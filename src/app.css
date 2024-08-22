@@ -1,0 +1,183 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --primary: 185 98% 19%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 72.2% 50.6%;
+    --destructive-foreground: 210 40% 98%;
+    --ring: 222.2 84% 4.9%;
+    --radius: 0.5rem;
+    --radio: #015a62;
+  }
+
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --primary: 188 62% 38%;
+    --primary-foreground: 240 5.9% 10%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 85.7% 97.3%;
+    --ring: 240 3.7% 15.9%;
+    --radio: white;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+.chosen {
+  box-shadow: 8px 8px 32px rgba(0, 0, 0, 0.3);
+  cursor: grabbing;
+}
+
+.dragged {
+  opacity: 0;
+}
+
+.image-grid {
+  display: grid;
+  max-height: calc(100vh - 134px) !important;
+  min-height: calc(100vh - 134px) !important;
+
+  /* max-width: 100%; */
+  /* overflow: hidden; */
+}
+
+.image-grid-full {
+  display: grid;
+  max-height: calc(100vh - 101px) !important;
+  min-height: calc(100vh - 101px) !important;
+
+  /* max-width: 100%; */
+  /* overflow: hidden; */
+}
+
+@keyframes gradient-border {
+  0% {
+    border-color: purple;
+  }
+
+  25% {
+    border-color: pink;
+  }
+
+  75% {
+    border-color: orange;
+  }
+
+  100% {
+    border-color: purple;
+  }
+}
+
+.animate-gradient-border {
+  animation: gradient-border 5s linear infinite;
+}
+
+select {
+  -moz-appearance: none;
+  -webkit-appearance: none;
+}
+
+input[type="radio"] {
+  accent-color: var(--radio);
+}
+
+input[type="checkbox"] {
+  accent-color: #015a62;
+  transform: scale(1.25);
+}
+
+input {
+  outline: none;
+}
+
+@keyframes pulseBlur {
+  0%,
+  100% {
+    backdrop-filter: none;
+  }
+  50% {
+    backdrop-filter: blur(20px);
+  }
+}
+
+.pulse-blur {
+  animation: pulseBlur 5s ease-in-out infinite;
+}
+
+.informative-shadow {
+  box-shadow: 0px 1.899999976158142px 7.599999904632568px 0px
+    rgba(19, 106, 155, 0.35);
+}
+
+.playback-card-shadow {
+  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.2);
+}
+
+.playback-card-mobile-shadow {
+  box-shadow: 0px 0.757px 7.569px 0px rgba(0, 0, 0, 0.3);
+}
+
+.hide-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  &::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, and Opera */
+  }
+
+  &::-webkit-scrollbar-thumb {
+    width: 0;
+    display: none;
+    background: transparent;
+  }
+}
+
+.shadow-big {
+  box-shadow: 0px 4px 26px 0px rgba(0, 0, 0, 0.15);
+}
+
+/* input[type=time]::-webkit-datetime-edit-hour-field:focus,
+input[type=time]::-webkit-datetime-edit-minute-field:focus,
+input[type=time]::-webkit-datetime-edit-second-field:focus,
+input[type=time]::-webkit-datetime-edit-ampm-field:focus {
+  background-color: #e4d2ba;
+}
+::selection {
+  background: #e4d2ba;
+} */
