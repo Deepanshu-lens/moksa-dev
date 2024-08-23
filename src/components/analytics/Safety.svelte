@@ -5,12 +5,14 @@
     import SafetyDataTable from "./table/SafetyDataTable.svelte";
     import SafetyViolationsDataTable from "./table/SafetyViolationsDataTable.svelte";
   import * as Select from "../ui/select";
-    import { onMount } from "svelte";
+    import { onDestroy, onMount } from "svelte";
+  import { io } from "socket.io-client";
     import { writable } from "svelte/store";
     export let allStores
+    export let token:string
     let safetyData = writable([])
     let selectedStore = writable(allStores[0])
-// console.log(allStores)
+
     onMount(async() => {
       const res = await fetch('/api/employee/getSafetyByStoreId', {
         method: 'POST',
@@ -21,45 +23,77 @@
       console.log(data)
     })
 
-  const fruits = allStores.map((store: any) => ({
+  const fruits = allStores?.map((store: any) => ({
     value: store.id,
     label: store.name,
   }));
-// $: console.log($safetyData)
-// $: console.log($selectedStore)
-// $: console.log($safetyData.find(store => store.storeId === $selectedStore.id))
+
+  let sockets: { [key: number]: any } = {};
+let liveData = writable([]);
+
+function setupSocketForAllStores() {
+  allStores.forEach((store: any) => {
+    setupSocket(store.id);
+  });
+}
+
+function setupSocket(storeId: number) {
+  const userID = 8
+  if (sockets[storeId]) {
+    sockets[storeId].disconnect();
+  }
+
+  sockets[storeId] = io("https://dev.api.moksa.ai", {
+    withCredentials: true,
+    extraHeaders: {
+      Authorization: `Bearer ${token}`,
+    },
+    transports: ["websocket", "polling"],
+  });
+
+  const socket = sockets[storeId];
+
+  socket.on("error", (err) => {
+    console.log(`error for store ${storeId}:`, err);
+  });
+
+  socket.on("connect", () => {
+    console.log(`connected for store ${storeId}`);
+    socket.emit("joinUser", userID);
+    socket.emit("joinStore", storeId);
+  });
+  
+  socket.on(`employee_safety_store_${storeId}`,(data)=>{
+    console.log(`Received employee_safety for store ${storeId}:`, data);
+    liveData.update((currentData) => {
+      return [{ storeId, ...data }, ...currentData].slice(0, 100);
+    });
+})
+
+  socket.on("disconnect", () => {
+    console.log(`disconnected for store ${storeId}`);
+  });
+}
+
+onMount(() => {
+  setTimeout(() => {
+    setupSocketForAllStores();
+  }, 500);
+});
+
+$: console.log($liveData)
+
+onDestroy(() => {
+  Object.values(sockets).forEach((socket) => {
+    console.log('disconnecting socket')
+    socket.disconnect();
+  });
+});
 </script>
 
 
 <section class="w-full p-4 flex flex-col max-h-[calc(100vh-75px)] overflow-y-auto hide-scrollbar">
   <div class="flex items-center justify-end">
-    <!-- <span
-      class="flex items-center border-black border-opacity-[18%] border-[1px] rounded-md dark:text-white dark:border-white"
-    >
-      <button
-        class="2xl:py-2 2xl:px-3 py-1 px-2 border-r border-black border-opacity-[18%] text-black text-sm dark:text-white dark:border-white"
-        >1 Hour</button
-      >
-      <button
-        class="2xl:py-2 2xl:px-3 py-1 px-2 border-r border-black border-opacity-[18%] text-black text-sm dark:text-white dark:border-white"
-        >24 Hours</button
-      >
-      <button
-        class="2xl:py-2 2xl:px-3 py-1 px-2 border-r border-black border-opacity-[18%] text-black text-sm dark:text-white dark:border-white"
-        >7 Days</button
-      >
-      <button
-        class="2xl:py-2 2xl:px-3 py-1 px-2 border-r border-black border-opacity-[18%] text-black text-sm dark:text-white dark:border-white"
-        >30 Days</button
-      >
-      <button
-        class="2xl:py-2 2xl:px-3 py-1 px-2 border-r border-black border-opacity-[18%] text-black text-sm dark:text-white dark:border-white"
-        >12 Months</button
-      >
-      <button class="2xl:py-2 2xl:px-3 py-1 px-2 text-black text-sm dark:text-white dark:border-white"
-        >Custom</button
-      >
-    </span> -->
     <span class="flex items-center gap-3">
 <Button variant='outline' class='flex items-center gap-1'> <ListFilter size={18}/> Filters</Button>
       <Button class="flex items-center gap-1 bg-[#3D81FC] text-white hover:bg-white hover:text-[#3D81FC]"
@@ -78,7 +112,11 @@
 </p>
       </span>
       <div class='h-full w-full'>
-        <SafetyLiveDataTable/>
+        {#if $liveData.length > 0}
+        <SafetyLiveDataTable data={$liveData}/>
+        {:else}
+        <p class='text-center text-gray-500 min-h-[350px] py-4'>No Live Data found</p>
+        {/if}
       </div>
     </div>
     <div class='col-span-5 row-span-4 border rounded-md flex flex-col min-h-[200px] dark:border-white/[.7]'>
@@ -94,6 +132,7 @@
           </Select.Trigger>
                <Select.Content class="max-h-[200px] overflow-y-auto">
             <Select.Group>
+              {#if fruits.length > 0}
               {#each fruits as fruit}
                 <Select.Item on:click={()=> selectedStore.set({id: fruit.value, name: fruit.label})}
                   class="px-1"
@@ -101,6 +140,13 @@
                   label={fruit.label}>{fruit.label}</Select.Item
                 >
               {/each}
+              {:else}
+              <Select.Item
+                class="px-1"
+                value="0"
+                label="No Stores Found">No Stores Found</Select.Item
+              >
+              {/if}
             </Select.Group>
           </Select.Content>
         </Select.Root>

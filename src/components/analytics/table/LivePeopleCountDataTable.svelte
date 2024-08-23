@@ -16,73 +16,75 @@
 
   const dispatch = createEventDispatcher();
 
-  const staticData = [
-    {
-      storeName: "Store 01",
-      customerCount: 20,
-      busyHourProjections: "8:00 am - 9:00 pm",
-      customerProjection: { value: 422, percentage: 25, trend: "up" },
-    },
-    {
-      storeName: "Store 02",
-      customerCount: 20,
-      busyHourProjections: "8:00 am - 9:00 pm",
-      customerProjection: { value: 422, percentage: 25, trend: "up" },
-    },
-    {
-      storeName: "Store 03",
-      customerCount: 20,
-      busyHourProjections: "8:00 am - 9:00 pm",
-      customerProjection: { value: 422, percentage: 15, trend: "down" },
-    },
-    {
-      storeName: "Store 04",
-      customerCount: 20,
-      busyHourProjections: "8:00 am - 9:00 pm",
-      customerProjection: { value: 422, percentage: 25, trend: "up" },
-    },
-    {
-      storeName: "Store 05",
-      customerCount: 20,
-      busyHourProjections: "8:00 am - 9:00 pm",
-      customerProjection: { value: 422, percentage: 15, trend: "down" },
-    },
-    {
-      storeName: "Store 06",
-      customerCount: 20,
-      busyHourProjections: "8:00 am - 9:00 pm",
-      customerProjection: { value: 422, percentage: 25, trend: "up" },
-    },
-    {
-      storeName: "Store 07",
-      customerCount: 20,
-      busyHourProjections: "8:00 am - 9:00 pm",
-      customerProjection: { value: 422, percentage: 25, trend: "up" },
-    },
-    {
-      storeName: "Store 08",
-      customerCount: 20,
-      busyHourProjections: "8:00 am - 9:00 pm",
-      customerProjection: { value: 422, percentage: 15, trend: "down" },
-    },
-  ];
+  // const staticData = [
+  //   {
+  //     storeName: "Store 01",
+  //     customerCount: 20,
+  //     busyHourProjections: "8:00 am - 9:00 pm",
+  //     customerProjection: { value: 422, percentage: 25, trend: "up" },
+  //   },
+  //   {
+  //     storeName: "Store 02",
+  //     customerCount: 20,
+  //     busyHourProjections: "8:00 am - 9:00 pm",
+  //     customerProjection: { value: 422, percentage: 25, trend: "up" },
+  //   },
+  //   {
+  //     storeName: "Store 03",
+  //     customerCount: 20,
+  //     busyHourProjections: "8:00 am - 9:00 pm",
+  //     customerProjection: { value: 422, percentage: 15, trend: "down" },
+  //   },
+  //   {
+  //     storeName: "Store 04",
+  //     customerCount: 20,
+  //     busyHourProjections: "8:00 am - 9:00 pm",
+  //     customerProjection: { value: 422, percentage: 25, trend: "up" },
+  //   },
+  //   {
+  //     storeName: "Store 05",
+  //     customerCount: 20,
+  //     busyHourProjections: "8:00 am - 9:00 pm",
+  //     customerProjection: { value: 422, percentage: 15, trend: "down" },
+  //   },
+  //   {
+  //     storeName: "Store 06",
+  //     customerCount: 20,
+  //     busyHourProjections: "8:00 am - 9:00 pm",
+  //     customerProjection: { value: 422, percentage: 25, trend: "up" },
+  //   },
+  //   {
+  //     storeName: "Store 07",
+  //     customerCount: 20,
+  //     busyHourProjections: "8:00 am - 9:00 pm",
+  //     customerProjection: { value: 422, percentage: 25, trend: "up" },
+  //   },
+  //   {
+  //     storeName: "Store 08",
+  //     customerCount: 20,
+  //     busyHourProjections: "8:00 am - 9:00 pm",
+  //     customerProjection: { value: 422, percentage: 15, trend: "down" },
+  //   },
+  // ];
 
-  export let storeData;
+  export let liveData;
+  export let selectedStore;
 
-  console.log($storeData);
+  console.log(liveData);
+  console.log(selectedStore);
 
 
-//   const dbData = $storeData.map((item:any) => {
-//     return {
-//       storeName: item.store,
-//       customerCount: item.noofcustomers,
-//       busyHourProjections: item.busyhour,
-//     };
-//   });
+  const dbData = liveData.map((item:any) => {
+    return {
+      storeName: item.store_id === selectedStore.value ? selectedStore.label : item.store_id,
+      customerCount: Number(item.going_out) - Number(item.going_in),
+      created: item.createdAt,
+    };
+  });
 
-  const data = writable(staticData);
+  const data = writable(dbData);
 
-  const readableData = readable(staticData, (set) => {
+  const readableData = readable(dbData, (set) => {
     const unsubscribe = data.subscribe(set);
     return unsubscribe;
   });
@@ -107,8 +109,8 @@
       header: "Customer Count",
     }),
     table.column({
-      accessor: "busyHourProjections",
-      header: "Busy Hour Projections",
+      accessor: "created",
+      header: "Created At",
     }),
     // table.column({
     //   accessor: "customerProjection",
@@ -180,6 +182,10 @@ function goToNextPage() {
                       </div>
                       <span>{row.original.storeName}</span>
                     </div>
+                    {:else if cell.id === 'created'}
+                    <span class="text-sm text-[#727272]">
+                      {new Date(row.original.created).toLocaleDateString('en-US', { weekday: 'short', month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                    </span>
                   {:else if cell.id === 'customerProjection'}
                     <div class="flex items-center gap-2">
                       <span class="text-gray-600">{row.original.customerProjection.value}</span>

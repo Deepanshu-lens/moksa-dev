@@ -1,51 +1,39 @@
-<script type='ts'>
-  import { onDestroy, onMount } from 'svelte';
-  import Hls from 'hls.js';
+<script lang="ts">
+  import { onMount } from 'svelte';
 
-  export let videoPath;
-  let video;
-  let hls;
+  export let videoUrls: string[];
+  let currentVideoIndex = 0;
+  let videoPlayer: HTMLVideoElement;
 
-  onMount(() => {
-    if (videoPath) {
-      if (videoPath.endsWith('.m3u8')) {
-        // Handle .m3u8 files with HLS.js
-        if (Hls.isSupported()) {
-          hls = new Hls();
-          hls.loadSource(videoPath);
-          hls.attachMedia(video);
-          hls.on(Hls.Events.MANIFEST_PARSED, function() {
-            video.play().catch(e => console.error('Error auto-playing video:', e));
-          });
-        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-          // For browsers that natively support HLS (like Safari)
-          video.src = videoPath;
-          video.addEventListener('loadedmetadata', function() {
-            video.play().catch(e => console.error('Error auto-playing video:', e));
-          });
-        }
-      } else {
-        // For other video formats
-        video.src = videoPath;
-      }
+  function loadAndPlayVideo(index: number) {
+    if (index < videoUrls.length) {
+      videoPlayer.src = videoUrls[index];
+      videoPlayer.load();
+      videoPlayer.play().catch(e => console.error('Error playing video:', e));
     }
-  });
-
-  function handleError(event) {
-    console.error('Error playing video:', event);
   }
 
-  onDestroy(() => {
-    if (hls) {
-      hls.destroy();
+  function handleEnded() {
+    currentVideoIndex++;
+    if (currentVideoIndex < videoUrls.length) {
+      loadAndPlayVideo(currentVideoIndex);
+    }
+  }
+
+  onMount(() => {
+    if (videoUrls.length > 0) {
+      loadAndPlayVideo(currentVideoIndex);
     }
   });
 </script>
 
-<video class='h-full w-full' id='awsvid'
-  bind:this={video} 
-  controls 
-  on:error={handleError}
+<video
+  bind:this={videoPlayer}
+  id="videoPlayer"
+  class="h-full w-full"
+  controls
+  preload="auto"
+  on:ended={handleEnded}
 >
   Your browser does not support the video tag.
 </video>

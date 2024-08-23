@@ -33,7 +33,7 @@
     { value: "pineapple", label: "Pineapple" },
   ];
 
-   const stores = allStores.map((store: any) => ({
+   const stores = allStores?.map((store: any) => ({
     value: store.id,
     label: store.name,
   }));
@@ -185,7 +185,9 @@ function createChart() {
       }
     }
   }
+
 let loading = false
+
     onMount(async () => {
     chartLoading = false;
     // console.log(stores[0])
@@ -209,7 +211,6 @@ let loading = false
 
     employeeData.set(await employeeResponse.json());
      efficiencyData.set(await efficiencyResponse.json());
-$: console.log($efficiencyData)
 
      if($employeeData.data.length > 0){
       await getEmployeeDetails($employeeData.data[0].id)
@@ -249,7 +250,6 @@ $: console.log($efficiencyData)
 
   $: console.log($employeeDetails)
 
-  $: console.log($efficiencyData && $efficiencyData.data && $efficiencyData?.data?.data?.length > 0)
 </script>
 
 <section
@@ -312,6 +312,7 @@ $: console.log($efficiencyData)
             </Select.Trigger>
                <Select.Content class="max-h-[200px] overflow-y-auto">
               <Select.Group>
+                {#if stores.length > 0}
                 {#each stores as store}
                   <Select.Item
                     class="px-1"
@@ -322,6 +323,12 @@ $: console.log($efficiencyData)
                     label={store.label}>{store.label}</Select.Item
                   >
                 {/each}
+                {:else}
+                <Select.Item
+                  class="px-1"
+                  label="No Stores Found">No Stores Found</Select.Item
+                >
+                {/if}
               </Select.Group>
             </Select.Content>
           </Select.Root>

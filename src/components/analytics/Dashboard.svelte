@@ -172,6 +172,7 @@ dateRange.set('custom')
 }
 
  function createChart() {
+  
   if (chartCanvas && !chart) {
     const ctx = chartCanvas.getContext("2d");
     const gradient = ctx.createLinearGradient(400, 0, 0, 0);
@@ -288,7 +289,6 @@ dateRange.set('custom')
   let theftDataa = writable([])
 
 
-  $: console.log(busyness)
 
 
 async function fetchDataStoreWise() {
@@ -522,10 +522,6 @@ console.log(formatDate(today))
     <span
       class="flex items-center border-black border-opacity-[18%] h-[40px] border-[1px] rounded-md dark:border-white"
     >
-      <!-- <button
-        class="2xl:py-2 2xl:px-3 py-1 px-2 border-r border-black border-opacity-[18%] text-black text-sm dark:text-white dark:border-white"
-        >1 Hour</button
-      > -->
       <button 
       class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === '7 Days' ? 'bg-[#0BA5E9] text-white' : 'text-black dark:text-white dark:border-white'}`}
       on:click={() => dateRange.set('7 Days')}>7 Days</button
@@ -625,15 +621,16 @@ console.log(formatDate(today))
           <Select.Trigger
             class="w-[100px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg dark:bg-transparent"
           >
-            <Select.Value placeholder={$selectedStore.label} />
+            <Select.Value placeholder={$selectedStore?.label} />
           </Select.Trigger>
           <Select.Content class="max-h-[200px] overflow-y-auto">
             <Select.Group>
-              <Select.Item on:click={() => selectedStore.set({ value: -1, label: 'All Stores' })}
+              <Select.Item on:click={() => {selectedStore.set({ value: -1, label: 'All Stores' }); fetchDataStoreWise()}}
                 class="px-1"
                 value="All Stores"
                 label="All Stores">All Stores</Select.Item
               >
+              {#if allStores.length > 0}
               {#each fruits as fruit}
                 <Select.Item on:click={() => selectedStore.set(fruit)}
                   class="px-1"
@@ -641,6 +638,7 @@ console.log(formatDate(today))
                   label={fruit.label}>{fruit.label}</Select.Item
                 >
               {/each}
+              {/if}
             </Select.Group>
           </Select.Content>
           <Select.Input name="favoriteFruit" />

@@ -16,64 +16,35 @@
   const dispatch = createEventDispatcher();
 
   // Static data
+  export let data;;
 
-  const staticData = [
-    {
-      employee: "Charles Gracia",
-      masks: true,
-      gloves: false,
-      hairnet: true,
-      uniform: true,
-      breakingSOPs: true,
-      videoLink: "Watch Video"
-    },
-    {
-      employee: "Sarah Johnson",
-      masks: true,
-      gloves: true,
-      hairnet: false,
-      uniform: true,
-      breakingSOPs: false,
-      videoLink: "Watch Video"
-    },
-    {
-      employee: "Michael Lee",
-      masks: false,
-      gloves: true,
-      hairnet: true,
-      uniform: false,
-      breakingSOPs: true,
-      videoLink: "Watch Video"
-    },
-    {
-      employee: "Emily Rodriguez",
-      masks: true,
-      gloves: true,
-      hairnet: true,
-      uniform: true,
-      breakingSOPs: false,
-      videoLink: "Watch Video"
-    },
-    {
-      employee: "David Kim",
-      masks: false,
-      gloves: false,
-      hairnet: false,
-      uniform: true,
-      breakingSOPs: true,
-      videoLink: "Watch Video"
-    },
-]
+// $:   readableData = readable(data);
 
+  // const readableData = readable(staticData, (set) => {
+  //   const unsubscribe = data.subscribe(set);
+  //   return unsubscribe;
+  // });
+$:console.log(data)
 
-  const data = writable(staticData);
+ const dbData = data?.map((item: any) => ({
+    employee: `Id: ${item.id}`,
+    masks: item.wearing_mask,
+    gloves: item.wearing_gloves,
+    hairnet: item.wearing_hair_net,
+    uniform: item.wearing_uniform,
+    apron: item.wearing_apron,
+    videoLink: 'Link',
+    videourl: item.img_link
+  }))
 
-  const readableData = readable(staticData, (set) => {
-    const unsubscribe = data.subscribe(set);
+  const dataa = writable(dbData);
+
+  const readableData = readable(dbData, (set) => {
+    const unsubscribe = dataa.subscribe(set);
     return unsubscribe;
   });
 
-  const table = createTable(readableData, {
+    const table = createTable(readableData, {
     page: addPagination({ initialPageSize: 5 }),
     sort: addSortBy(),
     filter: addTableFilter({
@@ -83,7 +54,7 @@
     select: addSelectedRows(),
   });
 
- const columns = table.createColumns([
+const columns = table.createColumns([
     table.column({
       accessor: "employee",
       header: "Employee",
@@ -105,12 +76,12 @@
       header: "Uniform",
     }),
     table.column({
-      accessor: "breakingSOPs",
-      header: "Breaking SOPs",
+      accessor: "apron",
+      header: "Apron",
     }),
     table.column({
       accessor: "videoLink",
-      header: "Video Link",
+      header: "Image Link",
     }),
   ]);
 
@@ -156,7 +127,7 @@
                       </div>
                       <span>{row.original.employee}</span>
                     </div>
-                  {:else if ['masks', 'gloves', 'hairnet', 'uniform', 'breakingSOPs'].includes(cell.id)}
+                  {:else if ['masks', 'gloves', 'hairnet', 'uniform', 'apron'].includes(cell.id)}
                     {#if row.original[cell.id]}
                       <Check class="w-5 h-5 text-blue-500" />
                     {:else}
@@ -172,6 +143,7 @@
                 </Table.Cell>
               </Subscribe>
             {/each}
+           
           </Table.Row>
         </Subscribe>
       {/each}

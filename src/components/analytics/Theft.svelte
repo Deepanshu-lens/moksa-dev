@@ -1,5 +1,11 @@
 <script lang="ts">
-  import { CalendarDays, ListFilter, Plus, TrendingUp, Upload } from "lucide-svelte";
+  import {
+    CalendarDays,
+    ListFilter,
+    Plus,
+    TrendingUp,
+    Upload,
+  } from "lucide-svelte";
   import { BarController, BarElement } from "chart.js";
   import {
     Chart,
@@ -10,25 +16,24 @@
     CategoryScale,
   } from "chart.js";
   import { Button } from "../ui/button";
-
   import type { DateRange } from "bits-ui";
-
-   import {
+  import { io } from "socket.io-client";
+  import {
     CalendarDate,
     DateFormatter,
     type DateValue,
-    getLocalTimeZone
-  } from "@internationalized/date";  
+    getLocalTimeZone,
+  } from "@internationalized/date";
   import { RangeCalendar } from "@/components/ui/range-calendar";
-import * as Popover from "../ui/popover";
-  let chartLoading = true;
+  import * as Popover from "../ui/popover";
   export let theftandcamera;
   export let allStores;
   export let theftData;
-  export let token:string;
-  let dateRange = writable('7 Days')
-  let selectedStore= writable({ value: -1, label: 'All Stores' })
- let isInitialLoad = true;
+  export let token: string;
+  let chartLoading = true;
+  let dateRange = writable("7 Days");
+  let selectedStore = writable({ value: -1, label: "All Stores" });
+  let isInitialLoad = true;
   let isLoading = writable(false);
 
   const fruits = allStores.map((store: any) => ({
@@ -38,9 +43,10 @@ import * as Popover from "../ui/popover";
 
   import * as Select from "../ui/select";
   import DashboardStoreCard from "../cards/DashboardStoreCard.svelte";
-  import { onMount } from "svelte";
+  import { onDestroy, onMount } from "svelte";
   import TheftDataTable from "./table/TheftDataTable.svelte";
-    import { writable } from "svelte/store";
+  import { writable } from "svelte/store";
+    import { toast } from "svelte-sonner";
 
   let barChart: Chart | null = null;
   let barChartCanvas: HTMLCanvasElement;
@@ -49,498 +55,409 @@ import * as Popover from "../ui/popover";
   let theftChartCanvas: HTMLCanvasElement;
   let theftChart: Chart | null = null;
 
-    let value: DateRange | undefined = undefined;
-let startValue: DateValue | undefined = undefined;
-let customDateLabel = "Custom";
+  let value: DateRange | undefined = undefined;
+  let startValue: DateValue | undefined = undefined;
+  let customDateLabel = "Custom";
 
+  let listtheft = writable([]);
+  let theftTrend = writable([]);
 
-$: {
-  if (value?.start && value?.end) {
-    const start = new Date(value.start.year, value.start.month - 1, value.start.day);
-    const end = new Date(value.end.year, value.end.month - 1, value.end.day);
-    customDateLabel = `${start.toLocaleDateString()} - ${end.toLocaleDateString()}`;
-        const dayDifference = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-console.log(dayDifference)
-dateRange.set('custom')
-  } else {
-    customDateLabel = "Custom";
+  $: {
+    if (value?.start && value?.end) {
+      const start = new Date(
+        value.start.year,
+        value.start.month - 1,
+        value.start.day,
+      );
+      const end = new Date(value.end.year, value.end.month - 1, value.end.day);
+      customDateLabel = `${start.toLocaleDateString()} - ${end.toLocaleDateString()}`;
+      const dayDifference = Math.ceil(
+        (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24),
+      );
+      console.log(dayDifference);
+      dateRange.set("custom");
+    } else {
+      customDateLabel = "Custom";
+    }
   }
-}
-
-
 
   function createBarChart() {
-  if (barChartCanvas && !barChart) {
-    const ctx = barChartCanvas.getContext("2d");
+    if (barChartCanvas && !barChart) {
+      const ctx = barChartCanvas.getContext("2d");
 
-    if (ctx) {
-      Chart.register(BarController, BarElement, CategoryScale, LinearScale);
+      if (ctx) {
+        Chart.register(BarController, BarElement, CategoryScale, LinearScale);
 
-      const data = theftData.data
+        const data = theftData.data;
 
-      const labels = data.map(item => item.day_of_week.trim());
-      const detectedData = data.map(item => parseInt(item.theft_detected));
-      const preventedData = data.map(item => parseInt(item.theft_prevented));
+        const labels = data.map((item) => item.day_of_week.trim());
+        const detectedData = data.map((item) => parseInt(item.theft_detected));
+        const preventedData = data.map((item) =>
+          parseInt(item.theft_prevented),
+        );
 
-      barChart = new Chart(ctx, {
-        type: "bar",
-        data: {
-          labels: labels,
-          datasets: [
-            {
-              label: "Theft Detected",
-              data: detectedData,
-              backgroundColor: "#4A7DFF",
-              borderRadius: 4,
-            },
-            {
-              label: "Theft Prevented",
-              data: preventedData,
-              backgroundColor: "#FF8F6B",
-              borderRadius: 4,
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            x: {
-              grid: {
-                display: false,
+        barChart = new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: "Theft Detected",
+                data: detectedData,
+                backgroundColor: "#4A7DFF",
+                borderRadius: 4,
               },
-            },
-            y: {
-              beginAtZero: true,
-              ticks: {
-                stepSize: 1,
+              {
+                label: "Theft Prevented",
+                data: preventedData,
+                backgroundColor: "#FF8F6B",
+                borderRadius: 4,
               },
-              grid: {
-                color: "rgba(0, 0, 0, 0.1)",
-              },
-            },
+            ],
           },
-          plugins: {
-            legend: {
-              display: true,
-            },
-            tooltip: {
-              callbacks: {
-                label: function (context) {
-                  let label = context.dataset.label || "";
-                  if (label) {
-                    label += ": ";
-                  }
-                  if (context.parsed.y !== null) {
-                    label += context.parsed.y;
-                  }
-                  return label;
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: {
+                grid: {
+                  display: false,
+                },
+              },
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  stepSize: 1,
+                },
+                grid: {
+                  color: "rgba(0, 0, 0, 0.1)",
                 },
               },
             },
-          },
-        },
-      });
-    }
-  }
-}
-
-  function createChart() {
-  if (chartCanvas && !chart) {
-    const ctx = chartCanvas.getContext("2d");
-    const gradient = ctx.createLinearGradient(400, 0, 0, 0);
-    gradient.addColorStop(1, "#5BC4FF");
-    gradient.addColorStop(0, "#FF5BEF");
-
-    if (ctx) {
-      Chart.register(
-        LineController,
-        LineElement,
-        PointElement,
-        LinearScale,
-        CategoryScale,
-      );
-
-      const data = $theftTrend
-
-      const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-      const theftData = labels.map(day => {
-        const entry = data.find(d => d.day_of_week.startsWith(day));
-        return entry ? parseInt(entry.theft_count) : 0;
-      });
-
-      chart = new Chart(ctx, {
-        type: "line",
-        data: {
-          labels: labels,
-          datasets: [
-            {
-              label: "Thefts",
-              borderColor: gradient,
-              backgroundColor: gradient,
-              borderWidth: 2,
-              data: theftData,
-              fill: true,
-              tension: 0.4,
-              pointBackgroundColor: 'white',
-              pointBorderColor: "#AE8FF7",
-              pointBorderWidth: 2,
-              pointRadius: 4,
-              pointHoverRadius: 6,
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            x: {
-              grid: {
-                color: "rgba(0,0,0,.05)",
-              },
-              ticks: {
-                maxRotation: 0,
-              },
-            },
-            y: {
-              display: true,
-              title: {
-                display: false,
-                text: "Theft Count",
-              },
-              grid: {
-                display: false,
-              },
-              beginAtZero: true,
-              suggestedMax: 2,
-              ticks: {
-                stepSize: 1,
-                callback: function (value) {
-                  return value;
-                },
-              },
-            },
-          },
-          plugins: {
-            legend: {
-              display: true,
-              position: "top",
-            },
-            tooltip: {
-              callbacks: {
-                label: function (context) {
-                  return `Thefts: ${context.parsed.y}`;
-                },
-              },
-            },
-          },
-        },
-      });
-    }
-  }
-}
-
-function createTheftChart() {
-  if (theftChartCanvas && !theftChart) {
-    const ctx = theftChartCanvas.getContext('2d');
-    if (ctx) {
-      // Sort the data by day of week
-      const sortedData = theftData.data.sort((a, b) => {
-        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-        return days.indexOf(a.day_of_week.trim()) - days.indexOf(b.day_of_week.trim());
-      });
-
-      const data = {
-        labels: sortedData.map(item => item.day_of_week.trim()),
-        datasets: [
-          {
-            label: 'Detected',
-            data: sortedData.map(item => parseInt(-item.theft_detected)),
-            backgroundColor: (context) => {
-              const chart = context.chart;
-              const {ctx, chartArea} = chart;
-              if (!chartArea) {
-                return null;
-              }
-              const gradient = ctx.createLinearGradient(0, 0, chart.width, 0);
-               gradient.addColorStop(0, 'rgba(4, 158, 243, 1)');
-              gradient.addColorStop(1, 'rgba(21, 29, 100, 1)');
-              return gradient;
-            },
-            borderColor: 'rgba(21, 29, 100, 1)',
-            borderWidth: 1,
-            borderRadius: 4,
-            barThickness: 20,
-          },
-          {
-            label: 'Prevented',
-            data: sortedData.map(item => parseInt(item.theft_prevented)),
-            backgroundColor: (context) => {
-              const chart = context.chart;
-              const {ctx, chartArea} = chart;
-              if (!chartArea) {
-                return null;
-              }
-              const gradient = ctx.createLinearGradient(0, 0, chart.width, 0);
-
-              gradient.addColorStop(0, 'rgba(255, 169, 88, 1)');
-              gradient.addColorStop(1, 'rgba(255, 1, 120, 1)');
-              return gradient;
-            },
-            borderColor: 'rgba(255, 1, 120, 1)',
-            borderWidth: 1,
-            borderRadius: 4,
-            barThickness: 20,
-          },
-        ],
-      };
-
-      theftChart = new Chart(ctx, {
-        type: 'bar',
-        data: data,
-        options: {
-          indexAxis: 'y',
-          scales: {
-            x: {
-              beginAtZero: true,
-             
-              grid: {
-                display: false,
-              },
-              ticks: {
-                stepSize: 1,
+            plugins: {
+              legend: {
                 display: true,
               },
-            },
-            y: {
-              grid: {
-                color: 'rgba(0, 0, 0, 0.1)',
-                drawBorder: false,
-              },
-            },
-          },
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: 'top',
-              align: 'end',
-              labels: {
-                usePointStyle: true,
-                pointStyle: 'circle',
-              },
-            },
-            tooltip: {
-              callbacks: {
-                label: function (context) {
-                  let label = context.dataset.label || '';
-                  if (label) {
-                    label += ': ';
-                  }
-                  if (context.parsed.x !== null) {
-                    label += context.parsed.x;
-                  }
-                  return label;
+              tooltip: {
+                callbacks: {
+                  label: function (context) {
+                    let label = context.dataset.label || "";
+                    if (label) {
+                      label += ": ";
+                    }
+                    if (context.parsed.y !== null) {
+                      label += context.parsed.y;
+                    }
+                    return label;
+                  },
                 },
               },
             },
           },
-          layout: {
-            padding: {
-              left: 30,
-              right: 30,
-            },
-          },
-        },
-      });
+        });
+      }
     }
   }
-}
 
-  onMount(async() => {
+  function createChart() {
+    if (chartCanvas && !chart) {
+      const ctx = chartCanvas.getContext("2d");
+      const gradient = ctx.createLinearGradient(400, 0, 0, 0);
+      gradient.addColorStop(1, "#5BC4FF");
+      gradient.addColorStop(0, "#FF5BEF");
+
+      if (ctx) {
+        Chart.register(
+          LineController,
+          LineElement,
+          PointElement,
+          LinearScale,
+          CategoryScale,
+        );
+
+        const data = $theftTrend;
+
+        const labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+        const theftData = labels.map((day) => {
+          const entry = data.find((d) => d.day_of_week.startsWith(day));
+          return entry ? parseInt(entry.theft_count) : 0;
+        });
+
+        chart = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: "Thefts",
+                borderColor: gradient,
+                backgroundColor: gradient,
+                borderWidth: 2,
+                data: theftData,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: "white",
+                pointBorderColor: "#AE8FF7",
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: {
+                grid: {
+                  color: "rgba(0,0,0,.05)",
+                },
+                ticks: {
+                  maxRotation: 0,
+                },
+              },
+              y: {
+                display: true,
+                title: {
+                  display: false,
+                  text: "Theft Count",
+                },
+                grid: {
+                  display: false,
+                },
+                beginAtZero: true,
+                suggestedMax: 2,
+                ticks: {
+                  stepSize: 1,
+                  callback: function (value) {
+                    return value;
+                  },
+                },
+              },
+            },
+            plugins: {
+              legend: {
+                display: true,
+                position: "top",
+              },
+              tooltip: {
+                callbacks: {
+                  label: function (context) {
+                    return `Thefts: ${context.parsed.y}`;
+                  },
+                },
+              },
+            },
+          },
+        });
+      }
+    }
+  }
+
+  function createTheftChart() {
+    if (theftChartCanvas && !theftChart) {
+      const ctx = theftChartCanvas.getContext("2d");
+      if (ctx) {
+        // Sort the data by day of week
+        const sortedData = theftData.data.sort((a, b) => {
+          const days = [
+            "Sunday",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+          ];
+          return (
+            days.indexOf(a.day_of_week.trim()) -
+            days.indexOf(b.day_of_week.trim())
+          );
+        });
+
+        const data = {
+          labels: sortedData.map((item) => item.day_of_week.trim()),
+          datasets: [
+            {
+              label: "Detected",
+              data: sortedData.map((item) => parseInt(-item.theft_detected)),
+              backgroundColor: (context) => {
+                const chart = context.chart;
+                const { ctx, chartArea } = chart;
+                if (!chartArea) {
+                  return null;
+                }
+                const gradient = ctx.createLinearGradient(0, 0, chart.width, 0);
+                gradient.addColorStop(0, "rgba(4, 158, 243, 1)");
+                gradient.addColorStop(1, "rgba(21, 29, 100, 1)");
+                return gradient;
+              },
+              borderColor: "rgba(21, 29, 100, 1)",
+              borderWidth: 1,
+              borderRadius: 4,
+              barThickness: 20,
+            },
+            {
+              label: "Prevented",
+              data: sortedData.map((item) => parseInt(item.theft_prevented)),
+              backgroundColor: (context) => {
+                const chart = context.chart;
+                const { ctx, chartArea } = chart;
+                if (!chartArea) {
+                  return null;
+                }
+                const gradient = ctx.createLinearGradient(0, 0, chart.width, 0);
+
+                gradient.addColorStop(0, "rgba(255, 169, 88, 1)");
+                gradient.addColorStop(1, "rgba(255, 1, 120, 1)");
+                return gradient;
+              },
+              borderColor: "rgba(255, 1, 120, 1)",
+              borderWidth: 1,
+              borderRadius: 4,
+              barThickness: 20,
+            },
+          ],
+        };
+
+        theftChart = new Chart(ctx, {
+          type: "bar",
+          data: data,
+          options: {
+            indexAxis: "y",
+            scales: {
+              x: {
+                beginAtZero: true,
+
+                grid: {
+                  display: false,
+                },
+                ticks: {
+                  stepSize: 1,
+                  display: true,
+                },
+              },
+              y: {
+                grid: {
+                  color: "rgba(0, 0, 0, 0.1)",
+                  drawBorder: false,
+                },
+              },
+            },
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: "top",
+                align: "end",
+                labels: {
+                  usePointStyle: true,
+                  pointStyle: "circle",
+                },
+              },
+              tooltip: {
+                callbacks: {
+                  label: function (context) {
+                    let label = context.dataset.label || "";
+                    if (label) {
+                      label += ": ";
+                    }
+                    if (context.parsed.x !== null) {
+                      label += context.parsed.x;
+                    }
+                    return label;
+                  },
+                },
+              },
+            },
+            layout: {
+              padding: {
+                left: 30,
+                right: 30,
+              },
+            },
+          },
+        });
+      }
+    }
+  }
+
+  onMount(async () => {
     chartLoading = false;
-    await Promise.all([
-      gettheftList(-1),
-      getTheftTrends(-1)
-    ]);
+    await Promise.all([gettheftList(-1), getTheftTrends(-1)]);
     setTimeout(() => {
       createBarChart();
       // createChart();
-      createTheftChart()
+      createTheftChart();
     }, 100);
-
   });
 
 
-  let listtheft = writable([])
-
-  async function gettheftList(storeId:number){
-    const theftList = await fetch('/api/theft/listByStoreId',{
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json'
+  async function gettheftList(storeId: number) {
+    const theftList = await fetch("/api/theft/listByStoreId", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
-      body:JSON.stringify({storeId})
-    })
-    const data = await theftList.json()
-    if(data.status === 200){
+      body: JSON.stringify({ storeId }),
+    });
+    const data = await theftList.json();
+    if (data.status === 200) {
       // console.log(data.data)
-      listtheft.set(data.data)
+      listtheft.set(data.data);
     } else {
-      console.log('no theft data')
+      console.log("no theft data");
     }
   }
 
-  let theftTrend = writable([])
-  async function getTheftTrends(storeId:number){
-    const theftList = await fetch('/api/theft/trends',{
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json'
+  async function getTheftTrends(storeId: number) {
+    const theftList = await fetch("/api/theft/trends", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
-      body:JSON.stringify({storeId})
-    })
-    const data = await theftList.json()
-    console.log(data)
-    if(data.status === 200){
-      theftTrend.set(data.data)
-      createChart()
+      body: JSON.stringify({ storeId }),
+    });
+    const data = await theftList.json();
+    console.log(data);
+    if (data.status === 200) {
+      theftTrend.set(data.data);
+      createChart();
     } else {
-      console.log('no trend data')
+      console.log("no trend data");
     }
   }
 
-
-  const totalThefts = theftandcamera.reduce((sum: number, store: any) => sum + parseInt(store.theft_detected_count), 0);
-  const totalPreventions = theftandcamera.reduce((sum: number, store: any) => sum + parseInt(store.theft_prevented_count), 0);
+  const totalThefts = theftandcamera.reduce(
+    (sum: number, store: any) => sum + parseInt(store.theft_detected_count),
+    0,
+  );
+  const totalPreventions = theftandcamera.reduce(
+    (sum: number, store: any) => sum + parseInt(store.theft_prevented_count),
+    0,
+  );
   const totalIncidents = totalThefts + totalPreventions;
   const detectionPercentage = (totalThefts / totalIncidents) * 100;
   const preventionPercentage = (totalPreventions / totalIncidents) * 100;
-  const today = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-  const oneYearAgo = new Date(new Date().setFullYear(new Date().getFullYear() - 1)).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  const today = new Date().toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+  const oneYearAgo = new Date(
+    new Date().setFullYear(new Date().getFullYear() - 1),
+  ).toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
 
-  let theftDataa = writable([])
-let tableKey = 0;
+  let theftDataa = writable([]);
+  let tableKey = 0;
 
-async function fetchDataStoreWise() {
-  if (isInitialLoad) {
-    isInitialLoad = false;
-    return; // Skip the first call
-  }
-  isLoading.set(true);
-
-  const today = new Date();
-  let startDate = new Date(today);
-
-  switch ($dateRange) {
-    case '7 Days':
-      startDate.setDate(today.getDate() - 7);
-      break;
-    case '15 Days':
-      startDate.setDate(today.getDate() - 15);
-      break;
-    case '30 Days':
-      startDate.setDate(today.getDate() - 30);
-      break;
-    case '12 Months':
-      startDate.setFullYear(today.getFullYear() - 1);
-      break;
-    default:
-      startDate.setDate(today.getDate() - 7);
-  }
-
-  const formatDate = (date: Date) => date.toISOString().split('T')[0];
-console.log($selectedStore.label, $selectedStore.value)
-  try {
-    const [theftD, theftT, theftL] = await Promise.all([
-      fetch(`https://dev.api.moksa.ai/theft/theftDetectionDetailsByStoreid/${$selectedStore.value}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-          'datetype': $dateRange === '7 Days' ? '7' : $dateRange === '15 Days' ? '15' : $dateRange === '30 Days' ? '30' : $dateRange === '12 Months' ? 'year' : '7',
-          'startDate': formatDate(startDate),
-          'endDate': formatDate(today),
-        }
-      }).then(res => res.json()),
-      fetch(`https://dev.api.moksa.ai/theft/theftTrendsOfAllTime/${$selectedStore.value}/${formatDate(startDate)}/${formatDate(today)}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      }).then(res => res.json()),
-      fetch(`https://dev.api.moksa.ai/theft/theftListBasedOnStoreId/${$selectedStore.value}/${formatDate(startDate)}/${formatDate(today)}/1/7`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      }).then(res => res.json()),
-    ]);
-
-    console.log(theftD);
-    console.log(theftT)
-    console.log(theftL)
-    theftDataa.set(theftD);
-      theftTrend.set(theftT)
-      listtheft.set(theftL.data)
-
-    updateBarChart(theftD);
-    updateTheftChart(theftD);
-    updateTrendChart(theftT.data);
- tableKey += 1;
-  } catch (error) {
-    console.error("Error fetching store-wise data:", error);
-  } finally {
-    isLoading.set(false);
-  }
-}
-
-function updateBarChart(theftD) {
-  console.log($dateRange)
-  console.log('first')
-  if (barChart) {
-    console.log('first')
-    console.log(theftD)
-    const labels = theftD?.data.map(item => $dateRange === '7 Days' ? item.day_of_week.trim() : $dateRange === '12 Months' ? item.month_name.trim() : item.date.trim());
-    const theftDetectedData = theftD?.data.map(item => parseInt(item.theft_detected));
-    const theftPreventedData = theftD?.data.map(item => parseInt(item.theft_prevented));
-
-    barChart.data.labels = labels;
-    barChart.data.datasets[0].data = theftDetectedData;
-    barChart.data.datasets[1].data = theftPreventedData;
-    barChart.update();
-  }
-}
-function updateTheftChart(theftD) {
-  console.log($dateRange)
-  console.log('first')
-  if (theftChart) {
-    console.log('first')
-    console.log(theftD)
-    const labels = theftD?.data.map(item => $dateRange === '7 Days' ? item.day_of_week.trim() : $dateRange === '12 Months' ? item.month_name.trim() : item.date.trim());
-    const theftDetectedData = theftD?.data.map(item => parseInt(item.theft_detected));
-    const theftPreventedData = theftD?.data.map(item => Number(-item.theft_prevented));
-
-    theftChart.data.labels = labels;
-    theftChart.data.datasets[0].data = theftDetectedData;
-    theftChart.data.datasets[1].data = theftPreventedData;
-    theftChart.update();
-  }
-}
-function updateTrendChart(theftT) {
-  if (chart) {
-    const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    const theftData = labels.map(day => {
-      const entry = theftT.find(d => d.day_of_week.startsWith(day));
-      return entry ? parseInt(entry.theft_count) : 0;
-    });
-
-    chart.data.datasets[0].data = theftData;
-    chart.update();
-  }
-}
-
-   async function fetchDataForDateRange() {
-     if (isInitialLoad) {
+  async function fetchDataStoreWise() {
+    console.log("called");
+    if (isInitialLoad) {
       isInitialLoad = false;
       return; // Skip the first call
     }
@@ -550,72 +467,249 @@ function updateTrendChart(theftT) {
     let startDate = new Date(today);
 
     switch ($dateRange) {
-      case '7 Days':
+      case "7 Days":
         startDate.setDate(today.getDate() - 7);
         break;
-      case '15 Days':
+      case "15 Days":
         startDate.setDate(today.getDate() - 15);
         break;
-      case '30 Days':
+      case "30 Days":
         startDate.setDate(today.getDate() - 30);
         break;
-      case '12 Months':
+      case "12 Months":
         startDate.setFullYear(today.getFullYear() - 1);
         break;
       default:
-        startDate.setDate(today.getDate() - 7); 
+        startDate.setDate(today.getDate() - 7);
     }
 
-    const formatDate = (date: Date) => date.toISOString().split('T')[0];
+    const formatDate = (date: Date) => date.toISOString().split("T")[0];
+    console.log($selectedStore.label, $selectedStore.value);
+    try {
+      const [theftD, theftT, theftL] = await Promise.all([
+        fetch(
+          `https://dev.api.moksa.ai/theft/theftDetectionDetailsByStoreid/${$selectedStore.value}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+              datetype:
+                $dateRange === "7 Days"
+                  ? "7"
+                  : $dateRange === "15 Days"
+                    ? "15"
+                    : $dateRange === "30 Days"
+                      ? "30"
+                      : $dateRange === "12 Months"
+                        ? "year"
+                        : "7",
+              startDate: formatDate(startDate),
+              endDate: formatDate(today),
+            },
+          },
+        ).then((res) => res.json()),
+        fetch(
+          `https://dev.api.moksa.ai/theft/theftTrendsOfAllTime/${$selectedStore.value}/${formatDate(startDate)}/${formatDate(today)}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          },
+        ).then((res) => res.json()),
+        fetch(
+          `https://dev.api.moksa.ai/theft/theftListBasedOnStoreId/${$selectedStore.value}/${formatDate(startDate)}/${formatDate(today)}/1/7`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          },
+        ).then((res) => res.json()),
+      ]);
 
-console.log(formatDate(startDate))
-console.log(formatDate(today))
+      console.log(theftD);
+      console.log(theftT);
+      console.log(theftL);
+      theftDataa.set(theftD);
+      theftTrend.set(theftT);
+      listtheft.set(theftL.data);
+
+      updateBarChart(theftD);
+      updateTheftChart(theftD);
+      updateTrendChart(theftT.data);
+      tableKey += 1;
+    } catch (error) {
+      console.error("Error fetching store-wise data:", error);
+    } finally {
+      isLoading.set(false);
+    }
+  }
+
+  function updateBarChart(theftD) {
+    console.log($dateRange);
+    console.log("first");
+    if (barChart) {
+      console.log("first");
+      console.log(theftD);
+      const labels = theftD?.data.map((item) =>
+        $dateRange === "7 Days"
+          ? item.day_of_week.trim()
+          : $dateRange === "12 Months"
+            ? item.month_name.trim()
+            : item.date.trim(),
+      );
+      const theftDetectedData = theftD?.data.map((item) =>
+        parseInt(item.theft_detected),
+      );
+      const theftPreventedData = theftD?.data.map((item) =>
+        parseInt(item.theft_prevented),
+      );
+
+      barChart.data.labels = labels;
+      barChart.data.datasets[0].data = theftDetectedData;
+      barChart.data.datasets[1].data = theftPreventedData;
+      barChart.update();
+    }
+  }
+
+  function updateTheftChart(theftD) {
+    console.log($dateRange);
+    console.log("first");
+    if (theftChart) {
+      console.log("first");
+      console.log(theftD);
+      const labels = theftD?.data.map((item) =>
+        $dateRange === "7 Days"
+          ? item.day_of_week.trim()
+          : $dateRange === "12 Months"
+            ? item.month_name.trim()
+            : item.date.trim(),
+      );
+      const theftDetectedData = theftD?.data.map((item) =>
+        parseInt(item.theft_detected),
+      );
+      const theftPreventedData = theftD?.data.map((item) =>
+        Number(-item.theft_prevented),
+      );
+
+      theftChart.data.labels = labels;
+      theftChart.data.datasets[0].data = theftDetectedData;
+      theftChart.data.datasets[1].data = theftPreventedData;
+      theftChart.update();
+    }
+  }
+
+  function updateTrendChart(theftT) {
+    if (chart) {
+      const labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+      const theftData = labels.map((day) => {
+        const entry = theftT.find((d) => d.day_of_week.startsWith(day));
+        return entry ? parseInt(entry.theft_count) : 0;
+      });
+
+      chart.data.datasets[0].data = theftData;
+      chart.update();
+    }
+  }
+
+  async function fetchDataForDateRange() {
+    if (isInitialLoad) {
+      isInitialLoad = false;
+      return; // Skip the first call
+    }
+    isLoading.set(true);
+
+    const today = new Date();
+    let startDate = new Date(today);
+
+    switch ($dateRange) {
+      case "7 Days":
+        startDate.setDate(today.getDate() - 7);
+        break;
+      case "15 Days":
+        startDate.setDate(today.getDate() - 15);
+        break;
+      case "30 Days":
+        startDate.setDate(today.getDate() - 30);
+        break;
+      case "12 Months":
+        startDate.setFullYear(today.getFullYear() - 1);
+        break;
+      default:
+        startDate.setDate(today.getDate() - 7);
+    }
+
+    const formatDate = (date: Date) => date.toISOString().split("T")[0];
+
+    console.log(formatDate(startDate));
+    console.log(formatDate(today));
     try {
       // Call the three APIs
-      const [theftD, theftT, theftL,storesTotal] = await Promise.all([
-      fetch(`https://dev.api.moksa.ai/theft/theftDetectionDetailsByStoreid/${$selectedStore.value}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-          'datetype': $dateRange === '7 Days' ? '7' : $dateRange === '15 Days' ? '15' : $dateRange === '30 Days' ? '30' : $dateRange === '12 Months' ? 'year' : '7',
-          'startDate': formatDate(startDate),
-          'endDate': formatDate(today),
-        }
-      }).then(res => res.json()),
-      fetch(`https://dev.api.moksa.ai/theft/theftTrendsOfAllTime/${$selectedStore.value}/${formatDate(startDate)}/${formatDate(today)}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      }).then(res => res.json()),
-      fetch(`https://dev.api.moksa.ai/theft/theftListBasedOnStoreId/${$selectedStore.value}/${formatDate(startDate)}/${formatDate(today)}/1/7`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      }).then(res => res.json()),
-      fetch(`https://dev.api.moksa.ai/store/getAllStoresTotals/${formatDate(startDate)}/${formatDate(today)}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      }).then(res => res.json()),
-    ]);
+      const [theftD, theftT, theftL, storesTotal] = await Promise.all([
+        fetch(
+          `https://dev.api.moksa.ai/theft/theftDetectionDetailsByStoreid/${$selectedStore.value}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+              datetype:
+                $dateRange === "7 Days"
+                  ? "7"
+                  : $dateRange === "15 Days"
+                    ? "15"
+                    : $dateRange === "30 Days"
+                      ? "30"
+                      : $dateRange === "12 Months"
+                        ? "year"
+                        : "7",
+              startDate: formatDate(startDate),
+              endDate: formatDate(today),
+            },
+          },
+        ).then((res) => res.json()),
+        fetch(
+          `https://dev.api.moksa.ai/theft/theftTrendsOfAllTime/${$selectedStore.value}/${formatDate(startDate)}/${formatDate(today)}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          },
+        ).then((res) => res.json()),
+        fetch(
+          `https://dev.api.moksa.ai/theft/theftListBasedOnStoreId/${$selectedStore.value}/${formatDate(startDate)}/${formatDate(today)}/1/7`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          },
+        ).then((res) => res.json()),
+        fetch(
+          `https://dev.api.moksa.ai/store/getAllStoresTotals/${formatDate(startDate)}/${formatDate(today)}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          },
+        ).then((res) => res.json()),
+      ]);
 
-      console.log(storesTotal)
-      console.log(theftD)
-      console.log(theftT)
-      console.log(theftL)
+      console.log(storesTotal);
+      console.log(theftD);
+      console.log(theftT);
+      console.log(theftL);
 
       theftDataa.set(theftD);
-      theftTrend.set(theftT)
-      listtheft.set(theftL.data)
+      theftTrend.set(theftT);
+      listtheft.set(theftL.data);
 
-    updateBarChart(theftD);
-    updateTheftChart(theftD);
-    updateTrendChart(theftT.data);
- tableKey += 1;
-
+      updateBarChart(theftD);
+      updateTheftChart(theftD);
+      updateTrendChart(theftT.data);
+      tableKey += 1;
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -624,57 +718,83 @@ console.log(formatDate(today))
   }
 
   async function fetchCustomDateData() {
-    console.log('fetching custom date data')
-    const start = value?.start ? `${value.start.year}-${String(value.start.month).padStart(2, '0')}-${String(value.start.day).padStart(2, '0')}` : '';
-    const end = value?.end ? `${value.end.year}-${String(value.end.month).padStart(2, '0')}-${String(value.end.day).padStart(2, '0')}` : '';
-    console.log(start)
-    console.log(end)
- try {
+    console.log("fetching custom date data");
+    const start = value?.start
+      ? `${value.start.year}-${String(value.start.month).padStart(2, "0")}-${String(value.start.day).padStart(2, "0")}`
+      : "";
+    const end = value?.end
+      ? `${value.end.year}-${String(value.end.month).padStart(2, "0")}-${String(value.end.day).padStart(2, "0")}`
+      : "";
+    console.log(start);
+    console.log(end);
+    try {
       // Call the three APIs
-      const [theftD, theftT, theftL,storesTotal] = await Promise.all([
-      fetch(`https://dev.api.moksa.ai/theft/theftDetectionDetailsByStoreid/${$selectedStore.value}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-          'datetype': $dateRange === '7 Days' ? '7' : $dateRange === '15 Days' ? '15' : $dateRange === '30 Days' ? '30' : $dateRange === '12 Months' ? 'year' :$dateRange === 'custom' ? 'custom' : '7',
-          'startDate': start,
-          'endDate': end,
-        }
-      }).then(res => res.json()),
-      fetch(`https://dev.api.moksa.ai/theft/theftTrendsOfAllTime/${$selectedStore.value}/${start}/${end}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      }).then(res => res.json()),
-      fetch(`https://dev.api.moksa.ai/theft/theftListBasedOnStoreId/${$selectedStore.value}/${start}/${end}/1/7`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      }).then(res => res.json()),
-      fetch(`https://dev.api.moksa.ai/store/getAllStoresTotals/${start}/${end}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      }).then(res => res.json()),
-    ]);
+      const [theftD, theftT, theftL, storesTotal] = await Promise.all([
+        fetch(
+          `https://dev.api.moksa.ai/theft/theftDetectionDetailsByStoreid/${$selectedStore.value}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+              datetype:
+                $dateRange === "7 Days"
+                  ? "7"
+                  : $dateRange === "15 Days"
+                    ? "15"
+                    : $dateRange === "30 Days"
+                      ? "30"
+                      : $dateRange === "12 Months"
+                        ? "year"
+                        : $dateRange === "custom"
+                          ? "custom"
+                          : "7",
+              startDate: start,
+              endDate: end,
+            },
+          },
+        ).then((res) => res.json()),
+        fetch(
+          `https://dev.api.moksa.ai/theft/theftTrendsOfAllTime/${$selectedStore.value}/${start}/${end}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          },
+        ).then((res) => res.json()),
+        fetch(
+          `https://dev.api.moksa.ai/theft/theftListBasedOnStoreId/${$selectedStore.value}/${start}/${end}/1/7`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          },
+        ).then((res) => res.json()),
+        fetch(
+          `https://dev.api.moksa.ai/store/getAllStoresTotals/${start}/${end}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          },
+        ).then((res) => res.json()),
+      ]);
 
-      console.log(storesTotal)
-      console.log(theftD)
-      console.log(theftT)
-      console.log(theftL)
+      console.log(storesTotal);
+      console.log(theftD);
+      console.log(theftT);
+      console.log(theftL);
 
       theftDataa.set(theftD);
-      theftTrend.set(theftT)
-      listtheft.set(theftL.data)
+      theftTrend.set(theftT);
+      listtheft.set(theftL.data);
 
-    updateBarChart(theftD);
-    updateTheftChart(theftD);
-    updateTrendChart(theftT.data);
- tableKey += 1;
-
+      updateBarChart(theftD);
+      updateTheftChart(theftD);
+      updateTrendChart(theftT.data);
+      tableKey += 1;
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -682,22 +802,87 @@ console.log(formatDate(today))
     }
   }
 
-    $: {
-    if ($dateRange !== 'custom') {
+  $: {
+    if ($dateRange !== "custom") {
       fetchDataForDateRange();
-    } 
+    }
   }
-  $: if ($dateRange === 'custom' && (value?.start || value?.end)) {
-  fetchCustomDateData();
-}
+  $: if ($dateRange === "custom" && (value?.start || value?.end)) {
+    fetchCustomDateData();
+  }
 
   $: {
-  if ($selectedStore.value !== -1) {
-    fetchDataStoreWise();
-  } 
+    if ($selectedStore.value !== -1) {
+      fetchDataStoreWise();
+    }
+  }
+
+let sockets: { [key: number]: any } = {};
+let liveData = writable([]);
+
+function setupSocketForAllStores() {
+  allStores.forEach((store: any) => {
+    setupSocket(store.id);
+  });
 }
 
+function setupSocket(storeId: number) {
+  const userID = 8
+  if (sockets[storeId]) {
+    sockets[storeId].disconnect();
+  }
 
+  sockets[storeId] = io("https://dev.api.moksa.ai", {
+    withCredentials: true,
+    extraHeaders: {
+      Authorization: `Bearer ${token}`,
+    },
+    transports: ["websocket", "polling"],
+  });
+
+  const socket = sockets[storeId];
+
+  socket.on("error", (err) => {
+    console.log(`error for store ${storeId}:`, err);
+  });
+
+  socket.on("connect", () => {
+    console.log(`connected for store ${storeId}`);
+    socket.emit("joinUser", userID);
+    socket.emit("joinStore", storeId);
+  });
+
+  socket.on(`theft_store_${storeId}`, (data) => {
+    console.log(`Received theft data for store ${storeId}:`, data);
+    toast(`Received theft data for store ${storeId}:`, {
+      description: `Store: ${storeId}, Theft Probability: ${data?.theftProbability}, Camera: ${data?.camera_id}`
+    });
+    liveData.update((currentData) => {
+      return [{ storeId, ...data }, ...currentData].slice(0, 100);
+    });
+  });
+
+  socket.on("disconnect", () => {
+    console.log(`disconnected for store ${storeId}`);
+  });
+}
+
+onMount(() => {
+  setTimeout(() => {
+    setupSocketForAllStores();
+  }, 500);
+});
+
+$: console.log($liveData)
+
+onDestroy(() => {
+  Object.values(sockets).forEach((socket) => {
+    console.log('disconnecting socket')
+    socket.disconnect();
+  });
+});
+
+$: console.log(allStores)
 </script>
 
 <section
@@ -707,64 +892,69 @@ console.log(formatDate(today))
     <span
       class="flex items-center border-black h-[40px] border-opacity-[18%] border-[1px] rounded-md dark:border-white"
     >
-      <button 
-      class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === '7 Days' ? 'bg-[#0BA5E9] text-white' : 'text-black dark:text-white dark:border-white'}`}
-      on:click={() => dateRange.set('7 Days')}>7 Days</button
+      <button
+        class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "7 Days" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
+        on:click={() => dateRange.set("7 Days")}>7 Days</button
       >
       <button
-      class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === '15 Days' ? 'bg-[#0BA5E9] text-white' : 'text-black dark:text-white dark:border-white'}`}
-        on:click={() => dateRange.set('15 Days')}>15 Days</button
+        class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "15 Days" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
+        on:click={() => dateRange.set("15 Days")}>15 Days</button
       >
       <button
-      class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === '30 Days' ? 'bg-[#0BA5E9] text-white' : 'text-black dark:text-white dark:border-white'}`}
-        on:click={() => dateRange.set('30 Days')}>30 Days</button
+        class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "30 Days" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
+        on:click={() => dateRange.set("30 Days")}>30 Days</button
       >
       <button
-      class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === '12 Months' ? 'bg-[#0BA5E9] text-white' : 'text-black dark:text-white dark:border-white'}`}
-        on:click={() => dateRange.set('12 Months')}>12 Months</button
+        class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "12 Months" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
+        on:click={() => dateRange.set("12 Months")}>12 Months</button
       >
-     <Popover.Root openFocus>
-    <Popover.Trigger asChild let:builder>
-      <Button  builders={[builder]} class={`2xl:py-2 2xl:px-3 py-1 px-2  text-sm hover:bg-[#0BA5E9] hover:text-white ${$dateRange === 'custom' ? 'bg-[#0BA5E9] text-white' : 'text-black dark:text-white bg-transparent dark:border-white'}`}
-        >       {customDateLabel}</Button
-      >
-    </Popover.Trigger>
-    <Popover.Content class="w-auto p-0" align="start">
-      <RangeCalendar
-        bind:value
-        bind:startValue
-        initialFocus
-        numberOfMonths={2}
-        placeholder={value?.start}
-      />
-    </Popover.Content>
-  </Popover.Root>
+      <Popover.Root openFocus>
+        <Popover.Trigger asChild let:builder>
+          <Button
+            builders={[builder]}
+            class={`2xl:py-2 2xl:px-3 py-1 px-2  text-sm hover:bg-[#0BA5E9] hover:text-white ${$dateRange === "custom" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white bg-transparent dark:border-white"}`}
+          >
+            {customDateLabel}</Button
+          >
+        </Popover.Trigger>
+        <Popover.Content class="w-auto p-0" align="start">
+          <RangeCalendar
+            bind:value
+            bind:startValue
+            initialFocus
+            numberOfMonths={2}
+            placeholder={value?.start}
+          />
+        </Popover.Content>
+      </Popover.Root>
     </span>
     <span class="flex items-center gap-3">
       <Select.Root portal={null}>
-          <Select.Trigger
-            class="w-[100px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg dark:bg-transparent"
-          >
-            <Select.Value placeholder={$selectedStore.label} />
-          </Select.Trigger>
-          <Select.Content class="max-h-[200px] overflow-y-auto">
-            <Select.Group>
-              <Select.Item on:click={() => selectedStore.set({ value: -1, label: 'All Stores' })}
+        <Select.Trigger
+          class="w-[100px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg dark:bg-transparent"
+        >
+          <Select.Value placeholder={$selectedStore.label} />
+        </Select.Trigger>
+        <Select.Content class="max-h-[200px] overflow-y-auto">
+          <Select.Group>
+            <!-- <Select.Item on:click={() =>{ selectedStore.set({ value: -1, label: 'All Stores'}); fetchDataStoreWise()}}
                 class="px-1"
                 value="All Stores"
                 label="All Stores">All Stores</Select.Item
+              > -->
+            {#each fruits as fruit}
+              <Select.Item
+                on:click={() => selectedStore.set(fruit)}
+                class="px-1"
+                value={fruit.value}
+                label={fruit.label}>{fruit.label}</Select.Item
               >
-              {#each fruits as fruit}
-                <Select.Item on:click={() => selectedStore.set(fruit)}
-                  class="px-1"
-                  value={fruit.value}
-                  label={fruit.label}>{fruit.label}</Select.Item
-                >
-              {/each}
-            </Select.Group>
-          </Select.Content>
-        </Select.Root>
-      <Button  class="bg-[#3D81FC] text-white flex items-center gap-1 hover:bg-white hover:text-[#3D81FC]"
+            {/each}
+          </Select.Group>
+        </Select.Content>
+      </Select.Root>
+      <Button
+        class="bg-[#3D81FC] text-white flex items-center gap-1 hover:bg-white hover:text-[#3D81FC]"
         ><Upload size={18} /> Export Reports</Button
       >
     </span>
@@ -793,7 +983,9 @@ console.log(formatDate(today))
       </span>
       <span>
         <p class="text-white text-xl font-bold">{totalThefts}</p>
-        <p class="text font-semibold capitalize text-white">total thefts detected</p>
+        <p class="text font-semibold capitalize text-white">
+          total thefts detected
+        </p>
       </span>
     </div>
     <div
@@ -819,7 +1011,9 @@ console.log(formatDate(today))
       </span>
       <span>
         <p class="text-white text-xl font-bold">{totalPreventions}</p>
-        <p class="text capitalize font-semibold text-white">total thefts prevented</p>
+        <p class="text capitalize font-semibold text-white">
+          total thefts prevented
+        </p>
       </span>
     </div>
     <div
@@ -844,8 +1038,12 @@ console.log(formatDate(today))
         </svg>
       </span>
       <span>
-       <p class="text-white text-xl font-bold">{isNaN(detectionPercentage) ? 0 : detectionPercentage.toFixed(2)}%</p>
-         <p class="text capitalize font-semibold text-white">total thefts percentage</p>
+        <p class="text-white text-xl font-bold">
+          {isNaN(detectionPercentage) ? 0 : detectionPercentage.toFixed(2)}%
+        </p>
+        <p class="text capitalize font-semibold text-white">
+          total thefts percentage
+        </p>
       </span>
     </div>
     <div
@@ -870,16 +1068,24 @@ console.log(formatDate(today))
         </svg>
       </span>
       <span>
-        <p class="text-white text-xl font-bold">{isNaN(preventionPercentage) ? 0 : preventionPercentage.toFixed(2)}%</p>
-        <p class="text capitalize font-semibold text-white">total prevention percentage</p>
+        <p class="text-white text-xl font-bold">
+          {isNaN(preventionPercentage) ? 0 : preventionPercentage.toFixed(2)}%
+        </p>
+        <p class="text capitalize font-semibold text-white">
+          total prevention percentage
+        </p>
       </span>
     </div>
-    <div class="col-span-3 row-span-3 border rounded-md p-4 flex flex-col gap-4 h-[350px] dark:border-white/[.7]">
+    <div
+      class="col-span-3 row-span-3 border rounded-md p-4 flex flex-col gap-4 h-[350px] dark:border-white/[.7]"
+    >
       <span class="flex items-center justify-between">
-        <p class="text-[#323232] dark:text-white text-lg font-semibold">All Stores</p>
+        <p class="text-[#323232] dark:text-white text-lg font-semibold">
+          All Stores
+        </p>
       </span>
       <div class="flex flex-col max-h-[300px] overflow-y-auto hide-scrollbar">
-    {#each theftandcamera as data, index}
+        {#each theftandcamera as data, index}
           <DashboardStoreCard
             storeName={data.name}
             cameraCount={data.camera_count}
@@ -891,15 +1097,19 @@ console.log(formatDate(today))
         {/each}
       </div>
     </div>
-    <div class="col-span-5 row-span-3 border rounded-md p-4 flex flex-col gap-4 h-[350px] dark:border-white/[.7]">
+    <div
+      class="col-span-5 row-span-3 border rounded-md p-4 flex flex-col gap-4 h-[350px] dark:border-white/[.7]"
+    >
       <span class="flex items-center justify-between">
-        <p class="text-[#323232] dark:text-white text-lg flex items-center gap-2 font-semibold">
+        <p
+          class="text-[#323232] dark:text-white text-lg flex items-center gap-2 font-semibold"
+        >
           Theft Detected
-           <!-- <span
+          <!-- <span
             class="text-xs text-white bg-pink-500 rounded-md p-1">Live</span
           > -->
         </p>
-       <Select.Root portal={null}>
+        <Select.Root portal={null}>
           <Select.Trigger
             class="w-[100px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg dark:bg-transparent"
           >
@@ -907,13 +1117,16 @@ console.log(formatDate(today))
           </Select.Trigger>
           <Select.Content class="max-h-[200px] overflow-y-auto">
             <Select.Group>
-              <Select.Item on:click={() => selectedStore.set({ value: -1, label: 'All Stores' })}
+              <Select.Item
+                on:click={() =>
+                  selectedStore.set({ value: -1, label: "All Stores" })}
                 class="px-1"
                 value="All Stores"
                 label="All Stores">All Stores</Select.Item
               >
               {#each fruits as fruit}
-                <Select.Item on:click={() => selectedStore.set(fruit)}
+                <Select.Item
+                  on:click={() => selectedStore.set(fruit)}
                   class="px-1"
                   value={fruit.value}
                   label={fruit.label}>{fruit.label}</Select.Item
@@ -957,11 +1170,15 @@ console.log(formatDate(today))
             >
           </div>
           <span class="flex items-center justify-center gap-2 mt-1">
-            <p class="flex gap-2 items-center text-xs text-[#030229] dark:text-white">
+            <p
+              class="flex gap-2 items-center text-xs text-[#030229] dark:text-white"
+            >
               <span class="w-2 h-2 rounded-full bg-[#5B93FF]" /> Detected
             </p>
-            <p class="flex gap-2 items-center text-xs text-[#030229] dark:text-white">
-              <span class="w-2 h-2 rounded-full bg-[#FF8F6B] " /> Prevented
+            <p
+              class="flex gap-2 items-center text-xs text-[#030229] dark:text-white"
+            >
+              <span class="w-2 h-2 rounded-full bg-[#FF8F6B]" /> Prevented
             </p>
           </span>
         </span>
@@ -970,39 +1187,60 @@ console.log(formatDate(today))
         </span>
       </div>
     </div>
-    <div class="col-span-8 row-span-4 border rounded-md p-4 flex flex-col gap-2 dark:border-white/[.7]">
+    <div
+      class="col-span-8 row-span-4 border rounded-md p-4 flex flex-col gap-2 dark:border-white/[.7]"
+    >
       <span class="flex items-center justify-between">
-        <p class="text-[#323232] dark:text-white font-medium text-lg">Theft History</p>
+        <p class="text-[#323232] dark:text-white font-medium text-lg">
+          Theft History
+        </p>
       </span>
       <span class="w-full h-full">
         {#if $listtheft?.data?.length > 0}
- {#key tableKey}
-      <TheftDataTable theftData={listtheft}/>
-    {/key}
+          {#key tableKey}
+          <TheftDataTable theftData={listtheft} />
+          {/key}
         {:else}
-          <p class="text-[#323232] dark:text-white text-lg font-semibold">No data found</p>
+          <p class="text-[#323232] dark:text-white text-lg font-semibold">
+            No data found
+          </p>
         {/if}
       </span>
     </div>
-    <div class="col-span-4 row-span-3 border rounded-md p-4 gap-4 h-[350px] flex flex-col dark:border-white/[.7]">
+    <div
+      class="col-span-4 row-span-3 border rounded-md p-4 gap-4 h-[350px] flex flex-col dark:border-white/[.7]"
+    >
       <span class="flex items-center justify-between">
-        <p class="text-[#323232] dark:text-white text-lg font-semibold">Trend for Theft</p>
-        <span class="flex items-center gap-3">
-        </span>
+        <p class="text-[#323232] dark:text-white text-lg font-semibold">
+          Trend for Theft
+        </p>
+        <span class="flex items-center gap-3"> </span>
       </span>
       <div class="h-full w-full">
         <canvas bind:this={chartCanvas}></canvas>
       </div>
     </div>
-    <div class="col-span-4 row-span-3 border rounded-md p-4 flex flex-col gap-4 h-[350px] dark:border-white/[.7]">
+    <div
+      class="col-span-4 row-span-3 border rounded-md p-4 flex flex-col gap-4 h-[350px] dark:border-white/[.7]"
+    >
       <span class="flex items-center justify-between">
-        <p class="text-[#323232] dark:text-white text-lg flex items-center gap-2 font-semibold">
+        <p
+          class="text-[#323232] dark:text-white text-lg flex items-center gap-2 font-semibold"
+        >
           Suspicious Activity
         </p>
-       <span class='flex items-center gap-2'>
-         <p class='flex items-center gap-2 text-xs'><span class='size-2 rounded-full bg-[#5B93FF] flex-shrink-0'/>Detected</p>
-         <p class='flex items-center gap-2 text-xs'><span class='size-2 rounded-full bg-[#FF8F6B] flex-shrink-0'/>Prevented</p>
-       </span>
+        <span class="flex items-center gap-2">
+          <p class="flex items-center gap-2 text-xs">
+            <span
+              class="size-2 rounded-full bg-[#5B93FF] flex-shrink-0"
+            />Detected
+          </p>
+          <p class="flex items-center gap-2 text-xs">
+            <span
+              class="size-2 rounded-full bg-[#FF8F6B] flex-shrink-0"
+            />Prevented
+          </p>
+        </span>
       </span>
       <div class="h-full w-full">
         <canvas bind:this={theftChartCanvas}></canvas>

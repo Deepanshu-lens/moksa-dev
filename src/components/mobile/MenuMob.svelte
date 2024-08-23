@@ -1,5 +1,5 @@
 <script lang="ts">
-  import LayoutDialog from "./../dialogs/mobile/LayoutDialog.svelte";
+  import LayoutDialog from "../dialogs/mobile/layoutDialog.svelte";
   import { selectedNode } from "@/lib/stores";
   import { Bell, Mic, Podcast, RotateCcw } from "lucide-svelte";
   import { ImageDown, LayoutGrid, Save, Video } from "lucide-svelte";

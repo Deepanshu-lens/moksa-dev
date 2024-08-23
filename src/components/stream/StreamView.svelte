@@ -61,8 +61,10 @@
   import Switch from "../ui/switch/switch.svelte";
     import Control from "../PTZ/Control.svelte";
 
-  export let data;
-  export let url;
+    
+    export let data;
+    export let url;
+    console.log(data)
   const selectedDetections = writable([]);
    let showOptions = writable('');
    let ptzControl = writable('');

@@ -34,8 +34,7 @@ export const handle = async ({ event, resolve }) => {
     httpOnly: true,
     secure: false,
     sameSite: "lax",
-    domain: undefined,
-    maxAge: 60 * 60 * 23
+    domain: undefined, // Remove domain for non-prod
   });
 
   // Append the PocketBase auth cookie to existing cookies

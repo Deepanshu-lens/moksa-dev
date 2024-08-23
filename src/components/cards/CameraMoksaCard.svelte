@@ -18,6 +18,8 @@
   import CameraEditDialog from "../dialogs/CameraEditDialog.svelte";
     import { onMount } from "svelte";
 
+    // console.log(data)
+
   export let isAllFullScreen: boolean;
   export let cameraId: string;
   export let name: string;

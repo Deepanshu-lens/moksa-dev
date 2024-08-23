@@ -35,18 +35,6 @@
       text: "Playback",
       href: `/playback/${sessionId}`,
     },
-    // {
-    //   text: "Events",
-    //   href: `/events/${sessionId}`,
-    // },
-    // {
-    //   text: "Reports",
-    //   href: `/reports/${sessionId}`,
-    // },
-    // {
-    //   text: "Settings",
-    //   href: `/settings/${sessionId}`,
-    // }
     {
       text: "Analytics",
       href: `/analytics/${sessionId}`,

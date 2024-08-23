@@ -26,8 +26,9 @@
     import AddUserDialog from "@/components/dialogs/AddUserDialog.svelte";
   let view: number = 1;
   export let data;
-  console.log(data)
+  // console.log(data)
   let userData = data.usersData.status === 200 ? data.usersData.data.data : []
+  // console.log(userData)
   const fruits = [
     { value: "apple", label: "Apple" },
     { value: "banana", label: "Banana" },
@@ -506,13 +507,13 @@ function createTheftChart() {
             class="2xl:py-2 2xl:px-3 py-1 px-2 border-r border-black border-opacity-[18%] text-black text-sm"
             >30 Days</button
           >
-          <button
-            class="2xl:py-2 2xl:px-3 py-1 px-2 border-r border-black border-opacity-[18%] text-black text-sm"
+ <button class="2xl:py-2 2xl:px-3 py-1 px-2 text-black text-sm"
+
             >12 Months</button
           >
-          <button class="2xl:py-2 2xl:px-3 py-1 px-2 text-black text-sm"
+          <!-- <button class="2xl:py-2 2xl:px-3 py-1 px-2 text-black text-sm"
             >Custom</button
-          >
+          > -->
         </span>
         <span class="flex items-center gap-3">
           <span class="relative">

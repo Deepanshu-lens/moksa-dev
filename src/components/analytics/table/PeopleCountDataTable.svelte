@@ -69,14 +69,14 @@
 
   export let storeData;
 
-  console.log($storeData);
+  // console.log($storeData);
 
 
   const dbData = $storeData.map((item:any) => {
     return {
-      storeName: item.store,
-      customerCount: item.noofcustomers,
-      busyHourProjections: item.busyhour,
+      storeName: item.store_name,
+      customerCount: Number(item.going_out) - Number(item.going_in),
+      busyHourProjections: item.busy_hours,
     };
   });
 
@@ -146,7 +146,7 @@ function goToNextPage() {
       <span
         class="rounded-t-xl w-full h-[50px] bg-transparent flex items-center justify-between px-4"
       >
-        <p class=" text-xl font-semibold flex items-center gap-2">All Stores</p>
+        <p class=" text-xl font-semibold flex items-center gap-2">{$storeData[0].store_name}</p>
         <div class='flex items-center gap-4'>
 <div class="flex items-center space-x-2">
       <span class="text-sm text-gray-700 font-medium">Rows per page:</span>

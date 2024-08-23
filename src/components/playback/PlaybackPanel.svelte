@@ -219,7 +219,7 @@
         <div
           class={`bg-[#333] h-[calc(100vh-75px)] grid place-items-center relative  gap-1 w-full grid-cols-1 grid-rows-1`}
         >
-          <AWSPlayer videoPath={$convertedVideos} />
+          <AWSPlayer videoUrls={$convertedVideos} />
           <button
             on:click={() => {
               convertedVideos.set([]);

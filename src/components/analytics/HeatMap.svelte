@@ -10,6 +10,8 @@
 export let allStores;
 export let aisleStoreData;
 
+$:console.log(allStores)
+
   const datadevicevalue = { Active: 5000, Inactive: 1000, Faulty: 400 };
   const fusiondevicedata = [
     {
@@ -72,7 +74,7 @@ export let aisleStoreData;
     },
   ];
 
-    const fruits = allStores.map((store: any) => ({
+    const fruits = allStores?.map((store: any) => ({
     value: store.id,
     label: store.name,
   }));
@@ -148,7 +150,7 @@ export let aisleStoreData;
     }, 100);
   });
 
-  $:console.log($aisleStoreData[0].data)
+  // $:console.log($aisleStoreData[0].data)
   $:console.log($aisleStoreData)
 </script>
 
@@ -156,21 +158,17 @@ export let aisleStoreData;
   class="w-full p-4 flex flex-col overflow-y-auto max-h-[calc(100vh-75px)] hide-scrollbar"
 >
   <div class="flex items-center justify-between">
-    <span class='flex items-center gap-2'>
+    <span class='flex items-center gap-4'>
     <span
       class="flex items-center border-black border-opacity-[18%] border-[1px] rounded-md dark:border-white dark:text-white"
     >
       <button
         class="2xl:py-2 2xl:px-3 py-1 px-2 border-r border-black border-opacity-[18%] text-black text-sm dark:border-white dark:text-white"
-        >1 Hour</button
-      >
-      <button
-        class="2xl:py-2 2xl:px-3 py-1 px-2 border-r border-black border-opacity-[18%] text-black text-sm dark:border-white dark:text-white"
-        >24 Hours</button
-      >
-      <button
-        class="2xl:py-2 2xl:px-3 py-1 px-2 border-r border-black border-opacity-[18%] text-black text-sm dark:border-white dark:text-white"
         >7 Days</button
+      >
+      <button
+        class="2xl:py-2 2xl:px-3 py-1 px-2 border-r border-black border-opacity-[18%] text-black text-sm dark:border-white dark:text-white"
+        >15 Days</button
       >
       <button
         class="2xl:py-2 2xl:px-3 py-1 px-2 border-r border-black border-opacity-[18%] text-black text-sm dark:border-white dark:text-white"
@@ -188,10 +186,11 @@ export let aisleStoreData;
           <Select.Trigger
             class="w-[100px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg dark:bg-transparent"
           >
-            <Select.Value placeholder={allStores[0].name} />
+            <Select.Value placeholder={allStores?.[0]?.name} />
           </Select.Trigger>
                <Select.Content class="max-h-[200px] overflow-y-auto">
             <Select.Group>
+              {#if allStores.length > 0}
               {#each fruits as fruit}
                 <Select.Item
                   class="px-1"
@@ -199,6 +198,7 @@ export let aisleStoreData;
                   label={fruit.label}>{fruit.label}</Select.Item
                 >
               {/each}
+              {/if}
             </Select.Group>
           </Select.Content>
           <Select.Input name="favoriteFruit" />

@@ -256,10 +256,10 @@ async function getAisleData(){
   {:else if view === 4}
     <EE {allStores}/>
   {:else if view === 5}
-    <PeopleCounter {allStores} token={data.moksaToken}/>
+    <PeopleCounter {allStores} token={data.moksaToken} {usersData} curruser={data.user}/>
   {:else if view === 6}
     <HeatMap {aisleStoreData} {allStores}/>
   {:else if view === 7}
-    <Safety {allStores}/>
+    <Safety {allStores} token={data.moksaToken}/>
   {/if}
 </main>

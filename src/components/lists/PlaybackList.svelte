@@ -236,7 +236,7 @@
 // }
 
 
-async function fetchfroms3(cameraId, date, startTime) {
+async function fetchfroms3(cameraId, date, startTime,endTime) {
   console.log(date);
   const localDate = new Date(date);
   const formattedDate = localDate.toLocaleDateString('en-CA').replace(/-/g, '_');
@@ -249,12 +249,13 @@ async function fetchfroms3(cameraId, date, startTime) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ cameraId, date: formattedDate, startTime }),
+      body: JSON.stringify({ cameraId, date: formattedDate, startTime,endTime }),
     });
 
     if (response.status === 200) {
       const data = await response.json();
-      convertedVideos.set(data.url);
+      console.log(data)
+      convertedVideos.set(data.files);
     } else {
       console.error(`Error: Received status code ${response.status}`);
     }
@@ -265,28 +266,28 @@ async function fetchfroms3(cameraId, date, startTime) {
   }
 }
 
-  function checkForOutputFile(cameraId, formattedDate,startTime) {
-    checkInterval = setInterval(async () => {
-      try {
-        const response = await fetch(`/videos/${cameraId}/${formattedDate}/${startTime}/output.m3u8`, { method: 'HEAD' });
-         console.log("Response status:", response.status);
-      console.log("Response headers:", response.headers);
-        if (response.ok) {
-          clearInterval(checkInterval);
-          convertedVideos.set(`/videos/${cameraId}/${formattedDate}/${startTime}/output.m3u8`);
-          // isLoading = false;
-          isLoading.set(false)
-        }
-      } catch (error) {
-        console.error("Error checking for output file:", error);
-      }
-    }, 7500);
-  }
+  // function checkForOutputFile(cameraId, formattedDate,startTime) {
+  //   checkInterval = setInterval(async () => {
+  //     try {
+  //       const response = await fetch(`/videos/${cameraId}/${formattedDate}/${startTime}/output.m3u8`, { method: 'HEAD' });
+  //        console.log("Response status:", response.status);
+  //     console.log("Response headers:", response.headers);
+  //       if (response.ok) {
+  //         clearInterval(checkInterval);
+  //         convertedVideos.set(`/videos/${cameraId}/${formattedDate}/${startTime}/output.m3u8`);
+  //         // isLoading = false;
+  //         isLoading.set(false)
+  //       }
+  //     } catch (error) {
+  //       console.error("Error checking for output file:", error);
+  //     }
+  //   }, 7500);
+  // }
 
-  onDestroy(() => {
-    if (checkInterval) {
-      clearInterval(checkInterval);
-    }})
+  // onDestroy(() => {
+  //   if (checkInterval) {
+  //     clearInterval(checkInterval);
+  //   }})
   // $: console.log($uniqueUrlList)
 
   $: filteredVideos = $allVideos?.filter(
@@ -414,7 +415,7 @@ async function fetchfroms3(cameraId, date, startTime) {
         />
       </span>
     </div>
-    \
+    
     <div class="px-4 w-full">
       <button
         class="text-white bg-[#050F41] w-full py-2 text-sm font-medium mt-4 rounded-md cursor-pointer disabled:cursor-not-allowed"
@@ -562,24 +563,36 @@ async function fetchfroms3(cameraId, date, startTime) {
       {/if}
     </div>
   </div>
-  <div class="px-4 w-full py-4 flex flex-col gap-1">
-    <label for="start-time" class="text-black/[.7] dark:text-slate-200"
-      >Start Time</label
-    >
-    <input
-      type="time"
-      id="start-time"
-      bind:value={startTime}
-      placeholder="00:00"
-      class="block rounded-md capitalize border-2 text-sm px-2 py-2 leading-tight w-full bg-[#f6f6f6] text-[#979797] dark:bg-black"
-    />
-  </div>
+  <div class="px-4 w-full py-4 flex flex-row items-center gap-3">
+      <span>
+        <label for="start-time" class="text-black/[.7] dark:text-slate-200"
+          >Start Time</label
+        >
+        <input
+          type="time"
+          id="start-time"
+          bind:value={startTime}
+          placeholder="00:00"
+          class="block rounded-md capitalize border-2 text-sm px-2 py-2 leading-tight w-full bg-[#f6f6f6] text-[#979797] dark:bg-black"
+        />
+      </span>
+      <span>
+        <label for="end-time" class="text-black/[.7]">End Time</label>
+        <input
+          type="time"
+          id="end-time"
+          bind:value={endTime}
+          placeholder="00:00"
+          class="block rounded-md capitalize border-2 text-sm px-2 py-2 leading-tight w-full bg-[#f6f6f6] text-[#979797] dark:bg-black"
+        />
+      </span>
+    </div>
   <div class="px-4 w-full">
     <button
     class="text-white bg-[#050F41] w-full py-2 text-sm font-medium mt-4 rounded-md cursor-pointer disabled:cursor-not-allowed"
     on:click={() => {
       isLoading.set(true) 
-      fetchfroms3(selectedCamera, searchDate, startTime)
+      fetchfroms3(selectedCamera, searchDate, startTime,endTime)
         .finally(() => {
           isLoading.set( false)
         });
