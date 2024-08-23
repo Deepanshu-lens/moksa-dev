@@ -25,15 +25,15 @@
     value: store.id,
     label: store.name,
   }));
-$: console.log($safetyData)
-$: console.log($selectedStore)
-$: console.log($safetyData.find(store => store.storeId === $selectedStore.id))
+// $: console.log($safetyData)
+// $: console.log($selectedStore)
+// $: console.log($safetyData.find(store => store.storeId === $selectedStore.id))
 </script>
 
 
 <section class="w-full p-4 flex flex-col max-h-[calc(100vh-75px)] overflow-y-auto hide-scrollbar">
-  <div class="flex items-center justify-between">
-    <span
+  <div class="flex items-center justify-end">
+    <!-- <span
       class="flex items-center border-black border-opacity-[18%] border-[1px] rounded-md dark:text-white dark:border-white"
     >
       <button
@@ -59,7 +59,7 @@ $: console.log($safetyData.find(store => store.storeId === $selectedStore.id))
       <button class="2xl:py-2 2xl:px-3 py-1 px-2 text-black text-sm dark:text-white dark:border-white"
         >Custom</button
       >
-    </span>
+    </span> -->
     <span class="flex items-center gap-3">
 <Button variant='outline' class='flex items-center gap-1'> <ListFilter size={18}/> Filters</Button>
       <Button class="flex items-center gap-1 bg-[#3D81FC] text-white hover:bg-white hover:text-[#3D81FC]"

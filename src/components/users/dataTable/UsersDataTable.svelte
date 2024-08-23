@@ -2,7 +2,7 @@
   import { createTable, Render, Subscribe } from "svelte-headless-table";
   import * as Table from "@/components/ui/table";
   import { Button } from "@/components/ui/button";
-  import { ArrowUpDown, Edit, StoreIcon, Trash2, User } from "lucide-svelte";
+  import { ArrowUpDown, ChevronLeft, ChevronRight, Edit, StoreIcon, Trash2, User } from "lucide-svelte";
   import { createEventDispatcher } from "svelte";
   import {
     addPagination,
@@ -13,6 +13,26 @@
   import { readable, writable } from "svelte/store";
 
   const dispatch = createEventDispatcher();
+
+  export let users 
+export let searchVal:string;
+
+// $: console.log(searchVal)
+
+// $: console.log(users)
+
+
+const dbData = users.map((user) => {
+  return {
+    username: user.first_name + ' ' + user.last_name,
+    userImage: user.profile,
+    email: user.email,
+    designation: user.role,
+    dateOfRegistration: user.createdAt,
+    storesAssigned: user.store_count,
+    action: "Edit",
+  }
+})
 
   // Static data
   const staticData = [
@@ -30,9 +50,9 @@
   ];
 
 
-  const data = writable(staticData);
+  const data = writable(dbData);
 
-  const readableData = readable([], (set) => {
+  const readableData = readable(dbData, (set) => {
     const unsubscribe = data.subscribe(set);
     return unsubscribe;
   });
@@ -60,10 +80,10 @@
       accessor: "dateOfRegistration",
       header: "Date of Registration",
     }),
-    table.column({
-      accessor: "storeName",
-      header: "Store Name",
-    }),
+    // table.column({
+    //   accessor: "storeName",
+    //   header: "Store Name",
+    // }),
     table.column({
       accessor: "storesAssigned",
       header: "Stores Assigned",
@@ -77,13 +97,25 @@
   const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } =
     table.createViewModel(columns);
 
-  const { hasNextPage, hasPreviousPage, pageIndex, pageCount } =
+  const { hasNextPage, hasPreviousPage, pageIndex, pageCount, setPageIndex } =
     pluginStates.page;
   const { selectedDataIds } = pluginStates.select;
+ const { filterValue } = pluginStates.filter;
+  $: $filterValue = searchVal;
 
   function handleRowClick(rowData) {
     dispatch("rowClick", rowData);
   }
+
+function goToNextPage() {
+  $pageIndex = $pageIndex + 1
+  }
+
+  function goToPreviousPage() {
+ $pageIndex = $pageIndex - 1
+  }
+
+
 </script>
 
 <div class="rounded-md mt-0">
@@ -189,3 +221,30 @@
     </Table.Body>
   </Table.Root>
 </div>
+
+<div class="flex items-center justify-between flex-row-reverse px-2 mt-4">
+    <div class="flex items-center gap-2">
+      <Button
+        variant="outline"
+        size="sm"
+        on:click={goToPreviousPage}
+        disabled={!$hasPreviousPage}
+      >
+        <ChevronLeft class="h-4 w-4" />
+        Previous
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        on:click={goToNextPage}
+        disabled={!$hasNextPage}
+      >
+        Next
+        <ChevronRight class="h-4 w-4" />
+      </Button>
+    </div>
+    <div class="text-sm text-gray-500">
+      Page {$pageIndex + 1} of {$pageCount}
+    </div>
+  </div>
+

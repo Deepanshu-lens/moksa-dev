@@ -33,7 +33,7 @@
 	"type": "module",
 	"dependencies": {
 		"@ffmpeg-installer/ffmpeg": "^1.1.0",
-		"@internationalized/date": "^3.5.2",
+		"@internationalized/date": "^3.5.5",
 		"@paralleldrive/cuid2": "^2.2.2",
 		"@radix-ui/react-dialog": "^1.0.5",
 		"@types/fluent-ffmpeg": "^2.1.25",

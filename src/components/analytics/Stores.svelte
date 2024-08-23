@@ -17,9 +17,13 @@
 let cardData = writable([])
   export let allStores: any[] = [];
   export let theftandcamera: any[] = [];
+  export let nodes;
+$:console.log(nodes)
+
   $: combinedStores = allStores?.map((store) => {
     const theftData = theftandcamera.find((t) => t.name === store.name) || {};
-    return { ...store, ...theftData };
+      const nodeData = nodes.find((n:any) => n.moksaId === store.id) || {};
+    return { ...store, ...theftData, lensId: nodeData ? nodeData.id : null  };
   });
 
 
@@ -49,7 +53,7 @@ let searchStore =''
 <section class="w-full p-4 flex flex-col gap-4 px-6">
   <div class='flex items-center justify-end gap-4'>
     <AddStoreDialog>
-      <Button class="bg-[#3D81FC] text-white">
+      <Button class="bg-[#3D81FC] text-white hover:bg-white hover:text-[#3D81FC]">
         Add Store +
       </Button>
     </AddStoreDialog>

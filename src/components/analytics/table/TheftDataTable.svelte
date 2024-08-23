@@ -15,34 +15,7 @@
   const dispatch = createEventDispatcher();
   export let theftData;
 
-  $: console.log($theftData?.data)
-
- //   {
-      //   "profile": null,
-      //   "id": null,
-      //   "first_name": null,
-      //   "last_name": null,
-      //   "validated_by": null,
-      //   "date_validated": null,
-      //   "video_uri": "abc",
-      //   "camera_id": 1,
-      //   "store_id": 1,
-      //   "createdAt": "2024-08-22T10:00:46.262Z",
-      //   "theftProbability": 100.8,
-      //   "name": "new store",
-      //   "total_count": null
-      // }
-
-  // const dbData = $theftData.data.map(item => ({
-  //   storeName: item.name,
-  //   employee: `${item.first_name} ${item.last_name}`,
-  //   date: item?.date,
-  //   videoLink: "Watch Video",
-  //   videoUri: item?.video_uri,
-  //   time: item?.time,
-  //   callHistory: "James Albert",
-  //   duration: "08 min 22 sec",
-  // }))
+  $: console.log('Table data updated:', $theftData);
 
   const dbData = $theftData.data.map(item => {
 

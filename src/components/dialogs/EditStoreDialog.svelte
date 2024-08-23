@@ -17,8 +17,26 @@
   let country = store.country;
   let manager = store.storeManager;
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     console.log(nodeName, address, pincode, country, manager)
+      await fetch("/api/node/update", {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: nodeName,
+        id: $selectedNode.id,
+        address: address,
+        pincode: pincode,
+        country: country,
+        manager: manager,
+        moksaId: store.moksaId
+      }),
+    }).then(() => {
+      toast("Store updated");
+      dialogOpen =false
+    });
     return true;
   };
 </script>

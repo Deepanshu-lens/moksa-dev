@@ -1,4 +1,5 @@
 <script lang="ts">
+	import StoreDeleteDialog from './../../dialogs/StoreDeleteDialog..svelte';
   import { createTable, Render, Subscribe } from "svelte-headless-table";
   import * as Table from "@/components/ui/table";
   import { Button } from "@/components/ui/button";
@@ -16,6 +17,8 @@
 
   const dispatch = createEventDispatcher();
 
+  // $:console.log(combinedStores)
+
 const dbData = combinedStores.map(store => {
   return {
     storeName: store.name,
@@ -27,10 +30,14 @@ const dbData = combinedStores.map(store => {
     camerasAssigned: store.camera_count,
     pincode: store.pincode,
     country: store.country,
+    moksaId: store.id,
+    lensId: store.lensId
   }
 });
 
 export let searchStore:string;
+
+// $: console.log(searchStore)
   const data = writable(dbData);
 
   const readableData = readable([], (set) => {
@@ -154,10 +161,12 @@ export let searchStore:string;
                         <Edit size={14} /> Modify</Button
                         >
                       </EditStoreDialog>
-                      <Button
+                      <StoreDeleteDialog name={row.original.storeName} moksaId={row.original.moksaId} id={row.original.lensId}>
+                        <Button
                         class="text-[#F44336] bg-[#F44336]/[.1] rounded-full text-xs text-start flex items-center gap-1"
                         variant="ghost"><Trash2 size={14} /> Delete</Button
-                      >
+                        >
+                      </StoreDeleteDialog>
                     </span>
                     {:else if cell.id === 'dateOfRegistration'}
                     <span class="text-sm text-[#727272]">

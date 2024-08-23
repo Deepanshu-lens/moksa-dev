@@ -9,8 +9,8 @@
   import { selectedNode } from "@/lib/stores";
   let newName: string = "";
 
-  const editCamera = () => {
-    fetch("/api/node/update", {
+  const editCamera = async () => {
+    await fetch("/api/node/update", {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",

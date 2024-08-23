@@ -10,7 +10,7 @@
   export let bgColor: string;
 
   $: percentageActive = totalCount === 0 ? 0 : Math.round((parseInt(activeCount) / parseInt(totalCount)) * 100);
-  console.log(totalCount)
+  // console.log(totalCount)
 </script>
 
     <!-- <div class="camera-count">

@@ -21,6 +21,7 @@
     CategoryScale,
   } from "chart.js";
   import { writable } from "svelte/store";
+  import LivePeopleCountDataTable from "./table/LivePeopleCountDataTable.svelte";
 
   export let allStores;
   export let token;
@@ -29,10 +30,18 @@
   let chart: Chart | null = null;
   let chartLoading: boolean = true;
   let storeData: any = writable([]);
+  let liveStoreData: any = writable([]);
 
   let livePeopleCount = {};
   const userID = 8;
   const storeID = 31;
+    const fruits = allStores?.map((store: any) => ({
+    value: store.id,
+    label: store.name,
+  }));
+
+  let selectedStore= writable({ value: allStores?.[0]?.id, label: allStores?.[0]?.name })
+
   // const token = Cookies.get('moksa-token');
   // const pbToken = Cookies.get('pb_auth');
   $: console.log(allStores);
@@ -62,7 +71,7 @@
       socket.emit("joinStore", storeID);
     }
 
-    socket.on(`people_count_store_${storeID}`, (data) => {
+    socket.on(`people_count_store_${$selectedStore.value}`, (data) => {
       console.log(`Received live people count for store ${storeID}:`, data);
       livePeopleCount[storeID] = data;
       livePeopleCount = { ...livePeopleCount }; // Trigger reactivity
@@ -97,24 +106,24 @@
     }
   });
 
-  async function getWeekData(storeId: number) {
-    const today = new Date().toISOString().split("T")[0];
-    const weekAgo = new Date(new Date().setDate(new Date().getDate() - 7))
-      .toISOString()
-      .split("T")[0];
-    const weekData = await fetch(
-      `https://dev.api.moksa.ai/people/getPeopleCount/${storeId}/${weekAgo}/${today}`,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        method: "GET",
-      },
-    );
-    const d = await weekData.json();
-    console.log(d);
-  }
+  // async function getWeekData(storeId: number) {
+  //   const today = new Date().toISOString().split("T")[0];
+  //   const weekAgo = new Date(new Date().setDate(new Date().getDate() - 7))
+  //     .toISOString()
+  //     .split("T")[0];
+  //   const weekData = await fetch(
+  //     `https://dev.api.moksa.ai/people/getPeopleCount/${storeId}/${weekAgo}/${today}`,
+  //     {
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //       method: "GET",
+  //     },
+  //   );
+  //   const d = await weekData.json();
+  //   console.log(d);
+  // }
 
   function createChart() {
     if (chartCanvas && !chart) {
@@ -197,8 +206,30 @@
     }
   }
 
+  async function getLiveData(storeId: number) {
+await fetch(`https://dev.api.moksa.ai/people/getPeopleCountLive/${storeId}`, {
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+  },
+  method: "GET",
+}).then(res => res.json()).then(data => {
+  console.log(data)
+  liveStoreData.set(data.data)
+}).catch(err => {
+  console.log(err)
+})
+  }
+
+  $: {
+  if ($selectedStore.value !== undefined) {
+   getLiveData($selectedStore.value);
+  }
+}
+
   onMount(async () => {
     chartLoading = false;
+    // await getLiveData($selectedStore.value)
     setTimeout(() => {
       createChart();
     }, 100);
@@ -233,7 +264,7 @@
   class="w-full p-4 flex flex-col max-h-[calc(100vh-75px)] overflow-y-auto hide-scrollbar"
 >
   <div class="flex items-center justify-between">
-    <span
+    <!-- <span
       class="flex items-center border-black border-opacity-[18%] border-[1px] rounded-md dark:border-white"
     >
       <button
@@ -260,7 +291,31 @@
         class="2xl:py-2 2xl:px-3 py-1 px-2 text-black text-sm dark:text-white dark:border-white"
         >Custom</button
       >
-    </span>
+    </span> -->
+     <Select.Root portal={null}>
+          <Select.Trigger
+            class="w-[100px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg dark:bg-transparent"
+          >
+            <Select.Value placeholder={$selectedStore.label} />
+          </Select.Trigger>
+          <Select.Content class="max-h-[200px] overflow-y-auto">
+            <Select.Group>
+              <Select.Item on:click={() => selectedStore.set({ value: -1, label: 'All Stores' })}
+                class="px-1"
+                value="All Stores"
+                label="All Stores">All Stores</Select.Item
+              >
+              {#each fruits as fruit}
+                <Select.Item on:click={() => selectedStore.set(fruit)}
+                  class="px-1"
+                  value={fruit.value}
+                  label={fruit.label}>{fruit.label}</Select.Item
+                >
+              {/each}
+            </Select.Group>
+          </Select.Content>
+          <Select.Input name="favoriteFruit" />
+        </Select.Root>
     <span class="flex items-center gap-3">
       <Button variant="outline" class="flex items-center gap-1">
         <ListFilter size={18} /> Filters</Button
@@ -334,19 +389,20 @@
         class="rounded-t-xl w-full h-[50px] bg-[#050F40] flex items-center justify-between px-4"
       >
         <p class="text-white text-lg font-semibold flex items-center gap-2">
-          All Stores
+          People Count: {$selectedStore.label}
           <span class="text-xs text-white bg-pink-500 rounded-md p-1">
             Live
           </span>
         </p>
       </span>
-      <!-- <div class="h-full w-full">
-        {#if $storeData.length > 0}
-        <PeopleCountDataTable {storeData}/>
+      <div class="h-full w-full">
+        {#if $liveStoreData.length > 0}
+        <!-- <PeopleCountDataTable {storeData}/> -->
+         <LivePeopleCountDataTable {liveStoreData}/>
         {:else}
-        <p>No data</p>
+          <p class="flex items-center justify-center ">No data</p>
         {/if}
-      </div> -->
+      </div>
     </div>
     <div
       class="col-span-3 row-span-4 border rounded-md p-2 flex flex-col dark:border-white/[.7]"
@@ -375,7 +431,7 @@
               All Stores
             </p>
           </span>
-          <p>No data</p>
+          <p class="flex items-center justify-center ">No data</p>
         {/if}
       </div>
     </div>

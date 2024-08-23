@@ -25,11 +25,18 @@ export const actions = {
         if (data.data && data.data.token) {
           const token = data.data.token;
           // Set the token in a cookie
+          // const cookieOptions = {
+          //   path: '/',
+          //   httpOnly: true,
+          //   secure: process.env.NODE_ENV === 'production',
+          //   sameSite: 'strict',
+          //   maxAge: 60 * 60 * 23
+          // };
           const cookieOptions = {
-            path: '/',
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            secure: false,
+            sameSite: "lax",
+            domain: undefined, 
             maxAge: 60 * 60 * 23
           };
 

@@ -17,11 +17,11 @@ export const load: PageServerLoad = async ({ fetch,cookies }) => {
                 const token = data.data.token;
                 // Set the token in a cookie
                 const cookieOptions = {
-                    path: '/',
                     httpOnly: true,
-                    secure: process.env.NODE_ENV === 'production',
-                    sameSite: 'strict',
-                    maxAge: 60 * 60 * 24
+                    secure: false,
+                    sameSite: "lax",
+                    domain: undefined,
+                    maxAge: 60 * 60 * 23
                 };
                 // console.log("TOKEN!!!!!!!!!!")
                 cookies.set('moksa-token', token, cookieOptions);
@@ -34,7 +34,7 @@ export const load: PageServerLoad = async ({ fetch,cookies }) => {
         });
     } 
     else {
-        cookies.delete('moksa-token');
+        cookies.delete('moksa-token', { path: '/' });
         await fetch(`https://dev.api.moksa.ai/auth/login`, {
             method: "POST", headers: {
                 'Content-Type': 'application/json'
@@ -47,11 +47,11 @@ export const load: PageServerLoad = async ({ fetch,cookies }) => {
                 const token = data.data.token;
                 // Set the token in a cookie
                 const cookieOptions = {
-                    path: '/',
                     httpOnly: true,
-                    secure: process.env.NODE_ENV === 'production',
-                    sameSite: 'strict',
-                    maxAge: 60 * 60 * 24
+                    secure: false,
+                    sameSite: "lax",
+                    domain: undefined,
+                    maxAge: 60 * 60 * 23
                 };
                 // console.log("TOKEN!!!!!!!!!!")
                 cookies.set('moksa-token', token, cookieOptions);
@@ -157,6 +157,18 @@ export const load: PageServerLoad = async ({ fetch,cookies }) => {
         return safetyDetails.json();
     }
 
+
+
+    const allUsers = async () => {
+        const allUsers = await fetch(`https://dev.api.moksa.ai/auth/getAllUsers/1/100`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${cookies.get('moksa-token')}`
+            }
+        });
+        return allUsers.json();
+    }
+
     const safeExecute = async (fn: () => Promise<any>) => {
         try {
             return await fn() || [];
@@ -175,6 +187,7 @@ export const load: PageServerLoad = async ({ fetch,cookies }) => {
         busyness: await safeExecute(busyness),
         efficiency: await safeExecute(efficiency),
         safetyDetails: await safeExecute(safetyDetails),
-        moksaToken: cookies.get('moksa-token')
+        moksaToken: cookies.get('moksa-token'),
+        usersData: await safeExecute(allUsers)
     };
 };

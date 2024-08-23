@@ -30,7 +30,10 @@
           country: country,
           manager: manager
         })
-    })
+    }).then(() => {
+      toast("Store added");
+      dialogOpen = false
+    }).catch((err) => console.log(err))
     return true;
   };
 

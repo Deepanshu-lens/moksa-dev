@@ -27,6 +27,7 @@
   let view: number = 1;
   export let data;
   console.log(data)
+  let userData = data.usersData.status === 200 ? data.usersData.data.data : []
   const fruits = [
     { value: "apple", label: "Apple" },
     { value: "banana", label: "Banana" },
@@ -44,6 +45,7 @@
   let theftChartCanvas: HTMLCanvasElement;
   let theftChart: Chart | null = null;
   let chartLoading = true;
+  let searchVal:string ='';
 
   function createChart() {
     if (chartCanvas && !chart) {
@@ -491,17 +493,14 @@ function createTheftChart() {
         <span
           class="flex items-center border-black border-opacity-[18%] border-[1px] rounded-md h-[40px]"
         >
-          <button
-            class="2xl:py-2 2xl:px-3 py-1 px-2 border-r border-black border-opacity-[18%] text-black text-sm"
-            >1 Hour</button
-          >
-          <button
-            class="2xl:py-2 2xl:px-3 py-1 px-2 border-r border-black border-opacity-[18%] text-black text-sm"
-            >24 Hours</button
-          >
+         
           <button
             class="2xl:py-2 2xl:px-3 py-1 px-2 border-r border-black border-opacity-[18%] text-black text-sm"
             >7 Days</button
+          >
+          <button
+            class="2xl:py-2 2xl:px-3 py-1 px-2 border-r border-black border-opacity-[18%] text-black text-sm"
+            >15 Days</button
           >
           <button
             class="2xl:py-2 2xl:px-3 py-1 px-2 border-r border-black border-opacity-[18%] text-black text-sm"
@@ -517,9 +516,10 @@ function createTheftChart() {
         </span>
         <span class="flex items-center gap-3">
           <span class="relative">
-            <Input type="text" placeholder="Search" class="pl-10" />
+            <Input   bind:value={searchVal} type="text" placeholder="Search" class="pl-10" />
             <Search
               size={18}
+            
               class="absolute top-1/2 -translate-y-1/2 left-4"
             />
           </span>
@@ -540,7 +540,7 @@ function createTheftChart() {
         >
           Users
         </div>
-        <UsersDataTable />
+        <UsersDataTable users={userData} {searchVal} />
       </div>
     </section>
   {:else}
