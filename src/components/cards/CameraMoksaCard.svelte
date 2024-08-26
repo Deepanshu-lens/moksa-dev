@@ -53,6 +53,9 @@
   export let ptzControl;
   export let showOptions;
   export let role:string
+  export let ptz;
+  export let preset;
+  export let lastCords;
 
 let hasShownToast = false;
 //  let showOptions = false;
@@ -94,6 +97,8 @@ let hasShownToast = false;
       toast("Camera deleted");
     });
   };
+
+  $: console.log($ptzControl)
 
 </script>
 
@@ -212,12 +217,16 @@ let hasShownToast = false;
 </span>
 Delete
 </button>
-<button class='flex items-center gap-2 text-black font-medium' on:click={() => {ptzControl.set(cameraId); showOptions.set('')}}>
+{#if ptz}
+<button class='flex items-center gap-2 text-black font-medium' on:click={() => {ptzControl.set({
+  id: cameraId, url: url, preset: preset, lastCords: lastCords
+}); showOptions.set('')}}>
 <span class='size-[24px] rounded-full bg-[#015a62]/[.2] text-[#015a62] flex-shrink-0 grid place-items-center'>
   <Cctv class='h-4 w-4' />
 </span>
 PTZ Control
 </button>
+{/if}
   </div>
   {/if}
 </article>

@@ -12,6 +12,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 
     const formatDate = (date: Date) => date.toISOString().split('T')[0];
     const today = new Date();
+    const newToday = new Date(today.setDate(today.getDate() + 1));
     const weekAgo = new Date(today.setDate(today.getDate() - 7));
 
     try {
@@ -20,7 +21,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
         
         const responses = await Promise.all(storeId.map(async (store: any) => {
             // console.log(`Fetching aisle count for store ${store.id}`);
-            const response = await fetch(`https://dev.api.moksa.ai/people/aisleCount/getAisleCountbyStoreid/${store.id}/${formatDate(weekAgo)}/${formatDate(today)}`, {
+            const response = await fetch(`https://dev.api.moksa.ai/people/aisleCount/getAisleCountbyStoreid/${store.id}/${formatDate(weekAgo)}/${formatDate(newToday)}`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -31,7 +32,8 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
                 console.error(`Failed to fetch aisle count for store ${store.id}: ${response.status} ${response.statusText}`);
                 throw new Error(`Failed to fetch aisle count for store ${store.id}`);
             }
-            return response.json();
+            const data = await response.json();
+            return { storeId: store.id, data };
         }));
 
         const combinedResponse = responses.flat();

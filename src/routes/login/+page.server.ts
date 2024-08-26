@@ -9,37 +9,23 @@ export const actions = {
     // const operatingSystem = os.platform;
     // console.log(operatingSystem);
     try {
-      const user = await locals.pb
-        ?.collection("users")
-        .authWithPassword(email, password);
-
-      // console.log(user);
       await fetch(`https://dev.api.moksa.ai/auth/login`, {
         method: "POST", headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ email: 'anushiya@gmail.com', password: 'anushiya' }),
+        body: JSON.stringify({ email: email, password: password }),
       }).then(async (res) => {
         const data = await res.json();
-        console.log(data);
+        // console.log(data);
         if (data.data && data.data.token) {
           const token = data.data.token;
-          // Set the token in a cookie
-          // const cookieOptions = {
-          //   path: '/',
-          //   httpOnly: true,
-          //   secure: process.env.NODE_ENV === 'production',
-          //   sameSite: 'strict',
-          //   maxAge: 60 * 60 * 23
-          // };
           const cookieOptions = {
             httpOnly: true,
             secure: false,
             sameSite: "lax",
-            domain: undefined, 
+            domain: undefined,
             maxAge: 60 * 60 * 23
           };
-
           cookies.set('moksa-token', token, cookieOptions);
 
           console.log('Token saved in cookie');
@@ -48,7 +34,12 @@ export const actions = {
         }
       }).catch((err) => {
         console.log(err);
+        throw redirect(303, `/login?message=${err.message}`);
       });
+      
+      const user = await locals.pb
+        ?.collection("users")
+        .authWithPassword(email, password);
 
       const eventData = { email: email };
 

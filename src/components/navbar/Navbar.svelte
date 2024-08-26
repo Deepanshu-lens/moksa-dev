@@ -96,6 +96,8 @@
   onDestroy(() => {
     PB.collection("session").unsubscribe("*");
   });
+
+  // $: console.log(data)
 </script>
 
 <header class="sm:flex sticky top-0 left-0 w-full z-20 h-[75px]">

@@ -882,7 +882,7 @@ onDestroy(() => {
   });
 });
 
-$: console.log(allStores)
+
 </script>
 
 <section

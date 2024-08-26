@@ -213,6 +213,9 @@ cameraCounts.update(counts => {
             {isAllFullScreen}
             features={user.features}
             role={data.user.role}
+            ptz={camera.ptz}
+            preset={camera.preset}
+            lastCords={camera.lastCords}
           />
         {/key}
       {/each}

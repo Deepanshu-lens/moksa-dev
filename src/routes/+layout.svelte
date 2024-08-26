@@ -11,6 +11,7 @@
   export let data;
   const user = data.user as User;
   const session = data.session;
+  $: console.log(data)
 
     setContext("user", user);
 

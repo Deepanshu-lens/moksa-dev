@@ -439,6 +439,7 @@
   }
 
   $: filteredEvents.set(filterEvents($events));
+  $: console.log($ptzControl)
 </script>
 
 <!-- desk -->

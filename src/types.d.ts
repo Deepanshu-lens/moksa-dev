@@ -48,6 +48,10 @@ export type Camera = {
   sparshID:number
   personCount: boolean;
   personCounter: any;
+  ptz: boolean;
+  preset: any[];
+  lastCords: any[]
+
 };
 
 export type Playback = {

@@ -2,67 +2,69 @@ export const ssr = false;
 
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ fetch,cookies }) => {
+export const load: PageServerLoad = async ({ fetch,cookies,locals }) => {
 
-    if (!cookies.get('moksa-token')) {
-        await fetch(`https://dev.api.moksa.ai/auth/login`, {
-            method: "POST", headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ email: 'anushiya@gmail.com', password: 'anushiya' }),
-        }).then(async (res) => {
-            const data = await res.json();
-            // console.log(data);
-            if (data.data && data.data.token) {
-                const token = data.data.token;
-                // Set the token in a cookie
-                const cookieOptions = {
-                    httpOnly: true,
-                    secure: false,
-                    sameSite: "lax",
-                    domain: undefined,
-                    maxAge: 60 * 60 * 23
-                };
-                // console.log("TOKEN!!!!!!!!!!")
-                cookies.set('moksa-token', token, cookieOptions);
-                // console.log('Token saved in cookie');
-            } else {
-                console.log('Token not found in response');
-            }
-        }).catch((err) => {
-            console.log(err);
-        });
-    } 
-    else {
-        cookies.delete('moksa-token', { path: '/' });
-        await fetch(`https://dev.api.moksa.ai/auth/login`, {
-            method: "POST", headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ email: 'anushiya@gmail.com', password: 'anushiya' }),
-        }).then(async (res) => {
-            const data = await res.json();
-            // console.log(data);
-            if (data.data && data.data.token) {
-                const token = data.data.token;
-                // Set the token in a cookie
-                const cookieOptions = {
-                    httpOnly: true,
-                    secure: false,
-                    sameSite: "lax",
-                    domain: undefined,
-                    maxAge: 60 * 60 * 23
-                };
-                // console.log("TOKEN!!!!!!!!!!")
-                cookies.set('moksa-token', token, cookieOptions);
-                // console.log('Token saved in cookie');
-            } else {
-                console.log('Token not found in response');
-            }
-        }).catch((err) => {
-            console.log(err);
-        });
-    }
+    // console.log(locals)
+
+    // if (!cookies.get('moksa-token')) {
+    //     await fetch(`https://dev.api.moksa.ai/auth/login`, {
+    //         method: "POST", headers: {
+    //             'Content-Type': 'application/json'
+    //         },
+    //         body: JSON.stringify({ email: 'anushiya@gmail.com', password: 'anushiya' }),
+    //     }).then(async (res) => {
+    //         const data = await res.json();
+    //         // console.log(data);
+    //         if (data.data && data.data.token) {
+    //             const token = data.data.token;
+    //             // Set the token in a cookie
+    //             const cookieOptions = {
+    //                 httpOnly: true,
+    //                 secure: false,
+    //                 sameSite: "lax",
+    //                 domain: undefined,
+    //                 maxAge: 60 * 60 * 23
+    //             };
+    //             // console.log("TOKEN!!!!!!!!!!")
+    //             cookies.set('moksa-token', token, cookieOptions);
+    //             // console.log('Token saved in cookie');
+    //         } else {
+    //             console.log('Token not found in response');
+    //         }
+    //     }).catch((err) => {
+    //         console.log(err);
+    //     });
+    // } 
+    // else {
+    //     cookies.delete('moksa-token', { path: '/' });
+    //     await fetch(`https://dev.api.moksa.ai/auth/login`, {
+    //         method: "POST", headers: {
+    //             'Content-Type': 'application/json'
+    //         },
+    //         body: JSON.stringify({ email: 'anushiya@gmail.com', password: 'anushiya' }),
+    //     }).then(async (res) => {
+    //         const data = await res.json();
+    //         // console.log(data);
+    //         if (data.data && data.data.token) {
+    //             const token = data.data.token;
+    //             // Set the token in a cookie
+    //             const cookieOptions = {
+    //                 httpOnly: true,
+    //                 secure: false,
+    //                 sameSite: "lax",
+    //                 domain: undefined,
+    //                 maxAge: 60 * 60 * 23
+    //             };
+    //             // console.log("TOKEN!!!!!!!!!!")
+    //             cookies.set('moksa-token', token, cookieOptions);
+    //             // console.log('Token saved in cookie');
+    //         } else {
+    //             console.log('Token not found in response');
+    //         }
+    //     }).catch((err) => {
+    //         console.log(err);
+    //     });
+    // }
     // console.log(cookies.get('moksa-token'))
     const today = new Date();
     const oneYearAgo = new Date(today);
