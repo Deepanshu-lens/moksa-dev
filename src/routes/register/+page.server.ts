@@ -72,8 +72,7 @@ export const actions = {
         .catch((e) => {
           console.error("[Session Create Error]: ", e);
         });
-      // console.log(session);
-      const newUser = await locals.pb?.collection("users").create({
+ await locals.pb?.collection("users").create({
         firstName,
         lastName,
         email,
@@ -82,23 +81,6 @@ export const actions = {
         session: session?.id,
       });
 
-      // console.log(newUser)
-
-      // await fetch(`https://dev.api.moksa.ai/auth/createUserWithPocketbase`, {
-      //   method: 'POST',
-      //   body: JSON.stringify({
-      //     first_name: firstName,
-      //     last_name: lastName,
-      //     email,
-      //     password,
-      //     lensId: newUser?.id,
-      //     role: 'user'
-      //   })
-      // }).then(res => {
-      //   console.log(res)
-      // }).catch(e => {
-      //   console.log(e)
-      // })
     } catch (e: any) {
       const message = e.message;
       console.log(message);

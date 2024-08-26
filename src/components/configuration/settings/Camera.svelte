@@ -527,6 +527,7 @@
                         name:
                           newName ?? newData[nodeIndex].cameraData[0][0].name,
                         url: newData[nodeIndex].cameraData[0][0].url,
+                        subUrl: newData[nodeIndex].cameraData[0][0].subUrl,
                         priority:
                           updatedPriority ??
                           newData[nodeIndex].cameraData[0][0].priority,

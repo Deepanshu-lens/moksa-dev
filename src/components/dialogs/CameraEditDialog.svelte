@@ -2,6 +2,9 @@
   export let cameraId: string;
   export let name: string;
   export let url: string;
+  export let role: string;
+  export let subUrl: string;
+
   let dialogOpen: boolean = false;
 
   import * as Dialog from "@/components/ui/dialog";
@@ -12,7 +15,24 @@
   import { selectedNode } from "@/lib/stores";
 
   const editCamera = () => {
+    if(role === 'superAdmin'){
     fetch("/api/camera/editCamera", {
+      method: "put",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        cameraId,
+        nodeId: $selectedNode.id,
+        name,
+        url,
+        subUrl
+      }),
+    }).then(() => {
+      toast("Camera edited");
+    });  
+    } else {
+      fetch("/api/camera/editCamera", {
       method: "put",
       headers: {
         "Content-Type": "application/json",
@@ -26,6 +46,8 @@
     }).then(() => {
       toast("Camera edited");
     });
+    }
+    
   };
 </script>
 
@@ -40,6 +62,16 @@
         <Label class="w-24" for="node-name">Name</Label>
         <Input type="text" bind:value={name} class="text-base"/>
       </div>
+      {#if role === 'superAdmin'}
+      <div class=" col-span-2 flex items-center gap-4">
+        <Label class="w-24" for="node-name">Url</Label>
+        <Input type="text" bind:value={url} class="text-base"/>
+      </div>
+      <div class=" col-span-2 flex items-center gap-4">
+        <Label class="w-24" for="node-name">Sub Url</Label>
+        <Input type="text" bind:value={subUrl} class="text-base"/>
+      </div>
+      {/if}
     </div>
 
     <Dialog.Footer>

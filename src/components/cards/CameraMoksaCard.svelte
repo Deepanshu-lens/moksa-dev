@@ -24,6 +24,7 @@
   export let cameraId: string;
   export let name: string;
   export let url: string;
+  export let subUrl: string;
   export let save: boolean;
   export let face: boolean;
   export let vehicle: boolean;
@@ -51,6 +52,7 @@
   export let personCount: boolean;
   export let ptzControl;
   export let showOptions;
+  export let role:string
 
 let hasShownToast = false;
 //  let showOptions = false;
@@ -157,7 +159,7 @@ let hasShownToast = false;
   <button class='absolute top-1 right-1' on:click|stopPropagation={() => showOptions.set('')}>
     <X size={16} class='text-black'/>
   </button>
-     <CameraEditDialog {name} {url} {cameraId}>
+     <CameraEditDialog {name} {url} {cameraId} {role} {subUrl}>
        <span class='flex items-center gap-2 text-black font-medium'>
          <span class='size-[24px] rounded-full bg-[#6159F030] text-[#6159F0] flex-shrink-0 grid place-items-center'>
            <Edit class='h-4 w-4' />
@@ -194,6 +196,7 @@ let hasShownToast = false;
         {lineVehicleThresh}
         {personCount}
         cameraURL={url}
+        {subUrl}
       >
       <span class='flex items-center gap-2 text-black font-medium'>
         <span class='size-[24px] rounded-full bg-[#0469FF2E] text-[#0469FF] flex-shrink-0 grid place-items-center'>

@@ -18,6 +18,7 @@ export const PUT: RequestHandler = async ({
   await locals.pb?.collection("camera").update(data.cameraId, {
     name: data.name,
     url: data.url,
+    subUrl: data.subUrl,
     save: data.save,
     saveDuration: data.saveDuration,
     saveFolder: data.saveFolder,

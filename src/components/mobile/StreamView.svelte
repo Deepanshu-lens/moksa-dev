@@ -334,6 +334,7 @@
                                   nodeId: $selectedNode.id,
                                   name: newName,
                                   url: item.url,
+                                  subUrl: item.subUrl
                                 }),
                               }).then(() => {
                                 edit = null;

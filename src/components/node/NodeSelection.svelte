@@ -80,6 +80,8 @@
     });
   };
 
+  // $: console.log($page.params.slug)
+
   const handleNodeSelect = async (event: Event) => {
     const selectedOption = (event.target as HTMLSelectElement).value;
 
@@ -92,11 +94,13 @@
     }
 
     try {
+      // console.log(selectedOption)
+
       const nodes = await PB.collection("node").getFullList({
       expand: "camera",
-      filter: `name="${selectedOption}"&&session~"${$selectedNode.session}"`,
+      filter: `name="${selectedOption}"&&session~"${$page.params.slug}"`,
     });
-
+    // console.log(nodes)
     if (nodes.length > 0) {
       const node = nodes[0];
       const cameras = await PB.collection("camera").getFullList({
@@ -115,7 +119,8 @@
 
       // console.log(formattedNode);
       selectedNode.set(formattedNode);
-      await PB.collection("session").update($selectedNode.session, {
+      // console.log(formattedNode.id)
+      await PB.collection("session").update($page.params.slug, {
         activeNode: formattedNode.id
       });
       console.log("updated selectedNode", formattedNode.name);
@@ -127,6 +132,14 @@
     toast.error("Something went wrong. Please try again");
   }
 };
+
+let searchTerm = writable('');
+
+  $: filteredNodes = $searchTerm
+    ? resultGroupNodes.filter(node => 
+        node.name.toLowerCase().includes($searchTerm.toLowerCase())
+      )
+    : resultGroupNodes;
 
   // console.log(data)
   // $: console.log(showAddNode)
@@ -155,14 +168,21 @@
         Add Store <span class='rounded-full bg-[#3D81FC] p-1 grid place-items-center scale-75'><Plus size={20} class=' text-white'/></span>
       </DropdownItem>
       <DropdownItem class='relative px-1'>
-        <Input type='text' placeholder='Search' class='border-[#EBEDF0] border text-xs pl-6 text-[#323232] dark:text-white/[.7]'/>
+        <Input type='text' placeholder='Search'  bind:value={$searchTerm} class='border-[#EBEDF0] border text-xs pl-6 text-[#323232] dark:text-white/[.7]'/>
         <Search size={14} class='text-[#323232] dark:text-white/[.7] absolute  left-2.5 top-1/2 -translate-y-1/2' />
       </DropdownItem>
-      {#if resultGroupNodes?.length !== 0}
+      <!-- {#if resultGroupNodes?.length !== 0}
         {#each resultGroupNodes as node}
           <RecursiveNode {node} {handleNodeSelect} />
         {/each}
-      {/if}
+      {/if} -->
+      {#if filteredNodes?.length !== 0}
+      {#each filteredNodes as node}
+        <RecursiveNode {node} {handleNodeSelect} />
+      {/each}
+    {:else}
+      <DropdownItem>No Matchs</DropdownItem>
+    {/if}
     </Dropdown>
     <div
       class={cn(

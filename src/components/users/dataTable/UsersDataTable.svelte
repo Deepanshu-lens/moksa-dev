@@ -138,7 +138,7 @@ function goToNextPage() {
               >
                 <Table.Head
                   {...attrs}
-                  class="text-[#727272] whitespace-nowrap h-full flex items-center justify-center flex-1"
+                  class={`text-[#727272] whitespace-nowrap h-full flex items-center flex-1 ${cell.id === "username" ? "justify-start" : "justify-center"}`}
                 >
                   <Button
                     variant="ghost"
@@ -168,7 +168,7 @@ function goToNextPage() {
               <Subscribe attrs={cell.attrs()} let:attrs>
                 <Table.Cell
                   {...attrs}
-                  class="whitespace-nowrap flex-1 flex items-center justify-center"
+                  class={`whitespace-nowrap flex-1 flex items-center ${cell.id === "username" ? "justify-start" : "justify-center"}`}
                 >
                   {#if cell.id === "action"}
                     <span class="w-full flex items-center gap-3">
@@ -184,12 +184,7 @@ function goToNextPage() {
                       >
                     </span>
                   {:else if cell.id === "username"}
-                    <span class="flex items-center gap-2">
-                      <!-- <img
-                        src={row.original.userImage}
-                        alt={row.original.username}
-                        class="size-7 rounded-full object-cover"
-                      /> -->
+                    <span class="flex items-center gap-2 text-start justify-start">
                       <User size={26} class="text-[#4976F4]" />
                       <span class="flex flex-col gap-1">
                         <p class="text-sm font-medium">

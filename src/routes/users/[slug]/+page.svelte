@@ -26,7 +26,6 @@
     import AddUserDialog from "@/components/dialogs/AddUserDialog.svelte";
   let view: number = 1;
   export let data;
-  // console.log(data)
   let userData = data.usersData.status === 200 ? data.usersData.data.data : []
   // console.log(userData)
   const fruits = [
@@ -490,31 +489,7 @@ function createTheftChart() {
 
   {#if view === 1}
     <section class="w-full p-4 px-6">
-      <div class="flex items-center justify-between">
-        <span
-          class="flex items-center border-black border-opacity-[18%] border-[1px] rounded-md h-[40px]"
-        >
-         
-          <button
-            class="2xl:py-2 2xl:px-3 py-1 px-2 border-r border-black border-opacity-[18%] text-black text-sm"
-            >7 Days</button
-          >
-          <button
-            class="2xl:py-2 2xl:px-3 py-1 px-2 border-r border-black border-opacity-[18%] text-black text-sm"
-            >15 Days</button
-          >
-          <button
-            class="2xl:py-2 2xl:px-3 py-1 px-2 border-r border-black border-opacity-[18%] text-black text-sm"
-            >30 Days</button
-          >
- <button class="2xl:py-2 2xl:px-3 py-1 px-2 text-black text-sm"
-
-            >12 Months</button
-          >
-          <!-- <button class="2xl:py-2 2xl:px-3 py-1 px-2 text-black text-sm"
-            >Custom</button
-          > -->
-        </span>
+      <div class="flex items-center justify-end">
         <span class="flex items-center gap-3">
           <span class="relative">
             <Input   bind:value={searchVal} type="text" placeholder="Search" class="pl-10" />

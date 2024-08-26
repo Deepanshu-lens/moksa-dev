@@ -44,6 +44,7 @@
   export let linePersonThresh: number = 0.3;
   export let lineVehicleThresh: number = 0.3;
   export let personCount: boolean;
+  export let subUrl:string
   let dialogOpen = false;
 
   const items = [
@@ -80,6 +81,7 @@
         nodeId: $selectedNode.id,
         name: cameraName,
         url: cameraURL,
+        subUrl,
         face,
         save,
         running,

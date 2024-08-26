@@ -12,13 +12,7 @@
   import { addUserLog } from "@/lib/addUserLog";
   import { page } from "$app/stores";
   import PocketBase from "pocketbase";
-    import { writable } from 'svelte/store';
 
-
-
-  /**
-   * Sortable Camera Info Cards
-   */
   export let isAllFullScreen: boolean;
   export let user;
   export let data;
@@ -27,7 +21,7 @@
   let cameraItems: HTMLDivElement;
   let filterText: string = "";
   const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
-
+  // console.log(data.user)
 
   function handleEscape(event: KeyboardEvent) {
     if (event.key === "Escape") {
@@ -189,6 +183,7 @@ cameraCounts.update(counts => {
             cameraId={camera.id}
             name={camera?.name}
             url={camera?.url}
+            subUrl={camera?.subUrl}
             save={camera?.save}
             face={camera?.expand?.inference?.face}
             vehicle={camera?.expand?.inference?.vehicle}
@@ -217,6 +212,7 @@ cameraCounts.update(counts => {
             personCount={camera.personCount}
             {isAllFullScreen}
             features={user.features}
+            role={data.user.role}
           />
         {/key}
       {/each}
