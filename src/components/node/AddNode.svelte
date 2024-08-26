@@ -88,7 +88,7 @@
       class="flex max-w-[160px] hover:bg-[#015a62]/[.9] dark:bg-transparent bg-[#015a62] border-2 border-white border-solid dark:hover:bg-[white] dark:hover:text-[#015a62] text-md text-white items-center justify-center py-2 px-6 font-medium rounded-lg"
       type="submit"
     >
-      Add Node
+      Add Store
     </button>
   </form>
 </div>

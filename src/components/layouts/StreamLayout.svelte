@@ -1096,7 +1096,12 @@
                   {#key pageIndex * ($selectedNode.maxStreamsPerPage === 5 || $selectedNode.maxStreamsPerPage === 7 ? $selectedNode.maxStreamsPerPage + 1 : $selectedNode.maxStreamsPerPage) + slotIndex}
                     <!-- svelte-ignore a11y-click-events-have-key-events -->
                     <div
-                      id={`grid-cell-${slotIndex}`}
+                       id={`grid-cell-${ pageIndex *
+                        ($selectedNode.maxStreamsPerPage === 5 ||
+                        $selectedNode.maxStreamsPerPage === 7
+                          ? $selectedNode.maxStreamsPerPage + 1
+                          : $selectedNode.maxStreamsPerPage) +
+                        slotIndex}`}
                       class="relative h-full"
                       style={$selectedNode.maxStreamsPerPage === 10 &&
                       slotIndex === 0
