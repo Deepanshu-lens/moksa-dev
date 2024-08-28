@@ -409,12 +409,9 @@
               ? Math.ceil(streamCount / 8)
               : Math.ceil(streamCount / (layoutRows * layoutColumns));
 
-    setTimeout(() => {
-      initSortable();
-    }, 500);
-    setTimeout(() => {
+     setTimeout(() => {
       createRoiLines();
-      // createIntrusionLines();
+      initSortable();
     }, 2000);
   };
 

@@ -446,7 +446,7 @@
 {#if !$isMobile}
   <section class="sm:flex flex-row-reverse hidden">
      <div
-      class=" flex flex-col gap-5 items-center justify-center px-2  bg-gradient-to-b from-[#000610] via-[#000307] via-[#050E41] to-[#000307] h-[calc(100vh-75px)]"
+      class=" flex flex-col gap-3 2xl:gap-5 items-center justify-center px-2  bg-gradient-to-b from-[#000610] via-[#000307] via-[#050E41] to-[#000307] h-[calc(100vh-75px)]"
     >
       <span class="group flex-col flex items-center justify-center gap-0.5">
         <button

@@ -2,6 +2,7 @@
   import { toast } from "svelte-sonner";
   import { onMount } from "svelte";
   import { browser } from "$app/environment";
+    import { Eye, EyeOff } from "lucide-svelte";
 
   onMount(() => {
     if (browser) {
@@ -16,6 +17,14 @@
       }
     }
   });
+
+    let showPassword = false;
+
+  function togglePasswordVisibility() {
+    showPassword = !showPassword;
+  }
+
+
 </script>
 
 <div
@@ -115,14 +124,24 @@
           class="h-[20px] w-[20px] aspect-square absolute top-1/2 left-2 -translate-y-1/2 block dark:hidden"
         />
 
-        <input
-          class={`appearance-none bg-transparent border-b border-b-[#919EAB] dark:border-b-[#919eab]/[.3] rounded w-full h-full py-4 pl-10 pr-3 font-semibold text-[#637381]  leading-tight focus:outline-none focus:shadow-outline`}
-          autoComplete="off"
-          id="password"
-          type="password"
-          placeholder="******************"
-          name="password"
-        />
+         <input
+    class={`appearance-none bg-transparent border-b border-b-[#919EAB] dark:border-b-[#919eab]/[.3] rounded w-full h-full py-4 pl-10 pr-10 font-semibold text-[#637381] leading-tight focus:outline-none focus:shadow-outline`}
+    autoComplete="off"
+    id="password"
+    type={showPassword ? "text" : "password"}
+    placeholder="Password"
+    name="password"
+  />
+  <button
+    type="button"
+    class="absolute top-1/2 right-2 -translate-y-1/2"
+    on:click={togglePasswordVisibility}
+  >
+    {#if showPassword}
+      <EyeOff class="w-5 h-5 text-[#637381]" />
+    {:else}
+      <Eye class="w-5 h-5 text-[#637381]" />
+    {/if}
       </div>
       <div
         class="flex flex-col items-center justify-between mt-2 mb-10 sm:mb-0"

@@ -8,6 +8,7 @@
   import { PUBLIC_BASE_URL } from "$env/static/public";
   import TimeAgo from "javascript-time-ago";
   import { page } from "$app/stores";
+  import PocketBase from "pocketbase";
 
   TimeAgo.addLocale(en);
   const timeAgo = new TimeAgo("en-US");
@@ -16,18 +17,24 @@
   let captureMode = 1;
   const queryImage = writable();
   const searchResults = writable([]);
-  // const location = window?.location?.href;
-  // const neededUrl =
-  //   location?.split("/")[2] === "localhost:5173"
-  //     ? PUBLIC_BASE_URL
-  //     : location?.split("/")[2]?.split(":")[0];
-
   const neededUrl = $page.url.hostname;
+  let loading = false;
+  const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
+
+  let startDateTime: string;
+  let endDateTime: string;
 
   $: {
     if (!dialogOpen) {
       queryImage.set(null);
     }
+  }
+
+  function formatDateTime(dateTimeString: string): string {
+    // Convert the local datetime string to a Date object
+    const date = new Date(dateTimeString);
+    // Format the date to RFC3339 format
+    return date.toISOString();
   }
 
   async function convertImageToBase64(file) {
@@ -45,31 +52,31 @@
       reader.readAsDataURL(file);
     });
   }
-  let loading = false;
+
   const onFileUpload = async (e) => {
     const file = e.target.files[0];
     if (file) {
       try {
         loading = true;
         let base64String = await convertImageToBase64(file);
-        const result = await fetch(`http://${neededUrl}:8083` + "/api/enroll", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            frame: base64String.replace(/^data:[^,]+,/, ""),
-          }),
-        });
-        if (!result.ok) {
-          const error = (await result.json()).error;
-          console.error(error);
-          toast.error("Something went wrong. Please try another");
-          loading = false;
-          return;
-        }
-        const croppedImage = await result.json();
-        queryImage.set(croppedImage);
+        // const result = await fetch(`http://${neededUrl}:8083` + "/api/enroll", {
+        //   method: "POST",
+        //   headers: {
+        //     "Content-Type": "application/json",
+        //   },
+        //   body: JSON.stringify({
+        //     frame: base64String.replace(/^data:[^,]+,/, ""),
+        //   }),
+        // });
+        // if (!result.ok) {
+        //   const error = (await result.json()).error;
+        //   console.error(error);
+        //   toast.error("Something went wrong. Please try another");
+        //   loading = false;
+        //   return;
+        // }
+        // const croppedImage = await result.json();
+        // queryImage.set(croppedImage);
 
         const search = await fetch(
           "http://localhost:8083" + "/api/faceSearch",
@@ -79,7 +86,7 @@
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              feature: croppedImage.bboxes[0].Feature,
+              baseImage: base64String.replace(/^data:[^,]+,/, ""),
             }),
           },
         );
@@ -125,6 +132,35 @@
       }
     }
   };
+
+  async function handleDateSearch() {
+    if (!startDateTime || !endDateTime) {
+      toast.error("Please select both start and end date/time.");
+      return;
+    }
+
+    try {
+      loading = true;
+      const filter = `created >= "${formatDateTime(startDateTime)}" && created <= "${formatDateTime(endDateTime)}"`;
+
+      const resultList = await PB.collection("events").getList(1, 50, {
+        filter: filter,
+        sort: "-created",
+        expand: "camera",
+      });
+
+      if (resultList.items.length > 0) {
+        searchResults.set(resultList.items);
+      } else {
+        toast("No events found in the selected time range.");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("An error occurred while fetching events.");
+    } finally {
+      loading = false;
+    }
+  }
 </script>
 
 <Dialog.Root bind:open={dialogOpen}>
@@ -165,6 +201,29 @@
         accept="image/*"
         on:input={onFileUpload}
       />
+    {:else if captureMode === 2}
+      <div class="flex flex-col gap-4">
+        <div class="flex items-center gap-4">
+          <label for="startDateTime" class="font-semibold whitespace-nowrap"
+            >Start Time:</label
+          >
+          <Input
+            bind:value={startDateTime}
+            type="datetime-local"
+            id="startDateTime"
+          />
+        </div>
+        <div class="flex items-center gap-4">
+          <label for="endDateTime" class="font-semibold whitespace-nowrap"
+            >End Time:</label
+          >
+          <Input
+            bind:value={endDateTime}
+            type="datetime-local"
+            id="endDateTime"
+          />
+        </div>
+      </div>
     {/if}
 
     {#if $queryImage}
@@ -213,7 +272,7 @@
     </div>
 
     <Dialog.Footer>
-      <Button type="submit">Search</Button>
+      <Button type="button" on:click={() => {if(captureMode === 2){handleDateSearch()}}}>Search</Button>
     </Dialog.Footer></Dialog.Content
   >
 </Dialog.Root>

@@ -26,7 +26,7 @@ export const POST: RequestHandler = async ({
         "node+": [result?.id],
       });
 
-     await fetch(`https://dev.api.moksa.ai/store/create`, {
+     await fetch(`https://api.moksa.ai/store/create`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -20,6 +20,13 @@ export const load: LayoutServerLoad = async ({ locals, url, cookies }) => {
     console.log("REDIRECTED FROM PROTECTED ROUTE");
     throw redirect(302, "/login");
   }
+  if (
+    !cookies.get('moksa-token') &&
+    protectedRoutes.includes(url.pathname.split("/").filter(Boolean)[0])
+  ) {
+    console.log("REDIRECTED FROM PROTECTED ROUTE");
+    throw redirect(302, "/login?message=Token not found");
+  }
   const currentUserToken = decodeJwt(locals.pb?.authStore.token || "");
   if (currentUserToken) {
     let currentUser = await locals.pb
@@ -70,7 +77,7 @@ export const load: LayoutServerLoad = async ({ locals, url, cookies }) => {
 
         // console.log(matchedFeatures);
         // console.log(session)
-
+// console.log(locals.user.record)
         return {
           loggedIn: locals.pb?.authStore.isValid,
           user: {
@@ -81,6 +88,7 @@ export const load: LayoutServerLoad = async ({ locals, url, cookies }) => {
             email: locals.user.record.email,
             session: locals.user.record.session[0],
             role: role?.[0]?.roleName,
+            moksaId: locals.user.record.moksaId,
             features: matchedFeatures,
           } as User,
           session: { ...session },

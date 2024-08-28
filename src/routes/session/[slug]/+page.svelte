@@ -9,19 +9,84 @@
   import type { PageServerData } from "./$types";
   import { page } from "$app/stores";
     import Spinner from "@/components/ui/spinner/Spinner.svelte";
+  import { io } from "socket.io-client";
+    import { writable } from "svelte/store";
+    import { toast } from "svelte-sonner";
 
   export let data: PageServerData;
   const { session } = data;
   let nodes: Node[] = [];
   let batchedEvents: Event[] = [];
   let searching : boolean = true;
-  // let stores = data.stores
 
+let sockets: { [key: number]: any } = {};
+let liveData = writable([]);
   // $: console.log("data", data);
 
   const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
 
-  // console.log("page on session page", $page);
+
+
+
+const token = data.token
+
+function setupSocket(userId: number) {
+  if (sockets[userId]) {
+    sockets[userId].disconnect();
+  }
+console.log(token)
+  sockets[userId] = io("https://api.moksa.ai", {
+    withCredentials: true,
+    extraHeaders: {
+      Authorization: `Bearer ${token}`,
+    },
+    transports: ["websocket", "polling"],
+  });
+
+  const socket = sockets[userId];
+
+  socket.on("error", (err) => {
+    console.log(`error for user ${userId}:`, err);
+  });
+
+  socket.on("connect", () => {
+    console.log(`connected for user ${userId}`);
+    socket.emit("joinUser", userId);
+  });
+
+ socket.on(`notification_${userId}`, (data) => {
+    console.log(`Received theft data for user ${userId}:`, data);
+    // toast(`Received theft data for user ${userId}:`, {
+    //   description: `User: ${userId}, Theft Probability: ${data?.theftProbability}, Camera: ${data?.camera_id}`
+    // });
+    //   liveData.update((currentData) => {
+    //     return [{ storeId, ...data }, ...currentData].slice(0, 100);
+    // });
+  });
+
+  socket.on("disconnect", () => {
+    console.log(`disconnected for store ${userId}`);
+  });
+}
+
+onMount(() => {
+  setTimeout(() => {
+  if (data.token !== undefined) {
+    const userId = 41
+    setupSocket(userId);
+  }
+  }, 500);
+});
+
+$: console.log($liveData)
+
+onDestroy(() => {
+  Object.values(sockets).forEach((socket) => {
+    console.log('disconnecting socket')
+    socket.disconnect();
+  });
+});
+
 
   async function getNodes(): Promise<Node[]> {
     if (session?.node.length > 0) {

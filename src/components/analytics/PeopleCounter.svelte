@@ -61,7 +61,7 @@ let liveData = writable([]);
       socket.disconnect();
     }
 
-    socket = io("https://dev.api.moksa.ai", {
+    socket = io("https://api.moksa.ai", {
       withCredentials: true,
       extraHeaders: {
         Authorization: `Bearer ${token}`,
@@ -106,52 +106,11 @@ let liveData = writable([]);
     }
   });
 
-  // onMount(() => {
-  //   let socket = io("https://dev.api.moksa.ai", {
-  //     withCredentials: true,
-  //     extraHeaders: {
-  //       Authorization: `Bearer ${token}`,
-  //     },
-  //     transports: ["websocket", "polling"],
-  //   });
-  //   console.log(userID);
-
-  //   socket.on("error", (err) => {
-  //     console.log("error", err);
-  //   });
-
-  //   socket.on("connect", onConnect);
-  //   socket.on("disconnect", onDisconnect);
-
-  //   function onConnect() {
-  //     console.log("connected");
-  //     socket.emit("joinUser", userID);
-  //     socket.emit("joinStore", $selectedStore.value);
-  //   }
-
-  //   socket.on(`people_count_store_${$selectedStore.value}`, (data) => {
-  //     console.log(`Received live people count for store ${$selectedStore.value}:`, data);
-  //   liveData.update(currentData => {
-  //     // Add the new data to the beginning of the array
-  //     return [data, ...currentData].slice(0, 100); // Keep only the last 100 entries
-  //   });
-  //   });
-
-  //   function onDisconnect() {
-  //     console.log("disconnected");
-  //   }
-
-  //   return () => {
-  //     socket.off("connect", onConnect);
-  //     socket.off("disconnect", onDisconnect);
-  //     socket.close();
-  //   };
-  // });
 
   onMount(async () => {
     if (allStores.length > 0) {
       const response = await fetch(
-        `https://dev.api.moksa.ai/people/getPeopleCountLive/${$selectedStore.value}`,
+        `https://api.moksa.ai/people/getPeopleCountLive/${$selectedStore.value}/30/1/100`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -171,7 +130,7 @@ let liveData = writable([]);
       .toISOString()
       .split("T")[0];
     const weekData = await fetch(
-      `https://dev.api.moksa.ai/people/getPeopleCount/${storeId}/${weekAgo}/${today}`,
+      `https://api.moksa.ai/people/getPeopleCount/${storeId}/${weekAgo}/${today}`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -269,7 +228,7 @@ let liveData = writable([]);
   }
 
 //   async function getLiveData(storeId: number) {
-// await fetch(`https://dev.api.moksa.ai/people/getPeopleCountLive/${storeId}`, {
+// await fetch(`https://api.moksa.ai/people/getPeopleCountLive/${storeId}`, {
 //   headers: {
 //     "Content-Type": "application/json",
 //     Authorization: `Bearer ${token}`,
@@ -283,11 +242,7 @@ let liveData = writable([]);
 // })
 //   }
 
-  $: {
-  if ($selectedStore.value !== undefined) {
-getWeekData($selectedStore.value)
-  }
-}
+
 
   onMount(async () => {
     chartLoading = false;

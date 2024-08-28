@@ -21,7 +21,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
         
         const responses = await Promise.all(storeId.map(async (store: any) => {
             // console.log(`Fetching aisle count for store ${store.id}`);
-            const response = await fetch(`https://dev.api.moksa.ai/people/aisleCount/getAisleCountbyStoreid/${store.id}/${formatDate(weekAgo)}/${formatDate(newToday)}`, {
+            const response = await fetch(`https://api.moksa.ai/people/aisleCount/getAisleCountbyStoreid/${store.id}/${formatDate(weekAgo)}/${formatDate(newToday)}`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,

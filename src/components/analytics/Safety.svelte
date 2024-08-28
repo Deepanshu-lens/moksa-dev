@@ -43,7 +43,7 @@ function setupSocket(storeId: number) {
     sockets[storeId].disconnect();
   }
 
-  sockets[storeId] = io("https://dev.api.moksa.ai", {
+  sockets[storeId] = io("https://api.moksa.ai", {
     withCredentials: true,
     extraHeaders: {
       Authorization: `Bearer ${token}`,

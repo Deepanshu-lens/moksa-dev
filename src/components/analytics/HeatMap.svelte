@@ -201,7 +201,7 @@
       const responses = await Promise.all(
         allStores.map(async (store: any) => {
           const response = await fetch(
-            `https://dev.api.moksa.ai/people/aisleCount/getAisleCountbyStoreid/${store.id}/${formatDate(startDate)}/${formatDate(today)}`,
+            `https://api.moksa.ai/people/aisleCount/getAisleCountbyStoreid/${store.id}/${formatDate(startDate)}/${formatDate(today)}`,
             {
               method: "GET",
               headers: {
@@ -249,7 +249,7 @@
         allStores.map(async (store: any) => {
           // console.log(`Fetching aisle count for store ${store.id}`);
           const response = await fetch(
-            `https://dev.api.moksa.ai/people/aisleCount/getAisleCountbyStoreid/${store.id}/${start}/${end}`,
+            `https://api.moksa.ai/people/aisleCount/getAisleCountbyStoreid/${store.id}/${start}/${end}`,
             {
               method: "GET",
               headers: {
@@ -305,7 +305,7 @@
       sockets[storeId].disconnect();
     }
 
-    sockets[storeId] = io("https://dev.api.moksa.ai", {
+    sockets[storeId] = io("https://api.moksa.ai", {
       withCredentials: true,
       extraHeaders: {
         Authorization: `Bearer ${token}`,

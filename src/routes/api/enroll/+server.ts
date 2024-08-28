@@ -25,14 +25,7 @@ export const POST: RequestHandler = async ({
     features: data.map((item: any) => item.bboxes[0].Feature),
   });
 
-  //   const camera = await locals.pb?.collection("camera").create({
-  //     name: data.name,
-  //     url: data.url,
-  //   });
 
-  //   await locals.pb?.collection("node").update(data.nodeId, {
-  //     "camera+": [camera.id],
-  //   });
   await fetch(VITE_POCKETBASE_URL + "/api/updateGallery", {
     method: "POST",
     headers: {

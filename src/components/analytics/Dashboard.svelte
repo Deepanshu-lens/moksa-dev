@@ -323,7 +323,7 @@ async function fetchDataStoreWise() {
   const formatDate = (date: Date) => date.toISOString().split('T')[0];
 console.log($selectedStore.label, $selectedStore.value)
   try {
-    const theftD = await fetch(`https://dev.api.moksa.ai/theft/theftDetectionDetailsByStoreid/${$selectedStore.value}`, {
+    const theftD = await fetch(`https://api.moksa.ai/theft/theftDetectionDetailsByStoreid/${$selectedStore.value}`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
@@ -398,25 +398,25 @@ console.log(formatDate(today))
     try {
       // Call the three APIs
       const [eeScore, storesTotal, storesAisle,theftD] = await Promise.all([
-        fetch(`https://dev.api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreid/-1/${formatDate(startDate)}/1/20/${formatDate(today)}`,{
+        fetch(`https://api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreid/-1/${formatDate(startDate)}/1/20/${formatDate(today)}`,{
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
         }).then(res => res.json()),
-        fetch(`https://dev.api.moksa.ai/store/getAllStoresTotals/${formatDate(startDate)}/${formatDate(today)}`,{
+        fetch(`https://api.moksa.ai/store/getAllStoresTotals/${formatDate(startDate)}/${formatDate(today)}`,{
            headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
         }).then(res => res.json()),
-        fetch(`https://dev.api.moksa.ai/store/getAllStoresWithAisleDetails/1/20/${formatDate(startDate)}/${formatDate(today)}`,{
+        fetch(`https://api.moksa.ai/store/getAllStoresWithAisleDetails/1/20/${formatDate(startDate)}/${formatDate(today)}`,{
            headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
         }).then(res => res.json()),
-        fetch(`https://dev.api.moksa.ai/theft/theftDetectionDetailsByStoreid/-1`,{
+        fetch(`https://api.moksa.ai/theft/theftDetectionDetailsByStoreid/-1`,{
              headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
@@ -454,25 +454,25 @@ console.log(formatDate(today))
  try {
       // Call the three APIs
       const [eeScore, storesTotal, storesAisle,theftD] = await Promise.all([
-        fetch(`https://dev.api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreid/-1/${start}/1/20/${end}`,{
+        fetch(`https://api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreid/-1/${start}/1/20/${end}`,{
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
         }).then(res => res.json()),
-        fetch(`https://dev.api.moksa.ai/store/getAllStoresTotals/${start}/${end}`,{
+        fetch(`https://api.moksa.ai/store/getAllStoresTotals/${start}/${end}`,{
            headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
         }).then(res => res.json()),
-        fetch(`https://dev.api.moksa.ai/store/getAllStoresWithAisleDetails/1/20/${start}/${end}`,{
+        fetch(`https://api.moksa.ai/store/getAllStoresWithAisleDetails/1/20/${start}/${end}`,{
            headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
         }).then(res => res.json()),
-        fetch(`https://dev.api.moksa.ai/theft/theftDetectionDetailsByStoreid/-1`,{
+        fetch(`https://api.moksa.ai/theft/theftDetectionDetailsByStoreid/-1`,{
              headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',

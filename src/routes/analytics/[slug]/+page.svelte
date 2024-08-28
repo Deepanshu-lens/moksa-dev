@@ -41,7 +41,7 @@
 
   const session = data.session;
   let nodes: Node[] = [];
-  // console.log(data)
+  console.log(data)
   // $:console.log(nodes)
   const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
 // console.log(aisleData)

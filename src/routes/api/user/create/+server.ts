@@ -7,7 +7,7 @@ export const POST: RequestHandler = async ({ request,cookies }) => {
         const token = cookies.get('moksa-token');
 
         const moksa = await fetch(
-            `https://dev.api.moksa.ai/auth/createUserWithPocketbase`,
+            `https://api.moksa.ai/auth/createUserWithPocketbase`,
             {
                 method: "POST",
                 headers: {

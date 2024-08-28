@@ -1,13 +1,11 @@
 import { redirect, error } from "@sveltejs/kit";
-import os from "os";
 export const actions = {
   login: async ({ locals, request, cookies }) => {
     console.log("LOGING ATTEMPT");
     const data = await request.formData();
     const email = data.get("email")?.toString() || "";
     const password = data.get("password")?.toString() || "";
-    // const operatingSystem = os.platform;
-    // console.log(operatingSystem);
+
     try {
       await fetch(`https://dev.api.moksa.ai/auth/login`, {
         method: "POST", headers: {
@@ -16,7 +14,6 @@ export const actions = {
         body: JSON.stringify({ email: email, password: password }),
       }).then(async (res) => {
         const data = await res.json();
-        // console.log(data);
         if (data.data && data.data.token) {
           const token = data.data.token;
           const cookieOptions = {
@@ -31,12 +28,13 @@ export const actions = {
           console.log('Token saved in cookie');
         } else {
           console.log('Token not found in response');
+          throw redirect(303, `/login?message=User not found,`);
         }
       }).catch((err) => {
         console.log(err);
-        throw redirect(303, `/login?message=${err.message}`);
+        throw redirect(303, `/login?message=User not found,`);
       });
-      
+
       const user = await locals.pb
         ?.collection("users")
         .authWithPassword(email, password);
@@ -51,9 +49,9 @@ export const actions = {
         "loginEvents+": [event?.id],
       });
     } catch (err: any) {
-      console.log("login error", err.message);
+      console.log("login error", err.message === undefined ? "User not found" : err.message);
       // throw error(err.status || 500, err.message || "An error occurred");
-      throw redirect(303, `/login?message=${err.message}`);
+      throw redirect(303, `/login?message=${err.message === undefined ? "User not found," : err.message}`);
     }
     throw redirect(303, "/");
   },
