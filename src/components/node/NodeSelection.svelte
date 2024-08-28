@@ -149,7 +149,7 @@ let searchTerm = writable('');
   class={`flex justify-between items-center py-0.5 px-4 border-b-[1px] w-full`}
 >
   <div
-    class={`relative inline-block min-w-[155px] ${$page.route.id.includes("/session") ? "w-max" : "w-full"} ${isAllFullScreen && "bg-black"}`}
+    class={`relative inline-block min-w-[85%] ${$page.route.id.includes("/session") ? "w-max" : "w-full"} ${isAllFullScreen && "bg-black"}`}
   >
     <button
       class={`text-start block text-sm outline-none capitalize border-none font-semibold appearance-none w-full ${isAllFullScreen ? "bg-black" : "bg-background"} text-[#323232] dark:text-white/[.7] border py-4 leading-tight  `}
@@ -193,17 +193,15 @@ let searchTerm = writable('');
     </div>
   </div>
   {#if url.includes(`/session/`)}
-    <span class="flex items-center gap-2 justify-between">
+    <span class="flex items-center gap-2 justify-between flex-shrink-0">
       <AddCameraDialog sNode={""} {nodes}>
-        <!-- disabled={!data.user.features.includes("add_node")} -->
         <button
           class={`w-[26px] h-[26px] bg-[#F9F9F9] dark:bg-black rounded-full ${isAllFullScreen && "text-primary"} grid place-items-center disabled:cursor-not-allowed`}
         >
           <PlusCircle size={18} class="text-[#727272] dark:text-[#f9f9f9]" />
         </button>
       </AddCameraDialog>
-      <EditNodeDialog>
-        <!-- disabled={!data.user.features.includes("edit_node")} -->
+      <!-- <EditNodeDialog>
         <button
           class={`w-[26px] h-[26px] bg-[#F9F9F9] dark:bg-black rounded-full ${isAllFullScreen && "text-primary"} grid place-items-center`}
         >
@@ -220,7 +218,7 @@ let searchTerm = writable('');
             class="text-[#727272] dark:text-[#f9f9f9]"
           /></Button
         ></AlertDeleteNode
-      >
+      > -->
     </span>
   {/if}
   <AddNodeModal {showAddNode} />

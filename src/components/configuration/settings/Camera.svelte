@@ -1,41 +1,41 @@
 <script lang="ts">
-  import * as Table from "@/components/ui/table";
-  let logs = [];
-  let allSelected = false;
+  // import * as Table from "@/components/ui/table";
+  // let logs = [];
+  // let allSelected = false;
   import {Button} from '../../ui/button'
 
-  onMount(() => {
-    logs = Array.from({ length: 50 }, (_, i) => ({
-      id: i + 1,
-      errorType: ["Syntax Error", "Runtime Error", "Logical Error"][
-        Math.floor(Math.random() * 3)
-      ],
-      severity: ["Critical", "Warning", "Informational"][
-        Math.floor(Math.random() * 3)
-      ],
-      frequency: `5 Apr, 2024; ${12 + (i % 12)}:00 PM IST`,
-      resolutionTime: "Solved within 2 hrs",
-      errorTrends: "9 AM to 9 PM",
-      rootCause: ["Recent code updates", "Database connection issues"][
-        Math.floor(Math.random() * 2)
-      ],
-      selected: false,
-    }));
-  });
+  // onMount(() => {
+  //   logs = Array.from({ length: 50 }, (_, i) => ({
+  //     id: i + 1,
+  //     errorType: ["Syntax Error", "Runtime Error", "Logical Error"][
+  //       Math.floor(Math.random() * 3)
+  //     ],
+  //     severity: ["Critical", "Warning", "Informational"][
+  //       Math.floor(Math.random() * 3)
+  //     ],
+  //     frequency: `5 Apr, 2024; ${12 + (i % 12)}:00 PM IST`,
+  //     resolutionTime: "Solved within 2 hrs",
+  //     errorTrends: "9 AM to 9 PM",
+  //     rootCause: ["Recent code updates", "Database connection issues"][
+  //       Math.floor(Math.random() * 2)
+  //     ],
+  //     selected: false,
+  //   }));
+  // });
 
-  let currentPage = 1;
-  const rowsPerPage = 20;
+  // let currentPage = 1;
+  // const rowsPerPage = 20;
 
-  function toggleAll() {
-    allSelected = !allSelected;
-    logs.forEach((log) => (log.selected = allSelected));
-  }
+  // function toggleAll() {
+  //   allSelected = !allSelected;
+  //   logs.forEach((log) => (log.selected = allSelected));
+  // }
 
-  $: allSelected = logs.every((log) => log.selected);
+  // $: allSelected = logs.every((log) => log.selected);
 
-  function clearSelectedLogs() {
-    logs = logs.filter((log) => !log.selected);
-  }
+  // function clearSelectedLogs() {
+  //   logs = logs.filter((log) => !log.selected);
+  // }
 
   import PocketBase from "pocketbase";
   import AddCameraDialog from "@/components/dialogs/AddCameraDialog.svelte";
@@ -178,16 +178,16 @@
       class=" w-[94.5%] my-4 py-4 mx-6 shadow-md rounded-md border border-[#00000014]"
 
     >
-      <h2 class="px-6 font-medium mb-4" id="details">Camera & Node Details</h2>
+      <h2 class="px-6 font-medium mb-4" id="details">Camera & Store Details</h2>
       <div
         class="h-[1px] dark:bg-[#292929] ml-2 mb-4 bg-[#e0e0e0] mt-8 w-[95%]"
       />
       <div class="flex flex-col items-start gap-2 px-6 mb-8">
-        <span class="dark:text-[#e0e0e0] text-sm"> Node name or Id </span>
+        <span class="dark:text-[#e0e0e0] text-sm"> Store name </span>
         <div class="flex items-center justify-center gap-5">
           <input
             autoComplete="off"
-            placeholder="Search for node name or id "
+            placeholder="Search for store name "
             class="py-4 w-[330px] pl-3 rounded-md border border-solid border-[#979797] active:border-[#015a62] text-xs text-[#979797] dark:bg-[#242424] dark:border-[#333] dark:text-[#929292]"
             bind:value={searchNode}
             on:input={(e) => {
@@ -303,7 +303,7 @@
         <table class="w-full bg-white rounded-md flex flex-col gap-4">
           <thead  class='bg-[#f9f9f9] border-[#e4e4e4] rounded-md'>
             <tr class='border-[#e4e4e4] rounded-md'>
-                <th class='text-start py-2 px-4 text-[#5F6064]  w-[80px]'>Node</th>
+                <th class='text-start py-2 px-4 text-[#5F6064]  w-[80px]'>Store</th>
               <th class='text-start py-2 px-4 text-[#5F6064]  w-2/3'></th>
                 <th class='text-start py-2 px-4 text-[#5F6064]  w-1/3'>Actions</th>
             </tr>
@@ -312,9 +312,8 @@
             {#if filteredNodeNames.length > 0}
               {#each filteredNodeNames as item, index}
                 <tr
-                  class={`dark:bg-[#1b1b1b] bg-[white] cursor-pointer ${
-                    index === 0 ? "border-t-[1px]" : ""
-                  } `}
+                                  class={`dark:bg-[#1b1b1b] bg-[white] cursor-pointer border-[#e4e4e4] border rounded-md`}
+
                   on:click={() => {
                     if (nodeIndex === index) {
                       if (!nodeModify) {
@@ -328,8 +327,8 @@
                     }
                   }}
                 >
-                  <td class="text-center py-3 px-4 h-full w-1/2">
-                    <div class="flex justify-center items-center h-full">
+                <td class="text-start py-3 px-4 h-full max-w-[80px]">
+                    <div class="flex justify-start items-start h-full">
                       <input
                         class="w-auto cursor-pointer"
                         type="checkbox"
@@ -337,8 +336,8 @@
                       />
                     </div>
                   </td>
-                  <td
-                    class=" text-center py-2 px-4 w-1/2"
+                 <td
+                    class=" text-start py-2 px-4  w-full"
                   >
                     {#if nodeModify && index === nodeIndex}
                       <input
@@ -362,10 +361,10 @@
                       {item.name}
                     {/if}
                   </td>
-                <td>
-                  <Button>Modify</Button>
-                  <Button>Delete</Button>
-                </td>
+               <td class='w-full flex items-center justify-start gap-3 py-3 px-4'>
+                  <Button class='text-[#4976F4] text-sm text-start flex items-center gap-1' variant='ghost'> <Edit size={16}/> Modify</Button>
+                  <Button class='text-[#F44336] text-sm text-start flex items-center gap-1' variant='ghost'><Trash2 size={16}/> Delete</Button>
+                 </td>
                 </tr>
               {/each}
             {:else}
@@ -1115,7 +1114,7 @@
         </div>
       {:else}
         <span class="px-6 text-sm dark:text-[#e0e0e0] mb-8">
-          Select a node to get its camera details.
+          Select a store to get its camera details.
         </span>
       {/if}
     </div>

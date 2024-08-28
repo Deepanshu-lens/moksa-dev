@@ -1,5 +1,5 @@
 <script lang="ts">
-	import StoreDeleteDialog from './../../dialogs/StoreDeleteDialog..svelte';
+	import StoreDeleteDialog from '../../dialogs/StoreDeleteDialog.svelte';
   import { createTable, Render, Subscribe } from "svelte-headless-table";
   import * as Table from "@/components/ui/table";
   import { Button } from "@/components/ui/button";
@@ -95,6 +95,7 @@ export let searchStore:string;
   function handleRowClick(rowData) {
     dispatch("rowClick", rowData);
   }
+
   
 </script>
 

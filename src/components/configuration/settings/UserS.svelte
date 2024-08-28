@@ -102,24 +102,24 @@
             class="rounded-t-md flex items-center justify-start px-2 gap-4 border-[#eaecf0] border-[1px] border-solid border-b-0 w-full data-[state=active]:bg-[#f8f8f8]"
             ><input type="checkbox" /> Playback</Tabs.Trigger
           >
-          <Tabs.Trigger
+          <!-- <Tabs.Trigger
             value="events"
             class="rounded-t-md flex items-center justify-start px-2 gap-4 border-[#eaecf0] border-[1px] border-solid border-b-0 w-full data-[state=active]:bg-[#f8f8f8]"
             ><input type="checkbox" /> Events</Tabs.Trigger
-          >
-          <Tabs.Trigger
+          > -->
+          <!-- <Tabs.Trigger
             value="gallery"
             class="rounded-t-md flex items-center justify-start px-2 gap-4 border-[#eaecf0] border-[1px] border-solid border-b-0 w-full data-[state=active]:bg-[#f8f8f8]"
             ><input type="checkbox" /> Gallery</Tabs.Trigger
-          >
+          > -->
           <Tabs.Trigger
             class="rounded-t-md flex items-center justify-start px-2 gap-4 border-[#eaecf0] border-[1px] border-solid border-b-0 w-full data-[state=active]:bg-[#f8f8f8]"
-            value="config"><input type="checkbox" /> Configuration</Tabs.Trigger
+            value="config"><input type="checkbox" /> Settings</Tabs.Trigger
           >
-          <Tabs.Trigger
+          <!-- <Tabs.Trigger
             class="rounded-t-md flex items-center justify-start px-2 gap-4 border-[#eaecf0] border-[1px] border-solid border-b-0 w-full data-[state=active]:bg-[#f8f8f8] "
             value="reports"><input type="checkbox" /> Reports</Tabs.Trigger
-          >
+          > -->
           <Tabs.Trigger
             class="rounded-t-md flex items-center justify-start px-2 gap-4 border-[#eaecf0] border-[1px] border-solid border-b-0 w-full data-[state=active]:bg-[#f8f8f8] "
             value="navbar"><input type="checkbox" /> Navbar</Tabs.Trigger

@@ -1,19 +1,22 @@
 import { redirect, error } from "@sveltejs/kit";
+import os from "os";
 export const actions = {
   login: async ({ locals, request, cookies }) => {
     console.log("LOGING ATTEMPT");
     const data = await request.formData();
     const email = data.get("email")?.toString() || "";
     const password = data.get("password")?.toString() || "";
-
+    // const operatingSystem = os.platform;
+    // console.log(operatingSystem);
     try {
-      await fetch(`https://dev.api.moksa.ai/auth/login`, {
+      await fetch(`https://api.moksa.ai/auth/login`, {
         method: "POST", headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ email: email, password: password }),
       }).then(async (res) => {
         const data = await res.json();
+        console.log(data);
         if (data.data && data.data.token) {
           const token = data.data.token;
           const cookieOptions = {
@@ -34,7 +37,7 @@ export const actions = {
         console.log(err);
         throw redirect(303, `/login?message=User not found,`);
       });
-
+      
       const user = await locals.pb
         ?.collection("users")
         .authWithPassword(email, password);

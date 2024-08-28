@@ -57,8 +57,8 @@
   export let sNode;
   export let nodes;
 
-  $: console.log($selectedNode?.allCameraNumbers)
-  $: console.log($selectedNode.moksaId)
+  // $: console.log($selectedNode?.allCameraNumbers)
+  // $: console.log($selectedNode.moksaId)
 
   const onSubmit = () => {
     console.log($selectedNode?.allCameraNumbers)
@@ -345,11 +345,12 @@ toast.error(`error adding camera`)
         >Add Store</button
       >
       <!-- disabled={$page.url.pathname.includes("frs")} -->
-      <button
+      <!-- <button
         on:click={() => (modeAdd = 2)}
         class={`${modeAdd === 2 ? "bg-white dark:bg-slate-700" : "bg-[#f5f5f5] dark:bg-slate-800"} w-full text-[#4f4f4f] dark:text-slate-200 font-medium text-lg border-r border-black/.13 disabled:cursor-not-allowed`}
         >Add SubStore</button
-      >
+      > -->
+
       <button
         on:click={() => (modeAdd = 3)}
         class={`${modeAdd === 3 ? "bg-white dark:bg-slate-700" : "bg-[#f5f5f5] dark:bg-slate-800"} w-full text-[#4f4f4f] dark:text-slate-200 font-medium text-lg border-r border-black/.13 `}

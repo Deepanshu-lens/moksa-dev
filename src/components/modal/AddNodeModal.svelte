@@ -78,7 +78,6 @@
         <Label for="pincode">Pincode</Label>
         <Input
           id="pincode"
-          type="number"
           placeholder={"110001"}
           class="col-span-3"
           required

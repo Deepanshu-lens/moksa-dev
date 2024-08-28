@@ -4,6 +4,7 @@
   import { Button } from "@/components/ui/button";
   import { ArrowUpDown, ChevronLeft, ChevronRight, Edit, StoreIcon, Trash2, User } from "lucide-svelte";
   import { createEventDispatcher } from "svelte";
+  import ModifyUserDialog from "@/components/dialogs/MofifyUserDialog.svelte";
   import {
     addPagination,
     addTableFilter,
@@ -11,20 +12,26 @@
     addSortBy,
   } from "svelte-headless-table/plugins";
   import { readable, writable } from "svelte/store";
+    import UserDeleteDialog from "@/components/dialogs/UserDeleteDialog.svelte";
 
   const dispatch = createEventDispatcher();
 
   export let users 
 export let searchVal:string;
+export let token:string;
 
 // $: console.log(searchVal)
 
-// $: console.log(users)
+$: console.log(users)
 
 
 const dbData = users.map((user) => {
   return {
+    moksaId: user.id,
+    lensId: user.lensId,
     username: user.first_name + ' ' + user.last_name,
+    firstName: user.first_name,
+    lastName: user.last_name,
     userImage: user.profile,
     email: user.email,
     designation: user.role,
@@ -172,16 +179,19 @@ function goToNextPage() {
                 >
                   {#if cell.id === "action"}
                     <span class="w-full flex items-center gap-3">
+                      <ModifyUserDialog data={row.original} token={token}>
                       <Button
                         class="text-[#4976F4] bg-[#4976F4]/[.1] rounded-2xl text-xs text-start flex items-center gap-1"
                         variant="ghost"
                       >
                         <Edit size={14} /> Modify</Button
-                      >
-                      <Button
+                      ></ModifyUserDialog>
+                      <UserDeleteDialog data={row.original} token={token}>
+                        <Button 
                         class="text-[#F44336] bg-[#F44336]/[.1] rounded-2xl text-xs text-start flex items-center gap-1"
                         variant="ghost"><Trash2 size={14} /> Delete</Button
-                      >
+                        >
+                      </UserDeleteDialog>
                     </span>
                   {:else if cell.id === "username"}
                     <span class="flex items-center gap-2 text-start justify-start">

@@ -99,7 +99,7 @@
       >
           <Table.Cell class="text-black h-full w-[50px]"><input type="checkbox"></Table.Cell>
           <Table.Cell class="text-black h-full w-[200px]">
-            <span class="flex flex-col font-semibold text-primary  capitalize">
+            <span class="flex flex-col font-semibold text-[#3D81FC]  capitalize">
               <span>Name: {user?.firstName} {user?.lastName}</span>
               <!-- <span class="text-xs">Id: {user.id}</span> -->
             </span>

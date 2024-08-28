@@ -4,8 +4,16 @@ import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch,cookies,locals }) => {
 
-    // console.log(locals)
-
+    // console.log(locals?.user)
+    await fetch(`https://api.moksa.ai/store/getUserStoreDetailsByUserId/41`, {
+        headers: {
+            "Content-Type": "application/json",
+            'Authorization': `Bearer ${cookies.get('moksa-token')}`
+        },
+    }).then(async (res) => {
+        const data = await res.json();
+        console.log(data)
+    })
     // if (!cookies.get('moksa-token')) {
     //     await fetch(`https://api.moksa.ai/auth/login`, {
     //         method: "POST", headers: {

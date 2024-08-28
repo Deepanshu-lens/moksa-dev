@@ -152,13 +152,13 @@
         >
           Sign In
         </button>
-        <a
+        <!-- <a
           href="/register"
           class="inline-block cursor-pointer align-baseline font-bold text-sm text-[#797c80] /[.7] mt-4"
         >
           Don't have an account yet?
           <span class="ml-1 text-primary font-semibold"> Sign up </span>
-        </a>
+        </a> -->
       </div>
     </div>
   </form>

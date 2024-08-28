@@ -16,81 +16,44 @@
 
   const dispatch = createEventDispatcher();
 
-  // const staticData = [
-  //   {
-  //     storeName: "Store 01",
-  //     customerCount: 20,
-  //     busyHourProjections: "8:00 am - 9:00 pm",
-  //     customerProjection: { value: 422, percentage: 25, trend: "up" },
-  //   },
-  //   {
-  //     storeName: "Store 02",
-  //     customerCount: 20,
-  //     busyHourProjections: "8:00 am - 9:00 pm",
-  //     customerProjection: { value: 422, percentage: 25, trend: "up" },
-  //   },
-  //   {
-  //     storeName: "Store 03",
-  //     customerCount: 20,
-  //     busyHourProjections: "8:00 am - 9:00 pm",
-  //     customerProjection: { value: 422, percentage: 15, trend: "down" },
-  //   },
-  //   {
-  //     storeName: "Store 04",
-  //     customerCount: 20,
-  //     busyHourProjections: "8:00 am - 9:00 pm",
-  //     customerProjection: { value: 422, percentage: 25, trend: "up" },
-  //   },
-  //   {
-  //     storeName: "Store 05",
-  //     customerCount: 20,
-  //     busyHourProjections: "8:00 am - 9:00 pm",
-  //     customerProjection: { value: 422, percentage: 15, trend: "down" },
-  //   },
-  //   {
-  //     storeName: "Store 06",
-  //     customerCount: 20,
-  //     busyHourProjections: "8:00 am - 9:00 pm",
-  //     customerProjection: { value: 422, percentage: 25, trend: "up" },
-  //   },
-  //   {
-  //     storeName: "Store 07",
-  //     customerCount: 20,
-  //     busyHourProjections: "8:00 am - 9:00 pm",
-  //     customerProjection: { value: 422, percentage: 25, trend: "up" },
-  //   },
-  //   {
-  //     storeName: "Store 08",
-  //     customerCount: 20,
-  //     busyHourProjections: "8:00 am - 9:00 pm",
-  //     customerProjection: { value: 422, percentage: 15, trend: "down" },
-  //   },
-  // ];
+// const fakeLiveData = [
+//   { store_id: "store1", going_out: "15", going_in: "10", createdAt: "2023-04-15T09:30:00Z" },
+//   { store_id: "store2", going_out: "8", going_in: "12", createdAt: "2023-04-15T09:35:00Z" },
+//   { store_id: "store3", going_out: "20", going_in: "18", createdAt: "2023-04-15T09:40:00Z" },
+//   { store_id: "store1", going_out: "22", going_in: "25", createdAt: "2023-04-15T09:45:00Z" },
+//   { store_id: "store2", going_out: "10", going_in: "7", createdAt: "2023-04-15T09:50:00Z" },
+//   { store_id: "store3", going_out: "30", going_in: "28", createdAt: "2023-04-15T09:55:00Z" },
+//   { store_id: "store1", going_out: "18", going_in: "20", createdAt: "2023-04-15T10:00:00Z" },
+//   { store_id: "store2", going_out: "14", going_in: "16", createdAt: "2023-04-15T10:05:00Z" },
+//   { store_id: "store3", going_out: "25", going_in: "22", createdAt: "2023-04-15T10:10:00Z" },
+//   { store_id: "store1", going_out: "30", going_in: "28", createdAt: "2023-04-15T10:15:00Z" },
+// ];
 
-  export let liveData;
-  export let selectedStore;
+// const fakeSelectedStore = { value: "store1", label: "Main Street Store" };
 
-  console.log(liveData);
-  console.log(selectedStore);
+// Replace the existing liveData and selectedStore with the fake data
+export let liveData;
+export let selectedStore;
+// let liveData = fakeLiveData;
+// let selectedStore = fakeSelectedStore;
 
+//  $: console.log("LivePeopleCountDataTable received new data:", liveData);
 
-  const dbData = liveData.map((item:any) => {
-    return {
-      storeName: item.store_id === selectedStore.value ? selectedStore.label : item.store_id,
-      customerCount: Number(item.going_out) - Number(item.going_in),
-      created: item.createdAt,
-    };
-  });
+  $: dbData = liveData.map((item:any) => ({
+    storeName: item.store_id === selectedStore.value ? selectedStore.label : item.store_id,
+    customerCount: Number(item.going_out) - Number(item.going_in),
+    created: item.createdAt,
+  }));
 
-  const data = writable(dbData);
+  $: data = writable(dbData);
 
-  const readableData = readable(dbData, (set) => {
+  $: readableData = readable(dbData, (set) => {
     const unsubscribe = data.subscribe(set);
     return unsubscribe;
   });
 
-  const table = createTable(readableData, {
-    page: addPagination({ initialPageSize: 5 }),
+  $: table = createTable(readableData, {
+    page: addPagination({ initialPageSize: 100 }),
     sort: addSortBy(),
     filter: addTableFilter({
       fn: ({ filterValue, value }: { filterValue: string, value: string }) =>
@@ -99,7 +62,7 @@
     select: addSelectedRows(),
   });
 
-  const columns = table.createColumns([
+  $: columns = table.createColumns([
     table.column({
       accessor: "storeName",
       header: "Store Name",
@@ -112,31 +75,23 @@
       accessor: "created",
       header: "Created At",
     }),
-    // table.column({
-    //   accessor: "customerProjection",
-    //   header: "Customer Projection",
-    // }),
-      table.column({
+    table.column({
       id: 'chevron',
       header: '',
       cell: () => '',
     }),
-
   ]);
 
-
-    const pageSizeOptions = [5, 10, 20, 50];
-
-  const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } = table.createViewModel(columns);
+  $: ({ headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } = table.createViewModel(columns));
 
   $: ({ pageIndex, hasNextPage, hasPreviousPage, pageSize} = pluginStates.page);
 
-function goToNextPage() {
-  $pageIndex = $pageIndex + 1
+  function goToNextPage() {
+    $pageIndex = $pageIndex + 1
   }
 
   function goToPreviousPage() {
- $pageIndex = $pageIndex - 1
+    $pageIndex = $pageIndex - 1
   }
 
   function changePageSize(newSize: number) {
@@ -174,7 +129,7 @@ function goToNextPage() {
           <Table.Row {...rowAttrs} class="border-b flex items-center w-full justify-between">
             {#each row.cells as cell (cell.id)}
               <Subscribe attrs={cell.attrs()} let:attrs>
-                <Table.Cell {...attrs} class='flex items-center justify-center whitespace-nowrap flex-1 py-2 w-1/4'>
+                <Table.Cell {...attrs} class={`flex items-center ${cell.id !== 'storeName' ? 'justify-center': 'justify-start'} whitespace-nowrap flex-1 py-2 w-1/4`}>
                   {#if cell.id === 'storeName'}
                     <div class="flex items-center gap-2">
                       <div class="w-8 h-8 rounded text-start bg-blue-900 flex items-center justify-center">

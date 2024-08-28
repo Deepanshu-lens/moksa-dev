@@ -9,46 +9,67 @@
   import { X } from "lucide-svelte";
   import PocketBase from "pocketbase";
   import { page } from "$app/stores";
-  import { onMount } from "svelte";
-  import { enhance } from "$app/forms";
+
 
   let dialogOpen = false;
-  let userType = "";
-  let userID = "";
-  let firstName = "";
-  let lastName = "";
-  let phoneNumber = "";
-  let mailId = "";
-  let password = "";
-  let cPassword = "";
-  export let user;
-  const token = user.moksaToken;
+  export let data;
+  export let token
+
+  let firstName = data.firstName;
+  let lastName = data.lastName;
+  let phoneNumber = data.mobile_number;
+  let mailId = data.email;
+  let lensId = data.lensId;
+  let moksaId = data.moksaId;
+  let userType = data.designation
+  let userID
+  let allStores =[]
+  let curStores=[]
+
+  $:console.log(data)
+  console.log(token)
   let nodes: any[] = [];
 
   let roles: any[] = [];
 
   const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
-  onMount(async () => {
-    PB.autoCancellation(false);
+
+async function initiate(){
+  PB.autoCancellation(false);
     const res = await PB.collection("roles").getFullList();
-    const stores = await PB.collection("node").getFullList();
-    // console.log(res);
+    const allStoress =await fetch('https://api.moksa.ai/store/getAllStoresForDropdown', {
+            method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+    const currentStores = await fetch(`https://api.moksa.ai/store/getUserStoreDetailsByUserId/${moksaId}`,{
+        headers: {
+          "Content-Type": "application/json",
+          'Authorization': `Bearer ${token}`
+        },
+      });
+    const allStoresData = await allStoress.json();
+    const currentStoresData = await currentStores.json();
+    console.log(allStoresData)
+    console.log(currentStoresData)
+    allStores = allStoresData.data.data
+    curStores = currentStoresData.data[0].stores
     roles = res;
-    // nodes = stores
-    nodes = stores.map((store) => store.id);
-    // console.log(nodes);
-  });
+
+}
+
+let initiatePromise: Promise<void> | null = null;
+
+$: if (dialogOpen) {
+  initiatePromise = initiate();
+}
+
+
+
 
   const handleSubmit = async () => {
-    if (password !== cPassword) {
-      toast.error("Passwords don't match");
-      return false;
-    }
 
-    const session = await PB.collection("session").create({
-      owned: true,
-      node: userType === "superAdmin" ? nodes : null,
-    });
     console.log(session);
     const user = await PB.collection("users").create({
       firstName,
@@ -75,14 +96,8 @@
         lensId: user.id,
       }),
     });
-    const d = await moksa.json();
-    console.log(d);
-
-    await PB.collection("users").update(user.id, {
-      moksaToken: d.token,
-    });
+    console.log(moksa);
     dialogOpen = false;
-
 
     if (userType === "superAdmin") {
       for (const node of nodes) {
@@ -94,21 +109,14 @@
     return true;
   };
 
-  const handleResult = (result) => {
-    if (result.type === "success") {
-      toast.success("User added successfully");
-      dialogOpen = false;
-    } else if (result.type === "failure") {
-      toast.error(result.data?.error || "Failed to add user");
-    }
-  };
+
 </script>
 
 <Dialog.Root bind:open={dialogOpen}>
   <Dialog.Trigger><slot /></Dialog.Trigger>
   <Dialog.Content
     closeButton={false}
-    class="sm:max-w-[460px] bg-white shadow-lg rounded-xl"
+    class="sm:max-w-[600px] bg-white shadow-lg rounded-xl"
   >
     <div class="px-4 py-2">
       <Dialog.Header class="relative">
@@ -130,27 +138,11 @@
           <Label for="userType" class="block text-sm font-medium text-gray-700"
             >User Type</Label
           >
-          <Input
-            required
-            id="userType"
-            name="userType"
-            bind:value={userType}
-            placeholder="Enter user type"
-            class="w-full border border-[#F2F4F7] rounded-md px-3 py-2  hidden"
-          />
-          <Input
-            required
-            id="userID"
-            name="userID"
-            bind:value={userID}
-            placeholder="Enter user type"
-            class="w-full border border-[#F2F4F7] rounded-md px-3 py-2  hidden"
-          />
           <Select.Root bind:value={userType}>
             <Select.Trigger
               class="w-full border border-[#F2F4F7] rounded-md px-3 py-2 text-gray-500"
             >
-              <Select.Value placeholder="Select user" />
+              <Select.Value placeholder={userType} />
             </Select.Trigger>
             <Select.Content>
               {#each roles as type}
@@ -221,35 +213,24 @@
           />
         </div>
         <div class="space-y-2">
-          <Label for="password" class="block text-sm font-medium text-gray-700"
-            >Password</Label
-          >
-          <Input
-            required
-            minlength={8}
-            type="password"
-            id="password"
-            name="password"
-            bind:value={password}
-            placeholder="Password"
-            class="w-full border border-[#F2F4F7] rounded-md px-3 py-2"
-          />
-        </div>
-        <div class="space-y-2">
-          <Label for="cPassword" class="block text-sm font-medium text-gray-700"
-            >Confirm Password</Label
-          >
-          <Input
-            required
-            minlength={8}
-            type="password"
-            id="cPassword"
-            name="cPassword"
-            bind:value={cPassword}
-            placeholder="Confirm Password"
-            class="w-full border border-[#F2F4F7] rounded-md px-3 py-2"
-          />
-        </div>
+  <Label class="block text-sm font-medium text-gray-700">Assigned Stores</Label>
+  <div class="grid grid-cols-3 px-1 gap-2 max-h-[150px] overflow-y-auto">
+{#if allStores.length > 0 && typeof curStores === 'object'}
+      {#each allStores as store}
+      <label class="flex items-center space-x-2">
+        <input
+          type="checkbox"
+          value={store.id}
+          checked={curStores.some(s => s.storeId === store.id)}
+          class="form-checkbox h-4 w-4 text-blue-600"
+        />
+        <span class="text-sm text-gray-700">{store.name}</span>
+      </label>
+    {/each}
+    {:else}
+    <p>Loading..</p>
+  {/if}
+  </div>
       </div>
       <div class="mt-6 flex justify-end space-x-3">
         <Button
@@ -269,3 +250,10 @@
     </div>
   </Dialog.Content>
 </Dialog.Root>
+
+
+<style>
+    input[type="checkbox"]{
+        accent-color: #0175ff;
+    }
+</style>

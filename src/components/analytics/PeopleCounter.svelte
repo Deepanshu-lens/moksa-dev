@@ -74,7 +74,7 @@ let liveData = writable([]);
     });
 
     socket.on("connect", () => {
-      console.log("connected");
+      console.log(`connected for ${$selectedStore.value}`);
       socket.emit("joinUser", userID);
       socket.emit("joinStore", $selectedStore.value);
     });
@@ -88,6 +88,7 @@ let liveData = writable([]);
 
     socket.on("disconnect", () => {
       console.log("disconnected");
+      liveData.set([])
     });
   }
 
@@ -362,7 +363,7 @@ let liveData = writable([]);
           </span>
         </p>
       </span>
-      <div class="h-full w-full">
+      <div class="h-full w-full max-h-[300px] overflow-y-auto">
          {#if $liveData.length > 0}
     <LivePeopleCountDataTable liveData={$liveData} selectedStore={$selectedStore}/>
   {:else}

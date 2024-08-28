@@ -937,11 +937,11 @@ onDestroy(() => {
         </Select.Trigger>
         <Select.Content class="max-h-[200px] overflow-y-auto">
           <Select.Group>
-            <!-- <Select.Item on:click={() =>{ selectedStore.set({ value: -1, label: 'All Stores'}); fetchDataStoreWise()}}
+            <Select.Item on:click={() =>{ selectedStore.set({ value: -1, label: 'All Stores'}); fetchDataStoreWise()}}
                 class="px-1"
                 value="All Stores"
                 label="All Stores">All Stores</Select.Item
-              > -->
+              >
             {#each fruits as fruit}
               <Select.Item
                 on:click={() => selectedStore.set(fruit)}
@@ -1118,8 +1118,11 @@ onDestroy(() => {
           <Select.Content class="max-h-[200px] overflow-y-auto">
             <Select.Group>
               <Select.Item
-                on:click={() =>
-                  selectedStore.set({ value: -1, label: "All Stores" })}
+                on:click={() => {
+                  selectedStore.set({ value: -1, label: "All Stores" })
+                  fetchDataStoreWise();
+                }}
+
                 class="px-1"
                 value="All Stores"
                 label="All Stores">All Stores</Select.Item

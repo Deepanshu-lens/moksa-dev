@@ -27,6 +27,7 @@
   let view: number = 1;
   export let data;
   let userData = data.usersData.status === 200 ? data.usersData.data.data : []
+  const moksaToken = data.moksaToken
   // console.log(userData)
   const fruits = [
     { value: "apple", label: "Apple" },
@@ -516,7 +517,7 @@ function createTheftChart() {
         >
           Users
         </div>
-        <UsersDataTable users={userData} {searchVal} />
+        <UsersDataTable token={moksaToken} users={userData} {searchVal} />
       </div>
     </section>
   {:else}
