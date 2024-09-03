@@ -51,6 +51,8 @@ export const PUT: RequestHandler = async ({
     theftDetectionThresh: data.theftDetectionThresh,
     safety: data.safety,
     person: data.person,
+    employeEE: data.employeEE,
+    mobile: data.mobile
   })
 
   if (old.url !== data.url) {

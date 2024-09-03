@@ -20,6 +20,7 @@
   export let url: string;
   export let nodes: Node[];
   export let isAllFullScreen: boolean;
+  let dropdownOpen = false
   let showAddNode = writable(false);
   const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
 
@@ -90,21 +91,24 @@
     if (selectedOption === "Add Node +") {
       console.log("adding node");
       showAddNode.set(true) ;
+      dropdownOpen = false; 
       return;
     }
 
     try {
-      console.log('selectedOption',selectedOption)
-      console.log('page.sesion',$page.params.slug)
-      console.log('selectednode.session',$selectedNode.session)
+      // console.log('selectedOption',selectedOption)
+      // console.log('page.sesion',$page.params.slug)
+      // console.log('selectednode.session',$selectedNode.session)
       PB.autoCancellation(false)
 
       const nodes = await PB.collection("node").getFullList({
-      filter: `name="${selectedOption}"&&session~"${$page.params.slug}"`,
+      filter: `id="${selectedOption}"`,
     });
     // console.log(nodes)
     if (nodes.length > 0) {
       const node = nodes[0];
+      dropdownOpen = false; 
+      PB.autoCancellation(false)
       const cameras = await PB.collection("camera").getFullList({
         filter: `node~"${node.id}"`,
         sort: "-created",
@@ -145,6 +149,7 @@ let searchTerm = writable('');
 
   // console.log(data)
   // $: console.log(showAddNode)
+  $: console.log('dropdown Open', dropdownOpen)
 </script>
 
 <div
@@ -161,7 +166,8 @@ let searchTerm = writable('');
           ? $selectedNode.name.substring(0, 20) + "..."
           : $selectedNode.name}</button
     >
-    <Dropdown
+    <Dropdown 
+    bind:open={dropdownOpen}
       class="z-[99999999] dark:text-slate-200 dark:bg-black border dark:border-slate-300 dark:border-opacity-35 min-w-[10rem] max-h-[16rem] overflow-y-auto rounded-sm  shadow-md pb-4"
     >
       <DropdownItem class='flex text-[#3D81FC] items-center justify-between py-1 px-2 font-semibold'

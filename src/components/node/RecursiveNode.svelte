@@ -7,13 +7,15 @@
   export let handleNodeSelect;
 
   const hasChildren = node?.nodes?.[0]?.nodes !== undefined;
+
+  // $: console.log(node)
 </script>
 
 <DropdownItem
   class="flex items-center justify-between z-40 text-[#2c2c2c] dark:text-white/[.7] font-medium text-sm"
   on:click={() => {
     if (!hasChildren) {
-      handleNodeSelect({ target: { value: node.name } });
+      handleNodeSelect({ target: { value: node.id } });
     }
   }}
 >

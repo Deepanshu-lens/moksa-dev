@@ -21,6 +21,8 @@
     Drama,
     FireExtinguisher,
     ShieldAlert,
+    TabletSmartphone,
+    Heater,
   } from "lucide-svelte";
 
   export let cameraName = "";
@@ -52,6 +54,7 @@
   export let safety: boolean
   export let person: boolean
   export let employeEE: boolean
+  export let heatmap: boolean
   export let theftDetectionThresh:number = 0.5
   let dialogOpen = false;
 
@@ -117,7 +120,9 @@
         personCount,
         theft,
         safety,person,
-        theftDetectionThresh
+        theftDetectionThresh,
+        employeEE,
+        mobile
       }),
     }).then(() => {
       toast("Camera settings updated.");
@@ -486,6 +491,16 @@
       </div>
       <div class="flex items-center gap-4">
         <Switch bind:checked={theft}/>
+      </div>
+    </div>
+
+    <div class="rounded-md flex items-center justify-between border p-4 my-2">
+      <div class="flex items-center space-x-4">
+        <Heater />
+        <p class="text-sm font-medium leading-none">Heatmap</p>
+      </div>
+      <div class="flex items-center gap-4">
+        <Switch bind:checked={heatmap}/>
       </div>
     </div>
     

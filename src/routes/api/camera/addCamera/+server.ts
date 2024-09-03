@@ -95,7 +95,8 @@ console.log(data.url.split('@')[1])
         streaming_url: data.url,
         ip: data.url.split('@')[1],
         store_id: data.moksaId,
-        cameraNo: Number(data.cameraNumber)
+        cameraNo: Number(data.cameraNumber),
+        lensCameraId: camera.id
       }),
     }).then((res) => {
       console.log(res);

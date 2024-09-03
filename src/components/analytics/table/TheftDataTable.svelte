@@ -11,6 +11,8 @@
     addSortBy,
   } from "svelte-headless-table/plugins";
   import { readable, writable } from "svelte/store";
+  import * as Dialog from "@/components/ui/dialog";
+
 
   const dispatch = createEventDispatcher();
   export let theftData;
@@ -32,16 +34,28 @@
   }) : 'N/A';
 
   return {
-    storeName: item.name || 'N/A',
+    storeName: item.store_id || 'N/A',
     employee: `${item.first_name || ''} ${item.last_name || ''}`.trim() || 'N/A',
     date: formattedDate,
     videoLink: "Watch Video",
     videoUri: item.video_uri,
     time: formattedTime,
     theftProbability: item.theftProbability,
+    live: item.live
   };
 });
+
+
+let selectedVideo = null;
+  let dialogOpen = false;
+
+  function openVideoDialog(videoUri) {
+    selectedVideo = videoUri;
+    console.log(selectedVideo)
+    dialogOpen = true;
+  }
  
+
   $: data = writable(dbData);
 
   $: readableData = readable(dbData, (set) => {
@@ -50,7 +64,7 @@
   });
 
   $: table = createTable(readableData, {
-    page: addPagination({ initialPageSize: 7 }),
+    page: addPagination({ initialPageSize: 100 }),
     sort: addSortBy(),
     filter: addTableFilter({
       fn: ({ filterValue, value }: { filterValue: string, value: string }) =>
@@ -96,11 +110,12 @@
 
   $: ({ pageIndex, hasNextPage, hasPreviousPage, pageSize} = pluginStates.page);
 
-  const { selectedDataIds } = pluginStates.select;
 
   function handleRowClick(rowData) {
     dispatch("rowClick", rowData);
   }
+
+  $: console.log('open',dialogOpen)
 </script>
 
 <div class="m-0">
@@ -123,7 +138,8 @@
         </Subscribe>
       {/each}
     </Table.Header>
-    <Table.Body {...$tableBodyAttrs}>
+    <div class='w-full h-[350px] overflow-y-auto flex'>
+    <Table.Body {...$tableBodyAttrs} class='w-full'>
       {#each $pageRows as row (row.id)}
         <Subscribe rowAttrs={row.attrs()} let:rowAttrs>
           <Table.Row {...rowAttrs} class="border-b flex items-center w-full">
@@ -149,7 +165,8 @@
                       <span>{row.original.employee}</span>
                     </div>
                   {:else if cell.id === 'videoLink'}
-                    <Button variant="link" class="text-red-500 p-0 flex items-center gap-2">
+                    <Button variant="link" class="text-red-500 p-0 flex items-center gap-2" on:click={() => { openVideoDialog(row.original.videoUri)
+                    }}>
                         <Play size={16}/>
                       {row.original.videoLink}
                     </Button>
@@ -170,6 +187,8 @@
         </Subscribe>
       {/each}
     </Table.Body>
+  </div>
+
   </Table.Root>
 </div>
 <!-- <div class="flex flex-row items-center justify-center space-x-4 py-4">
@@ -201,3 +220,17 @@
     Next
   </Button>
 </div> -->
+
+
+<Dialog.Root bind:open={dialogOpen}>
+  <Dialog.Content class="sm:max-w-[500px]">
+    <Dialog.Header>
+      <Dialog.Title>Video Playback</Dialog.Title>
+    </Dialog.Header>
+    {#if selectedVideo}
+      <video controls src={selectedVideo} class="w-auto h-[300px]">
+        Your browser does not support the video tag.
+      </video>
+    {/if}
+  </Dialog.Content>
+</Dialog.Root>

@@ -861,8 +861,23 @@ function setupSocket(storeId: number) {
     //   return [{ storeId, ...data }, ...currentData].slice(0, 100);
     // });
     listtheft.update((currentData) => {
-      return [{ storeId, ...data, live: true }, ...currentData].slice(0, 100);
-    });
+  // Ensure we have an array to work with
+  const dataArray = Array.isArray(currentData) ? currentData : [];
+  
+  // If currentData has a 'data' property that's an array, use that
+  if (currentData && Array.isArray(currentData.data)) {
+    return {
+      ...currentData,
+      data: [{ storeId, ...data, live: true }, ...currentData.data].slice(0, 100)
+    };
+  }
+  
+  // Otherwise, just return a new array with the new data
+  return [{ storeId, ...data, live: true }, ...dataArray].slice(0, 100);
+});
+    
+    // Otherwise, just return a new array with the mock data
+    return [storeId, ...dataArray].slice(0, 100);
   });
 
   socket.on("disconnect", () => {
@@ -870,13 +885,15 @@ function setupSocket(storeId: number) {
   });
 }
 
+$: console.log('theft list',$listtheft)
+
 onMount(() => {
   setTimeout(() => {
     setupSocketForAllStores();
   }, 500);
 });
 
-$: console.log($liveData)
+// $: console.log($liveData)
 
 onDestroy(() => {
   Object.values(sockets).forEach((socket) => {
@@ -884,6 +901,47 @@ onDestroy(() => {
     socket.disconnect();
   });
 });
+
+
+function addMockData() {
+  const mockData = {
+    cameraId: null,
+    camera_id: 38,
+    cost_saved: null,
+    createdAt: "2024-08-29T07:48:59.201Z",
+    date_validated: null,
+    id: 7924,
+    is_read: false,
+    is_valid: false,
+    storeId: null,
+    store_id: 34,
+    theftProbability: null,
+    updatedAt: "2024-09-03T09:12:43.748Z",
+    userId: null,
+    validated_by: null,
+    live: true // Add this to indicate it's live data
+  };
+
+  listtheft.update(currentData => {
+    // Ensure currentData is an array
+    const dataArray = Array.isArray(currentData) ? currentData : [];
+    
+    // If currentData has a 'data' property that's an array, use that
+    if (currentData && Array.isArray(currentData.data)) {
+      return {
+        ...currentData,
+        data: [mockData, ...currentData.data].slice(0, 100)
+      };
+    }
+    
+    // Otherwise, just return a new array with the mock data
+    return [mockData, ...dataArray].slice(0, 100);
+  });
+
+  toast("Added mock theft data", {
+    description: `Store: ${mockData.store_id}, Camera: ${mockData.camera_id}`
+  });
+}
 
 
 </script>
@@ -1200,6 +1258,8 @@ onDestroy(() => {
         <p class="text-[#323232] dark:text-white font-medium text-lg">
           Theft History
         </p>
+        <Button on:click={addMockData}>Add Mock Data</Button>
+
       </span>
       <span class="w-full h-full">
         {#if $listtheft?.data?.length > 0}

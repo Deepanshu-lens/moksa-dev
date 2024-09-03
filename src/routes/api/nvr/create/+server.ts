@@ -40,7 +40,7 @@ export const POST: RequestHandler = async ({
           saveFolder: nvrSaving ? `/Playback/` : null,
           priority: false,
           personCount: nvrPersonCount,
-          cameraNumber: Number(i)+1,
+          cameraNumber: `${i+1}02`,
           moksaId: moksaId
         })
       });

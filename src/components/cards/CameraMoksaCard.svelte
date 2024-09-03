@@ -18,8 +18,6 @@
   import CameraEditDialog from "../dialogs/CameraEditDialog.svelte";
     import { onMount } from "svelte";
 
-    // console.log(data)
-
   export let isAllFullScreen: boolean;
   export let cameraId: string;
   export let name: string;
@@ -59,8 +57,9 @@
   export let theft;
   export let theftDetectionThresh;
 export let safety;
-export let person
-export let employeEE
+export let person;
+export let employeEE;
+export let heatmap;
 
 let hasShownToast = false;
 //  let showOptions = false;
@@ -212,6 +211,7 @@ let hasShownToast = false;
         {safety}
         {employeEE}
         {theftDetectionThresh}
+        {heatmap}
       >
       <span class='flex items-center gap-2 text-black font-medium'>
         <span class='size-[24px] rounded-full bg-[#0469FF2E] text-[#0469FF] flex-shrink-0 grid place-items-center'>

@@ -74,6 +74,4 @@
   >
 </Dialog.Root>
 
-<style>
-  /* your styles go here */
-</style>
+

@@ -222,7 +222,8 @@ cameraCounts.update(counts => {
             safety={camera.expand?.inference?.safety}
             person={camera.expand?.inference?.person}
             employeEE={camera.expand?.inference?.employeEE}
-            theftDetectionThresh={camera.theftDetectionThresh}
+            theftDetectionThresh={camera?.theftDetectionThresh}
+            heatmap={camera?.expand?.inference?.heatmap}
           />
         {/key}
       {/each}

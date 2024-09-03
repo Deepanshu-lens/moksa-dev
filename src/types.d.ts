@@ -56,6 +56,7 @@ export type Camera = {
   person: boolean;
   employeEE: boolean;
   theftDetectionThresh: number;
+  heatmap: boolean
 };
 
 export type Playback = {
