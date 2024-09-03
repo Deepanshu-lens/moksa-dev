@@ -103,6 +103,7 @@ onDestroy(() => {
         sort: "-created",
         expand: 'personCounter,inference'
       });
+      console.log('cameras',cameras)
       node.camera = cameras.map((cam: Camera) => ({
         ...cam,
         personCounter: cam?.expand?.personCounter?.count,
@@ -156,6 +157,11 @@ onDestroy(() => {
       } as unknown as Event);
     });
 
+    PB.collection("session").subscribe("*", function (e) {
+      console.log("session subscription", e.action, e.record);
+      session.activeNode = e.record.activeNode
+    });
+
     PB.collection("camera").subscribe("*", async (e) => {
       console.log('complete event',e)
       nodes = await getNodes();
@@ -201,6 +207,7 @@ onDestroy(() => {
     PB.collection("events").unsubscribe("*");
     PB.collection("ai_inference").unsubscribe("*");
     PB.collection("camera").unsubscribe("*");
+    PB.collection("session").unsubscribe("*");
   });
 
 

@@ -16,18 +16,12 @@
   const dispatch = createEventDispatcher();
 
   // Static data
-  export let data;;
+  export let data;
+  
+$:console.log('livetabledata',data)
 
-// $:   readableData = readable(data);
-
-  // const readableData = readable(staticData, (set) => {
-  //   const unsubscribe = data.subscribe(set);
-  //   return unsubscribe;
-  // });
-$:console.log(data)
-
- const dbData = data?.map((item: any) => ({
-    employee: `Id: ${item.id}`,
+ $: dbData = data?.map((item: any) => ({
+    employee: `Id: ${item.emp_id}`,
     masks: item.wearing_mask,
     gloves: item.wearing_gloves,
     hairnet: item.wearing_hair_net,
@@ -37,15 +31,15 @@ $:console.log(data)
     videourl: item.img_link
   }))
 
-  const dataa = writable(dbData);
+  $: dataa = writable(dbData);
 
-  const readableData = readable(dbData, (set) => {
+  $: readableData = readable(dbData, (set) => {
     const unsubscribe = dataa.subscribe(set);
     return unsubscribe;
   });
 
-    const table = createTable(readableData, {
-    page: addPagination({ initialPageSize: 5 }),
+    $: table = createTable(readableData, {
+    page: addPagination({ initialPageSize: 100 }),
     sort: addSortBy(),
     filter: addTableFilter({
       fn: ({ filterValue, value }: { filterValue: string, value: string }) =>
@@ -54,7 +48,7 @@ $:console.log(data)
     select: addSelectedRows(),
   });
 
-const columns = table.createColumns([
+$: columns = table.createColumns([
     table.column({
       accessor: "employee",
       header: "Employee",
@@ -85,8 +79,8 @@ const columns = table.createColumns([
     }),
   ]);
 
-  const { headerRows, pageRows, tableAttrs, tableBodyAttrs } =
-    table.createViewModel(columns);
+  $: ({ headerRows, pageRows, tableAttrs, tableBodyAttrs } = table.createViewModel(columns));
+
 </script>
 
 <div class="m-0">

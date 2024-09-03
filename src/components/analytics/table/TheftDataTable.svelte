@@ -17,7 +17,7 @@
 
   $: console.log('Table data updated:', $theftData);
 
-  const dbData = $theftData.data.map(item => {
+  $: dbData = $theftData.data.map(item => {
 
   const createdDate = item?.createdAt ? new Date(item?.createdAt) : null;
   const formattedDate = createdDate ? createdDate.toLocaleDateString('en-GB', {
@@ -42,14 +42,14 @@
   };
 });
  
-  const data = writable(dbData);
+  $: data = writable(dbData);
 
-  const readableData = readable(dbData, (set) => {
+  $: readableData = readable(dbData, (set) => {
     const unsubscribe = data.subscribe(set);
     return unsubscribe;
   });
 
-  const table = createTable(readableData, {
+  $: table = createTable(readableData, {
     page: addPagination({ initialPageSize: 7 }),
     sort: addSortBy(),
     filter: addTableFilter({
@@ -59,7 +59,7 @@
     select: addSelectedRows(),
   });
 
-  const columns = table.createColumns([
+  $: columns = table.createColumns([
     table.column({
       accessor: "storeName",
       header: "Store Name",
@@ -91,11 +91,11 @@
   ]);
 
 
-      const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } =
-    table.createViewModel(columns);
 
-  const { hasNextPage, hasPreviousPage, pageIndex, pageCount } =
-    pluginStates.page;
+  $: ({ headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } = table.createViewModel(columns));
+
+  $: ({ pageIndex, hasNextPage, hasPreviousPage, pageSize} = pluginStates.page);
+
   const { selectedDataIds } = pluginStates.select;
 
   function handleRowClick(rowData) {
@@ -130,12 +130,19 @@
             {#each row.cells as cell (cell.id)}
               <Subscribe attrs={cell.attrs()} let:attrs>
                 <Table.Cell {...attrs} class='flex w-[14.285%] items-center justify-center flex-1 whitespace-nowrap py-2'>
-                  {#if cell.id === 'storeName'}
+                 {#if cell.id === "storeName"}
                     <div class="flex items-center gap-2 text-sm">
                       <Store class="text-blue-600" />
-                      <span>{row.original.storeName}</span>
+                      <span class="flex gap-2 items-center"
+                        >{row.original.storeName}
+                        {#if row.original.live}
+                          <span class="text-red-500 font-bold text-xs"
+                            >Live</span
+                          >
+                        {/if}
+                      </span>
                     </div>
-                  {:else if cell.id === 'employee'}
+                  {:else if cell.id === "employee"}
                     <div class="flex items-center gap-2">
                       <!-- <img src="/path-to-employee-image.jpg" alt={row.original.employee} class="w-8 h-8 rounded-full" /> -->
                        <User size=20/>

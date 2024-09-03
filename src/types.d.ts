@@ -51,7 +51,11 @@ export type Camera = {
   ptz: boolean;
   preset: any[];
   lastCords: any[]
-
+  theft: boolean;
+  safety: boolean;
+  person: boolean;
+  employeEE: boolean;
+  theftDetectionThresh: number;
 };
 
 export type Playback = {

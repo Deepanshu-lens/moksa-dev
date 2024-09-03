@@ -47,6 +47,10 @@ export const PUT: RequestHandler = async ({
     priority: data.priority,
     running: data.running,
     runningThresh: data.runningThresh,
+    theft: data.theft,
+    theftDetectionThresh: data.theftDetectionThresh,
+    safety: data.safety,
+    person: data.person,
   })
 
   if (old.url !== data.url) {

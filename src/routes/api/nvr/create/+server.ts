@@ -9,7 +9,7 @@ export const POST: RequestHandler = async ({
   try {
     locals.pb?.autoCancellation(false);
     const data = await request.json();
-    const { host,nodeName, camCount, nvrSaving, nvrFace, name, node, ip, user_id, password, http_port,nvrPersonCount } = data;
+    const { moksaId,host,nodeName, camCount, nvrSaving, nvrFace, name, node, ip, user_id, password, http_port,nvrPersonCount } = data;
     const result = await locals.pb?.collection("nvr").create({
       name,
       node,
@@ -39,7 +39,9 @@ export const POST: RequestHandler = async ({
           runningThresh: null,
           saveFolder: nvrSaving ? `/Playback/` : null,
           priority: false,
-          personCount: nvrPersonCount
+          personCount: nvrPersonCount,
+          cameraNumber: Number(i)+1,
+          moksaId: moksaId
         })
       });
     };

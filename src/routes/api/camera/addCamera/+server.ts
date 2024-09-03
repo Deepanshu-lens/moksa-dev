@@ -10,7 +10,6 @@ export const POST: RequestHandler = async ({
   console.log("Adding Camera");
   locals.pb?.autoCancellation(false);
   const data = await request.json();
-  console.log(data);
   try {
   const inference = await locals.pb?.collection('ai_inference').create({
     // camera: camera.id,
@@ -38,7 +37,7 @@ export const POST: RequestHandler = async ({
     saveFolder: data.saveFolder,
     personCount: data.personCount,
     inference: inference.id,
-    cameraNo: data.cameraNumber,
+    cameraNo: Number(data.cameraNumber),
   });
 
   console.log("CAMERA ADDED ", camera);
@@ -96,7 +95,7 @@ console.log(data.url.split('@')[1])
         streaming_url: data.url,
         ip: data.url.split('@')[1],
         store_id: data.moksaId,
-        cameraNo: data.cameraNumber
+        cameraNo: Number(data.cameraNumber)
       }),
     }).then((res) => {
       console.log(res);

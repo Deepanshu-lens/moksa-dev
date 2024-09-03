@@ -99,6 +99,8 @@ cameraCounts.update(counts => {
     filterText = (e.target as HTMLInputElement).value;
   }
 
+  // $: console.log($filteredNodeCameras)
+
 </script>
 
 {#if $selectedNode?.camera?.length === 0}
@@ -216,6 +218,11 @@ cameraCounts.update(counts => {
             ptz={camera.ptz}
             preset={camera.preset}
             lastCords={camera.lastCords}
+            theft={camera.expand?.inference?.theft}
+            safety={camera.expand?.inference?.safety}
+            person={camera.expand?.inference?.person}
+            employeEE={camera.expand?.inference?.employeEE}
+            theftDetectionThresh={camera.theftDetectionThresh}
           />
         {/key}
       {/each}

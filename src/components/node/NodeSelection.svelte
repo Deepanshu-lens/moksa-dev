@@ -94,10 +94,12 @@
     }
 
     try {
-      // console.log(selectedOption)
+      console.log('selectedOption',selectedOption)
+      console.log('page.sesion',$page.params.slug)
+      console.log('selectednode.session',$selectedNode.session)
+      PB.autoCancellation(false)
 
       const nodes = await PB.collection("node").getFullList({
-      expand: "camera",
       filter: `name="${selectedOption}"&&session~"${$page.params.slug}"`,
     });
     // console.log(nodes)

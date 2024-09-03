@@ -111,7 +111,7 @@ onDestroy(() => {
   </span>
 </p>
       </span>
-      <div class='h-full w-full'>
+      <div class='h-full w-full max-h-[350px] overflow-y-scroll overflow-x-clip'>
         {#if $liveData.length > 0}
         <SafetyLiveDataTable data={$liveData}/>
         {:else}

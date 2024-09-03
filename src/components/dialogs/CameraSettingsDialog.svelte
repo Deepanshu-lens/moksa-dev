@@ -18,6 +18,9 @@
     Activity,
     Siren,
     PersonStanding,
+    Drama,
+    FireExtinguisher,
+    ShieldAlert,
   } from "lucide-svelte";
 
   export let cameraName = "";
@@ -45,7 +48,14 @@
   export let lineVehicleThresh: number = 0.3;
   export let personCount: boolean;
   export let subUrl:string
+  export let theft: boolean
+  export let safety: boolean
+  export let person: boolean
+  export let employeEE: boolean
+  export let theftDetectionThresh:number = 0.5
   let dialogOpen = false;
+
+  // console.log('theft',theft)
 
   const items = [
     {
@@ -104,7 +114,10 @@
         lineVehicle,
         linePersonThresh,
         lineVehicleThresh,
-        personCount
+        personCount,
+        theft,
+        safety,person,
+        theftDetectionThresh
       }),
     }).then(() => {
       toast("Camera settings updated.");
@@ -468,11 +481,41 @@
 
     <div class="rounded-md flex items-center justify-between border p-4 my-2">
       <div class="flex items-center space-x-4">
+        <Drama />
+        <p class="text-sm font-medium leading-none">Theft Detection</p>
+      </div>
+      <div class="flex items-center gap-4">
+        <Switch bind:checked={theft}/>
+      </div>
+    </div>
+    
+    <div class="rounded-md flex items-center justify-between border p-4 my-2">
+      <div class="flex items-center space-x-4">
         <PersonStanding />
         <p class="text-sm font-medium leading-none">Person Count</p>
       </div>
       <div class="flex items-center gap-4">
-        <Switch bind:checked={personCount}/>
+        <Switch bind:checked={person}/>
+      </div>
+    </div>
+
+    <div class="rounded-md flex items-center justify-between border p-4 my-2">
+      <div class="flex items-center space-x-4">
+        <FireExtinguisher />
+        <p class="text-sm font-medium leading-none">Safety</p>
+      </div>
+      <div class="flex items-center gap-4">
+        <Switch bind:checked={safety}/>
+      </div>
+    </div>
+
+    <div class="rounded-md flex items-center justify-between border p-4 my-2">
+      <div class="flex items-center space-x-4">
+        <ShieldAlert/>
+        <p class="text-sm font-medium leading-none">Employee Efficiency</p>
+      </div>
+      <div class="flex items-center gap-4">
+        <Switch bind:checked={employeEE}/>
       </div>
     </div>
 

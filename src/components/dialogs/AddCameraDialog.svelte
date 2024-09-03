@@ -114,7 +114,6 @@
           priority: priority === true ? 1 : 0,
           motionThresh:
             motionThresh === 0 ? 1000 : motionThresh === 50 ? 2500 : 5000,
-          sparshID: sparshID,
           personCount: personCount,
           cameraNumber: parseInt(cameraNumber),
           moksaId: $selectedNode.moksaId
@@ -230,7 +229,8 @@ toast.error(`error adding camera`)
         nvrSaving: nvrSaving,
         nvrFace: nvrFace,
         host: $page.url.host,
-        nvrPersonCount: personCount
+        nvrPersonCount: personCount,
+          moksaId: $selectedNode.moksaId
       }),
     })
       .then((response) => {

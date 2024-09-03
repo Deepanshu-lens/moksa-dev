@@ -76,10 +76,9 @@
       }),
     });
     const d = await moksa.json();
-    console.log(d);
 
     await PB.collection("users").update(user.id, {
-      moksaToken: d.token,
+      moksaToken: d.id,
     });
     dialogOpen = false;
 
@@ -262,7 +261,7 @@
         <Button
           on:click={handleSubmit}
           type="submit"
-          class="px-4 py-2 bg-blue-500 text-white rounded-md">Submit</Button
+          class="px-4 py-2 bg-blue-500 hover:text-blue-500 hover:bg-white text-white rounded-md">Submit</Button
         >
       </div>
       <!-- </form> -->

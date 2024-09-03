@@ -167,8 +167,3 @@ export let selectedStore;
     </Table.Body>
   </Table.Root>
 </div>
-
-<!-- 
-<div class="flex items-center justify-between mt-4 px-6">
-    
-  </div> -->

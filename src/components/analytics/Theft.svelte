@@ -857,8 +857,11 @@ function setupSocket(storeId: number) {
     toast(`Received theft data for store ${storeId}:`, {
       description: `Store: ${storeId}, Theft Probability: ${data?.theftProbability}, Camera: ${data?.camera_id}`
     });
-    liveData.update((currentData) => {
-      return [{ storeId, ...data }, ...currentData].slice(0, 100);
+    // liveData.update((currentData) => {
+    //   return [{ storeId, ...data }, ...currentData].slice(0, 100);
+    // });
+    listtheft.update((currentData) => {
+      return [{ storeId, ...data, live: true }, ...currentData].slice(0, 100);
     });
   });
 

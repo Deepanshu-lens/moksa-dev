@@ -56,6 +56,11 @@
   export let ptz;
   export let preset;
   export let lastCords;
+  export let theft;
+  export let theftDetectionThresh;
+export let safety;
+export let person
+export let employeEE
 
 let hasShownToast = false;
 //  let showOptions = false;
@@ -98,7 +103,7 @@ let hasShownToast = false;
     });
   };
 
-  $: console.log($ptzControl)
+  // $: console.log($ptzControl)
 
 </script>
 
@@ -202,6 +207,11 @@ let hasShownToast = false;
         {personCount}
         cameraURL={url}
         {subUrl}
+        {theft}
+        {person}
+        {safety}
+        {employeEE}
+        {theftDetectionThresh}
       >
       <span class='flex items-center gap-2 text-black font-medium'>
         <span class='size-[24px] rounded-full bg-[#0469FF2E] text-[#0469FF] flex-shrink-0 grid place-items-center'>
