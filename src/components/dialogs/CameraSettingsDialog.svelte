@@ -122,7 +122,7 @@
         safety,person,
         theftDetectionThresh,
         employeEE,
-        mobile
+        heatmap
       }),
     }).then(() => {
       toast("Camera settings updated.");
@@ -204,7 +204,7 @@
       </div>
     </div>
 
-    <div class="rounded-md border p-4 my-2">
+    <!-- <div class="rounded-md border p-4 my-2">
       <div class="flex items-center space-x-4">
         <ScanFace />
         <div class="flex-1 space-y-1">
@@ -267,7 +267,7 @@
           </div>
         {/if}
       </div>
-    </div>
+    </div> -->
 
     <!-- <div class="rounded-md border p-4 my-2">
       <div class="flex items-center space-x-4">
@@ -517,7 +517,7 @@
     <div class="rounded-md flex items-center justify-between border p-4 my-2">
       <div class="flex items-center space-x-4">
         <FireExtinguisher />
-        <p class="text-sm font-medium leading-none">Safety</p>
+        <p class="text-sm font-medium leading-none">Kitchen Safety</p>
       </div>
       <div class="flex items-center gap-4">
         <Switch bind:checked={safety}/>

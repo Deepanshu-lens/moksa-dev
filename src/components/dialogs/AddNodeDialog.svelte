@@ -75,7 +75,7 @@
         />
       </div>
       <div class="grid grid-cols-4 items-center gap-4">
-        <Label for="pincode">Pincode</Label>
+        <Label for="pincode">Zip</Label>
         <Input
           id="pincode"
           placeholder={"110001"}

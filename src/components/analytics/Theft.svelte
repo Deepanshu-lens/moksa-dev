@@ -1258,7 +1258,7 @@ function addMockData() {
         <p class="text-[#323232] dark:text-white font-medium text-lg">
           Theft History
         </p>
-        <Button on:click={addMockData}>Add Mock Data</Button>
+        <!-- <Button on:click={addMockData}>Add Mock Data</Button> -->
 
       </span>
       <span class="w-full h-full">

@@ -60,8 +60,8 @@
             <Input id="address" name="address" bind:value={address} placeholder="Enter address" class="w-full border border-[#F2F4F7] rounded-md px-3 py-2" />
           </div>
           <div class="space-y-2">
-            <Label for="pincode" class="block text-sm font-medium text-gray-700">Pincode</Label>
-            <Input id="pincode" name="pincode" type="number" bind:value={pincode} placeholder="Enter pincode" class="w-full border border-[#F2F4F7] rounded-md px-3 py-2" />
+            <Label for="pincode" class="block text-sm font-medium text-gray-700">Zip</Label>
+            <Input id="pincode" name="pincode" type="number" bind:value={pincode} placeholder="Enter Zip" class="w-full border border-[#F2F4F7] rounded-md px-3 py-2" />
           </div>
           <div class="space-y-2">
             <Label for="country" class="block text-sm font-medium text-gray-700">Country</Label>

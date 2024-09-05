@@ -52,7 +52,7 @@ export const PUT: RequestHandler = async ({
     safety: data.safety,
     person: data.person,
     employeEE: data.employeEE,
-    mobile: data.mobile
+heatmap: data.heatmap
   })
 
   if (old.url !== data.url) {

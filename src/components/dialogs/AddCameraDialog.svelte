@@ -809,10 +809,10 @@ toast.error(`error adding camera`)
             />
           </div>
           <div class="grid grid-cols-4 items-center gap-4 py-2">
-            <Label for={`node-pin-${index}`}>Pincode</Label>
+            <Label for={`node-pin-${index}`}>Zip</Label>
             <Input
               id={`node-pin-${index}`}
-              placeholder={`Pincode`}
+              placeholder={`Zip`}
               class="col-span-3"
               bind:value={nodePin[index]}
               on:change={(e) => (nodePin[index] = e.target.value)}
