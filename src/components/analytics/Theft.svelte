@@ -29,6 +29,7 @@
   export let theftandcamera;
   export let allStores;
   export let theftData;
+  export let moksaUserId
   export let token: string;
   let chartLoading = true;
   let dateRange = writable("7 Days");
@@ -827,7 +828,7 @@ function setupSocketForAllStores() {
 }
 
 function setupSocket(storeId: number) {
-  const userID = 8
+  const userID = moksaUserId
   if (sockets[storeId]) {
     sockets[storeId].disconnect();
   }

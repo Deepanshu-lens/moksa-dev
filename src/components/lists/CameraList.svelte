@@ -12,11 +12,13 @@
   import { addUserLog } from "@/lib/addUserLog";
   import { page } from "$app/stores";
   import PocketBase from "pocketbase";
+  import { writable } from "svelte/store";
 
+   let showOptions = writable('');
   export let isAllFullScreen: boolean;
   export let user;
   export let data;
-  export let showOptions;
+  // export let showOptions;
   export let ptzControl;
   let cameraItems: HTMLDivElement;
   let filterText: string = "";
@@ -224,6 +226,8 @@ cameraCounts.update(counts => {
             employeEE={camera.expand?.inference?.employeEE}
             theftDetectionThresh={camera?.theftDetectionThresh}
             heatmap={camera?.expand?.inference?.heatmap}
+            cameraNo={camera?.cameraNo}
+            moksaId={camera?.cameraId}
           />
         {/key}
       {/each}

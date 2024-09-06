@@ -61,7 +61,7 @@ let searchStore =''
           <Select.Trigger
             class="w-[180px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg bg-transparent"
           >
-            <Select.Value placeholder={allStores[selectedStore].name} />
+            <Select.Value placeholder={allStores.length > 0 ? allStores?.[selectedStore]?.name : 'No Stores'} />
           </Select.Trigger>
                <Select.Content class="max-h-[200px] overflow-y-auto">
             <Select.Group>
@@ -74,7 +74,6 @@ let searchStore =''
               {/each}
             </Select.Group>
           </Select.Content>
-          <Select.Input name="favoriteFruit" />
         </Select.Root></div>
   <div class="grid grid-rows-1 grid-cols-4 gap-4 h-[140px]">
     <div

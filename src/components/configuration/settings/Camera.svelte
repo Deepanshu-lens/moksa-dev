@@ -168,6 +168,8 @@
       detailIndex = null;
     }
   }
+
+  // $: console.log($nodeData?.[0]?.cameraData?.[0][0])
 </script>
 
 <div
@@ -585,8 +587,8 @@
               </CameraDeleteDialog>
             </div>
           </div>
-          <table class="w-full bg-white shadow-md rounded">
-            <thead>
+          <table class="w-[calc(100vh-350px)]  bg-white shadow-md rounded scale-90">
+            <thead class='w-full max-w-[calc(100vh-350px)]'>
               <tr
                 class="dark:bg-[#1b1b1b] bg-[#f2f2f2] border-t-[1px] border-solid dark:border-[#929292]"
               >
@@ -633,17 +635,32 @@
                 <th
                   class="text-left py-3 px-4 border-r-[1px] border-solid dark:border-[#929292]"
                 >
-                  Face
+                  Person Count
                 </th>
                 <th
                   class="text-left py-3 px-4 border-r-[1px] border-solid dark:border-[#929292]"
                 >
-                  Vehicle
+                  Employee Efficiency
+                </th>
+                <th
+                  class="text-left py-3 px-4 border-r-[1px] border-solid dark:border-[#929292]"
+                >
+                  Theft 
+                </th>
+                <th
+                  class="text-left py-3 px-4 border-r-[1px] border-solid dark:border-[#929292]"
+                >
+                  Heatmap 
+                </th>
+                <th
+                  class="text-left py-3 px-4 border-r-[1px] border-solid dark:border-[#929292]"
+                >
+                  Kitchen Safety
                 </th>
                 <th class="text-left py-3 px-4">Save</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody class='w-full max-w-[calc(100vh-350px)]'>
               {#if filteredCameraNames.length > 0}
                 {#each filteredCameraNames as item, index}
                   <tr
@@ -789,62 +806,31 @@
                     <td
                       class="py-2 px-4 border-r-[1px] border-solid dark:border-[#929292]"
                     >
-                      {#if modify && index === detailIndex}
-                        <Select.Root
-                          portal={null}
-                          onSelectedChange={(e) => (updatedFace = e?.value)}
-                        >
-                          <Select.Trigger class="text-sm ">
-                            <Select.Value placeholder={item[0].face} />
-                          </Select.Trigger>
-                          <Select.Content>
-                            <Select.Group>
-                              <Select.Item
-                                value={true}
-                                label={"true"}
-                                class="pl-6">True</Select.Item
-                              >
-                              <Select.Item
-                                value={false}
-                                label={"False"}
-                                class="pl-6">False</Select.Item
-                              >
-                            </Select.Group>
-                          </Select.Content>
-                        </Select.Root>
-                      {:else}
-                        {item?.[0].face}
-                      {/if}
+                        {item?.[0]?.expand?.inference?.person}
                     </td>
                     <td
                       class="py-2 px-4 border-r-[1px] border-solid dark:border-[#929292]"
                     >
-                      {#if modify && index === detailIndex}
-                        <Select.Root
-                          portal={null}
-                          onSelectedChange={(e) => (updatedVehicle = e?.value)}
-                        >
-                          <Select.Trigger class="text-sm ">
-                            <Select.Value placeholder={item[0].vehicle} />
-                          </Select.Trigger>
-                          <Select.Content>
-                            <Select.Group>
-                              <Select.Item
-                                value={true}
-                                label={"true"}
-                                class="pl-6">True</Select.Item
-                              >
-                              <Select.Item
-                                value={false}
-                                label={"False"}
-                                class="pl-6">False</Select.Item
-                              >
-                            </Select.Group>
-                          </Select.Content>
-                        </Select.Root>
-                      {:else}
-                        {item?.[0].vehicle}
-                      {/if}
+                      
+                        {item?.[0]?.expand?.inference?.employeEE}
+                    </td>
+                    <td
+                      class="py-2 px-4 border-r-[1px] border-solid dark:border-[#929292]"
+                    >
+                      
+                        {item?.[0]?.expand?.inference?.theft}
+                    </td>
+                    <td
+                      class="py-2 px-4 border-r-[1px] border-solid dark:border-[#929292]"
+                    >
+                      
+                        {item?.[0]?.expand?.inference?.heatmap}
+                    </td>
+                    <td
+                      class="py-2 px-4 border-r-[1px] border-solid dark:border-[#929292]"
+                    >
+                      
+                        {item?.[0]?.expand?.inference?.safety}
                     </td>
                     <td class="py-2 px-4">
                       {#if modify && index === detailIndex}
@@ -974,7 +960,7 @@
                           </Select.Content>
                         </Select.Root>
                       {:else}
-                        {item?.[0].priority}{/if}</td
+                        {item?.[0]?.expand?.inference?.priority}{/if}</td
                     >
                     <td
                       class="py-2 px-4 border-r-[1px] border-solid dark:border-[#929292]"
@@ -1020,63 +1006,37 @@
                     <td
                       class="py-2 px-4 border-r-[1px] border-solid dark:border-[#929292]"
                     >
-                      {#if modify && index === detailIndex}
-                        <Select.Root
-                          portal={null}
-                          onSelectedChange={(e) => (updatedFace = e?.value)}
-                        >
-                          <Select.Trigger class="text-sm ">
-                            <Select.Value placeholder={item[0].face} />
-                          </Select.Trigger>
-                          <Select.Content>
-                            <Select.Group>
-                              <Select.Item
-                                value={true}
-                                label={"true"}
-                                class="pl-6">True</Select.Item
-                              >
-                              <Select.Item
-                                value={false}
-                                label={"False"}
-                                class="pl-6">False</Select.Item
-                              >
-                            </Select.Group>
-                          </Select.Content>
-                        </Select.Root>
-                      {:else}
-                        {item?.[0].face}
-                      {/if}
+                      
+                        {item?.[0]?.expand?.inference?.person}
                     </td>
 
                     <td
                       class="py-2 px-4 border-r-[1px] border-solid dark:border-[#929292]"
                     >
-                      {#if modify && index === detailIndex}
-                        <Select.Root
-                          portal={null}
-                          onSelectedChange={(e) => (updatedVehicle = e?.value)}
-                        >
-                          <Select.Trigger class="text-sm ">
-                            <Select.Value placeholder={item[0].vehicle} />
-                          </Select.Trigger>
-                          <Select.Content>
-                            <Select.Group>
-                              <Select.Item
-                                value={true}
-                                label={"true"}
-                                class="pl-6">True</Select.Item
-                              >
-                              <Select.Item
-                                value={false}
-                                label={"False"}
-                                class="pl-6">False</Select.Item
-                              >
-                            </Select.Group>
-                          </Select.Content>
-                        </Select.Root>
-                      {:else}
-                        {item[0].vehicle}
-                      {/if}</td
+                    
+                        {item[0]?.expand?.inference?.employeEE}
+                   </td
+                    >
+                    <td
+                      class="py-2 px-4 border-r-[1px] border-solid dark:border-[#929292]"
+                    >
+                    
+                        {item[0]?.expand?.inference?.theft}
+                   </td
+                    >
+                    <td
+                      class="py-2 px-4 border-r-[1px] border-solid dark:border-[#929292]"
+                    >
+                    
+                        {item[0]?.expand?.inference?.heatmap}
+                   </td
+                    >
+                    <td
+                      class="py-2 px-4 border-r-[1px] border-solid dark:border-[#929292]"
+                    >
+                    
+                        {item[0]?.expand?.inference?.safety}
+                   </td
                     >
                     <td
                       class="py-2 px-4 border-r-[1px] border-solid dark:border-[#929292]"

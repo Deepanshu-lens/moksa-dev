@@ -66,7 +66,6 @@
     export let url;
     console.log(data)
   const selectedDetections = writable([]);
-   let showOptions = writable('');
    let ptzControl = writable('');
   const { nodes } = data;
   let animateHeader = false;
@@ -1216,7 +1215,7 @@
           {/if}
         {:else}
           <NodeSelection {isAllFullScreen} {nodes} {url} {data} />
-          <CameraList {isAllFullScreen} {showItems} user={data.user} {data} {showOptions} {ptzControl} />
+          <CameraList {isAllFullScreen} {showItems} user={data.user} {data}  {ptzControl} />
           {#if $ptzControl !== ''}
             <Control {ptzControl} />
           {/if}

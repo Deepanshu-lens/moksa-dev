@@ -306,9 +306,9 @@ let loading = false
         </p>
           <Select.Root portal={null}>
             <Select.Trigger
-              class="w-auto bg-[#3D81FC] text-white border-none text-xs px-1 rounded-lg"
+              class="w-auto min-w-[100px] bg-[#3D81FC] text-white border-none text-xs px-1 rounded-lg"
             >
-              <Select.Value placeholder={stores[0].label} />
+              <Select.Value placeholder={stores.length > 0 ? stores?.[0]?.label: 'No Stores'} />
             </Select.Trigger>
                <Select.Content class="max-h-[200px] overflow-y-auto">
               <Select.Group>

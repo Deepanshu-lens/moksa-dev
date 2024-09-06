@@ -15,13 +15,16 @@
 
   export let data: PageServerData;
   const { session } = data;
+  const moksaUserId = data.user.moksaId
+  const allStores = data?.stores?.data.data
+  console.log('allstores',allStores)
   let nodes: Node[] = [];
   let batchedEvents: Event[] = [];
   let searching : boolean = true;
 
 let sockets: { [key: number]: any } = {};
 let liveData = writable([]);
-  // $: console.log("data", data);
+  $: console.log("data", data);
 
   const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
 
@@ -55,13 +58,8 @@ console.log(token)
   });
 
  socket.on(`notification_${userId}`, (data) => {
-    console.log(`Received theft data for user ${userId}:`, data);
-    // toast(`Received theft data for user ${userId}:`, {
-    //   description: `User: ${userId}, Theft Probability: ${data?.theftProbability}, Camera: ${data?.camera_id}`
-    // });
-    //   liveData.update((currentData) => {
-    //     return [{ storeId, ...data }, ...currentData].slice(0, 100);
-    // });
+    console.log(`Received notification for user ${userId}:`, data);
+  
   });
 
   socket.on("disconnect", () => {
@@ -72,7 +70,7 @@ console.log(token)
 onMount(() => {
   setTimeout(() => {
   if (data.token !== undefined) {
-    const userId = 41
+    const userId = moksaUserId
     setupSocket(userId);
   }
   }, 500);
@@ -103,7 +101,7 @@ onDestroy(() => {
         sort: "-created",
         expand: 'personCounter,inference'
       });
-      console.log('cameras',cameras)
+      // console.log('cameras',cameras)
       node.camera = cameras.map((cam: Camera) => ({
         ...cam,
         personCounter: cam?.expand?.personCounter?.count,
@@ -209,6 +207,66 @@ onDestroy(() => {
     PB.collection("camera").unsubscribe("*");
     PB.collection("session").unsubscribe("*");
   });
+
+
+  function setupSocketForAllStores() {
+  allStores.forEach((store: any) => {
+    setupTheftSockets(store.id);
+  });
+}
+
+function setupTheftSockets(storeId: number) {
+  const userID = moksaUserId
+  if (sockets[storeId]) {
+    sockets[storeId].disconnect();
+  }
+
+  sockets[storeId] = io("https://api.moksa.ai", {
+    withCredentials: true,
+    extraHeaders: {
+      Authorization: `Bearer ${token}`,
+    },
+    transports: ["websocket", "polling"],
+  });
+
+  const socket = sockets[storeId];
+
+  socket.on("error", (err) => {
+    console.log(`error for store ${storeId}:`, err);
+  });
+
+  socket.on("connect", () => {
+    console.log(`connected for store ${storeId}`);
+    socket.emit("joinUser", userID);
+    socket.emit("joinStore", storeId);
+  });
+
+  socket.on(`theft_store_${storeId}`, (data) => {
+    console.log(`Received theft data for store ${storeId}:`, data);
+    toast(`Received theft data for store ${storeId}:`, {
+      description: `Store: ${storeId}, Theft Probability: ${data?.theftProbability}, Camera: ${data?.camera_id}`
+    });
+  });
+
+  socket.on("disconnect", () => {
+    console.log(`disconnected for store ${storeId}`);
+  });
+}
+
+onMount(() => {
+  setTimeout(() => {
+    setupSocketForAllStores();
+  }, 500);
+});
+
+// $: console.log($liveData)
+
+onDestroy(() => {
+  Object.values(sockets).forEach((socket) => {
+    console.log('disconnecting socket')
+    socket.disconnect();
+  });
+});
 
 
 </script>

@@ -92,7 +92,7 @@ let liveData = writable([]);
     });
   }
 
-  $:console.log($liveData)
+  // $:console.log($liveData)
 
   $: {
     if ($selectedStore.value !== undefined) {
@@ -243,7 +243,10 @@ let liveData = writable([]);
 // })
 //   }
 
+let busyHours = 'N/A'
 
+// $: console.log($storeData)
+// $: console.log(allStores)
 
   onMount(async () => {
     chartLoading = false;
@@ -262,7 +265,7 @@ let liveData = writable([]);
           <Select.Trigger
             class="w-[100px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg dark:bg-transparent"
           >
-            <Select.Value placeholder={$selectedStore.label} />
+            <Select.Value placeholder={fruits.length> 0 ? $selectedStore.label: 'No Stores'} />
           </Select.Trigger>
           <Select.Content class="max-h-[200px] overflow-y-auto">
             <Select.Group>
@@ -322,7 +325,7 @@ let liveData = writable([]);
       </span>
     </div>
     <div
-      class="col-span-2 border rounded-md bg-gradient-to-r from-[#FFB156] to-[#FF007A] p-2 flex items-center gap-3"
+      class="col-span-2 border rounded-md bg-gradient-to-r from-[#FFB156] to-[#FF007A] p-2 flex items-center gap-3 invisible"
     >
       <span
         class="size-[60px] grid place-items-center text-white bg-white bg-opacity-20 rounded-full"
@@ -337,7 +340,7 @@ let liveData = writable([]);
       </span>
     </div>
     <div
-      class="col-span-2 border rounded-md bg-gradient-to-r from-[#C8C303] to-[#597802] p-2 flex items-center gap-3"
+      class="col-span-2 border rounded-md bg-gradient-to-r from-[#C8C303] to-[#597802] p-2 flex items-center gap-3 invisible"
     >
       <span
         class="size-[60px] grid place-items-center text-white bg-white bg-opacity-20 rounded-full"

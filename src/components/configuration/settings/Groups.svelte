@@ -228,7 +228,7 @@
   </div>
   {#if next === false}
     <div
-      class="w-full h-auto grid grid-cols-4 grid-rows-3 gap-y-2 place-items-center"
+      class="w-full h-[calc(100vh-75px)] overflow-y-auto grid grid-cols-4 gap-y-2 py-2"
     >
       {#each data as node, index}
         <GroupNodeCard {node} {index} {checkedIndices} />
@@ -236,7 +236,7 @@
     </div>
   {:else}
     <div
-      class="w-full h-auto relative grid grid-cols-4 grid-rows-3 gap-y-2 place-items-center"
+      class="w-full h-[calc(100vh-75px)] overflow-y-auto relative grid grid-cols-4 gap-y-2 py-2"
     >
       {#if currNode !== null}
         {#if data[currNode].camera.length > 0}

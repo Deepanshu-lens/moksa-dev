@@ -19,7 +19,7 @@ export const actions = {
     const pincode = data.get("pincode")?.toString() || "";
     const country = data.get("country")?.toString() || "";
     const manager = data.get("manager")?.toString() || "";
-console.log(data)
+    console.log(data)
     const node = await locals.pb
       ?.collection("node")
       .create({ name, session: locals.user.record.session[0], mobileLayout: 1 });
@@ -35,13 +35,13 @@ console.log(data)
     const store = await moksaStore.json();
     console.log(store)
 
-    if(store.status === 201){
+    if (store.status === 201) {
       console.log("Store created successfully")
       await locals.pb
-      ?.collection("node")
-      .update(node?.id, {
-        "moksaId": store.data.id
-      });
+        ?.collection("node")
+        .update(node?.id, {
+          "moksaId": store.data.id
+        });
     }
 
     await locals.pb
@@ -92,15 +92,15 @@ export const load: PageServerLoad = async ({ locals, cookies }) => {
 
   }
 
-  // const dropwdown = async () => {
-  //   const response = await fetch('https://api.moksa.ai/store/getAllStoresForDropdown', {
-  //     method: 'GET',
-  //     headers: {
-  //       'Authorization': `Bearer ${cookies.get('moksa-token')}`
-  //     }
-  //   });
-  //   return response.json();
-  // }
+  const dropwdown = async () => {
+    const response = await fetch('https://api.moksa.ai/store/getAllStoresForDropdown', {
+        method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${cookies.get('moksa-token')}`
+      }
+    });
+  return response.json();
+}
 
   const imposterItems = async () => {
     const i = await locals.pb
@@ -128,7 +128,7 @@ export const load: PageServerLoad = async ({ locals, cookies }) => {
     events: await events(),
     galleryItems: await gelleryItems(),
     imposterItems: await imposterItems(),
-    // stores: await dropwdown(),
+    stores: await dropwdown(),
     token: cookies.get('moksa-token'),
   };
 }

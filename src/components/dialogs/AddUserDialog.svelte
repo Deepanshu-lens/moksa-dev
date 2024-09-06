@@ -39,68 +39,142 @@
     // console.log(nodes);
   });
 
-  const handleSubmit = async () => {
-    if (password !== cPassword) {
-      toast.error("Passwords don't match");
-      return false;
-    }
+   const validateFields = () => {
+    const fields = [
+      { name: 'User Type', value: userType },
+      { name: 'First Name', value: firstName },
+      { name: 'Last Name', value: lastName },
+      { name: 'Phone Number', value: phoneNumber },
+      { name: 'Mail ID', value: mailId },
+      { name: 'Password', value: password },
+      { name: 'Confirm Password', value: cPassword },
+    ];
 
-    const session = await PB.collection("session").create({
-      owned: true,
-      node: userType === "superAdmin" ? nodes : null,
-    });
-    console.log(session);
-    const user = await PB.collection("users").create({
-      firstName,
-      lastName,
-      email: mailId,
-      role: userID,
-      session: session.id,
-      password,
-      passwordConfirm: cPassword,
-    });
-    console.log(user);
-
-    const moksa = await fetch("/api/user/create", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        firstName,
-        lastName,
-        mailId,
-        password,
-        userType,
-        lensId: user.id,
-      }),
-    });
-    const d = await moksa.json();
-
-    await PB.collection("users").update(user.id, {
-      moksaToken: d.id,
-    });
-    dialogOpen = false;
-
-
-    if (userType === "superAdmin") {
-      for (const node of nodes) {
-        await PB.collection("node").update(node, {
-          "session+": [session.id],
-        });
+    for (const field of fields) {
+      if (!field.value.trim()) {
+        toast.error(`${field.name} is required`);
+        return false;
       }
     }
     return true;
   };
 
-  const handleResult = (result) => {
-    if (result.type === "success") {
+  // const handleSubmit = async () => {
+  //   if (password !== cPassword) {
+  //     toast.error("Passwords don't match");
+  //     return false;
+  //   }
+
+  //   const session = await PB.collection("session").create({
+  //     owned: true,
+  //     node: userType === "superAdmin" ? nodes : null,
+  //   });
+  //   console.log(session);
+  //   const user = await PB.collection("users").create({
+  //     firstName,
+  //     lastName,
+  //     email: mailId,
+  //     role: userID,
+  //     session: session.id,
+  //     password,
+  //     passwordConfirm: cPassword,
+  //   });
+  //   console.log(user);
+
+  //   const moksa = await fetch("/api/user/create", {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //     body: JSON.stringify({
+  //       firstName,
+  //       lastName,
+  //       mailId,
+  //       password,
+  //       userType,
+  //       lensId: user.id,
+  //     }),
+  //   });
+  //   const d = await moksa.json();
+
+  //   await PB.collection("users").update(user.id, {
+  //     moksaToken: d.id,
+  //   });
+  //   dialogOpen = false;
+
+
+  //   if (userType === "superAdmin") {
+  //     for (const node of nodes) {
+  //       await PB.collection("node").update(node, {
+  //         "session+": [session.id],
+  //       });
+  //     }
+  //   }
+  //   return true;
+  // };
+
+   const handleSubmit = async () => {
+    if (!validateFields()) {
+      return;
+    }
+
+    if (password !== cPassword) {
+      toast.error("Passwords don't match");
+      return;
+    }
+
+    try {
+      const session = await PB.collection("session").create({
+        owned: true,
+        node: userType === "superAdmin" ? nodes : null,
+      });
+
+      const user = await PB.collection("users").create({
+        firstName,
+        lastName,
+        email: mailId,
+        role: userID,
+        session: session.id,
+        password,
+        passwordConfirm: cPassword,
+      });
+
+      const moksa = await fetch("/api/user/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          firstName,
+          lastName,
+          mailId,
+          password,
+          userType,
+          lensId: user.id,
+        }),
+      });
+      const d = await moksa.json();
+
+      await PB.collection("users").update(user.id, {
+        moksaToken: d.id,
+      });
+
+      if (userType === "superAdmin") {
+        for (const node of nodes) {
+          await PB.collection("node").update(node, {
+            "session+": [session.id],
+          });
+        }
+      }
+
       toast.success("User added successfully");
       dialogOpen = false;
-    } else if (result.type === "failure") {
-      toast.error(result.data?.error || "Failed to add user");
+    } catch (error) {
+      console.error("Error adding user:", error);
+      toast.error(error.message || "Failed to add user");
     }
   };
+
 </script>
 
 <Dialog.Root bind:open={dialogOpen}>
@@ -158,7 +232,8 @@
                     userType = type.roleName;
                     userID = type.id;
                   }}
-                  value={type.id}>{type.roleName}</Select.Item
+                  class="capitalize cursor-pointer"
+                  value={type.id}>{type.roleName === "superAdmin" ? "Super Admin" : type.roleName}</Select.Item
                 >
               {/each}
             </Select.Content>

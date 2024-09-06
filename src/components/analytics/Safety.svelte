@@ -128,7 +128,7 @@ onDestroy(() => {
           <Select.Trigger
             class="w-[100px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg dark:bg-transparent"
           >
-            <Select.Value placeholder={$selectedStore?.name} />
+            <Select.Value placeholder={fruits.length > 0 ? $selectedStore?.name : 'No Stores'} />
           </Select.Trigger>
                <Select.Content class="max-h-[200px] overflow-y-auto">
             <Select.Group>

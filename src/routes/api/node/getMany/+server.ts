@@ -16,7 +16,7 @@ export const POST: RequestHandler = async ({
         for (let cameraId of node.camera) {
           let cameraDetails = await locals.pb
             ?.collection("camera")
-            .getFullList({ filter: `id="${cameraId}"` });
+            .getFullList({ filter: `id="${cameraId}"`, expand: "inference" });
           if (cameraDetails) {
             cameraData.push(cameraDetails);
           }

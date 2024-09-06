@@ -49,10 +49,12 @@
   onMount(() => {
     fetchAllUsers()
   })
+
+  
 </script>
 
 <div
-  class="flex flex-col items-start h-[calc(100vh-75px)] w-full text-black dark:text-white"
+  class="flex flex-col items-start h-[calc(100vh-75px)] max-w-[calc(100vw-75px)] w-full text-black dark:text-white"
 >
     <div class="h-[1px] dark:bg-[#292929] w-[96%] mb-8 bg-[#e0e0e0]" />
     <div class="w-full justify-between flex items-center px-6 mb-4">
@@ -87,7 +89,7 @@
       </span>
     </div>
     {#if selectedP === 1}
-<div class='px-6 p-4 w-[97.5%] flex flex-col gap-2 mx-auto shadow-md rounded-md border border-[#00000014]'>
+<div class='px-6 p-4 w-[96%] flex flex-col gap-2 mx-auto shadow-md rounded-md border border-[#00000014]'>
   <p class='text-lg text-[#323232] dark:text-white/[.7] font-semibold '>Permissions</p>
   <p class='text-sm text-[#323232] dark:text-white/[.7] '>Select and assign permissions to users</p>
       <Tabs.Root class="mx-auto w-full pb-0 bg-transparent mt-2">
@@ -157,10 +159,10 @@
 </div>
 
     {:else}
-<div class='px-6 p-4 w-[97.5%] flex flex-col gap-2 mx-auto shadow-md rounded-md border border-[#00000014]'>
+<div class='px-6 p-4 max-w-[96%] flex flex-col gap-2 mx-auto shadow-md rounded-md border border-[#00000014] overflow-clip'>
  <p class='text-lg text-[#323232] dark:text-white/[.7] font-semibold '>Store Permissions</p>
   <p class='text-sm text-[#323232] dark:text-white/[.7] '>Select and assign permissions to users</p>
-      <div class="w-full overflow-x-auto overflow-y-auto max-h-[calc(100vh-250px)] max-w-[calc(100vw-5.5rem)] hide-scrollbar">
+      <div class="w-[calc(100vw-5rem)] overflow-x-auto overflow-y-auto max-h-[calc(100vh-250px)] max-w-[calc(100vw-5.5rem)] hide-scrollbar">
        <NodesTable {data} {allUsers} searchText={searchtext}/>
        <!-- nodes table -->
       </div>

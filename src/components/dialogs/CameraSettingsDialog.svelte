@@ -6,7 +6,6 @@
   import { selectedNode } from "@/lib/stores";
   import { Switch } from "@/components/ui/switch";
   import * as Select from "@/components/ui/select";
-
   import { Slider } from "@/components/ui/slider";
 
   import {
@@ -56,9 +55,19 @@
   export let employeEE: boolean
   export let heatmap: boolean
   export let theftDetectionThresh:number = 0.5
+  export let showOptions;
+  export let isSettingsDialogOpen
+  export let cameraNo
   let dialogOpen = false;
 
-  // console.log('theft',theft)
+  $: {
+    if(dialogOpen) {
+      isSettingsDialogOpen.set(true)
+    } else {
+      isSettingsDialogOpen.set(false)
+
+    }
+  }
 
   const items = [
     {
@@ -83,8 +92,11 @@
     },
   ];
 
-  const editCamera = () => {
-    fetch("/api/camera/editCamera", {
+  const editCamera = async () => {
+    setTimeout(() => {
+      console.log(showOptions.set(''))
+    }, 1000)
+    await fetch("/api/camera/editCamera", {
       method: "put",
       headers: {
         "Content-Type": "application/json",
@@ -101,8 +113,6 @@
         faceDetectionThreshold,
         faceSearchThreshold,
         runningThresh: runningDetectionThreshold,
-        // vehiclePlateThreshold,
-        // vehicleOCRThreshold,
         saveDuration,
         saveFolder,
         motionThresh: motion === 0 ? 1000 : motion,
@@ -122,12 +132,29 @@
         safety,person,
         theftDetectionThresh,
         employeEE,
-        heatmap
+        heatmap,
       }),
     }).then(() => {
       toast("Camera settings updated.");
       dialogOpen = false;
     });
+    const enabledFeatures = {
+    heat: heatmap || false,
+    count: person || false,
+    theft: theft || false,
+    kitchenhygiene: safety || false,
+    rtsp: false
+  };
+  console.log(enabledFeatures)
+    await fetch(`/api/camera/updateFeatures`, {
+      method: 'POST', headers: {
+        "Content-Type": "application/json"
+      }, body: JSON.stringify({
+        storeId: $selectedNode.moksaId,
+        camId: moksaId,
+        feature: enabledFeatures
+      })
+    })
   };
 </script>
 

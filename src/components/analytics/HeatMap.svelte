@@ -20,8 +20,8 @@
   let fusiondevicedata = [];
   let fusiondevicecategories = [];
   let selectedStore = writable({
-    value: allStores[0].id,
-    label: allStores[0].name,
+    value: allStores?.[0]?.id,
+    label: allStores?.[0]?.name,
   });
   let isInitialLoad = true;
   let isLoading = writable(false);
@@ -294,7 +294,7 @@
   let liveData = writable([]);
 
   function setupSocketForAllStores() {
-    allStores.forEach((store: any) => {
+    allStores?.forEach((store: any) => {
       setupSocket(store.id);
     });
   }
@@ -349,11 +349,15 @@
   $: console.log($liveData)
 
   onDestroy(() => {
-    Object.values(sockets).forEach((socket) => {
+    Object.values(sockets)?.forEach((socket) => {
       console.log('disconnecting socket')
       socket.disconnect();
     });
   });
+
+  $: console.log('c',chartData)
+  $: console.log('s',selectedStoreData)
+  $: console.log('f',fruits)
 </script>
 
 <section
@@ -404,10 +408,11 @@
         <Select.Trigger
           class="w-[100px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg dark:bg-transparent"
         >
-          <Select.Value placeholder={$selectedStore.label} />
+          <Select.Value placeholder={fruits.length > 0 ?$selectedStore.label: 'No Stores'} />
         </Select.Trigger>
         <Select.Content class="max-h-[200px] overflow-y-auto">
           <Select.Group>
+            {#if fruits.length > 0}
             {#each fruits as fruit}
               <Select.Item
                 on:click={() => selectedStore.set(fruit)}
@@ -416,6 +421,13 @@
                 label={fruit.label}>{fruit.label}</Select.Item
               >
             {/each}
+            {:else}
+            <Select.Item
+            class="px-1"
+            >
+            No Stores
+            </Select.Item>
+            {/if}
           </Select.Group>
         </Select.Content>
       </Select.Root>
@@ -431,7 +443,7 @@
     </span>
   </div>
   <div class="grid grid-cols-8 grid-rows-12 gap-4 mt-4">
-    <div
+    <!-- <div
       class="col-span-8 row-span-4 border rounded-md flex flex-col rounded-t-xl dark:border-white/[.7]"
     >
       <span
@@ -447,7 +459,7 @@
       <div class="h-full w-full">
         <HeatMapDataTable />
       </div>
-    </div>
+    </div> -->
 
     <div
       class="col-span-4 row-span-3 border rounded-md flex flex-col dark:border-white/[.7]"
@@ -460,14 +472,14 @@
         </p>
       </span>
       <span class="h-full w-full">
-        <!-- {#if selectedStoreData?.totalCount !==0} -->
+        {#if selectedStoreData !== undefined && selectedStoreData?.totalCount !==0}
         <FusionChart
           data={fusiondevicedata}
           categoriesdata={fusiondevicecategories}
         />
-        <!-- {:else}
-        <p>No data available</p>
-        {/if} -->
+        {:else}
+        <p class='px-4'>No data available</p>
+        {/if}
       </span>
     </div>
     <div
@@ -481,7 +493,7 @@
         </p>
       </span>
       <div class="h-full w-full flex items-start justify-between p-3">
-        {#if selectedStoreData?.totalCount !==0}
+        {#if selectedStoreData !== undefined && selectedStoreData?.totalCount !==0}
         <span class="w-1/4 flex flex-col gap-3">
             {#each chartData as item, index}
               <p class="flex items-center gap-2">
@@ -508,7 +520,7 @@
             <canvas bind:this={chartCanvas}></canvas>
           </span>
           {:else}
-            <p>No data available</p>
+          <p class='px-2'>No data available</p>
           {/if}
       </div>
     </div>

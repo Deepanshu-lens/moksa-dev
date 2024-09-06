@@ -39,6 +39,8 @@
   // console.log(usersData)
   // console.log(data)
 
+  const moksaUserId = data.user.moksaId
+
   const session = data.session;
   let nodes: Node[] = [];
   console.log(data)
@@ -248,11 +250,11 @@ async function getAisleData(){
   </div>
 
   {#if view === 1}
-    <Dashboard {allStores} {allStoresData} {aisleData} {theftandcamera} {busyness} {efficiency} {safetyDetails} {theftData} token={data.moksaToken}/>
+    <Dashboard {moksaUserId} {allStores} {allStoresData} {aisleData} {theftandcamera} {busyness} {efficiency} {safetyDetails} {theftData} token={data.moksaToken}/>
   {:else if view === 2}
-    <Stores {allStores} {theftandcamera} {nodes}/>
+    <Stores {allStores} {theftandcamera} {nodes} {moksaUserId}/>
   {:else if view === 3}
-    <Theft {theftandcamera} {allStores} {theftData} token={data.moksaToken}/>
+    <Theft {theftandcamera} {allStores} {theftData} token={data.moksaToken} {moksaUserId}/>
   {:else if view === 4}
     <EE {allStores}/>
   {:else if view === 5}

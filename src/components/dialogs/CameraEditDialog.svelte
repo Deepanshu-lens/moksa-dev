@@ -4,6 +4,8 @@
   export let url: string;
   export let role: string;
   export let subUrl: string;
+  export let showOptions;
+  export let isEditDialogOpen
 
   let dialogOpen: boolean = false;
 
@@ -16,6 +18,7 @@
 
   const editCamera = () => {
     if(role === 'superAdmin'){
+      console.log(showOptions.set(''))
     fetch("/api/camera/editCamera", {
       method: "put",
       headers: {
@@ -30,8 +33,10 @@
       }),
     }).then(() => {
       toast("Camera edited");
+      dialogOpen = false
     });  
     } else {
+      console.log(showOptions.set(''))
       fetch("/api/camera/editCamera", {
       method: "put",
       headers: {
@@ -45,10 +50,18 @@
       }),
     }).then(() => {
       toast("Camera edited");
+      dialogOpen = false
     });
     }
     
   };
+  $: {
+    if(dialogOpen) {
+      isEditDialogOpen.set(true)
+    } else {
+      isEditDialogOpen.set(false)
+    }
+  }
 </script>
 
 <Dialog.Root bind:open={dialogOpen}>

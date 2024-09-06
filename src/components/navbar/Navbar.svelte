@@ -218,10 +218,10 @@
                 <span class="mt-0.5 text-sm text-[#32323299]"
                   >{user?.email}</span
                 >
-                <button class="flex gap-1 items-center text-[#3D81FC] text-sm">
+                <a href="/account/{sessionId}" class="flex gap-1 items-center text-[#3D81FC] text-sm" >
                   <Settings size={16} />
                   Manage Account
-                </button>
+                </a>
               </p>
             </span>
 

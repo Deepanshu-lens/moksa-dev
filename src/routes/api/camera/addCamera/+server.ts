@@ -8,6 +8,8 @@ export const POST: RequestHandler = async ({
   cookies   
 }: RequestEvent) => {
   console.log("Adding Camera");
+  const mToken  = cookies.get('moksa-token')
+  console.log(mToken)
   locals.pb?.autoCancellation(false);
   const data = await request.json();
   try {
@@ -73,11 +75,14 @@ export const POST: RequestHandler = async ({
   } else {
     console.error("Node not found for the given nodeId:", data.nodeId);
   }
-console.log(cookies.get('moksa-token'))
+console.log('cookie,token',mToken)
+console.log('payload',data.token)
 console.log(data.moksaId)
 console.log(data.cameraNumber)
-console.log(data.url)
 console.log(data.url.split('@')[1])
+
+const tokenToUse = mToken === undefined ? data.token : mToken
+
   await Promise.all([
     fetch(`${VITE_POCKETBASE_URL}/api/addStream`, {
       method: "POST",
@@ -87,19 +92,33 @@ console.log(data.url.split('@')[1])
     fetch(`https://api.moksa.ai/camera/addCamera`, {
       method: "POST",
       headers: { "Content-Type": "application/json",
-        'Authorization': `Bearer ${cookies.get('moksa-token')}`,
+        'Authorization': `Bearer ${tokenToUse}`,
        },
       body: JSON.stringify({
         port: 554,
         vendor: 'company',
         streaming_url: data.url,
-        ip: data.url.split('@')[1],
+        ip: data.url.split('@')[1].split(':')[0],
         store_id: data.moksaId,
         cameraNo: Number(data.cameraNumber),
         lensCameraId: camera.id
       }),
-    }).then((res) => {
-      console.log(res);
+    }).then(async(res) => {
+      if (!res.ok) {
+        throw new Error(`Moksa API error: ${res.status} ${res.statusText}`);
+      }
+      const moksaData = await res.json();
+      console.log("Moksa API response:", moksaData);
+      
+      // Update PocketBase camera with Moksa ID
+      if (moksaData.id) {
+        await locals.pb?.collection("camera").update(camera.id, {
+          cameraId: moksaData.id
+        });
+        console.log("Updated PocketBase camera with Moksa ID:", moksaData.id);
+      } else {
+        console.warn("Moksa API response doesn't contain an ID");
+      }
     }).catch((err) => {
       console.log(err);
     })

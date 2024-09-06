@@ -16,7 +16,8 @@
   import CameraSettingsDialog from "../dialogs/CameraSettingsDialog.svelte";
   import { addUserLog } from "@/lib/addUserLog";
   import CameraEditDialog from "../dialogs/CameraEditDialog.svelte";
-    import { onMount } from "svelte";
+  import { onMount } from "svelte";
+  import { writable } from "svelte/store";
 
   export let isAllFullScreen: boolean;
   export let cameraId: string;
@@ -50,22 +51,24 @@
   export let personCount: boolean;
   export let ptzControl;
   export let showOptions;
-  export let role:string
+  export let role: string;
   export let ptz;
   export let preset;
   export let lastCords;
   export let theft;
   export let theftDetectionThresh;
-export let safety;
-export let person;
-export let employeEE;
-export let heatmap;
+  export let safety;
+  export let person;
+  export let employeEE;
+  export let heatmap;
+  export let cameraNo;
+  export let moksaId;
 
-let hasShownToast = false;
-//  let showOptions = false;
+  let hasShownToast = false;
+  //  let showOptions = false;
   $: count = $cameraCounts[cameraId];
 
-    $: {
+  $: {
     if (count > 4 && !hasShownToast) {
       toast(`Number of people in Camera:${name} exceeded the fixed threshold`);
       hasShownToast = true;
@@ -85,6 +88,9 @@ let hasShownToast = false;
     // if (cell) {
     //   document.getElementById(`stream-${cameraId}`)?.remove();
     // }
+    setTimeout(() => {
+      console.log(showOptions.set(''))
+    }, 1000)
     fetch("/api/camera/deleteCamera", {
       method: "delete",
       headers: {
@@ -95,6 +101,8 @@ let hasShownToast = false;
         nodeId: $selectedNode.id,
         name,
         url,
+        storeId: $selectedNode.moksaId,
+        camId: moksaId
       }),
     }).then(() => {
       document.getElementById(`stream-${cameraId}`)?.remove();
@@ -102,8 +110,38 @@ let hasShownToast = false;
     });
   };
 
-  // $: console.log($ptzControl)
+  let optionsMenuRef;
+  const isEditDialogOpen = writable(false);
+  const isSettingsDialogOpen = writable(false);
 
+  function handleOptionsClick(event: MouseEvent) {
+    event.stopPropagation();
+    showOptions.set(cameraId);
+  }
+
+  onMount(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if ($showOptions !== "" && 
+          optionsMenuRef && 
+          !optionsMenuRef.contains(event.target as Node) &&
+          !$isEditDialogOpen &&
+          !$isSettingsDialogOpen) {
+        showOptions.set('');
+      }
+    };
+
+    // Delay adding the event listener to allow for initial clicks
+    setTimeout(() => {
+      window.addEventListener('click', handleClickOutside);
+    }, 0);
+
+    return () => {
+      window.removeEventListener('click', handleClickOutside);
+      hasShownToast = false;
+    };
+  });
+
+  // $: console.log($ptzControl)
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -159,24 +197,40 @@ let hasShownToast = false;
           : splitResult;
       })()}
     </p>
-  </div> <Button variant='ghost' class='p-0 bg-transparent absolute top-3 right-2 h-[22px] w-[22px]' type='button' size='icon' on:click={() => showOptions.set(cameraId)}>
+  </div>
+  <Button
+    variant="ghost"
+    class="p-0 bg-transparent absolute top-3 right-2 h-[22px] w-[22px]"
+    type="button"
+    size="icon"
+    on:click={handleOptionsClick}
+  >
     <MoreVertical size={16} />
   </Button>
-  {#if $showOptions !== '' && $showOptions === cameraId}
-  <div class='flex flex-col h-auto w-[140px] rounded-lg shadow-2xl drop-shadow-lg z-[99999] bg-white p-0.5 gap-1 flex-shrink-0 absolute top-2 right-2'
-  >
-  <button class='absolute top-1 right-1' on:click|stopPropagation={() => showOptions.set('')}>
-    <X size={16} class='text-black'/>
-  </button>
-     <CameraEditDialog {name} {url} {cameraId} {role} {subUrl}>
-       <span class='flex items-center gap-2 text-black font-medium'>
-         <span class='size-[24px] rounded-full bg-[#6159F030] text-[#6159F0] flex-shrink-0 grid place-items-center'>
-           <Edit class='h-4 w-4' />
+  {#if $showOptions !== "" && $showOptions === cameraId}
+    <div
+    bind:this={optionsMenuRef}
+      class=" flex flex-col h-auto w-[140px] rounded-lg shadow-2xl drop-shadow-lg z-[99999] bg-white p-0.5 gap-1 flex-shrink-0 absolute top-2 right-2"
+    >
+      <button
+        class="absolute top-1 right-1"
+        on:click|stopPropagation={() => showOptions.set("")}
+      >
+        <X size={16} class="text-black" />
+      </button>
+      <CameraEditDialog {name} {url} {cameraId} {role} {subUrl} {showOptions} {isEditDialogOpen}>
+        <span class="flex items-center gap-2 text-black font-medium">
+          <span
+            class="size-[24px] rounded-full bg-[#6159F030] text-[#6159F0] flex-shrink-0 grid place-items-center"
+          >
+            <Edit class="h-4 w-4" />
           </span>
           Edit
         </span>
       </CameraEditDialog>
       <CameraSettingsDialog
+      {isSettingsDialogOpen}
+        {showOptions}
         cameraName={name}
         {save}
         {face}
@@ -212,37 +266,56 @@ let hasShownToast = false;
         {employeEE}
         {theftDetectionThresh}
         {heatmap}
+        {cameraNo}
+        {moksaId}
       >
-      <span class='flex items-center gap-2 text-black font-medium'>
-        <span class='size-[24px] rounded-full bg-[#0469FF2E] text-[#0469FF] flex-shrink-0 grid place-items-center'>
-          <Settings class='h-4 w-4' />
+        <span class="flex items-center gap-2 text-black font-medium">
+          <span
+            class="size-[24px] rounded-full bg-[#0469FF2E] text-[#0469FF] flex-shrink-0 grid place-items-center"
+          >
+            <Settings class="h-4 w-4" />
+          </span>
+          Settings
         </span>
-        Settings
-      </span>
-    </CameraSettingsDialog>
+      </CameraSettingsDialog>
 
-<button class='flex items-center gap-2 text-black font-medium' on:click={deleteCamera}>
-<span class='size-[24px] rounded-full bg-[#E539352E] text-[#E53935] flex-shrink-0 grid place-items-center'>
-  <Trash class='h-4 w-4' />
-</span>
-Delete
-</button>
-{#if ptz}
-<button class='flex items-center gap-2 text-black font-medium' on:click={() => {ptzControl.set({
-  id: cameraId, url: url, preset: preset, lastCords: lastCords
-}); showOptions.set('')}}>
-<span class='size-[24px] rounded-full bg-[#015a62]/[.2] text-[#015a62] flex-shrink-0 grid place-items-center'>
-  <Cctv class='h-4 w-4' />
-</span>
-PTZ Control
-</button>
-{/if}
-  </div>
+      <button
+        class="flex items-center gap-2 text-black font-medium"
+        on:click={deleteCamera}
+      >
+        <span
+          class="size-[24px] rounded-full bg-[#E539352E] text-[#E53935] flex-shrink-0 grid place-items-center"
+        >
+          <Trash class="h-4 w-4" />
+        </span>
+        Delete
+      </button>
+      {#if ptz}
+        <button
+          class="flex items-center gap-2 text-black font-medium"
+          on:click={() => {
+            ptzControl.set({
+              id: cameraId,
+              url: url,
+              preset: preset,
+              lastCords: lastCords,
+            });
+            showOptions.set("");
+          }}
+        >
+          <span
+            class="size-[24px] rounded-full bg-[#015a62]/[.2] text-[#015a62] flex-shrink-0 grid place-items-center"
+          >
+            <Cctv class="h-4 w-4" />
+          </span>
+          PTZ Control
+        </button>
+      {/if}
+    </div>
   {/if}
 </article>
 
-
-  <!-- <ul class="flex flex-row gap-1 ml-auto p-0 list-none cursor-pointer">
+<!-- <ul class="flex flex-row gap-1 ml-auto p-0 list-none cursor-pointer">
       <li class="cursor-pointer hover:scale-125">
       <CameraEditDialog {name} {url} {cameraId}>
         <Edit class="h-4 w-4" />
@@ -290,4 +363,3 @@ PTZ Control
       <Trash class="h-4 w-4" />
     </li>
   </ul> -->
-  

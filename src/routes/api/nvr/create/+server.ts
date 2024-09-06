@@ -4,8 +4,11 @@ import type { RequestEvent, RequestHandler } from "./$types";
 export const POST: RequestHandler = async ({
   locals,
   request,
+  cookies
 }: RequestEvent) => {
   console.log("Creating new node");
+  console.log('cookies', cookies.get('moksa-token'))
+  
   try {
     locals.pb?.autoCancellation(false);
     const data = await request.json();
@@ -19,7 +22,8 @@ export const POST: RequestHandler = async ({
       http_port,
       ip_address: null
     });
-
+    const token = cookies.get('moksa-token')
+    console.log(token)
     const createCamera = async (i: number) => {
       const url = `rtsp://${user_id}:${password.includes('@') ? password.replace('@', '%40') : password}@${ip}:${http_port}/Streaming/channels/${i + 1}`;
       await fetch(`http://${host}/api/camera/addCamera`, {
@@ -41,7 +45,8 @@ export const POST: RequestHandler = async ({
           priority: false,
           personCount: nvrPersonCount,
           cameraNumber: `${i+1}02`,
-          moksaId: moksaId
+          moksaId: moksaId,
+          token: token
         })
       });
     };
