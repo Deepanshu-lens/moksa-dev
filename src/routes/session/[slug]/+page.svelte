@@ -16,6 +16,7 @@
   export let data: PageServerData;
   const { session } = data;
   const moksaUserId = data.user.moksaId
+  console.log('stores data',data.stores)
   const allStores = data?.stores?.data.data
   console.log('allstores',allStores)
   let nodes: Node[] = [];
@@ -210,7 +211,8 @@ onDestroy(() => {
 
 
   function setupSocketForAllStores() {
-  allStores.forEach((store: any) => {
+    console.log('allstores',allStores)
+  allStores?.forEach((store: any) => {
     setupTheftSockets(store.id);
   });
 }

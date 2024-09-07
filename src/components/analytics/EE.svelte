@@ -25,19 +25,13 @@
     import Spinner from "../ui/spinner/Spinner.svelte";
   let chartLoading = true;
   export let allStores;
-  const fruits = [
-    { value: "apple", label: "Apple" },
-    { value: "banana", label: "Banana" },
-    { value: "blueberry", label: "Blueberry" },
-    { value: "grapes", label: "Grapes" },
-    { value: "pineapple", label: "Pineapple" },
-  ];
-
-   const stores = allStores?.map((store: any) => ({
+  
+  const stores = allStores?.map((store: any) => ({
     value: store.id,
     label: store.name,
   }));
-
+  let selectedStore = writable(stores.length > 0 ? stores?.[0].label : null);
+  
   function calculateFilledSegments(hours, totalSegments = 36) {
     const [h, m] = hours.split(":").map(Number);
     const totalMinutes = h * 60 + m;
@@ -225,7 +219,7 @@ let loading = false
 
   async function getbystoreID () {
     loading = true
-    await fetch('/api/employee/getByStoreId', {
+   const response =  await fetch('/api/employee/getByStoreId', {
         method: 'POST',
         body: JSON.stringify({ storeId: stores[0].value }),
         headers: { 'Content-Type': 'application/json' }
@@ -248,14 +242,14 @@ let loading = false
     employeeDetails.set(data)
   }
 
-  $: console.log($employeeDetails)
+  $: console.log('empdetails',$employeeDetails)
 
 </script>
 
 <section
   class="w-full p-4 flex flex-col max-h-[calc(100vh-75px)] hide-scrollbar overflow-y-auto"
 >
-  <div class="flex items-center justify-between">
+  <!-- <div class="flex items-center justify-between">
     <span
       class="flex items-center border-black border-opacity-[18%] border-[1px] rounded-md"
     >
@@ -291,7 +285,7 @@ let loading = false
         ><Upload size={18} /> Export Reports</Button
       >
     </span>
-  </div>
+  </div> -->
   <div class="grid grid-cols-8 grid-rows-4 gap-4 mt-4">
     <div
       class="col-span-8 row-span-4 h-[400px] border rounded-md rounded-t-xl bg-white dark:bg-transparent dark:border-white/[.7] flex flex-col gap-3 flex-shrink-0"
@@ -300,9 +294,10 @@ let loading = false
         class="flex bg-[#050F40] h-[60px] w-full rounded-t-xl px-4 flex-shrink-0 items-center justify-between"
       >
         <p class="text-white flex items-center gap-2 text-xl font-bold">
-          Employee Tracking <span
+          Employee Tracking 
+          <!-- <span
             class="text-xs text-white bg-pink-500 rounded-md p-1">Live</span
-          >
+          > -->
         </p>
           <Select.Root portal={null}>
             <Select.Trigger
@@ -317,6 +312,7 @@ let loading = false
                   <Select.Item
                     class="px-1"
                     on:click={async () => {
+                      selectedStore.set(store.label);
                       await getbystoreID(store.value)
                     }}
                     value={store.value}
@@ -343,7 +339,7 @@ let loading = false
       </span>
       {:else}
       {#if $efficiencyData && $efficiencyData.data && $efficiencyData?.data?.data?.length > 0}
-      <EmployeeTrackingDataTable d={$efficiencyData?.data?.data} />
+      <EmployeeTrackingDataTable d={$efficiencyData?.data?.data} selectedStore={$selectedStore}/>
       {:else}
       <span class="flex items-center justify-center h-full w-full">
         <p class='text-black'>No data</p>
@@ -353,8 +349,8 @@ let loading = false
       </div>
     </div>
 
-    <div
-      class="col-span-3 row-span-4 border rounded-md p-2 flex flex-col flex-shrink-0 h-[550px] dark:border-white/[.7]"
+    <!-- <div
+      class=" col-span-3 row-span-4 border rounded-md p-2 flex flex-col flex-shrink-0 h-[550px] dark:border-white/[.7]"
     >
       <span class="flex flex-col gap-3">
         <p class="text-[#323232] text-lg font-semibold dark:text-white">Employee Details</p>
@@ -403,12 +399,6 @@ let loading = false
         </span>
         {#if $employeeDetails?.length > 0 && $employeeData !== null}
         <span class="flex items-center gap-3 my-2">
-          <!-- <img
-            alt="Employee Image"
-            class="rounded-full object-contain size-[100px]"
-            src="data:image/png;base64,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"
-          /> -->
-
           <User size={100} />
           <span class="flex flex-col gap-4 w-full">
             <span class="items-center gap-2 flex">
@@ -428,7 +418,6 @@ let loading = false
       </span>
         {#if $employeeDetails?.length > 0 && $employeeData !== null}
       <span class="flex flex-col gap-3 mt-2">
-        <!-- ... existing employee details ... -->
         {#each [{ label: "Total Hours With Customers", hours: "05:50", color1: "#02A7FD", color2: "#141C64" }, { label: "Total Hours on Mobile", hours: "02:40", color1: "#00FEA3", color2: "#007077" }, { label: "Total Hours Sitting Idle", hours: "02:10", color1: "#FFB156", color2: "#FF007A" }, { label: "Hours filling shelves", hours: "01:10", color1: "#E4DF00", color2: "#89B900" }] as activity}
           <div class="my-2">
             <div class="flex justify-between text-sm mb-2">
@@ -453,10 +442,10 @@ let loading = false
           No employee selected
         </p>
       {/if}
-    </div>
+    </div> -->
 
-    <div
-      class="col-span-5 row-span-2 border rounded-md p-2 flex items-center justify-between flex-shrink-0 h-[200px] dark:border-white/[.7]"
+    <!-- <div
+      class="invisible col-span-5 row-span-2 border rounded-md p-2 flex items-center justify-between flex-shrink-0 h-[200px] dark:border-white/[.7]"
     >
       <span class="flex flex-col w-1/2">
         <p class="text-[#323232] text-lg flex items-center gap-2 font-semibold dark:text-white">
@@ -594,9 +583,9 @@ let loading = false
             <p class="text-sm text-gray-500">Efficiency</p>
           </div>
         </div></span>
-    </div>
+    </div> -->
 
-    <div
+    <!-- <div
       class="col-span-5 row-span-2 border rounded-md p-2 flex flex-col flex-shrink-0 h-[334px] dark:border-white/[.7]"
     >
       <span class="flex items-center justify-between">
@@ -607,7 +596,7 @@ let loading = false
       <span class='h-full w-full'>
           <canvas bind:this={chartCanvas}></canvas>
       </span>
-    </div>
+    </div> -->
   </div>
 </section>
 

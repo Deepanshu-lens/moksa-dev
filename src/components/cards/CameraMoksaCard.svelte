@@ -9,7 +9,7 @@
     Settings,
     Trash,
     X,
-    Cctv,
+    Cctv,Bone
   } from "lucide-svelte";
   import { hoveredCamera, selectedNode, cameraCounts } from "@/lib/stores";
   import { activeCamera } from "@/lib/stores";
@@ -18,6 +18,7 @@
   import CameraEditDialog from "../dialogs/CameraEditDialog.svelte";
   import { onMount } from "svelte";
   import { writable } from "svelte/store";
+    import XrayViewDialog from "../dialogs/XrayViewDialog.svelte";
 
   export let isAllFullScreen: boolean;
   export let cameraId: string;
@@ -113,6 +114,7 @@
   let optionsMenuRef;
   const isEditDialogOpen = writable(false);
   const isSettingsDialogOpen = writable(false);
+  const isXrayDialogOpen = writable(false);
 
   function handleOptionsClick(event: MouseEvent) {
     event.stopPropagation();
@@ -125,7 +127,7 @@
           optionsMenuRef && 
           !optionsMenuRef.contains(event.target as Node) &&
           !$isEditDialogOpen &&
-          !$isSettingsDialogOpen) {
+          !$isSettingsDialogOpen &&!$isXrayDialogOpen) {
         showOptions.set('');
       }
     };
@@ -290,7 +292,7 @@
         </span>
         Delete
       </button>
-      {#if ptz}
+      <!-- {#if ptz} -->
         <button
           class="flex items-center gap-2 text-black font-medium"
           on:click={() => {
@@ -302,7 +304,7 @@
             });
             showOptions.set("");
           }}
-        >
+          >
           <span
             class="size-[24px] rounded-full bg-[#015a62]/[.2] text-[#015a62] flex-shrink-0 grid place-items-center"
           >
@@ -310,7 +312,21 @@
           </span>
           PTZ Control
         </button>
-      {/if}
+        <!-- {/if} -->
+        <XrayViewDialog {name} {url} {isXrayDialogOpen}>
+<button
+class="flex items-center gap-2 text-black font-medium"
+
+>
+          <span 
+          class="size-[24px] rounded-full bg-[#015a62]/[.2] text-[#015a62] flex-shrink-0 grid place-items-center"
+          >
+          <Bone class="h-4 w-4" />
+        </span>
+        X-Ray view
+      </button>
+    </XrayViewDialog>
+      <!-- {/if} -->
     </div>
   {/if}
 </article>

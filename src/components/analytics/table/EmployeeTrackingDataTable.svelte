@@ -15,84 +15,36 @@
 
   const dispatch = createEventDispatcher();
   export let d: any;
+  export let selectedStore
 
-  console.log(d)
+  function generateRandomMinutes() {
+  // Generate random time between 30 and 240 minutes (4 hours)
+  return Math.floor(Math.random() * (240 - 30 + 1) + 30);
+}
 
-  const dbData = d.map((item: any) => {
-    return {
-      employee: `${item.first_name} ${item.last_name}`,
-      storeName: item.storeName,
-      loginTime: item.loginTime,
-      withCustomers: String(item.customer),
-      onMobile: String(item.mobile),
-      sittingIdle: String(item.idle),
-      fillingShelf: '02:24:26',
-      efficiencyScore: 69,
-    }
-  })
-  // Static data
-  // const staticData = [
-  //    {
-  //     employee: "Charles Gracia",
-  //     storeName: "Store 01",
-  //     loginTime: "04:54:19 PM",
-  //     withCustomers: "02:24:26",
-  //     onMobile: "02:24:26",
-  //     sittingIdle: "02:24:26",
-  //     fillingShelf: "02:24:26",
-  //     efficiencyScore: 70,
-  //   },
-  //   {
-  //     employee: "Emma Johnson",
-  //     storeName: "Store 02",
-  //     loginTime: "08:30:45 AM",
-  //     withCustomers: "03:15:12",
-  //     onMobile: "01:45:33",
-  //     sittingIdle: "00:45:18",
-  //     fillingShelf: "01:30:55",
-  //     efficiencyScore: 85,
-  //   },
-  //   {
-  //     employee: "Michael Chen",
-  //     storeName: "Store 03",
-  //     loginTime: "11:20:37 AM",
-  //     withCustomers: "01:55:48",
-  //     onMobile: "00:30:22",
-  //     sittingIdle: "01:10:41",
-  //     fillingShelf: "03:45:09",
-  //     efficiencyScore: 78,
-  //   },
-  //   {
-  //     employee: "Sarah Davis",
-  //     storeName: "Store 01",
-  //     loginTime: "02:15:56 PM",
-  //     withCustomers: "04:10:33",
-  //     onMobile: "00:55:17",
-  //     sittingIdle: "00:30:45",
-  //     fillingShelf: "01:15:28",
-  //     efficiencyScore: 92,
-  //   },
-  //   {
-  //     employee: "Robert Wilson",
-  //     storeName: "Store 04",
-  //     loginTime: "07:45:22 AM",
-  //     withCustomers: "02:30:15",
-  //     onMobile: "01:20:48",
-  //     sittingIdle: "01:45:36",
-  //     fillingShelf: "02:55:19",
-  //     efficiencyScore: 68,
-  //   },
-  // ];
+function formatMinutes(minutes: number): string {
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:00`;
+}
 
-  function getAisleColor(aisle: string): string {
-    const colors: { [key: string]: string } = {
-      'Liqour': '#e6f7f5',
-      'Grocery': '#e6f0ff',
-      'Clothing': '#fff9e6',
-      'Electronics': '#ffe6f0',
-    };
-    return colors[aisle] || '#e6e6e6';
+function generateRandomEfficiency() {
+  // Generate random efficiency score between 50 and 100
+  return Math.floor(Math.random() * (100 - 50 + 1) + 50);
+}
+
+const dbData = d.map((item: any) => {
+  return {
+    employee: `${item.first_name} ${item.last_name}`,
+      storeName: item.storeName === undefined ? selectedStore : item.storeName,
+    role: item.role,
+    withCustomers: formatMinutes(item.customer ?? generateRandomMinutes()),
+    onMobile: formatMinutes(item.mobile ?? generateRandomMinutes()),
+    sittingIdle: formatMinutes(item.idle ?? generateRandomMinutes()),
+    fillingShelf: formatMinutes(item.fillingShelf ?? generateRandomMinutes()),
+    efficiencyScore: item.efficiency ?? generateRandomEfficiency(),
   }
+})
 
   const data = writable(dbData);
 
@@ -102,7 +54,7 @@
   });
 
   const table = createTable(readableData, {
-    page: addPagination({ initialPageSize: 20 }),
+    page: addPagination({ initialPageSize: 3 }),
     sort: addSortBy(),
     filter: addTableFilter({
       fn: ({ filterValue, value }: { filterValue: string, value: string }) =>
@@ -126,8 +78,8 @@
       header: "Store Name",
     }),
     table.column({
-      accessor: "loginTime",
-      header: "Login Time",
+      accessor: "role",
+      header: "Role",
     }),
     table.column({
       accessor: "withCustomers",
@@ -151,8 +103,11 @@
     }),
   ]);
 
-  const { headerRows, pageRows, tableAttrs, tableBodyAttrs } =
+  const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } =
     table.createViewModel(columns);
+      const { hasNextPage, hasPreviousPage, pageIndex, pageCount } =
+    pluginStates.page;
+
 </script>
 
 <div class="m-0">
@@ -242,4 +197,35 @@
       {/each}
     </Table.Body>
   </Table.Root>
+  {#if $pageCount > 1}
+  <div class="flex flex-row items-center justify-center space-x-4 py-4">
+    <Button
+      size="sm"
+      variant="outline"
+      class="bg-transparent hover:bg-[#3D81FC] hover:text-white text-[#727272] gap-2"
+      on:click={() => ($pageIndex = $pageIndex - 1)}
+      disabled={!$hasPreviousPage}
+    >
+      Previous
+    </Button>
+    <div class="flex flex-row gap-2 items-center text-sm text-muted-foreground">
+      <span class="p-2 rounded-md aspect-square bg-[#3D81FC] bg-opacity-10">
+        {$pageIndex + 1 < 10 ? "0" + ($pageIndex + 1) : $pageIndex + 1}
+      </span>
+      of
+      <span class="p-2 rounded-md aspect-square bg-[#3D81FC] bg-opacity-20">
+        {$pageCount < 10 ? "0" + $pageCount : $pageCount}
+      </span> Page.
+    </div>
+    <Button
+      size="sm"
+      variant="outline"
+      disabled={!$hasNextPage}
+      class="bg-transparent hover:bg-[#3D81FC] hover:text-white text-[#727272] gap-2"
+      on:click={() => ($pageIndex = $pageIndex + 1)}
+    >
+      Next
+    </Button>
+  </div>
+  {/if}
 </div>

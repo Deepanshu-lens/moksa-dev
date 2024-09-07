@@ -20,6 +20,54 @@
   
 $:console.log('livetabledata',data)
 
+const staticData = [
+  {
+    emp_id: `Id: 1001`,
+    wearing_mask: true,
+    wearing_gloves: false,
+    wearing_hair_net: true,
+    wearing_uniform: true,
+    wearing_apron: false,
+    img_link: "https://example.com/image1.jpg"
+  },
+  {
+    emp_id: `Id: 1002`,
+    wearing_mask: true,
+    wearing_gloves: true,
+    wearing_hair_net: true,
+    wearing_uniform: true,
+    wearing_apron: true,
+    img_link: "https://example.com/image2.jpg"
+  },
+  {
+    emp_id: `Id: 1003`,
+    wearing_mask: false,
+    wearing_gloves: true,
+    wearing_hair_net: false,
+    wearing_uniform: true,
+    wearing_apron: true,
+    img_link: "https://example.com/image3.jpg"
+  },
+  {
+    emp_id: `Id: 1004`,
+    wearing_mask: true,
+    wearing_gloves: false,
+    wearing_hair_net: true,
+    wearing_uniform: false,
+    wearing_apron: false,
+    img_link: "https://example.com/image4.jpg"
+  },
+  {
+    emp_id: `Id: 1005`,
+    wearing_mask: true,
+    wearing_gloves: true,
+    wearing_hair_net: false,
+    wearing_uniform: true,
+    wearing_apron: true,
+    img_link: "https://example.com/image5.jpg"
+  }
+];
+
  $: dbData = data?.map((item: any) => ({
     employee: `Id: ${item.emp_id}`,
     masks: item.wearing_mask,

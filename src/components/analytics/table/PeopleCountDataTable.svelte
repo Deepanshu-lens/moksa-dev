@@ -72,22 +72,22 @@
   // console.log($storeData);
 
 
-  const dbData = $storeData.map((item:any) => {
+  $: dbData = $storeData.map((item:any) => {
     return {
-      storeName: item.store_name,
-      customerCount: Number(item.going_out) - Number(item.going_in),
-      busyHourProjections: item.busy_hours,
+      storeName: item.store,
+      customerCount: item.noofcustomers,
+      busyHourProjections: item.busyhour,
     };
   });
 
-  const data = writable(dbData);
+  $: data = writable(dbData);
 
-  const readableData = readable(dbData, (set) => {
+  $: readableData = readable(dbData, (set) => {
     const unsubscribe = data.subscribe(set);
     return unsubscribe;
   });
 
-  const table = createTable(readableData, {
+  $: table = createTable(readableData, {
     page: addPagination({ initialPageSize: 5 }),
     sort: addSortBy(),
     filter: addTableFilter({
@@ -97,7 +97,7 @@
     select: addSelectedRows(),
   });
 
-  const columns = table.createColumns([
+  $: columns = table.createColumns([
     table.column({
       accessor: "storeName",
       header: "Store Name",
@@ -125,7 +125,7 @@
 
     const pageSizeOptions = [5, 10, 20, 50];
 
-  const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } = table.createViewModel(columns);
+  $: ({ headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } = table.createViewModel(columns));
 
   $: ({ pageIndex, hasNextPage, hasPreviousPage, pageSize} = pluginStates.page);
 
@@ -146,7 +146,7 @@ function goToNextPage() {
       <span
         class="rounded-t-xl w-full h-[50px] bg-transparent flex items-center justify-between px-4"
       >
-        <p class=" text-xl font-semibold flex items-center gap-2">{$storeData[0].store_name}</p>
+        <p class=" text-xl font-semibold flex items-center gap-2">{$storeData[0].store}</p>
         <div class='flex items-center gap-4'>
 <div class="flex items-center space-x-2">
       <span class="text-sm text-gray-700 font-medium">Rows per page:</span>

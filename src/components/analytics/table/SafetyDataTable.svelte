@@ -16,8 +16,7 @@
 
   const dispatch = createEventDispatcher();
 
-  // Static data
-  $:console.log(safetyData)
+
   const dbData = safetyData?.map((item: any) => ({
     employee: `${item.first_name} ${item.last_name}`,
     masks: item.wearing_mask,
@@ -29,53 +28,53 @@
     videourl: item.video_link
   }))
 
-  const staticData = [
-    {
-      employee: "Charles Gracia",
-      masks: true,
-      gloves: false,
-      hairnet: true,
-      uniform: true,
-      breakingSOPs: true,
-      videoLink: "Watch Video"
-    },
-    {
-      employee: "Sarah Johnson",
-      masks: true,
-      gloves: true,
-      hairnet: false,
-      uniform: true,
-      breakingSOPs: false,
-      videoLink: "Watch Video"
-    },
-    {
-      employee: "Michael Lee",
-      masks: false,
-      gloves: true,
-      hairnet: true,
-      uniform: false,
-      breakingSOPs: true,
-      videoLink: "Watch Video"
-    },
-    {
-      employee: "Emily Rodriguez",
-      masks: true,
-      gloves: true,
-      hairnet: true,
-      uniform: true,
-      breakingSOPs: false,
-      videoLink: "Watch Video"
-    },
-    {
-      employee: "David Kim",
-      masks: false,
-      gloves: false,
-      hairnet: false,
-      uniform: true,
-      breakingSOPs: true,
-      videoLink: "Watch Video"
-    },
-]
+//   const staticData = [
+//     {
+//       employee: "Charles Gracia",
+//       masks: true,
+//       gloves: false,
+//       hairnet: true,
+//       uniform: true,
+//       breakingSOPs: true,
+//       videoLink: "Watch Video"
+//     },
+//     {
+//       employee: "Sarah Johnson",
+//       masks: true,
+//       gloves: true,
+//       hairnet: false,
+//       uniform: true,
+//       breakingSOPs: false,
+//       videoLink: "Watch Video"
+//     },
+//     {
+//       employee: "Michael Lee",
+//       masks: false,
+//       gloves: true,
+//       hairnet: true,
+//       uniform: false,
+//       breakingSOPs: true,
+//       videoLink: "Watch Video"
+//     },
+//     {
+//       employee: "Emily Rodriguez",
+//       masks: true,
+//       gloves: true,
+//       hairnet: true,
+//       uniform: true,
+//       breakingSOPs: false,
+//       videoLink: "Watch Video"
+//     },
+//     {
+//       employee: "David Kim",
+//       masks: false,
+//       gloves: false,
+//       hairnet: false,
+//       uniform: true,
+//       breakingSOPs: true,
+//       videoLink: "Watch Video"
+//     },
+// ]
 
 
   const data = writable(dbData);
@@ -86,7 +85,7 @@
   });
 
   const table = createTable(readableData, {
-    page: addPagination({ initialPageSize: 5 }),
+    page: addPagination({ initialPageSize: 3 }),
     sort: addSortBy(),
     filter: addTableFilter({
       fn: ({ filterValue, value }: { filterValue: string, value: string }) =>
@@ -126,8 +125,10 @@
     }),
   ]);
 
-  const { headerRows, pageRows, tableAttrs, tableBodyAttrs } =
+  const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } =
     table.createViewModel(columns);
+      const { hasNextPage, hasPreviousPage, pageIndex, pageCount } =
+    pluginStates.page;
 </script>
 
 <div class="m-0">
@@ -189,4 +190,35 @@
       {/each}
     </Table.Body>
   </Table.Root>
+  {#if $pageCount > 1}
+  <div class="flex flex-row items-center justify-center space-x-4 py-4">
+    <Button
+      size="sm"
+      variant="outline"
+      class="bg-transparent hover:bg-[#3D81FC] hover:text-white text-[#727272] gap-2"
+      on:click={() => ($pageIndex = $pageIndex - 1)}
+      disabled={!$hasPreviousPage}
+    >
+      Previous
+    </Button>
+    <div class="flex flex-row gap-2 items-center text-sm text-muted-foreground">
+      <span class="p-2 rounded-md aspect-square bg-[#3D81FC] bg-opacity-10">
+        {$pageIndex + 1 < 10 ? "0" + ($pageIndex + 1) : $pageIndex + 1}
+      </span>
+      of
+      <span class="p-2 rounded-md aspect-square bg-[#3D81FC] bg-opacity-20">
+        {$pageCount < 10 ? "0" + $pageCount : $pageCount}
+      </span> Page.
+    </div>
+    <Button
+      size="sm"
+      variant="outline"
+      disabled={!$hasNextPage}
+      class="bg-transparent hover:bg-[#3D81FC] hover:text-white text-[#727272] gap-2"
+      on:click={() => ($pageIndex = $pageIndex + 1)}
+    >
+      Next
+    </Button>
+  </div>
+  {/if}
 </div>

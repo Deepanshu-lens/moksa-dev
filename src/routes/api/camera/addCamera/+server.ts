@@ -82,7 +82,11 @@ console.log(data.cameraNumber)
 console.log(data.url.split('@')[1])
 
 const tokenToUse = mToken === undefined ? data.token : mToken
-
+console.log(tokenToUse)
+// console.log(data.url)
+// console.log(data.moksaId)
+// console.log(data.cameraNumber)
+// console.log(camera.id)
   await Promise.all([
     fetch(`${VITE_POCKETBASE_URL}/api/addStream`, {
       method: "POST",
@@ -111,11 +115,11 @@ const tokenToUse = mToken === undefined ? data.token : mToken
       console.log("Moksa API response:", moksaData);
       
       // Update PocketBase camera with Moksa ID
-      if (moksaData.id) {
+      if (moksaData.data.id) {
         await locals.pb?.collection("camera").update(camera.id, {
-          cameraId: moksaData.id
+          cameraId: moksaData.data.id
         });
-        console.log("Updated PocketBase camera with Moksa ID:", moksaData.id);
+        console.log("Updated PocketBase camera with Moksa ID:", moksaData.data.id);
       } else {
         console.warn("Moksa API response doesn't contain an ID");
       }

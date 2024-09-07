@@ -11,7 +11,7 @@
     export let allStores
     export let token:string
     let safetyData = writable([])
-    let selectedStore = writable(allStores[0])
+    let selectedStore = writable(allStores[1])
 
     onMount(async() => {
       const res = await fetch('/api/employee/getSafetyByStoreId', {

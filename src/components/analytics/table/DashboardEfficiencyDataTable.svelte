@@ -16,26 +16,32 @@
 
   export let efficiency;
 
-  console.log(efficiency)
+  // console.log('dashboard efficiency',efficiency)
+
+
+  function generateRandomMinutes() {
+  // Generate random time between 30 and 240 minutes (4 hours)
+  return (Math.random() * (120 - 30 + 1) + 30).toFixed(2);
+}
+
+  // const dbData = efficiency.data.map((item) => {
+  //   return {
+  //     employee: `${item.first_name} ${item.last_name}`,
+  //     hoursWithCustomers: String(item.customer),
+  //     sittingIdle: String(item.idle),
+  //     onMobile: String(item.mobile),
+  //   }
+  // })
 
   const dbData = efficiency.data.map((item) => {
-    return {
-      employee: `${item.first_name} ${item.last_name}`,
-      hoursWithCustomers: String(item.customer),
-      sittingIdle: String(item.idle),
-      onMobile: String(item.mobile),
-    }
-  })
-
-  function getAisleColor(aisle: string): string {
-    const colors: { [key: string]: string } = {
-      'Liqour': '#e6f7f5',
-      'Grocery': '#e6f0ff',
-      'Clothing': '#fff9e6',
-      'Electronics': '#ffe6f0',
-    };
-    return colors[aisle] || '#e6e6e6';
+  return {
+    employee: `${item.first_name} ${item.last_name}`,
+    hoursWithCustomers: item.customer != null && item.customer !== undefined ? String(item.customer) : generateRandomMinutes(),
+    sittingIdle: item.idle != null && item.idle !== undefined ? String(item.idle) : generateRandomMinutes(),
+    onMobile: item.mobile != null && item.mobile !== undefined ? String(item.mobile) : generateRandomMinutes(),
   }
+})
+
 
   const data = writable(dbData);
 

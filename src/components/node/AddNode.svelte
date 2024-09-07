@@ -57,11 +57,10 @@
     />
 
     <label for="pincode" class="font-medium text-start self-start mb-2">
-      Pincode
+      Zip
     </label>
     <input
       name="pincode"
-      type="number"
       required
       class="w-[480px] text-black dark:text-white dark:bg-background bg-transparent font-medium px-4 h-[48px] rounded-md border-2 border-solid border-[#015a62] dark:border-none mb-6"
     />

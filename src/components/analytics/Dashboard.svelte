@@ -11,6 +11,8 @@
   export let theftData;
   import * as Popover from "../ui/popover";
 
+  // console.log('busyness',busyness)
+
   const fruits = allStores?.map((store: any) => ({
     value: store.id,
     label: store.name,
@@ -763,7 +765,7 @@
         {/each}
       </div>
     </div>
-    {#if $selectedStore.label === "All Stores"}
+    <!-- {#if $selectedStore.label === "All Stores"}
       <div
         class="col-span-3 row-span-3 border rounded-md p-4 flex flex-col gap-4 h-[375px] dark:border-white/[.7]"
       >
@@ -774,31 +776,6 @@
             </p>
             <p class="text-sm font-medium text-[#8C8C8C]">Average busy hours</p>
           </span>
-          <!-- <Select.Root portal={null}>
-          <Select.Trigger
-            class="w-[100px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg dark:bg-transparent"
-          >
-            <Select.Value placeholder={$selectedStore.label} />
-
-          </Select.Trigger>
-          <Select.Content class="max-h-[200px] overflow-y-auto">
-            <Select.Group>
-              <Select.Item on:click={() => selectedStore.set({ value: -1, label: 'All Stores' })}
-                class="px-1"
-                value="All Stores"
-                label="All Stores">All Stores</Select.Item
-              >
-              {#each fruits as fruit}
-                <Select.Item on:click={() => selectedStore.set(fruit)}
-                  class="px-1"
-                  value={fruit.value}
-                  label={fruit.label}>{fruit.label}</Select.Item
-                >
-              {/each}
-            </Select.Group>
-          </Select.Content>
-          <Select.Input name="favoriteFruit" />
-        </Select.Root> -->
         </span>
         <div class="h-full w-full">
           {#if busyness.length === 0}
@@ -808,9 +785,9 @@
           {/if}
         </div>
       </div>
-    {/if}
+    {/if} -->
     <div
-      class="col-span-5 row-span-3 border rounded-md p-4 flex flex-col gap-4 h-[375px] dark:border-white/[.7]"
+      class="col-span-8 row-span-3 border rounded-md p-4 flex flex-col gap-4 h-[375px] dark:border-white/[.7]"
     >
       <span class="flex items-center justify-between font-semibold">
         <p class="text-[#323232] dark:text-white">Stores Overview</p>

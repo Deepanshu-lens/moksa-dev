@@ -351,10 +351,10 @@ export class VideoRTC extends HTMLElement {
       if (typeof ev.data === "string") {
         const msg = JSON.parse(ev.data);
         if (msg.value && msg.value.includes("No connection could be made")) {
-          console.log("connection error",this.wsURL);
-let camName = this.wsURL.split('&cn=')[1]
+          console.log("connection error", this.wsURL);
+          let camName = this.wsURL.split('&cn=')[1]
           toast.error(`Connection error: No connection could be made with ${camName}!`);
-     
+
         }
         for (const mode in this.onmessage) {
           this.onmessage[mode](msg);
@@ -524,78 +524,239 @@ let camName = this.wsURL.split('&cn=')[1]
       };
     };
   }
+  // onmse() {
+  //   const retryDelay = 30; // 2 seconds delay between retries
+  //   let ms;
+  //   let sb; // Track the SourceBuffer
+  //   let buf = new Uint8Array(2 * 1024 * 1024);
+  //   let bufLen = 0;
+
+  //   const setupMSE = () => {
+  //     console.log("Attempting MSE setup");
+
+  //     if ("ManagedMediaSource" in window) {
+  //       const MediaSource = window.ManagedMediaSource;
+
+  //       ms = new MediaSource();
+  //       ms.addEventListener(
+  //         "sourceopen",
+  //         () => {
+  //           this.send({
+  //             type: "mse",
+  //             value: this.codecs(MediaSource.isTypeSupported),
+  //           });
+  //         },
+  //         { once: true },
+  //       );
+
+  //       this.video.disableRemotePlayback = true;
+  //       this.video.srcObject = ms;
+  //     } else {
+  //       ms = new MediaSource();
+  //       ms.addEventListener(
+  //         "sourceopen",
+  //         () => {
+  //           URL.revokeObjectURL(this.video.src);
+  //           this.send({
+  //             type: "mse",
+  //             value: this.codecs(MediaSource.isTypeSupported),
+  //           });
+  //         },
+  //         { once: true },
+  //       );
+
+  //       this.video.src = URL.createObjectURL(ms);
+  //       this.video.srcObject = null;
+  //     }
+
+  //     this.play();
+  //     setupSourceBuffer();
+  //   };
+
+  //   const setupSourceBuffer = () => {
+  //     this.onmessage["mse"] = (msg) => {
+  //       if (msg.type !== "mse") return;
+
+  //       this.mseCodecs = msg.value;
+
+  //       try {
+  //         sb = ms.addSourceBuffer(msg.value);
+  //         sb.mode = "segments"; // segments or sequence
+
+  //         console.log("SourceBuffer initialized with codec:", msg.value);
+
+  //         sb.addEventListener("updateend", () => {
+  //           handleBufferUpdates(sb);
+  //         });
+  //       } catch (e) {
+  //         console.error("Error creating SourceBuffer:", e);
+  //         retryAfterDelay(); // Retry on SourceBuffer creation failure
+  //       }
+
+  //       this.ondata = (data) => {
+  //         if (!sb || ms.readyState !== "open") {
+  //           console.error("SourceBuffer or MediaSource is not ready. Retrying...");
+  //           retryAfterDelay(); // Retry if SourceBuffer or MediaSource isn't ready
+  //           return;
+  //         }
+
+  //         if (sb.updating || bufLen > 0) {
+  //           const b = new Uint8Array(data);
+  //           buf.set(b, bufLen);
+  //           bufLen += b.byteLength;
+  //         } else {
+  //           try {
+  //             sb.appendBuffer(data);
+  //           } catch (e) {
+  //             console.error("Error appending buffer:", e);
+  //             retryAfterDelay(); // Retry on error
+  //           }
+  //         }
+  //       };
+  //     };
+  //   };
+  //   const MAX_BUFFER_SIZE_SECONDS = 30;
+  //   const handleBufferUpdates = (sb) => {
+  //     if (sb.updating) return;
+
+  //     try {
+  //       if (bufLen > 0) {
+  //         const data = buf.slice(0, bufLen);
+  //         bufLen = 0;
+  //         sb.appendBuffer(data);
+  //       }
+
+  //       // Trim buffer to avoid it growing indefinitely
+  //       if (sb.buffered && sb.buffered.length) {
+  //         const currentTime = this.video.currentTime;
+  //         const end = sb.buffered.end(sb.buffered.length - 1);
+  //         const start = sb.buffered.start(0);
+
+  //         // Remove content that is more than MAX_BUFFER_SIZE_SECONDS behind currentTime
+  //         if (end - start > MAX_BUFFER_SIZE_SECONDS) {
+  //           const trimUpTo = currentTime - MAX_BUFFER_SIZE_SECONDS;
+  //           if (trimUpTo > start) {
+  //             sb.remove(start, trimUpTo);
+  //             console.log(`Trimmed buffer from ${start} to ${trimUpTo}`);
+  //           }
+  //         }
+
+  //         ms.setLiveSeekableRange(currentTime, currentTime + MAX_BUFFER_SIZE_SECONDS);
+  //       }
+  //     } catch (e) {
+  //       console.error("Error during buffer updates:", e);
+  //       retryAfterDelay(); // Retry on error
+  //     }
+  //   };
+  //   const retryAfterDelay = () => {
+  //     console.log(`Retrying MSE setup in ${retryDelay / 1000} seconds...`);
+  //     if (sb) {
+  //       try {
+  //         ms.removeSourceBuffer(sb);
+  //       } catch (e) {
+  //         console.error("Error removing SourceBuffer:", e);
+  //       }
+  //     }
+  //     sb = null; // Reset SourceBuffer
+  //     buf = new Uint8Array(2 * 1024 * 1024); // Clear buffer
+  //     bufLen = 0;
+
+  //     // Retry the setup after the delay
+  //     setTimeout(() => {
+  //       setupMSE();
+  //     }, retryDelay);
+  //   };
+
+  //   setupMSE();
+  // }
 
   onwebrtc() {
-    const pc = new RTCPeerConnection(this.pcConfig);
+    const retryDelay = 2000; // 2 seconds delay between retries
+    const retryConnection = () => {
+      const pc = new RTCPeerConnection(this.pcConfig);
+      console.log("Attempting WebRTC Connection", pc);
 
-    pc.addEventListener("icecandidate", (ev) => {
-      if (
-        ev.candidate &&
-        this.mode.indexOf("webrtc/tcp") >= 0 &&
-        ev.candidate.protocol === "udp"
-      )
-        return;
+      pc.addEventListener("icecandidate", (ev) => {
+        if (
+          ev.candidate &&
+          this.mode.indexOf("webrtc/tcp") >= 0 &&
+          ev.candidate.protocol === "udp"
+        )
+          return;
 
-      const candidate = ev.candidate ? ev.candidate.toJSON().candidate : "";
-      this.send({ type: "webrtc/candidate", value: candidate });
-    });
+        const candidate = ev.candidate ? ev.candidate.toJSON().candidate : "";
+        this.send({ type: "webrtc/candidate", value: candidate });
+      });
 
-    pc.addEventListener("connectionstatechange", () => {
-      if (pc.connectionState === "connected") {
-        const tracks = pc.getReceivers().map((receiver) => receiver.track);
-        /** @type {HTMLVideoElement} */
-        const video2 = document.createElement("video");
-        video2.addEventListener("loadeddata", () => this.onpcvideo(video2), {
-          once: true,
-        });
-        video2.srcObject = new MediaStream(tracks);
-      } else if (
-        pc.connectionState === "failed" ||
-        pc.connectionState === "disconnected"
-      ) {
-        pc.close(); // stop next events
+      pc.addEventListener("connectionstatechange", () => {
+        if (pc.connectionState === "connected") {
+          const tracks = pc.getReceivers().map((receiver) => receiver.track);
+          /** @type {HTMLVideoElement} */
+          const video2 = document.createElement("video");
+          video2.addEventListener("loadeddata", () => {
+            if (video2.readyState >= 2) {
+              console.log("Video data loaded successfully.");
+              this.onpcvideo(video2);
+            } else {
+              console.log("Video data not loaded, retrying connection...");
+              retryAfterDelay();
+            }
+          }, { once: true });
 
-        this.pcState = WebSocket.CLOSED;
-        this.pc = null;
+          video2.srcObject = new MediaStream(tracks);
+        } else if (
+          pc.connectionState === "failed" ||
+          pc.connectionState === "disconnected"
+        ) {
+          console.log("Connection failed or disconnected, retrying connection...");
+          retryAfterDelay();
+        }
+      });
 
-        this.onconnect();
-      }
-    });
+      this.onmessage["webrtc"] = (msg) => {
+        switch (msg.type) {
+          case "webrtc/candidate":
+            if (
+              this.mode.indexOf("webrtc/tcp") >= 0 &&
+              msg.value.indexOf(" udp ") > 0
+            )
+              return;
 
-    this.onmessage["webrtc"] = (msg) => {
-      switch (msg.type) {
-        case "webrtc/candidate":
-          if (
-            this.mode.indexOf("webrtc/tcp") >= 0 &&
-            msg.value.indexOf(" udp ") > 0
-          )
-            return;
+            pc.addIceCandidate({ candidate: msg.value, sdpMid: "0" }).catch(
+              (er) => {
+                console.warn(er);
+              },
+            );
+            break;
+          case "webrtc/answer":
+            pc.setRemoteDescription({ type: "answer", sdp: msg.value }).catch(
+              (er) => {
+                console.warn(er);
+              },
+            );
+            break;
+          case "error":
+            if (msg.value.indexOf("webrtc/offer") < 0) return;
+            pc.close();
+        }
+      };
 
-          pc.addIceCandidate({ candidate: msg.value, sdpMid: "0" }).catch(
-            (er) => {
-              console.warn(er);
-            },
-          );
-          break;
-        case "webrtc/answer":
-          pc.setRemoteDescription({ type: "answer", sdp: msg.value }).catch(
-            (er) => {
-              console.warn(er);
-            },
-          );
-          break;
-        case "error":
-          if (msg.value.indexOf("webrtc/offer") < 0) return;
-          pc.close();
-      }
+      this.createOffer(pc).then((offer) => {
+        this.send({ type: "webrtc/offer", value: offer.sdp });
+      });
+
+      this.pcState = WebSocket.CONNECTING;
+      this.pc = pc;
     };
 
-    this.createOffer(pc).then((offer) => {
-      this.send({ type: "webrtc/offer", value: offer.sdp });
-    });
+    const retryAfterDelay = () => {
+      console.log(`Retrying connection in ${retryDelay / 1000} seconds...`);
+      setTimeout(() => {
+        retryConnection();
+      }, retryDelay);
+    };
 
-    this.pcState = WebSocket.CONNECTING;
-    this.pc = pc;
+    retryConnection();
   }
 
   /**

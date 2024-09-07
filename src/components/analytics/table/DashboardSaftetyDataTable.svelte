@@ -14,6 +14,8 @@
 
   export let safetyData;
 
+  // console.log('safetyDataTable',safetyData)
+
   const dbData = safetyData?.data.map((item: any) => ({
     employee: `${item.first_name} ${item.last_name}`,
     mask: item.wearing_mask,
@@ -69,8 +71,10 @@
     }),
   ]);
 
-  const { headerRows, pageRows, tableAttrs, tableBodyAttrs } =
+    const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } =
     table.createViewModel(columns);
+      const { hasNextPage, hasPreviousPage, pageIndex, pageCount } =
+    pluginStates.page;
 </script>
 
 <div class="m-0">
@@ -124,4 +128,35 @@
       {/each}
     </Table.Body>
   </Table.Root>
+  {#if $pageCount > 1}
+  <div class="flex flex-row items-center justify-center space-x-4 py-4">
+    <Button
+      size="sm"
+      variant="outline"
+      class="bg-transparent hover:bg-[#3D81FC] hover:text-white text-[#727272] gap-2"
+      on:click={() => ($pageIndex = $pageIndex - 1)}
+      disabled={!$hasPreviousPage}
+    >
+      Previous
+    </Button>
+    <div class="flex flex-row gap-2 items-center text-sm text-muted-foreground">
+      <span class="p-2 rounded-md aspect-square bg-[#3D81FC] bg-opacity-10">
+        {$pageIndex + 1 < 10 ? "0" + ($pageIndex + 1) : $pageIndex + 1}
+      </span>
+      of
+      <span class="p-2 rounded-md aspect-square bg-[#3D81FC] bg-opacity-20">
+        {$pageCount < 10 ? "0" + $pageCount : $pageCount}
+      </span> Page.
+    </div>
+    <Button
+      size="sm"
+      variant="outline"
+      disabled={!$hasNextPage}
+      class="bg-transparent hover:bg-[#3D81FC] hover:text-white text-[#727272] gap-2"
+      on:click={() => ($pageIndex = $pageIndex + 1)}
+    >
+      Next
+    </Button>
+  </div>
+  {/if}
 </div>

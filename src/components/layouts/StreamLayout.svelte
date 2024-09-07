@@ -69,7 +69,7 @@
     console.log(`Handling H265 error for camera ID: ${cameraId}`); // Debug: Log when handling
     const video = videos[cameraId];
     if (video) {
-      video.mode = "mse";
+      video.mode = "webrtc";
       if (video) {
         video.remove();
         delete videos[cameraId];
@@ -83,6 +83,7 @@
   };
 
   const initVideo = async (camera: Camera, mode) => {
+    console.log("initvid", camera.mse, camera.name);
     const index = $selectedNode.camera.findIndex((cam) => cam.id === camera.id);
     if (videos[camera.id]) {
       console.log("video c.id exists", camera.name);
@@ -91,6 +92,7 @@
     let video = document.createElement("video-stream") as VideoStreamType;
     video.id = `stream-${camera.id}`;
     video.mode = "mse";
+    // video.mode = camera.mse ? 'mse' : "webrtc";
     video.url = camera.url;
     video.src = new URL(
       `ws://${neededUrl}:8082/api/ws?src=${camera.id}&nodeID=${1}&cn=${camera.name}`,
@@ -409,7 +411,7 @@
               ? Math.ceil(streamCount / 8)
               : Math.ceil(streamCount / (layoutRows * layoutColumns));
 
-     setTimeout(() => {
+    setTimeout(() => {
       createRoiLines();
       initSortable();
     }, 2000);
@@ -959,12 +961,12 @@
     }
   }
 
-  onMount(() => {
-    if ($selectedNode) {
-      stopRefreshing();
-      setTimeout(startRefreshing, 15000);
-    }
-  });
+  // onMount(() => {
+  //   if ($selectedNode) {
+  //     stopRefreshing();
+  //     setTimeout(startRefreshing, 15000);
+  //   }
+  // });
 
   onDestroy(() => {
     stopRefreshing();
@@ -1093,12 +1095,14 @@
                   {#key pageIndex * ($selectedNode.maxStreamsPerPage === 5 || $selectedNode.maxStreamsPerPage === 7 ? $selectedNode.maxStreamsPerPage + 1 : $selectedNode.maxStreamsPerPage) + slotIndex}
                     <!-- svelte-ignore a11y-click-events-have-key-events -->
                     <div
-                       id={`grid-cell-${ pageIndex *
-                        ($selectedNode.maxStreamsPerPage === 5 ||
-                        $selectedNode.maxStreamsPerPage === 7
-                          ? $selectedNode.maxStreamsPerPage + 1
-                          : $selectedNode.maxStreamsPerPage) +
-                        slotIndex}`}
+                      id={`grid-cell-${
+                        pageIndex *
+                          ($selectedNode.maxStreamsPerPage === 5 ||
+                          $selectedNode.maxStreamsPerPage === 7
+                            ? $selectedNode.maxStreamsPerPage + 1
+                            : $selectedNode.maxStreamsPerPage) +
+                        slotIndex
+                      }`}
                       class="relative h-full"
                       style={$selectedNode.maxStreamsPerPage === 10 &&
                       slotIndex === 0

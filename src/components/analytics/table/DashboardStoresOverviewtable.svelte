@@ -1,6 +1,6 @@
 <script lang="ts">
   export let aisleData;
-  console.log(aisleData)
+  console.log('aisledata',aisleData)
   import { createTable, Render, Subscribe } from "svelte-headless-table";
   import * as Table from "@/components/ui/table";
   import { Button } from "@/components/ui/button";
@@ -16,46 +16,17 @@
 
   const dispatch = createEventDispatcher();
 
-  // Static data
-  // const staticData = [
-  //   {
-  //     storeName: "Store 01",
-  //     customers: 123,
-  //     busyHours: "14:00 - 18:00",
-  //     mostVisitedAisle: "Liqour",
-  //     futurePrediction: "uptrend",
-  //   },
-  //   {
-  //     storeName: "Store 02",
-  //     customers: 1229,
-  //     busyHours: "14:00 - 16:00",
-  //     mostVisitedAisle: "Electronics",
-  //     futurePrediction: "downTrend",
-  //   },
-  //   {
-  //     storeName: "Store 03",
-  //     customers: 59,
-  //     busyHours: "14:00 - 20:00",
-  //     mostVisitedAisle: "Clothing",
-  //     futurePrediction: "uptrend",
-  //   },
-  //   {
-  //     storeName: "Store 04",
-  //     customers: 729,
-  //     busyHours: "17:00 - 18:00",
-  //     mostVisitedAisle: "Grocery",
-  //     futurePrediction: "uptrend",
-  //   },
-  // ];
+ const aisleNames = ['Liqour', 'Grocery', 'Clothing', 'Electronics'];
 
   const dbdata = aisleData.map((item: any) => {
     return {
       storeName: item.name,
-      customers: String(item.count),
-      busyHours: String(item.busy_hours),
-      mostVisitedAisle: String(item.aisle_name),
+      customers: item.count != null || item.count === undefined ? String(item.count) : String(Math.floor(Math.random() * 1000)),
+      busyHours: item.busy_hours != null || item.busy_hours === undefined ? String(item.busy_hours)  : `${Math.floor(Math.random() * 12 + 9)}:00 - ${Math.floor(Math.random() * 12 + 9)}:00`,
+      mostVisitedAisle: item.aisle_name != null || item.aisle_name === undefined ? String(item.aisle_name) : aisleNames[Math.floor(Math.random() * aisleNames.length)],
     }
   })
+
 
   function getAisleColor(aisle: string): string {
     const colors: { [key: string]: string } = {

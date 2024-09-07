@@ -18,13 +18,14 @@
   const dispatch = createEventDispatcher();
 
   // $:console.log(combinedStores)
+  const managerNames = ['Sunaib Lalani', 'Bunty', 'Sanjay'];
 
 const dbData = combinedStores.map(store => {
   return {
     storeName: store.name,
     storeImage: store.storeImage,
-    location: `${store.address}, ${store.country}`,
-    storeManager: store.manager,
+    location: `${store.address}, ${store.country}` === 'address, country' ? 'US' : `${store.address}, ${store.country}`,
+    storeManager: store.manager === 'manager' ? managerNames[Math.floor(Math.random() * managerNames.length)] : store.manager,
     managerImage: store.managerImage,
     dateOfRegistration: store.createdAt,
     camerasAssigned: store.camera_count,

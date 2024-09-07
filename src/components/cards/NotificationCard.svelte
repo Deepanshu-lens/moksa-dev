@@ -26,7 +26,7 @@
     </span>
     <span class="flex flex-col gap-2 w-full">
       <span class="flex items-center justify-between"
-        ><h2 class="font-medium">{title}</h2>
+        ><h2 class="font-medium text-black">{title}</h2>
         <p class="text-[#686868] text-xs mr-1">{time}</p></span
       >
       <p class="text-[#686868] text-xs">{description}</p>

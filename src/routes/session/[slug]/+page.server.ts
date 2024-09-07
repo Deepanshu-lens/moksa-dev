@@ -24,6 +24,14 @@ export const actions = {
       ?.collection("node")
       .create({ name, session: locals.user.record.session[0], mobileLayout: 1 });
 
+
+      console.log(token)
+      console.log(name)
+      console.log(address)
+      console.log(pincode)
+      console.log(country)
+      console.log(manager)
+
     const moksaStore = await fetch(`https://api.moksa.ai/store/create`, {
       method: 'POST',
       headers: {
@@ -32,8 +40,9 @@ export const actions = {
       },
       body: JSON.stringify({ name: name, address: address, pincode: pincode, country: country, manager: manager }),
     });
+    console.log(moksaStore)
     const store = await moksaStore.json();
-    console.log(store)
+    console.log('store',store)
 
     if (store.status === 201) {
       console.log("Store created successfully")
@@ -42,13 +51,14 @@ export const actions = {
         .update(node?.id, {
           "moksaId": store.data.id
         });
+        await locals.pb
+        ?.collection("session")
+        .update(locals.user.record.session[0], {
+          "node+": [node?.id],
+        });
     }
 
-    await locals.pb
-      ?.collection("session")
-      .update(locals.user.record.session[0], {
-        "node+": [node?.id],
-      });
+  
   },
 };
 

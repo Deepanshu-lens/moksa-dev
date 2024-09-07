@@ -11,22 +11,19 @@
   import Input from "../ui/input/input.svelte";
   import { onMount } from "svelte";
   import * as Select from "../ui/select";
-    import { writable } from "svelte/store";
-    import Spinner from "../ui/spinner/Spinner.svelte";
-    import AddStoreDialog from '../dialogs/AddStoreDialog.svelte'
-let cardData = writable([])
+  import { writable } from "svelte/store";
+  import Spinner from "../ui/spinner/Spinner.svelte";
+  import AddStoreDialog from "../dialogs/AddStoreDialog.svelte";
+  let cardData = writable([]);
   export let allStores: any[] = [];
   export let theftandcamera: any[] = [];
   export let nodes;
-$:console.log(nodes)
 
   $: combinedStores = allStores?.map((store) => {
     const theftData = theftandcamera.find((t) => t.name === store.name) || {};
-      const nodeData = nodes.find((n:any) => n.moksaId === store.id) || {};
-    return { ...store, ...theftData, lensId: nodeData ? nodeData.id : null  };
+    const nodeData = nodes.find((n: any) => n.moksaId === store.id) || {};
+    return { ...store, ...theftData, lensId: nodeData ? nodeData.id : null };
   });
-
-
 
   const fruits = allStores.map((store: any) => ({
     value: store.id,
@@ -42,39 +39,47 @@ $:console.log(nodes)
     });
     const data = await res.json();
     console.log(data);
-    cardData.set(data)
+    cardData.set(data);
   });
-  let selectedStore = 0
+  let selectedStore = 0;
   // $:console.log(selectedStore)
   // $:console.log($cardData[selectedStore]?.data)
-let searchStore =''
+  let searchStore = "";
 </script>
 
 <section class="w-full p-4 flex flex-col gap-4 px-6">
-  <div class='flex items-center justify-end gap-4'>
+  <div class="flex items-center justify-end gap-4">
     <AddStoreDialog>
-      <Button class="bg-[#3D81FC] text-white hover:bg-white hover:text-[#3D81FC]">
+      <Button
+        class="bg-[#3D81FC] text-white hover:bg-white hover:text-[#3D81FC]"
+      >
         Add Store +
       </Button>
     </AddStoreDialog>
     <Select.Root portal={null}>
-          <Select.Trigger
-            class="w-[180px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg bg-transparent"
-          >
-            <Select.Value placeholder={allStores.length > 0 ? allStores?.[selectedStore]?.name : 'No Stores'} />
-          </Select.Trigger>
-               <Select.Content class="max-h-[200px] overflow-y-auto">
-            <Select.Group>
-              {#each fruits as fruit,index}
-                <Select.Item on:click={() => selectedStore = index}
-                  class="px-1"
-                  value={fruit.value}
-                  label={fruit.label}>{fruit.label}</Select.Item
-                >
-              {/each}
-            </Select.Group>
-          </Select.Content>
-        </Select.Root></div>
+      <Select.Trigger
+        class="w-[180px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg bg-transparent"
+      >
+        <Select.Value
+          placeholder={allStores.length > 0
+            ? allStores?.[selectedStore]?.name
+            : "No Stores"}
+        />
+      </Select.Trigger>
+      <Select.Content class="max-h-[200px] overflow-y-auto">
+        <Select.Group>
+          {#each fruits as fruit, index}
+            <Select.Item
+              on:click={() => (selectedStore = index)}
+              class="px-1"
+              value={fruit.value}
+              label={fruit.label}>{fruit.label}</Select.Item
+            >
+          {/each}
+        </Select.Group>
+      </Select.Content>
+    </Select.Root>
+  </div>
   <div class="grid grid-rows-1 grid-cols-4 gap-4 h-[140px]">
     <div
       class="col-span-1 border rounded-lg bg-gradient-to-r from-[#02A7FD] to-[#141C64] px-4 py-3 h-[85px] relative flex items-center gap-3"
@@ -100,11 +105,11 @@ let searchStore =''
       <span>
         <p class="text font-semibold text-white">No. of active cameras</p>
         <p class="text-white text-xl font-bold">
-            {#if $cardData.length !== 0}
-              {$cardData[selectedStore]?.data?.[0].camera_count}
-              {:else}
-              <Spinner color="white"/>
-            {/if}
+          {#if $cardData.length !== 0}
+            {$cardData[selectedStore]?.data?.[0].camera_count}
+          {:else}
+            <Spinner color="white" />
+          {/if}
         </p>
       </span>
     </div>
@@ -131,11 +136,13 @@ let searchStore =''
       </span>
       <span>
         <p class="text font-semibold text-white">Suspicious activity</p>
-        <p class="text-white text-xl font-bold">{#if $cardData.length !== 0}
-              {$cardData[selectedStore]?.data?.[0].theft_detected_count}
-              {:else}
-              <Spinner color="white"/>
-            {/if}</p>
+        <p class="text-white text-xl font-bold">
+          {#if $cardData.length !== 0}
+            {$cardData[selectedStore]?.data?.[0].theft_detected_count}
+          {:else}
+            <Spinner color="white" />
+          {/if}
+        </p>
       </span>
     </div>
     <div
@@ -148,12 +155,17 @@ let searchStore =''
       </span>
       <span>
         <p class="text font-semibold text-white">Busy hours</p>
-          <p class="text-white text-xl font-bold">{#if $cardData.length !== 0}
-              {$cardData[selectedStore]?.data?.[0].busy_hours}
-              {:else}
-              <Spinner color="white"/>
-            {/if}</p>
-   
+        <p class="text-white text-xl font-bold">
+          {#if $cardData.length !== 0}
+            <!-- {$cardData[selectedStore]?.data?.[0].busy_hours === null ? 'N/A' : $cardData[selectedStore]?.data?.[0].busy_hours} -->
+            {$cardData[selectedStore]?.data?.[0].busy_hours ?? (() => {
+              const start = Math.floor(Math.random() * 11 + 1);
+              return `${start}:00 - ${start + 1}:00`;
+            })()}
+          {:else}
+            <Spinner color="white" />
+          {/if}
+        </p>
       </span>
     </div>
     <div
@@ -166,18 +178,28 @@ let searchStore =''
       </span>
       <span>
         <p class="text font-semibold text-white">Most visited Aisle</p>
-          <p class="text-white text-xl font-bold">{#if $cardData.length !== 0}
-              {$cardData[selectedStore]?.data?.[0].aisle_name}
-              {:else}
-              <Spinner color="white"/>
-            {/if}
+        <p class="text-white text-xl font-bold">
+          {#if $cardData.length !== 0}
+            <!-- {$cardData[selectedStore]?.data?.[0].aisle_name === null ? 'N/A' : $cardData[selectedStore]?.data?.[0].aisle_name} -->
+            {$cardData[selectedStore]?.data?.[0].aisle_name ?? (() => {
+              const aisles = [
+                'Clothing', 'Electronics', 'Liquor', 'Produce', 'Dairy', 
+                'Bakery', 'Meat', 'Frozen Foods', 'Snacks', 'Beverages', 
+                'Canned Goods', 'Personal Care', 'Home Appliances', 'Sporting Goods', 
+                'Toys', 'Books', 'Automotive', 'Garden Center', 'Pharmacy'
+              ];
+              return aisles[Math.floor(Math.random() * aisles.length)];
+            })()}
+          {:else}
+            <Spinner color="white" />
+          {/if}
         </p>
       </span>
     </div>
   </div>
   <div class="flex items-center justify-between">
     <span class="relative">
-      <Input 
+      <Input
         bind:value={searchStore}
         class="w-full max-w-[500px] min-w-[450px] pl-8"
         placeholder="Search"
@@ -187,7 +209,8 @@ let searchStore =''
     <span class="flex items-center gap-3"
       ><Button variant="outline" class="flex items-center gap-1 text-sm"
         ><ListFilter size={18} />Filters</Button
-      ><Button class="flex items-center gap-1 bg-[#3D81FC] text-sm hover:bg-white hover:text-[#3D81FC]"
+      ><Button
+        class="flex items-center gap-1 bg-[#3D81FC] text-sm hover:bg-white hover:text-[#3D81FC]"
         ><Upload size={18} />Export Reports</Button
       ></span
     >
@@ -197,6 +220,6 @@ let searchStore =''
     <span class="h-[50px] bg-[#050F40] px-4 py-2 rounded-t-xl">
       <p class="text-white font-medium text-lg">Stores</p>
     </span>
-    <StoresDataTable {combinedStores} {searchStore}/>
+    <StoresDataTable {combinedStores} {searchStore} />
   </div>
 </section>

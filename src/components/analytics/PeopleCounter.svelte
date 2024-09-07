@@ -141,9 +141,9 @@ let liveData = writable([]);
       },
     );
     const d = await weekData.json();
-    console.log(d);
+    console.log('week data people count',d);
     if(d.status === 200) {
-      storeData.set(d.data)
+      storeData.set(d.data.data)
     }
   }
 
@@ -245,7 +245,7 @@ let liveData = writable([]);
 
 let busyHours = 'N/A'
 
-// $: console.log($storeData)
+$: console.log('storesdata',$storeData)
 // $: console.log(allStores)
 
   onMount(async () => {
@@ -320,7 +320,7 @@ let busyHours = 'N/A'
         <Clock size={40} />
       </span>
       <span>
-        <p class="text-white text-xl font-bold">3:00 - 5:00</p>
+        <p class="text-white text-xl font-bold">{$storeData?.[0]?.busyhour === undefined || $storeData?.[0].busyhour === null ? 'N/A' : $storeData?.[0]?.busyhour}</p>
         <p class="text-sm font-semibold text-white">peak hours</p>
       </span>
     </div>
@@ -354,7 +354,7 @@ let busyHours = 'N/A'
     </div>
 
     <div
-      class="col-span-5 row-span-4 border rounded-md flex flex-col rounded-t-xl dark:border-white/[.7]"
+      class="col-span-8 row-span-4 border rounded-md flex flex-col rounded-t-xl dark:border-white/[.7]"
     >
       <span
         class="rounded-t-xl w-full h-[50px] bg-[#050F40] flex items-center justify-between px-4"
@@ -374,7 +374,7 @@ let busyHours = 'N/A'
   {/if}
       </div>
     </div>
-    <div
+    <!-- <div
       class="col-span-3 row-span-4 border rounded-md p-2 flex flex-col dark:border-white/[.7]"
     >
       <p
@@ -386,9 +386,9 @@ let busyHours = 'N/A'
       <span class="flex w-full h-full">
         <canvas bind:this={chartCanvas}></canvas>
       </span>
-    </div>
+    </div> -->
     <div
-      class="col-span-5 row-span-4 border rounded-md p-2 flex flex-col dark:border-white/[.7]"
+      class="col-span-8 row-span-4 border rounded-md p-2 flex flex-col dark:border-white/[.7]"
     >
       <div class="h-full w-full">
         {#if $storeData.length > 0}

@@ -10,7 +10,7 @@
   import { ChevronDown, PlusCircle } from "lucide-svelte";
   import * as Select from "@/components/ui/select/index";
   import { page } from "$app/stores";
-    import { onMount } from "svelte";
+  import { onMount } from "svelte";
   let cameraName = "";
   let cameraNumber: number | null = null;
   let cameraURL = "";
@@ -28,8 +28,8 @@
   let motionThresh: number = 0;
   let nvrName = "";
   let sparshID = "";
-  let personCount = false
-  let nvrPersonCount = false
+  let personCount = false;
+  let nvrPersonCount = false;
 
   let mode = 2;
   let uploadMode = 1;
@@ -40,9 +40,9 @@
   let addDevice = 1;
   let nodeName = [];
   let nodeAddress = [];
-  let nodePin= []
-  let nodeCountry = []
-  let nodeManager = []
+  let nodePin = [];
+  let nodeCountry = [];
+  let nodeManager = [];
   let subNodeNames = [];
   let chosenNode: any;
   let httpPort: null | number = null;
@@ -61,10 +61,14 @@
   // $: console.log($selectedNode.moksaId)
 
   const onSubmit = () => {
-    console.log($selectedNode?.allCameraNumbers)
-    console.log(cameraNumber)
-    console.log(typeof cameraNumber)
-    if (cameraNumber === null || cameraNumber === "" || cameraNumber === undefined) {
+    console.log($selectedNode?.allCameraNumbers);
+    console.log(cameraNumber);
+    console.log(typeof cameraNumber);
+    if (
+      cameraNumber === null ||
+      cameraNumber === "" ||
+      cameraNumber === undefined
+    ) {
       toast.error("Camera number is required");
       return;
     }
@@ -78,15 +82,16 @@
       let modifiedSubURL = subURL;
       const urlParts = cameraURL.split("@");
       console.log(urlParts);
-      
+
       if (urlParts.length > 2) {
-              modifiedCameraURL = urlParts[0] + "%40" + urlParts.slice(1).join("@");
+        modifiedCameraURL = urlParts[0] + "%40" + urlParts.slice(1).join("@");
       }
 
-         const subUrlParts = subURL.split("@");
-         console.log(subUrlParts)
+      const subUrlParts = subURL.split("@");
+      console.log(subUrlParts);
       if (subUrlParts.length > 2) {
-        modifiedSubURL = subUrlParts[0] + "%40" + subUrlParts.slice(1).join("@");
+        modifiedSubURL =
+          subUrlParts[0] + "%40" + subUrlParts.slice(1).join("@");
       }
       console.log(modifiedCameraURL);
       console.log(modifiedSubURL);
@@ -116,14 +121,14 @@
             motionThresh === 0 ? 1000 : motionThresh === 50 ? 2500 : 5000,
           personCount: personCount,
           cameraNumber: parseInt(cameraNumber),
-          moksaId: $selectedNode.moksaId
+          moksaId: $selectedNode.moksaId,
         }),
       }).then((response) => {
         if (response.ok) {
           dialogOpen = false;
           toast("Camera added!");
         } else {
-toast.error(`error adding camera`)
+          toast.error(`error adding camera`);
         }
       });
     } else {
@@ -183,16 +188,14 @@ toast.error(`error adding camera`)
                     sparshID: sparshID,
                     personCount: personCount,
                     cameraNumber: parseInt(cameraNumber),
-          moksaId: $selectedNode.moksaId
-
+                    moksaId: $selectedNode.moksaId,
                   }),
                 }).then((response) => {
                   if (response.ok) {
                     dialogOpen = false;
                     toast("Camera added!");
                   } else {
-toast.error(`error adding camera`)
-
+                    toast.error(`error adding camera`);
                   }
                 });
               }
@@ -230,14 +233,22 @@ toast.error(`error adding camera`)
         nvrFace: nvrFace,
         host: $page.url.host,
         nvrPersonCount: personCount,
-          moksaId: $selectedNode.moksaId
+        moksaId: $selectedNode.moksaId,
       }),
     })
       .then((response) => {
         if (response.ok) {
           dialogOpen = false;
+          toast("NVR added!");
         }
-        toast("NVR added!");
+        nvrName = "";
+        nvrPass = "";
+        nvrPort = "";
+        nvrIp = "";
+        camCount = 0;
+        nvrSaving = false;
+        nvrFace = false;
+        personCount = false;
       })
       .catch((err) => console.log(err));
   };
@@ -257,7 +268,7 @@ toast.error(`error adding camera`)
       return;
     }
 
-  for (let i = 0; i < nodeName.length; i++) {
+    for (let i = 0; i < nodeName.length; i++) {
       await fetch("/api/node/create", {
         method: "POST",
         headers: {
@@ -269,10 +280,16 @@ toast.error(`error adding camera`)
           address: nodeAddress[i],
           pin: nodePin[i],
           country: nodeCountry[i],
-          manager: nodeManager[i]
+          manager: nodeManager[i],
         }),
       }).catch((err) => console.log(err));
     }
+    nodeName = []
+    nodeAddress = []
+    nodePin = []
+    nodeCountry = []
+    nodeManager = []
+    toast.success('Store Added')
     dialogOpen = false;
   }
 
@@ -309,7 +326,7 @@ toast.error(`error adding camera`)
   //     headers: {
   //       "Content-Type": "application/json",
   //     }, body: JSON.stringify({
-  //       id: 
+  //       id:
   //     })
   //   });
   // })
@@ -386,9 +403,7 @@ toast.error(`error adding camera`)
             </span>
             <div class="grid gap-4 py-4">
               <div class="grid grid-cols-4 items-center gap-4">
-                <Label for="camera-name"
-                  class="col-span-1"
-                >Name</Label>
+                <Label for="camera-name" class="col-span-1">Name</Label>
                 <Input
                   id="camera-name"
                   type="text"
@@ -396,22 +411,20 @@ toast.error(`error adding camera`)
                   class="col-span-3"
                   bind:cameraName
                   on:change={(e) => (cameraName = e.target.value)}
-                  />
-                </div>
- <div class="grid grid-cols-4 items-center gap-4">
-                  <Label for="camera-Number"
-                  class="col-span-1"
-                  >Camera No.</Label>
-                  <Input
+                />
+              </div>
+              <div class="grid grid-cols-4 items-center gap-4">
+                <Label for="camera-Number" class="col-span-1">Camera No.</Label>
+                <Input
                   id="camera-Number"
                   placeholder={"26"}
                   class="col-span-3"
                   type="number"
                   bind:cameraNumber
                   on:change={(e) => (cameraNumber = e.target.value)}
-                  />
-                  </div>
-                  <!-- <div class="grid grid-cols-4 items-center gap-4">
+                />
+              </div>
+              <!-- <div class="grid grid-cols-4 items-center gap-4">
                 <Label for="camera-name">Sparsh ID</Label>
                 <Input
                   id="camera-name"
@@ -708,7 +721,10 @@ toast.error(`error adding camera`)
                       <label
                         class=" text-xs 2xl:text-sm font-medium leading-6 dark:text-white text-[#2c2c2c] flex items-center gap-1"
                       >
-                        <Switch bind:checked={nvrPersonCount} class="scale-90" />
+                        <Switch
+                          bind:checked={nvrPersonCount}
+                          class="scale-90"
+                        />
                         Person Count
                       </label>
                     </div>

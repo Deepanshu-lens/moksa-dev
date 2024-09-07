@@ -43,7 +43,7 @@
 
   const session = data.session;
   let nodes: Node[] = [];
-  console.log(data)
+  // console.log(data)
   // $:console.log(nodes)
   const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
 // console.log(aisleData)
@@ -103,7 +103,7 @@ async function getAisleData(){
   <div
     class=" flex flex-col gap-5 items-center justify-center px-2 bg-gradient-to-b from-[#000610] via-[#000307] via-[#050E41] to-[#000307] h-[calc(100vh-75px)]"
   >
-    <span class="group flex-col flex items-center justify-center gap-0.5">
+    <!-- <span class="group flex-col flex items-center justify-center gap-0.5">
       <button
         class={`disabled:cursor-not-allowed  h-[40px] w-[40px] rounded-full shadow-md group border-2 border-solid border-white bg-transparent text-white group-hover:text-black group-hover:bg-gradient-to-r group-hover:from-[#EBE60B] group-hover:to-[#07E1A4] group-hover:border-none grid place-items-center`}
         ><Search class="h-[22px] w-[22px]" /></button
@@ -113,7 +113,7 @@ async function getAisleData(){
       >
         Search
       </p>
-    </span>
+    </span> -->
     <span class="group flex-col flex items-center justify-center gap-0.5">
       <button
         on:click={() => (view = 1)}
@@ -142,7 +142,6 @@ async function getAisleData(){
         Stores
       </p>
     </span>
-
     <span class="group flex-col flex items-center justify-center gap-0.5">
       <button
         on:click={() => (view = 3)}
@@ -219,7 +218,7 @@ async function getAisleData(){
         People <br /> Counter
       </p>
     </span>
-    <span class="group flex-col flex items-center justify-center gap-0.5">
+    <!-- <span class="group flex-col flex items-center justify-center gap-0.5">
       <button
         on:click={() => (view = 6)}
         class={view !== 6
@@ -232,7 +231,7 @@ async function getAisleData(){
       >
         Heat Map
       </p>
-    </span>
+    </span> -->
     <span class="group flex-col flex items-center justify-center gap-0.5">
       <button
         on:click={() => (view = 7)}
@@ -259,8 +258,8 @@ async function getAisleData(){
     <EE {allStores}/>
   {:else if view === 5}
     <PeopleCounter {allStores} token={data.moksaToken} {usersData} curruser={data.user}/>
-  {:else if view === 6}
-    <HeatMap {aisleStoreData} {allStores} token={data.moksaToken}/>
+  <!-- {:else if view === 6}
+    <HeatMap {aisleStoreData} {allStores} token={data.moksaToken}/> -->
   {:else if view === 7}
     <Safety {allStores} token={data.moksaToken}/>
   {/if}

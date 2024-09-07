@@ -34,19 +34,18 @@ import type { RequestEvent, RequestHandler } from "./$types";
 
 export const DELETE: RequestHandler = async ({ locals, request, cookies }: RequestEvent) => {
   const data = await request.json();
-  const { cameraId, storeId, camId } = await request.json();
+  console.log(data)
   const tokenToUse = cookies.get('moksa-token');
 
   try {
     await Promise.all([
-      locals.pb?.collection("camera").delete(cameraId),
-      fetch(`https://api.moksa.ai/camera/deleteByStoreIdAndCameraId/${storeId}/${camId}`, {
+      locals.pb?.collection("camera").delete(data.cameraId),
+      fetch(`https://api.moksa.ai/camera/deleteByStoreIdAndCameraId/${data.storeId}/${data.camId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${tokenToUse}`,
         },
-        body: JSON.stringify({ cameraId, storeId, camId }),
       }),
       fetch(`${VITE_POCKETBASE_URL}/api/deleteStream`, {
         method: "POST",

@@ -1265,7 +1265,7 @@ function addMockData() {
       <span class="w-full h-full">
         {#if $listtheft?.data?.length > 0}
           {#key tableKey}
-          <TheftDataTable theftData={listtheft} />
+          <TheftDataTable {token} theftData={listtheft} />
           {/key}
         {:else}
           <p class="text-[#323232] dark:text-white text-lg font-semibold">
