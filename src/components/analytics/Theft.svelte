@@ -764,7 +764,7 @@
           },
         ).then((res) => res.json()),
         fetch(
-          `https://api.moksa.ai/theft/theftListBasedOnStoreId/${$selectedStore.value}/${start}/${end}/1/7`,
+          `https://api.moksa.ai/theft/theftListBasedOnStoreId/${$selectedStore.value}/${start}/${end}/1/100`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

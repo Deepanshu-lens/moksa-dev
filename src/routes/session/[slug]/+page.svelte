@@ -87,37 +87,55 @@ onDestroy(() => {
 });
 
 
-  async function getNodes(): Promise<Node[]> {
-    if (session?.node.length > 0) {
-      PB.autoCancellation(false);
-    const nodes = await PB.collection("node").getFullList(200, {
-      sort: "-created",
-      filter: `session~"${session.id}"`,
-    });
- const allCameraNumbers: { [nodeId: string]: number[] } = {};
+//   async function getNodes(): Promise<Node[]> {
+//     if (session?.node.length > 0) {
+//       PB.autoCancellation(false);
+//     const nodes = await PB.collection("node").getFullList(200, {
+//       sort: "-created",
+//       filter: `session~"${session.id}"`,
+//     });
+//  const allCameraNumbers: { [nodeId: string]: number[] } = {};
 
-    for (const node of nodes) {
-      const cameras = await PB.collection("camera").getFullList({
-        filter: `node~"${node.id}"`,
-        sort: "-created",
-        expand: 'personCounter,inference'
-      });
-      // console.log('cameras',cameras)
-      node.camera = cameras.map((cam: Camera) => ({
-        ...cam,
-        personCounter: cam?.expand?.personCounter?.count,
-      }));
-        allCameraNumbers[node.id] = cameras.map(cam => cam.cameraNo);
+//     for (const node of nodes) {
+//       const cameras = await PB.collection("camera").getFullList({
+//         filter: `node~"${node.id}"`,
+//         sort: "-created",
+//         expand: 'personCounter,inference'
+//       });
+//       // console.log('cameras',cameras)
+//       node.camera = cameras.map((cam: Camera) => ({
+//         ...cam,
+//         personCounter: cam?.expand?.personCounter?.count,
+//       }));
+//         allCameraNumbers[node.id] = cameras.map(cam => cam.cameraNo);
+//     }
+
+//     return nodes.map((node) => ({
+//       ...node,
+//       session: session.id,
+//         allCameraNumbers: allCameraNumbers[node.id],
+//     }) as Node);
+//   }
+//     return [];
+//   }
+
+async function getNodes(): Promise<Node[]> {
+  if (session?.node.length > 0) {
+    try {
+      const response = await fetch(`/api/node/getNodes?sessionId=${session.id}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch nodes');
+      }
+      const nodes = await response.json();
+      console.log('nodes',nodes)
+      return nodes;
+    } catch (error) {
+      console.error('Error fetching nodes:', error);
+      return [];
     }
-
-    return nodes.map((node) => ({
-      ...node,
-      session: session.id,
-        allCameraNumbers: allCameraNumbers[node.id],
-    }) as Node);
   }
-    return [];
-  }
+  return [];
+}
 
   function updateEvents() {
     events.update((currentEvents) => {

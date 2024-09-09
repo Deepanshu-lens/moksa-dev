@@ -30,7 +30,7 @@
 
   function handleSave() {
     PB.autoCancellation(false)
-    if(data.user?.username !== usersList?.username){
+    if(data.user?.role !== "superAdmin"){
       toast.error("You are not authorized to change Node Permissions!");
       return
     }
@@ -165,7 +165,7 @@
     {/if}
   </Table.Body>
 </Table.Root>
-<Button class="mr-auto flex bg-[#3D81FC] text-white" disabled={data.user?.username !== usersList?.username} on:click={handleSave}>Save</Button>
+<Button class="mr-auto flex bg-[#3D81FC] text-white" disabled={data.user?.role !== "superAdmin"} on:click={handleSave}>Save</Button>
 
 
 <style>

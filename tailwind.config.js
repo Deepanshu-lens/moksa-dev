@@ -73,9 +73,9 @@ const config = {
       },
       backgroundImage: {
         "contact-bg": "url('/images/contactMob.png')",
-        "forms-background": "url('/images/9-min.png')",
-        "dark-forms-background": "url('/images/9dark-min.png')",
-        "dark-add-node": 'url("/images/addNodeDark1-min.png")',
+        "forms-background": "url('/images/9-min.jpg')",
+        "dark-forms-background": "url('/images/9dark-min.jpg')",
+        "dark-add-node": 'url("/images/addNodeDark1-min.jpg")',
         "light-add-node": "url('/images/addNodeLight.jpg')",
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-conic":

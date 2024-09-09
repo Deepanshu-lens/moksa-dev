@@ -10,7 +10,7 @@ export const POST: RequestHandler = async ({
       await Promise.all(data.map(async (item: any) => {
         const { sessionId, nodeId } = item;
   
-        const record = await locals.pb?.collection('session').update(sessionId, { "node": nodeId });
+        await locals.pb?.collection('session').update(sessionId, { "node": nodeId });
   
         await Promise.all(nodeId.map(async (node: any) => {
           const existingNode = await locals.pb?.collection('node').getOne(node);

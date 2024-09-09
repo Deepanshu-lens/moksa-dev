@@ -64,11 +64,11 @@ const dbData = d.map((item: any) => {
   });
 
   const columns = table.createColumns([
-    table.column({
-      id: 'select',
-      header: '',
-      cell: ({ row }) => row.select,
-    }),
+    // table.column({
+    //   id: 'select',
+    //   header: '',
+    //   cell: ({ row }) => row.select,
+    // }),
     table.column({
       accessor: "employee",
       header: "Employee",

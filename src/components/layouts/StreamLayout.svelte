@@ -63,28 +63,28 @@
   };
 
   const handleH265Error = (event) => {
-    console.log("first");
+    // console.log("first");
     console.log(event);
     const { cameraId } = event.detail;
     console.log(`Handling H265 error for camera ID: ${cameraId}`); // Debug: Log when handling
-    const video = videos[cameraId];
-    if (video) {
-      video.mode = "webrtc";
-      if (video) {
-        video.remove();
-        delete videos[cameraId];
-      }
-      initVideo(
-        $selectedNode.camera.find((c) => c.id === cameraId),
-        "mse",
-      );
-      // initVideo($selectedNode.camera.find((c) => c.id === cameraId));
-    }
+    // const video = videos[cameraId];
+    // if (video) {
+    //   video.mode = "webrtc";
+    //   if (video) {
+    //     video.remove();
+    //     delete videos[cameraId];
+    //   }
+    //   initVideo(
+    //     $selectedNode.camera.find((c) => c.id === cameraId),
+    //     "mse",
+    //   );
+    //   // initVideo($selectedNode.camera.find((c) => c.id === cameraId));
+    // }
   };
 
-  const initVideo = async (camera: Camera, mode) => {
-    console.log("initvid", camera.mse, camera.name);
-    const index = $selectedNode.camera.findIndex((cam) => cam.id === camera.id);
+  const initVideo = async (camera: Camera) => {
+    // console.log("initvid", camera.mse, camera.name);
+    // const index = $selectedNode.camera.findIndex((cam) => cam.id === camera.id);
     if (videos[camera.id]) {
       console.log("video c.id exists", camera.name);
       return;

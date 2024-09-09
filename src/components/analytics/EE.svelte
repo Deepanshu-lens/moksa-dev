@@ -32,12 +32,19 @@
   }));
   let selectedStore = writable(stores.length > 0 ? stores?.[0].label : null);
   
+  // function calculateFilledSegments(hours, totalSegments = 36) {
+  //   const [h, m] = hours.split(":").map(Number);
+  //   const totalMinutes = h * 60 + m;
+  //   const maxMinutes = 8 * 60; // Assuming 8 hours is the maximum
+  //   return Math.round((totalMinutes / maxMinutes) * totalSegments);
+  // }
+
   function calculateFilledSegments(hours, totalSegments = 36) {
-    const [h, m] = hours.split(":").map(Number);
-    const totalMinutes = h * 60 + m;
-    const maxMinutes = 8 * 60; // Assuming 8 hours is the maximum
-    return Math.round((totalMinutes / maxMinutes) * totalSegments);
-  }
+  if (!hours) return 0; // Handle null or undefined time as 0
+  const totalMinutes = parseFloat(hours) * 60; // Convert decimal hours to total minutes
+  const maxMinutes = 8 * 60; // Assuming 8 hours is the maximum
+  return Math.round((totalMinutes / maxMinutes) * totalSegments);
+}
 
   function interpolateColor(color1, color2, factor) {
     const r1 = parseInt(color1.substring(1, 3), 16);
@@ -243,6 +250,7 @@ let loading = false
   }
 
   $: console.log('empdetails',$employeeDetails)
+  $: console.log('empd',$employeeData)
 
 </script>
 
@@ -349,7 +357,7 @@ let loading = false
       </div>
     </div>
 
-    <!-- <div
+    <div
       class=" col-span-3 row-span-4 border rounded-md p-2 flex flex-col flex-shrink-0 h-[550px] dark:border-white/[.7]"
     >
       <span class="flex flex-col gap-3">
@@ -397,7 +405,7 @@ let loading = false
             >
           </span>
         </span>
-        {#if $employeeDetails?.length > 0 && $employeeData !== null}
+        {#if $employeeDetails?.data?.length > 0 && $employeeData !== null}
         <span class="flex items-center gap-3 my-2">
           <User size={100} />
           <span class="flex flex-col gap-4 w-full">
@@ -409,20 +417,22 @@ let loading = false
             <span class="flex items-center gap-2">
               <Clock size={20} class="text-[#000065]" />
               <p class="text-sm text-[#727272]">No.of hours worked everyday</p>
-              <p class="ml-auto text-sm font-semibold">{$employeeDetails?.data?.[0]?.hours_worked}</p>
+              <p class="ml-auto text-sm font-semibold">{$employeeDetails?.data?.[0]?.hours_worked === null ? 0 : $employeeDetails?.data?.[0]?.hours_worked}</p>
             </span>
           </span>
         </span>
       
         {/if}
       </span>
-        {#if $employeeDetails?.length > 0 && $employeeData !== null}
+        {#if $employeeDetails?.data?.length > 0 && $employeeData !== null}
       <span class="flex flex-col gap-3 mt-2">
-        {#each [{ label: "Total Hours With Customers", hours: "05:50", color1: "#02A7FD", color2: "#141C64" }, { label: "Total Hours on Mobile", hours: "02:40", color1: "#00FEA3", color2: "#007077" }, { label: "Total Hours Sitting Idle", hours: "02:10", color1: "#FFB156", color2: "#FF007A" }, { label: "Hours filling shelves", hours: "01:10", color1: "#E4DF00", color2: "#89B900" }] as activity}
-          <div class="my-2">
+        {#each [{ label: "Total Hours With Customers", hours: $employeeDetails?.data?.[0]?.customer, color1: "#02A7FD", color2: "#141C64" }, { label: "Total Hours on Mobile", hours: $employeeDetails?.data?.[0]?.mobile, color1: "#00FEA3", color2: "#007077" }, { label: "Total Hours Sitting Idle", hours: $employeeDetails?.data?.[0]?.idle, color1: "#FFB156", color2: "#FF007A" }, 
+        // { label: "Hours filling shelves", hours: "01:10", color1: "#E4DF00", color2: "#89B900" }
+        ] as activity}
+        <div class="my-2">
             <div class="flex justify-between text-sm mb-2">
               <span class="text-[#323232]">{activity.label}</span>
-              <span class="font-semibold">{activity.hours} Hrs</span>
+              <span class="font-semibold">{activity.hours === null ? 0: activity.hours} Hrs</span>
             </div>
             <div class="w-full h-5 rounded-sm flex gap-2">
               {#each Array(36) as _, i}
@@ -442,7 +452,7 @@ let loading = false
           No employee selected
         </p>
       {/if}
-    </div> -->
+    </div>
 
     <!-- <div
       class="invisible col-span-5 row-span-2 border rounded-md p-2 flex items-center justify-between flex-shrink-0 h-[200px] dark:border-white/[.7]"

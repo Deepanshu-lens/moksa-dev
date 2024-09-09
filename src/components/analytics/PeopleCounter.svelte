@@ -22,30 +22,24 @@
   } from "chart.js";
   import { writable } from "svelte/store";
   import LivePeopleCountDataTable from "./table/LivePeopleCountDataTable.svelte";
-
+  import * as Popover from "../ui/popover";
+  import type { DateRange } from "bits-ui";
+import {
+  type DateValue,
+} from "@internationalized/date";
+import { RangeCalendar } from "@/components/ui/range-calendar";
   export let allStores;
   export let token;
-  export let usersData;
-  export let curruser
-
-  // $:console.log(usersData)
-  // $:console.log(curruser)
-
-  $: console.log($selectedStore)
-
-
-  $: matchingUser = usersData?.data?.data?.find((user: any) => user.lensId === curruser.id);
-
-  $: console.log("Matching user:", matchingUser);
-
+  let isInitialLoad = true;
   let chartCanvas: HTMLCanvasElement;
   let chart: Chart | null = null;
-  let chartLoading: boolean = true;
   let storeData: any = writable([]);
-  let liveStoreData: any = writable([]);
-let liveData = writable([]);
-
-  let livePeopleCount = {};
+  let liveData = writable([]);
+  let dateRange = writable("7 Days");
+  let value: DateRange | undefined = undefined;
+  let startValue: DateValue | undefined = undefined;
+  let customDateLabel = "Custom";
+  let close = false;
   const userID = 8;
     const fruits = allStores?.map((store: any) => ({
     value: store.id,
@@ -92,11 +86,36 @@ let liveData = writable([]);
     });
   }
 
-  // $:console.log($liveData)
+  $: {
+    if (value?.start && value?.end) {
+      const start = new Date(
+        value.start.year,
+        value.start.month - 1,
+        value.start.day,
+      );
+      const end = new Date(value.end.year, value.end.month - 1, value.end.day);
+      customDateLabel = `${start.toLocaleDateString()} - ${end.toLocaleDateString()}`;
+      const dayDifference = Math.ceil(
+        (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24),
+      );
+      console.log(dayDifference);
+      dateRange.set("custom");
+      setTimeout(() => {
+        close = false;
+      }, 200);
+    } else {
+      customDateLabel = "Custom";
+    }
+  }
 
   $: {
     if ($selectedStore.value !== undefined) {
-      getWeekData($selectedStore.value);
+      if($dateRange === '7 Days') {
+
+        getWeekData($selectedStore.value);
+      } else {
+        fetchDataForDateRange()
+      }
       setupSocket();
     }
   }
@@ -106,7 +125,6 @@ let liveData = writable([]);
       socket.disconnect();
     }
   });
-
 
   onMount(async () => {
     if (allStores.length > 0) {
@@ -228,28 +246,106 @@ let liveData = writable([]);
     }
   }
 
-//   async function getLiveData(storeId: number) {
-// await fetch(`https://api.moksa.ai/people/getPeopleCountLive/${storeId}`, {
-//   headers: {
-//     "Content-Type": "application/json",
-//     Authorization: `Bearer ${token}`,
-//   },
-//   method: "GET",
-// }).then(res => res.json()).then(data => {
-//   console.log(data)
-//   liveStoreData.set(data.data)
-// }).catch(err => {
-//   console.log(err)
-// })
-//   }
+  async function fetchDataForDateRange() {
+    if (isInitialLoad) {
+      isInitialLoad = false;
+      return; // Skip the first call
+    }
 
-let busyHours = 'N/A'
+    const today = new Date();
+    let startDate = new Date(today);
 
-$: console.log('storesdata',$storeData)
-// $: console.log(allStores)
+    switch ($dateRange) {
+      case "7 Days":
+        startDate.setDate(today.getDate() - 7);
+        break;
+      case "15 Days":
+        startDate.setDate(today.getDate() - 15);
+        break;
+      case "30 Days":
+        startDate.setDate(today.getDate() - 30);
+        break;
+      case "12 Months":
+        startDate.setFullYear(today.getFullYear() - 1);
+        break;
+      default:
+        startDate.setDate(today.getDate() - 7);
+    }
+
+    const formatDate = (date: Date) => date.toISOString().split("T")[0];
+
+    console.log(formatDate(startDate));
+    console.log(formatDate(today));
+    const storeId = $selectedStore.value
+    console.log(storeId)
+    console.log(token)
+    try {
+      // Call the three APIs
+        const d = await fetch(
+          `https://api.moksa.ai/people/getPeopleCount/${storeId}/${startDate}/${today}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          },
+        )
+        console.log(d)
+        const peopleCount = await d.json()
+
+      console.log('poeplecount',peopleCount);
+    if(peopleCount.status === 200) {
+      storeData.set(peopleCount?.data?.data)
+    }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  }
+
+  async function fetchCustomDateData() {
+    console.log("fetching custom date data");
+    const start = value?.start
+      ? `${value.start.year}-${String(value.start.month).padStart(2, "0")}-${String(value.start.day).padStart(2, "0")}`
+      : "";
+    const end = value?.end
+      ? `${value.end.year}-${String(value.end.month).padStart(2, "0")}-${String(value.end.day).padStart(2, "0")}`
+      : "";
+    console.log(start);
+    console.log(end);
+    const storeId = $selectedStore.value
+    try {
+      // Call the three APIs
+        const d = await fetch(
+          `https://api.moksa.ai/people/getPeopleCount/${storeId}/${start}/${end}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          },
+        )
+        console.log(d)
+        const peopleCount = await d.json()
+
+      console.log('poeplecount',peopleCount);
+    if(peopleCount.status === 200) {
+      storeData.set(peopleCount?.data?.data)
+    }} catch (error) {
+      console.error("Error fetching data:", error);
+    } 
+  }
+
+  $: {
+    if ($dateRange !== "custom") {
+      fetchDataForDateRange();
+    }
+  }
+
+  $: if ($dateRange === "custom" && (value?.start || value?.end)) {
+    fetchCustomDateData();
+  }
 
   onMount(async () => {
-    chartLoading = false;
     setTimeout(() => {
       createChart();
     }, 100);
@@ -261,33 +357,74 @@ $: console.log('storesdata',$storeData)
   class="w-full p-4 flex flex-col max-h-[calc(100vh-75px)] overflow-y-auto hide-scrollbar"
 >
   <div class="flex items-center justify-between">
-     <Select.Root portal={null}>
-          <Select.Trigger
-            class="w-[100px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg dark:bg-transparent"
+    <span class='flex gap-4 items-center'>
+      <span
+      class="flex items-center border-black border-opacity-[18%] h-[40px] border-[1px] rounded-md dark:border-white"
+    >
+      <button
+        class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "7 Days" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
+        on:click={() => dateRange.set("7 Days")}>7 Days</button
+      >
+      <button
+        class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "15 Days" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
+        on:click={() => dateRange.set("15 Days")}>15 Days</button
+      >
+      <button
+        class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "30 Days" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
+        on:click={() => dateRange.set("30 Days")}>30 Days</button
+      >
+      <button
+        class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "12 Months" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
+        on:click={() => dateRange.set("12 Months")}>12 Months</button
+      >
+      <Popover.Root openFocus bind:open={close}>
+        <Popover.Trigger asChild let:builder>
+          <Button
+            builders={[builder]}
+            class={`2xl:py-2 2xl:px-3 py-1 px-2  text-sm hover:bg-[#0BA5E9] hover:text-white ${$dateRange === "custom" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white bg-transparent dark:border-white"}`}
           >
-            <Select.Value placeholder={fruits.length> 0 ? $selectedStore.label: 'No Stores'} />
-          </Select.Trigger>
-          <Select.Content class="max-h-[200px] overflow-y-auto">
-            <Select.Group>
-              <!-- <Select.Item on:click={() => selectedStore.set({ value: -1, label: 'All Stores' })}
-                class="px-1"
-                value="All Stores"
-                label="All Stores">All Stores</Select.Item
+            {customDateLabel}</Button
+          >
+        </Popover.Trigger>
+        <Popover.Content class="w-auto p-0" align="start">
+          <RangeCalendar
+            bind:value
+            bind:startValue
+            initialFocus
+            numberOfMonths={2}
+            placeholder={value?.start}
+          />
+        </Popover.Content>
+      </Popover.Root>
+    </span>
+      <Select.Root portal={null}>
+        <Select.Trigger
+        class="w-[100px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg dark:bg-transparent"
+        >
+        <Select.Value placeholder={fruits.length> 0 ? $selectedStore.label: 'No Stores'} />
+        </Select.Trigger>
+        <Select.Content class="max-h-[200px] overflow-y-auto">
+          <Select.Group>
+            <!-- <Select.Item on:click={() => selectedStore.set({ value: -1, label: 'All Stores' })}
+              class="px-1"
+              value="All Stores"
+              label="All Stores">All Stores</Select.Item
               > -->
               {#if fruits.length > 0}
               {#each fruits as fruit}
-                <Select.Item on:click={() => selectedStore.set(fruit)}
-                  class="px-1"
-                  value={fruit.value}
-                  label={fruit.label}>{fruit.label}</Select.Item
+              <Select.Item on:click={() => {selectedStore.set(fruit); }}
+                class="px-1"
+                value={fruit.value}
+                label={fruit.label}>{fruit.label}</Select.Item
                 >
-              {/each}
-              {/if}
-            </Select.Group>
-          </Select.Content>
-          <Select.Input name="favoriteFruit" />
-        </Select.Root>
-    <span class="flex items-center gap-3">
+                {/each}
+                {/if}
+              </Select.Group>
+            </Select.Content>
+            <Select.Input name="favoriteFruit" />
+          </Select.Root>
+        </span>
+          <span class="flex items-center gap-3">
       <Button variant="outline" class="flex items-center gap-1">
         <ListFilter size={18} /> Filters</Button
       >
