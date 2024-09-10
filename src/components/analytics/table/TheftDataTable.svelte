@@ -4,13 +4,8 @@
   import { Button } from "@/components/ui/button";
   import {
     ArrowUpDown,
-    Edit,
     Play,
     Store,
-    StoreIcon,
-    Trash2,
-    TrendingDown,
-    TrendingUp,
     User,
   } from "lucide-svelte";
   import { createEventDispatcher } from "svelte";
@@ -22,12 +17,13 @@
   } from "svelte-headless-table/plugins";
   import { readable, writable } from "svelte/store";
   import * as Dialog from "@/components/ui/dialog";
+    import Spinner from "@/components/ui/spinner/Spinner.svelte";
 
   const dispatch = createEventDispatcher();
   export let theftData;
   export let token;
 
-  $: console.log("Table data updated:", $theftData);
+  // $: console.log("Table data updated:", $theftData);
 
   $: dbData = $theftData.data.map((item) => {
     const createdDate = item?.createdAt ? new Date(item?.createdAt) : null;
@@ -70,13 +66,7 @@
   let dialogOpen = false;
 
   async function openVideoDialog(videoUri) {
-    // const response = await fetch('/api/GetSignedUrl', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
-    //   body: JSON.stringify({ videoUri }),
-    // });
+    dialogOpen = true;
 
     const response = await fetch("https://api.moksa.ai/stream", {
       method: "POST",
@@ -90,16 +80,14 @@
     if (!response.ok) {
       throw new Error("Failed to get signed URL");
     }
-
     const blob = await response.blob();
-    console.log(blob);
-    const contentType = response.headers.get("content-type");
-    const videoBlob = new Blob([response.data], { type: contentType });
-    const videoUrl = URL.createObjectURL(videoBlob);
-    console.log("data", videoUrl);
+    const videoUrl = URL.createObjectURL(blob);
     selectedVideo = videoUrl;
-    console.log(selectedVideo);
-    dialogOpen = true;
+    console.log("Video URL:", selectedVideo);
+  }
+
+  $: if(dialogOpen === false && selectedVideo){
+    URL.revokeObjectURL(selectedVideo);
   }
 
   $: data = writable(dbData);
@@ -110,7 +98,7 @@
   });
 
   $: table = createTable(readableData, {
-    page: addPagination({ initialPageSize: 100 }),
+    page: addPagination({ initialPageSize: 5 }),
     sort: addSortBy(),
     filter: addTableFilter({
       fn: ({ filterValue, value }: { filterValue: string; value: string }) =>
@@ -153,14 +141,9 @@
   $: ({ headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } =
     table.createViewModel(columns));
 
-  $: ({ pageIndex, hasNextPage, hasPreviousPage, pageSize } =
+  $: ({ pageIndex, hasNextPage, hasPreviousPage, pageSize,pageCount } =
     pluginStates.page);
 
-  function handleRowClick(rowData) {
-    dispatch("rowClick", rowData);
-  }
-
-  $: console.log("open", dialogOpen);
 </script>
 
 <div class="m-0">
@@ -266,7 +249,7 @@
     </div>
   </Table.Root>
 </div>
-<!-- <div class="flex flex-row items-center justify-center space-x-4 py-4">
+<div class="flex flex-row items-center justify-center space-x-4 py-4">
   <Button
     size="sm"
     variant="outline"
@@ -294,25 +277,44 @@
   >
     Next
   </Button>
-</div> -->
+</div>
 
 <Dialog.Root bind:open={dialogOpen}>
-  <Dialog.Content class="sm:max-w-[500px]">
+  <Dialog.Content class="sm:max-w-[720px]">
     <Dialog.Header>
       <Dialog.Title>Video Playback</Dialog.Title>
     </Dialog.Header>
-    {#if selectedVideo}
+    <div class="flex items-center justify-center w-full h-full">
+      {#if selectedVideo}
       <!-- <video controls src={selectedVideo} type='video/mp4' class="w-auto h-[300px]">
-        Your browser does not support the video tag.
+      Your browser does not support the video tag.
       </video> -->
-      <video width="640" height="360" controls>
+      <video  class="video-player" width="640" height="360" controls autoplay muted  controlsList="nodownload"   disablePictureInPicture >
         <source src={selectedVideo} type="video/mp4" />
         Your browser does not support the video tag.
       </video>
-
+      
       <!-- <p>
         {selectedVideo}
       </p> -->
-    {/if}
+      {:else}
+      <Spinner />
+      {/if}
+    </div>
   </Dialog.Content>
 </Dialog.Root>
+
+
+<style>
+  .video-player::-internal-media-controls-download-button {
+    display: none !important;
+  }
+
+  .video-player::-webkit-media-controls-enclosure {
+    overflow: hidden !important;
+  }
+
+  .video-player::-webkit-media-controls-panel {
+    width: calc(100% + 30px) !important;
+  }
+</style>

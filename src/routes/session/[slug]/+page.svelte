@@ -16,16 +16,16 @@
   export let data: PageServerData;
   const { session } = data;
   const moksaUserId = data.user.moksaId
-  console.log('stores data',data.stores)
+  // console.log('stores data',data.stores)
   const allStores = data?.stores?.data.data
-  console.log('allstores',allStores)
+  // console.log('allstores',allStores)
   let nodes: Node[] = [];
   let batchedEvents: Event[] = [];
   let searching : boolean = true;
 
 let sockets: { [key: number]: any } = {};
 let liveData = writable([]);
-  $: console.log("data", data);
+  // $: console.log("data", data);
 
   const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
 
@@ -38,7 +38,7 @@ function setupSocket(userId: number) {
   if (sockets[userId]) {
     sockets[userId].disconnect();
   }
-console.log(token)
+// console.log(token)
   sockets[userId] = io("https://api.moksa.ai", {
     withCredentials: true,
     extraHeaders: {
@@ -86,39 +86,6 @@ onDestroy(() => {
   });
 });
 
-
-//   async function getNodes(): Promise<Node[]> {
-//     if (session?.node.length > 0) {
-//       PB.autoCancellation(false);
-//     const nodes = await PB.collection("node").getFullList(200, {
-//       sort: "-created",
-//       filter: `session~"${session.id}"`,
-//     });
-//  const allCameraNumbers: { [nodeId: string]: number[] } = {};
-
-//     for (const node of nodes) {
-//       const cameras = await PB.collection("camera").getFullList({
-//         filter: `node~"${node.id}"`,
-//         sort: "-created",
-//         expand: 'personCounter,inference'
-//       });
-//       // console.log('cameras',cameras)
-//       node.camera = cameras.map((cam: Camera) => ({
-//         ...cam,
-//         personCounter: cam?.expand?.personCounter?.count,
-//       }));
-//         allCameraNumbers[node.id] = cameras.map(cam => cam.cameraNo);
-//     }
-
-//     return nodes.map((node) => ({
-//       ...node,
-//       session: session.id,
-//         allCameraNumbers: allCameraNumbers[node.id],
-//     }) as Node);
-//   }
-//     return [];
-//   }
-
 async function getNodes(): Promise<Node[]> {
   if (session?.node.length > 0) {
     try {
@@ -165,9 +132,17 @@ async function getNodes(): Promise<Node[]> {
     searching = false
     events.set(data.events);
 
-    PB.collection("events").subscribe("*", function (e) {
-      console.log("event subscription", e.action, e.record);
-      // console.log('detetc event created', e.record)
+    // PB.collection("events").subscribe("*", function (e) {
+    //   console.log("event subscription", e.action, e.record);
+    //   // console.log('detetc event created', e.record)
+    //   batchedEvents.push({
+    //     ...e.record,
+    //     created: new Date(e.record.created),
+    //   } as unknown as Event);
+    // });
+    PB.collection("moksa_Events").subscribe("*", function (e) {
+      console.log("moksa event ", e.action, e.record);
+
       batchedEvents.push({
         ...e.record,
         created: new Date(e.record.created),
@@ -221,7 +196,8 @@ async function getNodes(): Promise<Node[]> {
   onDestroy(() => {
     PB.autoCancellation(false);
     PB.collection("node").unsubscribe("*");
-    PB.collection("events").unsubscribe("*");
+    // PB.collection("events").unsubscribe("*");
+    PB.collection("moksa_Events").unsubscribe("*");
     PB.collection("ai_inference").unsubscribe("*");
     PB.collection("camera").unsubscribe("*");
     PB.collection("session").unsubscribe("*");

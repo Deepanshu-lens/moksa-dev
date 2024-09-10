@@ -519,7 +519,7 @@
           },
         ).then((res) => res.json()),
         fetch(
-          `https://api.moksa.ai/theft/theftListBasedOnStoreId/${$selectedStore.value}/${formatDate(startDate)}/${formatDate(today)}/1/7`,
+          `https://api.moksa.ai/theft/theftListBasedOnStoreId/${$selectedStore.value}/${formatDate(startDate)}/${formatDate(today)}/1/100`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -679,7 +679,7 @@
           },
         ).then((res) => res.json()),
         fetch(
-          `https://api.moksa.ai/theft/theftListBasedOnStoreId/${$selectedStore.value}/${formatDate(startDate)}/${formatDate(today)}/1/7`,
+          `https://api.moksa.ai/theft/theftListBasedOnStoreId/${$selectedStore.value}/${formatDate(startDate)}/${formatDate(today)}/1/100`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -1226,7 +1226,7 @@ function addMockData() {
                 fill="none"
                 stroke="#5B93FF"
                 stroke-width="4"
-                stroke-dasharray="60, 100"
+                stroke-dasharray="{detectionPercentage}, 100"
               />
             </svg>
             <span

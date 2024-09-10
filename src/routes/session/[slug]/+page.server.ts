@@ -24,14 +24,6 @@ export const actions = {
       ?.collection("node")
       .create({ name, session: locals.user.record.session[0], mobileLayout: 1 });
 
-
-      console.log(token)
-      console.log(name)
-      console.log(address)
-      console.log(pincode)
-      console.log(country)
-      console.log(manager)
-
     const moksaStore = await fetch(`https://api.moksa.ai/store/create`, {
       method: 'POST',
       headers: {
@@ -134,11 +126,25 @@ export const load: PageServerLoad = async ({ locals, cookies }) => {
 
   }
 
+  const moksaEvents = async () => {
+    const e = await locals.pb?.collection("moksa_Events").getList(1, 100, {
+      sort: "created",
+    });
+    return e?.items.map(
+      (ee) =>
+        ({
+          ...ee,
+          created: new Date(ee.created),
+        }) as unknown as Event,
+    );
+  }
+  
   return {
     events: await events(),
     galleryItems: await gelleryItems(),
     imposterItems: await imposterItems(),
     stores: await dropwdown(),
     token: cookies.get('moksa-token'),
+    moksaEvents: await moksaEvents(),
   };
 }

@@ -527,7 +527,6 @@ let camName = this.wsURL.split('&cn=')[1]
 
   onwebrtc() {
     const pc = new RTCPeerConnection(this.pcConfig);
-
     pc.addEventListener("icecandidate", (ev) => {
       if (
         ev.candidate &&

@@ -147,18 +147,18 @@
   <Button
     size="sm"
     variant="outline"
-    class="bg-transparent hover:bg-[#3D81FC] hover:text-white text-[#727272] gap-2"
+    class="bg-transparent hover:bg-[#015a62] hover:text-white text-[#727272] gap-2"
     on:click={() => ($pageIndex = $pageIndex - 1)}
     disabled={!$hasPreviousPage}
   >
     Previous
   </Button>
   <div class="flex flex-row gap-2 items-center text-sm text-muted-foreground">
-    <span class="p-2 rounded-md aspect-square bg-[#3D81FC] bg-opacity-10">
+    <span class="p-2 rounded-md aspect-square bg-[#015a62] bg-opacity-10">
       {$pageIndex + 1 < 10 ? "0" + ($pageIndex + 1) : $pageIndex + 1}
     </span>
     of
-    <span class="p-2 rounded-md aspect-square bg-[#3D81FC] bg-opacity-20">
+    <span class="p-2 rounded-md aspect-square bg-[#015a62] bg-opacity-20">
       {$pageCount < 10 ? "0" + $pageCount : $pageCount}
     </span> Page.
   </div>
@@ -166,7 +166,7 @@
     size="sm"
     variant="outline"
     disabled={!$hasNextPage}
-    class="bg-transparent hover:bg-[#3D81FC] hover:text-white text-[#727272] gap-2"
+    class="bg-transparent hover:bg-[#015a62] hover:text-white text-[#727272] gap-2"
     on:click={() => ($pageIndex = $pageIndex + 1)}
   >
     Next

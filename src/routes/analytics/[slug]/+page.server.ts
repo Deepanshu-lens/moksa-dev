@@ -4,7 +4,6 @@ import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch,cookies,locals }) => {
 
-    console.log(locals?.user.record.moksaId)
     await fetch(`https://api.moksa.ai/store/getUserStoreDetailsByUserId/${locals.user.record.moksaId}`, {
         headers: {
             "Content-Type": "application/json",

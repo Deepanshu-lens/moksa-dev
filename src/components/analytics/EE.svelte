@@ -32,18 +32,12 @@
   }));
   let selectedStore = writable(stores.length > 0 ? stores?.[0].label : null);
   
-  // function calculateFilledSegments(hours, totalSegments = 36) {
-  //   const [h, m] = hours.split(":").map(Number);
-  //   const totalMinutes = h * 60 + m;
-  //   const maxMinutes = 8 * 60; // Assuming 8 hours is the maximum
-  //   return Math.round((totalMinutes / maxMinutes) * totalSegments);
-  // }
 
   function calculateFilledSegments(hours, totalSegments = 36) {
   if (!hours) return 0; // Handle null or undefined time as 0
   const totalMinutes = parseFloat(hours) * 60; // Convert decimal hours to total minutes
   const maxMinutes = 8 * 60; // Assuming 8 hours is the maximum
-  return Math.round((totalMinutes / maxMinutes) * totalSegments);
+  return Math.round((totalMinutes / maxMinutes) * totalSegments).toFixed(2);
 }
 
   function interpolateColor(color1, color2, factor) {
@@ -396,11 +390,11 @@ let loading = false
           </Select.Root>
           <span class="flex items-center gap-1">
             <Button
-              class="flex items-center gap-1 text-sm bg-[#389E0D] text-white"
+              class="flex items-center gap-1 text-sm bg-[#389E0D] text-white hover:text-[#389E0D] hover:bg-white"
               ><Plus size={20} /> Add</Button
             >
-            <Button class="text-sm bg-[#FAAD14] text-white"><Edit size={20} /></Button>
-            <Button class="text-sm bg-[#CF1322] text-white"
+            <Button class="text-sm bg-[#FAAD14] text-white hover:text-[#FAAD14] hover:bg-white"><Edit size={20} /></Button>
+            <Button class="text-sm bg-[#CF1322] text-white hover:text-[#CF1322] hover:bg-white"
               ><LucideXOctagon size={20} /></Button
             >
           </span>
@@ -417,7 +411,7 @@ let loading = false
             <span class="flex items-center gap-2">
               <Clock size={20} class="text-[#000065]" />
               <p class="text-sm text-[#727272]">No.of hours worked everyday</p>
-              <p class="ml-auto text-sm font-semibold">{$employeeDetails?.data?.[0]?.hours_worked === null ? 0 : $employeeDetails?.data?.[0]?.hours_worked}</p>
+              <span class="ml-auto text-sm font-semibold">{$employeeDetails?.data?.[0]?.hours_worked === null ? 0 : $employeeDetails?.data?.[0]?.hours_worked}</span>
             </span>
           </span>
         </span>
@@ -432,7 +426,7 @@ let loading = false
         <div class="my-2">
             <div class="flex justify-between text-sm mb-2">
               <span class="text-[#323232]">{activity.label}</span>
-              <span class="font-semibold">{activity.hours === null ? 0: activity.hours} Hrs</span>
+              <span class="font-semibold">{activity.hours === null ? 0: Number(activity.hours).toFixed(2)} Hrs</span>
             </div>
             <div class="w-full h-5 rounded-sm flex gap-2">
               {#each Array(36) as _, i}
@@ -454,8 +448,8 @@ let loading = false
       {/if}
     </div>
 
-    <!-- <div
-      class="invisible col-span-5 row-span-2 border rounded-md p-2 flex items-center justify-between flex-shrink-0 h-[200px] dark:border-white/[.7]"
+    <div
+      class="col-span-5 row-span-2 border rounded-md p-2 flex items-center justify-between flex-shrink-0 h-[200px] dark:border-white/[.7]"
     >
       <span class="flex flex-col w-1/2">
         <p class="text-[#323232] text-lg flex items-center gap-2 font-semibold dark:text-white">
@@ -593,9 +587,9 @@ let loading = false
             <p class="text-sm text-gray-500">Efficiency</p>
           </div>
         </div></span>
-    </div> -->
+    </div>
 
-    <!-- <div
+    <div
       class="col-span-5 row-span-2 border rounded-md p-2 flex flex-col flex-shrink-0 h-[334px] dark:border-white/[.7]"
     >
       <span class="flex items-center justify-between">
@@ -606,7 +600,7 @@ let loading = false
       <span class='h-full w-full'>
           <canvas bind:this={chartCanvas}></canvas>
       </span>
-    </div> -->
+    </div>
   </div>
 </section>
 

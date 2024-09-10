@@ -442,8 +442,8 @@
       >
     </span>
   </div>
-  <div class="grid grid-cols-8 grid-rows-12 gap-4 mt-4">
-    <!-- <div
+  <div class="grid grid-cols-8 grid-rows-8 gap-4 mt-4">
+    <div
       class="col-span-8 row-span-4 border rounded-md flex flex-col rounded-t-xl dark:border-white/[.7]"
     >
       <span
@@ -459,7 +459,7 @@
       <div class="h-full w-full">
         <HeatMapDataTable />
       </div>
-    </div> -->
+    </div>
 
     <div
       class="col-span-4 row-span-3 border rounded-md flex flex-col dark:border-white/[.7]"
@@ -524,7 +524,7 @@
           {/if}
       </div>
     </div>
-    <div class="col-span-4 row-span-4 rounded-md dark:border-white/[.7]">
+    <!-- <div class="col-span-4 row-span-4 rounded-md dark:border-white/[.7]">
       <img
         src="/images/heat1.png"
         alt="heat1"
@@ -538,5 +538,5 @@
         class="object-cover w-full h-full rounded-md"
       />
     </div>
-  </div>
+  </div> -->
 </section>

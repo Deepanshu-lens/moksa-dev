@@ -12,17 +12,14 @@
   import AddNodeModal from "../modal/AddNodeModal.svelte";
   import { page } from "$app/stores";
   import { addUserLog } from "@/lib/addUserLog";
-  import PocketBase from "pocketbase";
-  import { Dropdown, DropdownItem, DropdownDivider } from "flowbite-svelte";
+  import { Dropdown, DropdownItem } from "flowbite-svelte";
     import { Input } from "../ui/input";
     import { writable } from "svelte/store";
-  export let data: PageServerData;
   export let url: string;
   export let nodes: Node[];
   export let isAllFullScreen: boolean;
   let dropdownOpen = false
   let showAddNode = writable(false);
-  const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
 
  function groupNodesRecursively(nodes) {
     const groupNodes = (nodes, level = 0) => {
@@ -86,8 +83,6 @@
   const handleNodeSelect = async (event: Event) => {
     const selectedOption = (event.target as HTMLSelectElement).value;
 
-    console.log("selectedOption for nodeSelect", selectedOption);
-
     if (selectedOption === "Add Node +") {
       console.log("adding node");
       showAddNode.set(true) ;
@@ -96,43 +91,23 @@
     }
 
     try {
-      // console.log('selectedOption',selectedOption)
-      // console.log('page.sesion',$page.params.slug)
-      // console.log('selectednode.session',$selectedNode.session)
-      PB.autoCancellation(false)
-
-      const nodes = await PB.collection("node").getFullList({
-      filter: `id="${selectedOption}"`,
-    });
-    // console.log(nodes)
-    if (nodes.length > 0) {
-      const node = nodes[0];
       dropdownOpen = false; 
-      PB.autoCancellation(false)
-      const cameras = await PB.collection("camera").getFullList({
-        filter: `node~"${node.id}"`,
-        sort: "-created",
-        expand: 'personCounter,inference'
-      });
+       const response = await fetch("/api/node/nodeSelect", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ nodeId: selectedOption,sessionId:$page.params.slug }),
+    });
 
-      const formattedNode = {
-        ...node,
-        camera: cameras.map((cam: Camera) => ({
-          ...cam,
-          personCounter: cam?.expand?.personCounter?.count,
-        })),
-      };
-
-      // console.log(formattedNode);
-      selectedNode.set(formattedNode);
-      // console.log(formattedNode.id)
-      await PB.collection("session").update($page.params.slug, {
-        activeNode: formattedNode.id
-      });
-      console.log("updated selectedNode", formattedNode.name);
-    } else {
-      throw new Error("No node found");
+    if (!response.ok) {
+      throw new Error("Failed to fetch node data");
     }
+
+    const { node: formattedNode } = await response.json();
+
+    selectedNode.set(formattedNode);
+
   } catch (error) {
     console.error(error);
     toast.error("Something went wrong. Please try again");
@@ -147,8 +122,6 @@ let searchTerm = writable('');
       )
     : resultGroupNodes;
 
-  // console.log(data)
-  // $: console.log(showAddNode)
   $: console.log('dropdown Open', dropdownOpen)
 </script>
 

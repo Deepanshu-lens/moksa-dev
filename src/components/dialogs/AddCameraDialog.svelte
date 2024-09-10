@@ -253,10 +253,6 @@
       .catch((err) => console.log(err));
   };
 
-  function updateCompany(value: number) {
-    company = value;
-  }
-
   async function handleAddNode() {
     // Check all nodeNames for underscores first
     const invalidNodes = nodeName.filter((node) => node.includes("_"));
@@ -320,17 +316,6 @@
     }
   }
 
-  // onMount(async() => {
-  //   await fetch(`/api/moksa/stores/get`, {
-  //     method: "POST",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //     }, body: JSON.stringify({
-  //       id:
-  //     })
-  //   });
-  // })
-
   $: {
     if (
       cameraUsername?.length > 0 ||
@@ -344,6 +329,7 @@
       disabled = null;
     }
   }
+  
 </script>
 
 <Dialog.Root bind:open={dialogOpen}>
