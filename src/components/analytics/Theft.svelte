@@ -255,133 +255,263 @@
     }
   }
 
-  function createTheftChart() {
-    if (theftChartCanvas && !theftChart) {
-      const ctx = theftChartCanvas.getContext("2d");
-      if (ctx) {
-        // Sort the data by day of week
-        const sortedData = theftData.data.sort((a, b) => {
-          const days = [
-            "Sunday",
-            "Monday",
-            "Tuesday",
-            "Wednesday",
-            "Thursday",
-            "Friday",
-            "Saturday",
-          ];
-          return (
-            days.indexOf(a.day_of_week.trim()) -
-            days.indexOf(b.day_of_week.trim())
-          );
-        });
+  // function createTheftChart() {
+  //   if (theftChartCanvas && !theftChart) {
+  //     const ctx = theftChartCanvas.getContext("2d");
+  //     if (ctx) {
+  //       // Sort the data by day of week
+  //       const sortedData = theftData.data.sort((a, b) => {
+  //         const days = [
+  //           "Sunday",
+  //           "Monday",
+  //           "Tuesday",
+  //           "Wednesday",
+  //           "Thursday",
+  //           "Friday",
+  //           "Saturday",
+  //         ];
+  //         return (
+  //           days.indexOf(a.day_of_week.trim()) -
+  //           days.indexOf(b.day_of_week.trim())
+  //         );
+  //       });
 
-        const data = {
-          labels: sortedData.map((item) => item.day_of_week.trim()),
-          datasets: [
-            {
-              label: "Detected",
-              data: sortedData.map((item) => parseInt(-item.theft_detected)),
-              backgroundColor: (context) => {
-                const chart = context.chart;
-                const { ctx, chartArea } = chart;
-                if (!chartArea) {
-                  return null;
+  //       const data = {
+  //         labels: sortedData.map((item) => item.day_of_week.trim()),
+  //         datasets: [
+  //           {
+  //             label: "Detected",
+  //             data: sortedData.map((item) => parseInt(-item.theft_detected)),
+  //             backgroundColor: (context) => {
+  //               const chart = context.chart;
+  //               const { ctx, chartArea } = chart;
+  //               if (!chartArea) {
+  //                 return null;
+  //               }
+  //               const gradient = ctx.createLinearGradient(0, 0, chart.width, 0);
+  //               gradient.addColorStop(0, "rgba(4, 158, 243, 1)");
+  //               gradient.addColorStop(1, "rgba(21, 29, 100, 1)");
+  //               return gradient;
+  //             },
+  //             borderColor: "rgba(21, 29, 100, 1)",
+  //             borderWidth: 1,
+  //             borderRadius: 4,
+  //             barThickness: 20,
+  //           },
+  //           {
+  //             label: "Prevented",
+  //             data: sortedData.map((item) => parseInt(item.theft_prevented)),
+  //             backgroundColor: (context) => {
+  //               const chart = context.chart;
+  //               const { ctx, chartArea } = chart;
+  //               if (!chartArea) {
+  //                 return null;
+  //               }
+  //               const gradient = ctx.createLinearGradient(0, 0, chart.width, 0);
+
+  //               gradient.addColorStop(0, "rgba(255, 169, 88, 1)");
+  //               gradient.addColorStop(1, "rgba(255, 1, 120, 1)");
+  //               return gradient;
+  //             },
+  //             borderColor: "rgba(255, 1, 120, 1)",
+  //             borderWidth: 1,
+  //             borderRadius: 4,
+  //             barThickness: 20,
+  //           },
+  //         ],
+  //       };
+
+  //       theftChart = new Chart(ctx, {
+  //         type: "bar",
+  //         data: data,
+  //         options: {
+  //           indexAxis: "y",
+  //           scales: {
+  //             x: {
+  //               beginAtZero: true,
+
+  //               grid: {
+  //                 display: false,
+  //               },
+  //               ticks: {
+  //                 stepSize: 1,
+  //                 display: true,
+  //               },
+  //             },
+  //             y: {
+  //               grid: {
+  //                 color: "rgba(0, 0, 0, 0.1)",
+  //                 drawBorder: false,
+  //               },
+  //             },
+  //           },
+  //           responsive: true,
+  //           maintainAspectRatio: false,
+  //           plugins: {
+  //             legend: {
+  //               position: "top",
+  //               align: "end",
+  //               labels: {
+  //                 usePointStyle: true,
+  //                 pointStyle: "circle",
+  //               },
+  //             },
+  //             tooltip: {
+  //               callbacks: {
+  //                 label: function (context) {
+  //                   let label = context.dataset.label || "";
+  //                   if (label) {
+  //                     label += ": ";
+  //                   }
+  //                   if (context.parsed.x !== null) {
+  //                     label += context.parsed.x;
+  //                   }
+  //                   return label;
+  //                 },
+  //               },
+  //             },
+  //           },
+  //           layout: {
+  //             padding: {
+  //               left: 30,
+  //               right: 30,
+  //             },
+  //           },
+  //         },
+  //       });
+  //     }
+  //   }
+  // }
+
+ function createTheftChart() {
+  if (theftChartCanvas && !theftChart) {
+    const ctx = theftChartCanvas.getContext("2d");
+    if (ctx) {
+      // Sort the data by day of week
+      const sortedData = theftData.data.sort((a, b) => {
+        const days = [
+          "Sunday",
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+        ];
+        return (
+          days.indexOf(a.day_of_week.trim()) -
+          days.indexOf(b.day_of_week.trim())
+        );
+      });
+
+      const data = {
+        labels: sortedData.map((item) => item.day_of_week.trim()),
+        datasets: [
+          {
+            label: "Detected",
+            data: sortedData.map((item) => -parseInt(item.theft_detected)),
+            backgroundColor: (context) => {
+              const chart = context.chart;
+              const { ctx, chartArea } = chart;
+              if (!chartArea) {
+                return null;
+              }
+              const gradient = ctx.createLinearGradient(0, 0, chart.width, 0);
+              gradient.addColorStop(0, "rgba(4, 158, 243, 1)");
+              gradient.addColorStop(1, "rgba(21, 29, 100, 1)");
+              return gradient;
+            },
+            borderColor: "rgba(21, 29, 100, 1)",
+            borderWidth: 1,
+            borderRadius: 4,
+            barThickness: 20,
+          },
+          {
+            label: "Prevented",
+            data: sortedData.map((item) => parseInt(item.theft_prevented)),
+            backgroundColor: (context) => {
+              const chart = context.chart;
+              const { ctx, chartArea } = chart;
+              if (!chartArea) {
+                return null;
+              }
+              const gradient = ctx.createLinearGradient(0, 0, chart.width, 0);
+              gradient.addColorStop(0, "rgba(255, 169, 88, 1)");
+              gradient.addColorStop(1, "rgba(255, 1, 120, 1)");
+              return gradient;
+            },
+            borderColor: "rgba(255, 1, 120, 1)",
+            borderWidth: 1,
+            borderRadius: 4,
+            barThickness: 20,
+          },
+        ],
+      };
+
+      theftChart = new Chart(ctx, {
+        type: "bar",
+        data: data,
+        options: {
+          indexAxis: "y",
+          scales: {
+            x: {
+              position: 'top',
+              stacked: false,
+              beginAtZero: true,
+              grid: {
+                display: false,
+              },
+              ticks: {
+                callback: function(value) {
+                  return Math.abs(value);
                 }
-                const gradient = ctx.createLinearGradient(0, 0, chart.width, 0);
-                gradient.addColorStop(0, "rgba(4, 158, 243, 1)");
-                gradient.addColorStop(1, "rgba(21, 29, 100, 1)");
-                return gradient;
-              },
-              borderColor: "rgba(21, 29, 100, 1)",
-              borderWidth: 1,
-              borderRadius: 4,
-              barThickness: 20,
-            },
-            {
-              label: "Prevented",
-              data: sortedData.map((item) => parseInt(item.theft_prevented)),
-              backgroundColor: (context) => {
-                const chart = context.chart;
-                const { ctx, chartArea } = chart;
-                if (!chartArea) {
-                  return null;
-                }
-                const gradient = ctx.createLinearGradient(0, 0, chart.width, 0);
-
-                gradient.addColorStop(0, "rgba(255, 169, 88, 1)");
-                gradient.addColorStop(1, "rgba(255, 1, 120, 1)");
-                return gradient;
-              },
-              borderColor: "rgba(255, 1, 120, 1)",
-              borderWidth: 1,
-              borderRadius: 4,
-              barThickness: 20,
-            },
-          ],
-        };
-
-        theftChart = new Chart(ctx, {
-          type: "bar",
-          data: data,
-          options: {
-            indexAxis: "y",
-            scales: {
-              x: {
-                beginAtZero: true,
-
-                grid: {
-                  display: false,
-                },
-                ticks: {
-                  stepSize: 1,
-                  display: true,
-                },
-              },
-              y: {
-                grid: {
-                  color: "rgba(0, 0, 0, 0.1)",
-                  drawBorder: false,
-                },
               },
             },
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                position: "top",
-                align: "end",
-                labels: {
-                  usePointStyle: true,
-                  pointStyle: "circle",
-                },
-              },
-              tooltip: {
-                callbacks: {
-                  label: function (context) {
-                    let label = context.dataset.label || "";
-                    if (label) {
-                      label += ": ";
-                    }
-                    if (context.parsed.x !== null) {
-                      label += context.parsed.x;
-                    }
-                    return label;
-                  },
-                },
-              },
-            },
-            layout: {
-              padding: {
-                left: 30,
-                right: 30,
+            y: {
+              stacked: true,
+              grid: {
+                color: "rgba(0, 0, 0, 0.1)",
+                drawBorder: false,
               },
             },
           },
-        });
-      }
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "top",
+              align: "end",
+              labels: {
+                usePointStyle: true,
+                pointStyle: "circle",
+              },
+            },
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  let label = context.dataset.label || "";
+                  if (label) {
+                    label += ": ";
+                  }
+                  if (context.parsed.x !== null) {
+                    label += Math.abs(context.parsed.x);
+                  }
+                  return label;
+                },
+              },
+            },
+          },
+          layout: {
+            padding: {
+              left: 30,
+              right: 30,
+            },
+          },
+        },
+      });
     }
   }
+}
 
   onMount(async () => {
     chartLoading = false;
@@ -588,10 +718,10 @@
             : item.date.trim(),
       );
       const theftDetectedData = theftD?.data.map((item) =>
-        parseInt(item.theft_detected),
+        parseInt(-item.theft_detected),
       );
       const theftPreventedData = theftD?.data.map((item) =>
-        Number(-item.theft_prevented),
+        Number(item.theft_prevented),
       );
 
       theftChart.data.labels = labels;
@@ -1275,7 +1405,7 @@ function addMockData() {
       </span>
     </div>
     <div
-      class="col-span-4 row-span-3 border rounded-md p-4 gap-4 h-[350px] flex flex-col dark:border-white/[.7]"
+      class="col-span-4 row-span-3 border rounded-md p-4 gap-4 h-[450px] flex flex-col dark:border-white/[.7]"
     >
       <span class="flex items-center justify-between">
         <p class="text-[#323232] dark:text-white text-lg font-semibold">
@@ -1288,7 +1418,7 @@ function addMockData() {
       </div>
     </div>
     <div
-      class="col-span-4 row-span-3 border rounded-md p-4 flex flex-col gap-4 h-[350px] dark:border-white/[.7]"
+      class="col-span-4 row-span-3 border rounded-md p-4 flex flex-col gap-4 h-[450px] dark:border-white/[.7]"
     >
       <span class="flex items-center justify-between">
         <p

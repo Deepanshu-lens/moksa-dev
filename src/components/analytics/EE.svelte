@@ -1,4 +1,4 @@
-<script lang='ts'>
+<script lang="ts">
   import {
     Clock,
     Edit,
@@ -20,25 +20,30 @@
     LinearScale,
     CategoryScale,
   } from "chart.js";
-    import { onMount } from "svelte";
-    import { writable } from "svelte/store";
-    import Spinner from "../ui/spinner/Spinner.svelte";
+  import { onMount } from "svelte";
+  import { writable } from "svelte/store";
+  import Spinner from "../ui/spinner/Spinner.svelte";
+  import CreateEmployeeDialog from "../dialogs/CreateEmployeeDialog.svelte";
+  import UpdateEmployeeDialog from "../dialogs/UpdateEmployeeDialog.svelte";
+  import DeleteEmployeeDialog from "../dialogs/DeleteEmployeeDialog.svelte";
   let chartLoading = true;
   export let allStores;
-  
+  export let token;
+
   const stores = allStores?.map((store: any) => ({
     value: store.id,
     label: store.name,
   }));
+
   let selectedStore = writable(stores.length > 0 ? stores?.[0].label : null);
-  
+  let selectedStoreId = writable(stores.length > 0 ? stores?.[0].value : null);
 
   function calculateFilledSegments(hours, totalSegments = 36) {
-  if (!hours) return 0; // Handle null or undefined time as 0
-  const totalMinutes = parseFloat(hours) * 60; // Convert decimal hours to total minutes
-  const maxMinutes = 8 * 60; // Assuming 8 hours is the maximum
-  return Math.round((totalMinutes / maxMinutes) * totalSegments).toFixed(2);
-}
+    if (!hours) return 0; // Handle null or undefined time as 0
+    const totalMinutes = parseFloat(hours) * 60; // Convert decimal hours to total minutes
+    const maxMinutes = 8 * 60; // Assuming 8 hours is the maximum
+    return Math.round((totalMinutes / maxMinutes) * totalSegments).toFixed(2);
+  }
 
   function interpolateColor(color1, color2, factor) {
     const r1 = parseInt(color1.substring(1, 3), 16);
@@ -65,15 +70,14 @@
   const progress = 70; // 70% progress
   const dashOffset = circumference - (progress / 100) * circumference;
 
-
   let chartCanvas: HTMLCanvasElement;
   let chart: Chart | null = null;
   let efficiencyData = writable([]);
   let employeeData = writable([]);
   let employeeDetails = writable([]);
+  let selectedEmployee = writable(null);
 
-
-function createChart() {
+  function createChart() {
     if (chartCanvas && !chart) {
       const ctx = chartCanvas.getContext("2d");
       const gradient = ctx.createLinearGradient(400, 0, 0, 0);
@@ -109,7 +113,7 @@ function createChart() {
                 data: onlineData,
                 fill: true,
                 tension: 0.4,
-                pointBackgroundColor: 'white',
+                pointBackgroundColor: "white",
                 pointBorderColor: "#000065",
                 pointBorderWidth: 2,
                 pointRadius: 4,
@@ -123,7 +127,7 @@ function createChart() {
                 data: onlineData2,
                 fill: true,
                 tension: 0.4,
-                pointBackgroundColor: 'white',
+                pointBackgroundColor: "white",
                 pointBorderColor: "#000065",
                 pointBorderWidth: 2,
                 pointRadius: 4,
@@ -181,71 +185,73 @@ function createChart() {
     }
   }
 
-let loading = false
+  async function updateEmployee() {}
 
-    onMount(async () => {
+  async function deleteEmployee() {}
+  let loading = false;
+
+  onMount(async () => {
     chartLoading = false;
     // console.log(stores[0])
     setTimeout(() => {
       createChart();
     }, 100);
-  try {
-    loading = true
-    const [employeeResponse, efficiencyResponse] = await Promise.all([
-      fetch('/api/employee/getByStoreId', {
-        method: 'POST',
-        body: JSON.stringify({ storeId: stores[0].value }),
-        headers: { 'Content-Type': 'application/json' }
-      }),
-      fetch('/api/employee/getEfficiencyByStoreId', {
-        method: 'POST',
-        body: JSON.stringify({ storeId: stores[0].value }),
-        headers: { 'Content-Type': 'application/json' }
-      })
-    ]);
+    try {
+      loading = true;
+      const [employeeResponse, efficiencyResponse] = await Promise.all([
+        fetch("/api/employee/getByStoreId", {
+          method: "POST",
+          body: JSON.stringify({ storeId: stores[0].value }),
+          headers: { "Content-Type": "application/json" },
+        }),
+        fetch("/api/employee/getEfficiencyByStoreId", {
+          method: "POST",
+          body: JSON.stringify({ storeId: stores[0].value }),
+          headers: { "Content-Type": "application/json" },
+        }),
+      ]);
 
-    employeeData.set(await employeeResponse.json());
-     efficiencyData.set(await efficiencyResponse.json());
+      employeeData.set(await employeeResponse.json());
+      efficiencyData.set(await efficiencyResponse.json());
 
-     if($employeeData.data.length > 0){
-      await getEmployeeDetails($employeeData.data[0].id)
-     } else {
-      employeeDetails.set(null)
-     }
-   loading = false
-  } catch (error) {
-    console.error('Error fetching data:', error);
-  }
+      if ($employeeData.data.length > 0) {
+        await getEmployeeDetails($employeeData.data[0].id);
+      } else {
+        employeeDetails.set(null);
+      }
+      loading = false;
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
   });
 
-  async function getbystoreID () {
-    loading = true
-   const response =  await fetch('/api/employee/getByStoreId', {
-        method: 'POST',
-        body: JSON.stringify({ storeId: stores[0].value }),
-        headers: { 'Content-Type': 'application/json' }
-      })
-      const data = await response.json();
-      console.log(data)
-      employeeData.set(data)
-      loading = false
-  }
-
-  async function getEmployeeDetails(id:number){
-    // console.log(id)
-    const response = await fetch('/api/employee/getByEmpId', {
-      method: 'POST',
-      body: JSON.stringify({ id: id }),
-      headers: { 'Content-Type': 'application/json' }
+  async function getbystoreID() {
+    loading = true;
+    const response = await fetch("/api/employee/getByStoreId", {
+      method: "POST",
+      body: JSON.stringify({ storeId: stores[0].value }),
+      headers: { "Content-Type": "application/json" },
     });
     const data = await response.json();
-    console.log(data)
-    employeeDetails.set(data)
+    console.log(data);
+    employeeData.set(data);
+    loading = false;
   }
 
-  $: console.log('empdetails',$employeeDetails)
-  $: console.log('empd',$employeeData)
+  async function getEmployeeDetails(id: number) {
+    // console.log(id)
+    const response = await fetch("/api/employee/getByEmpId", {
+      method: "POST",
+      body: JSON.stringify({ id: id }),
+      headers: { "Content-Type": "application/json" },
+    });
+    const data = await response.json();
+    console.log(data);
+    employeeDetails.set(data);
+  }
 
+  $: console.log("empdetails", $employeeDetails);
+  $: console.log("empd", $employeeData);
 </script>
 
 <section
@@ -296,58 +302,61 @@ let loading = false
         class="flex bg-[#050F40] h-[60px] w-full rounded-t-xl px-4 flex-shrink-0 items-center justify-between"
       >
         <p class="text-white flex items-center gap-2 text-xl font-bold">
-          Employee Tracking 
+          Employee Tracking
           <!-- <span
             class="text-xs text-white bg-pink-500 rounded-md p-1">Live</span
           > -->
         </p>
-          <Select.Root portal={null}>
-            <Select.Trigger
-              class="w-auto min-w-[100px] bg-[#3D81FC] text-white border-none text-xs px-1 rounded-lg"
-            >
-              <Select.Value placeholder={stores.length > 0 ? stores?.[0]?.label: 'No Stores'} />
-            </Select.Trigger>
-               <Select.Content class="max-h-[200px] overflow-y-auto">
-              <Select.Group>
-                {#if stores.length > 0}
+        <Select.Root portal={null}>
+          <Select.Trigger
+            class="w-auto min-w-[100px] bg-[#3D81FC] text-white border-none text-xs px-1 rounded-lg"
+          >
+            <Select.Value
+              placeholder={stores.length > 0 ? stores?.[0]?.label : "No Stores"}
+            />
+          </Select.Trigger>
+          <Select.Content class="max-h-[200px] overflow-y-auto">
+            <Select.Group>
+              {#if stores.length > 0}
                 {#each stores as store}
                   <Select.Item
                     class="px-1"
                     on:click={async () => {
                       selectedStore.set(store.label);
-                      await getbystoreID(store.value)
+                      selectedStoreId.set(store.value);
+                      await getbystoreID(store.value);
                     }}
                     value={store.value}
                     label={store.label}>{store.label}</Select.Item
                   >
                 {/each}
-                {:else}
-                <Select.Item
-                  class="px-1"
-                  label="No Stores Found">No Stores Found</Select.Item
+              {:else}
+                <Select.Item class="px-1" label="No Stores Found"
+                  >No Stores Found</Select.Item
                 >
-                {/if}
-              </Select.Group>
-            </Select.Content>
-          </Select.Root>
+              {/if}
+            </Select.Group>
+          </Select.Content>
+        </Select.Root>
       </span>
-   
+
       <div
         class="h-full w-full max-h-[400px] overflow-y-auto hide-scrollbar overflow-x-clip"
       >
-      {#if loading}
-      <span class="flex items-center justify-center h-full w-full">
-        <Spinner />
-      </span>
-      {:else}
-      {#if $efficiencyData && $efficiencyData.data && $efficiencyData?.data?.data?.length > 0}
-      <EmployeeTrackingDataTable d={$efficiencyData?.data?.data} selectedStore={$selectedStore}/>
-      {:else}
-      <span class="flex items-center justify-center h-full w-full">
-        <p class='text-black'>No data</p>
-      </span>
-      {/if}
-      {/if}
+        {#if loading}
+          <span class="flex items-center justify-center h-full w-full">
+            <Spinner />
+          </span>
+        {:else if $efficiencyData && $efficiencyData.data && $efficiencyData?.data?.data?.length > 0}
+          <EmployeeTrackingDataTable
+            d={$efficiencyData?.data?.data}
+            selectedStore={$selectedStore}
+          />
+        {:else}
+          <span class="flex items-center justify-center h-full w-full">
+            <p class="text-black">No data</p>
+          </span>
+        {/if}
       </div>
     </div>
 
@@ -355,94 +364,156 @@ let loading = false
       class=" col-span-3 row-span-4 border rounded-md p-2 flex flex-col flex-shrink-0 h-[550px] dark:border-white/[.7]"
     >
       <span class="flex flex-col gap-3">
-        <p class="text-[#323232] text-lg font-semibold dark:text-white">Employee Details</p>
+        <p class="text-[#323232] text-lg font-semibold dark:text-white">
+          Employee Details
+        </p>
         <span class="flex items-center justify-between">
           <Select.Root portal={null}>
             <Select.Trigger
               class="w-[250px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg dark:bg-transparent "
             >
-              <Select.Value placeholder={$employeeData?.data?.length > 0 ? $employeeData?.data?.[0]?.first_name+ ' ' + $employeeData?.data?.[0]?.last_name : 'No Employees Found'} />
+              <Select.Value
+                placeholder={$employeeData?.data?.length > 0
+                  ? $employeeData?.data?.[0]?.first_name +
+                    " " +
+                    $employeeData?.data?.[0]?.last_name
+                  : "No Employees Found"}
+              />
             </Select.Trigger>
             <Select.Content>
               <Select.Group>
-                
                 {#if $employeeData && $employeeData.data && $employeeData?.data?.length > 0}
-                {#each $employeeData?.data as employee}
-                  <Select.Item on:click={async() => {
-                    console.log(employee)
-                    await getEmployeeDetails(employee.id)
-                  }}
-                    class="px-1"
-                    value={employee.id}
-                    label={employee.name}>{employee.first_name} {employee.last_name}</Select.Item
-                  >
-                {/each}
+                  {#each $employeeData?.data as employee}
+                    <Select.Item
+                      on:click={async () => {
+                        console.log(employee);
+                        await getEmployeeDetails(employee.id);
+                        selectedEmployee.set(employee);
+                      }}
+                      class="px-1"
+                      value={employee.id}
+                      label={employee.name}
+                      >{employee.first_name} {employee.last_name}</Select.Item
+                    >
+                  {/each}
                 {:else}
-                <Select.Item
-                  class="px-1"
-                  value="0"
-                  label="No Employees Found">No Employees Found</Select.Item
-                >
+                  <Select.Item class="px-1" value="0" label="No Employees Found"
+                    >No Employees Found</Select.Item
+                  >
                 {/if}
               </Select.Group>
             </Select.Content>
             <Select.Input name="favoriteFruit" />
           </Select.Root>
           <span class="flex items-center gap-1">
-            <Button
-              class="flex items-center gap-1 text-sm bg-[#389E0D] text-white hover:text-[#389E0D] hover:bg-white"
-              ><Plus size={20} /> Add</Button
+            <CreateEmployeeDialog
+              {employeeData}
+              {token}
+              storeId={$selectedStoreId}
             >
-            <Button class="text-sm bg-[#FAAD14] text-white hover:text-[#FAAD14] hover:bg-white"><Edit size={20} /></Button>
-            <Button class="text-sm bg-[#CF1322] text-white hover:text-[#CF1322] hover:bg-white"
-              ><LucideXOctagon size={20} /></Button
+              <Button
+                class="flex items-center gap-1 text-sm bg-[#389E0D] text-white hover:text-[#389E0D] hover:bg-white"
+                ><Plus size={20} /> Add</Button
+              >
+            </CreateEmployeeDialog>
+            <UpdateEmployeeDialog
+              {token}
+              firstName={$selectedEmployee === null
+                ? $employeeData?.data?.[0]?.first_name
+                : $selectedEmployee?.first_name}
+              lastName={$selectedEmployee === null
+                ? $employeeData?.data?.[0]?.last_name
+                : $selectedEmployee?.last_name}
+              role={$selectedEmployee === null
+                ? $employeeData?.data?.[0]?.role
+                : $selectedEmployee?.role}
+              id={$selectedEmployee === null
+                ? $employeeData?.data?.[0]?.id
+                : $selectedEmployee?.id}
+              storeId={$selectedStoreId}
+              {employeeData}
             >
+              <Button
+                class="text-sm bg-[#FAAD14] text-white hover:text-[#FAAD14] hover:bg-white"
+                ><Edit size={20} /></Button
+              >
+            </UpdateEmployeeDialog>
+            <DeleteEmployeeDialog
+              employeeData={employeeData}
+              empId={$selectedEmployee === null
+                ? $employeeData?.data?.[0]?.id
+                : $selectedEmployee?.id}
+              {token}
+              firstName={$selectedEmployee === null
+                ? $employeeData?.data?.[0]?.first_name
+                : $selectedEmployee?.first_name}
+              lastName={$selectedEmployee === null
+                ? $employeeData?.data?.[0]?.last_name
+                : $selectedEmployee?.last_name}
+            >
+              <Button
+                class="text-sm bg-[#CF1322] text-white hover:text-[#CF1322] hover:bg-white"
+                ><LucideXOctagon size={20} /></Button
+              >
+            </DeleteEmployeeDialog>
           </span>
         </span>
         {#if $employeeDetails?.data?.length > 0 && $employeeData !== null}
-        <span class="flex items-center gap-3 my-2">
-          <User size={100} />
-          <span class="flex flex-col gap-4 w-full">
-            <span class="items-center gap-2 flex">
-              <LucideContact2 size={20} class="text-[#000065]" />
-              <p class="text-sm text-[#727272]">Employee Id</p>
-              <p class="ml-auto text-sm font-semibold">{$employeeDetails?.data?.[0]?.emp_id}</p>
-            </span>
-            <span class="flex items-center gap-2">
-              <Clock size={20} class="text-[#000065]" />
-              <p class="text-sm text-[#727272]">No.of hours worked everyday</p>
-              <span class="ml-auto text-sm font-semibold">{$employeeDetails?.data?.[0]?.hours_worked === null ? 0 : $employeeDetails?.data?.[0]?.hours_worked}</span>
+          <span class="flex items-center gap-3 my-2">
+            <User size={100} />
+            <span class="flex flex-col gap-4 w-full">
+              <span class="items-center gap-2 flex">
+                <LucideContact2 size={20} class="text-[#000065]" />
+                <p class="text-sm text-[#727272]">Employee Id</p>
+                <p class="ml-auto text-sm font-semibold">
+                  {$employeeDetails?.data?.[0]?.emp_id}
+                </p>
+              </span>
+              <span class="flex items-center gap-2">
+                <Clock size={20} class="text-[#000065]" />
+                <p class="text-sm text-[#727272]">
+                  No.of hours worked everyday
+                </p>
+                <span class="ml-auto text-sm font-semibold"
+                  >{$employeeDetails?.data?.[0]?.hours_worked === null
+                    ? 0
+                    : $employeeDetails?.data?.[0]?.hours_worked}</span
+                >
+              </span>
             </span>
           </span>
-        </span>
-      
         {/if}
       </span>
-        {#if $employeeDetails?.data?.length > 0 && $employeeData !== null}
-      <span class="flex flex-col gap-3 mt-2">
-        {#each [{ label: "Total Hours With Customers", hours: $employeeDetails?.data?.[0]?.customer, color1: "#02A7FD", color2: "#141C64" }, { label: "Total Hours on Mobile", hours: $employeeDetails?.data?.[0]?.mobile, color1: "#00FEA3", color2: "#007077" }, { label: "Total Hours Sitting Idle", hours: $employeeDetails?.data?.[0]?.idle, color1: "#FFB156", color2: "#FF007A" }, 
-        // { label: "Hours filling shelves", hours: "01:10", color1: "#E4DF00", color2: "#89B900" }
-        ] as activity}
-        <div class="my-2">
-            <div class="flex justify-between text-sm mb-2">
-              <span class="text-[#323232]">{activity.label}</span>
-              <span class="font-semibold">{activity.hours === null ? 0: Number(activity.hours).toFixed(2)} Hrs</span>
+      {#if $employeeDetails?.data?.length > 0 && $employeeData !== null}
+        <span class="flex flex-col gap-3 mt-2">
+          {#each [{ label: "Total Hours With Customers", hours: $employeeDetails?.data?.[0]?.customer, color1: "#02A7FD", color2: "#141C64" }, { label: "Total Hours on Mobile", hours: $employeeDetails?.data?.[0]?.mobile, color1: "#00FEA3", color2: "#007077" }, { label: "Total Hours Sitting Idle", hours: $employeeDetails?.data?.[0]?.idle, color1: "#FFB156", color2: "#FF007A" }] as activity}
+         
+            <div class="my-2">
+              <div class="flex justify-between text-sm mb-2">
+                <span class="text-[#323232]">{activity.label}</span>
+                <span class="font-semibold"
+                  >{activity.hours === null
+                    ? 0
+                    : Number(activity.hours).toFixed(2)} Hrs</span
+                >
+              </div>
+              <div class="w-full h-5 rounded-sm flex gap-2">
+                {#each Array(36) as _, i}
+                  <span
+                    class={`w-[3%] h-full rounded-lg ${i < calculateFilledSegments(activity.hours) ? "" : "bg-gray-200"}`}
+                    style={i < calculateFilledSegments(activity.hours)
+                      ? `background-color: ${interpolateColor(activity.color1, activity.color2, i / (calculateFilledSegments(activity.hours) - 1))}`
+                      : ""}
+                  />
+                {/each}
+              </div>
             </div>
-            <div class="w-full h-5 rounded-sm flex gap-2">
-              {#each Array(36) as _, i}
-                <span
-                  class={`w-[3%] h-full rounded-lg ${i < calculateFilledSegments(activity.hours) ? "" : "bg-gray-200"}`}
-                  style={i < calculateFilledSegments(activity.hours)
-                    ? `background-color: ${interpolateColor(activity.color1, activity.color2, i / (calculateFilledSegments(activity.hours) - 1))}`
-                    : ""}
-                />
-              {/each}
-            </div>
-          </div>
-        {/each}
-      </span>
+          {/each}
+        </span>
       {:else}
-        <p class="text-[#323232] text-lg flex items-center gap-2 font-semibold dark:text-white">
+        <p
+          class="text-[#323232] text-lg flex items-center gap-2 font-semibold dark:text-white"
+        >
           No employee selected
         </p>
       {/if}
@@ -452,10 +523,14 @@ let loading = false
       class="col-span-5 row-span-2 border rounded-md p-2 flex items-center justify-between flex-shrink-0 h-[200px] dark:border-white/[.7]"
     >
       <span class="flex flex-col w-1/2">
-        <p class="text-[#323232] text-lg flex items-center gap-2 font-semibold dark:text-white">
+        <p
+          class="text-[#323232] text-lg flex items-center gap-2 font-semibold dark:text-white"
+        >
           Employee Efficiency Score
         </p>
-        <p class="flex items-center gap-3 mt-4 mb-2 text-[#4D6674] dark:text-white/[.8]">
+        <p
+          class="flex items-center gap-3 mt-4 mb-2 text-[#4D6674] dark:text-white/[.8]"
+        >
           Based on Factor 1 <span class="text-[#0D2846] font-medium">69%</span>
           <svg
             width="37"
@@ -553,62 +628,72 @@ let loading = false
         </p>
       </span>
       <span class="h-full w-1/2 flex items-center justify-center">
-       <div class="relative w-48 h-48">
-         <svg class="w-full h-full" viewBox="0 0 100 100">
-      <defs>
-        <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stop-color="#0266FD" />
-          <stop offset="100%" stop-color="#02A7FD" />
-        </linearGradient>
-      </defs>
-      <circle
-        class="text-gray-200 stroke-current"
-        stroke-width="10"
-        cx="50"
-        cy="50"
-        r={radius}
-        fill="transparent"
-      ></circle>
-      <circle
-        class="progress-ring_circle"
-        stroke="url(#blueGradient)"
-        stroke-width="10"
-        stroke-dasharray={circumference}
-        stroke-linecap="round"
-        cx="50"
-        cy="50"
-        r={radius}
-        fill="transparent"
-        stroke-dashoffset={dashOffset}
-      ></circle>
-    </svg>
-          <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
+        <div class="relative w-48 h-48">
+          <svg class="w-full h-full" viewBox="0 0 100 100">
+            <defs>
+              <linearGradient
+                id="blueGradient"
+                x1="0%"
+                y1="0%"
+                x2="100%"
+                y2="0%"
+              >
+                <stop offset="0%" stop-color="#0266FD" />
+                <stop offset="100%" stop-color="#02A7FD" />
+              </linearGradient>
+            </defs>
+            <circle
+              class="text-gray-200 stroke-current"
+              stroke-width="10"
+              cx="50"
+              cy="50"
+              r={radius}
+              fill="transparent"
+            ></circle>
+            <circle
+              class="progress-ring_circle"
+              stroke="url(#blueGradient)"
+              stroke-width="10"
+              stroke-dasharray={circumference}
+              stroke-linecap="round"
+              cx="50"
+              cy="50"
+              r={radius}
+              fill="transparent"
+              stroke-dashoffset={dashOffset}
+            ></circle>
+          </svg>
+          <div
+            class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center"
+          >
             <span class="text-3xl font-bold">70%</span>
             <p class="text-sm text-gray-500">Efficiency</p>
           </div>
-        </div></span>
+        </div></span
+      >
     </div>
 
     <div
       class="col-span-5 row-span-2 border rounded-md p-2 flex flex-col flex-shrink-0 h-[334px] dark:border-white/[.7]"
     >
       <span class="flex items-center justify-between">
-        <p class="text-[#323232] text-lg flex items-center gap-2 font-semibold dark:text-white">
+        <p
+          class="text-[#323232] text-lg flex items-center gap-2 font-semibold dark:text-white"
+        >
           Employee Efficiency Management
         </p>
       </span>
-      <span class='h-full w-full'>
-          <canvas bind:this={chartCanvas}></canvas>
+      <span class="h-full w-full">
+        <canvas bind:this={chartCanvas}></canvas>
       </span>
     </div>
   </div>
 </section>
 
-
 <style>
   .progress-ring_circle {
-  transition: stroke-dashoffset 0.35s;
-  transform: rotate(-90deg);
-  transform-origin: 50% 50%;
-}
+    transition: stroke-dashoffset 0.35s;
+    transform: rotate(-90deg);
+    transform-origin: 50% 50%;
+  }
 </style>

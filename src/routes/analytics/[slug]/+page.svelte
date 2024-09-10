@@ -255,7 +255,7 @@ async function getAisleData(){
   {:else if view === 3}
     <Theft {theftandcamera} {allStores} {theftData} token={data.moksaToken} {moksaUserId}/>
   {:else if view === 4}
-    <EE {allStores}/>
+    <EE {allStores} token={data.moksaToken}/>
   {:else if view === 5}
     <PeopleCounter {allStores} token={data.moksaToken} {usersData} curruser={data.user}/>
   {:else if view === 6}

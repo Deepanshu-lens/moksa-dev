@@ -523,24 +523,12 @@
                    flex rounded-xl shadow-md text-base border}
                `}
                 >
-                  <img
+                  <!-- <img
                     class="object-cover w-24 h-24 rounded-md"
                     src={"data:image/jpeg;base64," + event.frameImage}
                     alt="Team Member"
                   />
-                  {#if event.title.includes("car") && event.description !== ""}
-                    <CarDetailsDialog
-                      plateImage={event.videoUrl}
-                      plateNumber={event.description}
-                      carColor={event.title.replace(" car", "")}
-                      fullImage={event.frameImage}
-                      ><img
-                        class="object-cover w-64 h-16 rounded-md col-span-1"
-                        src={"data:image/jpeg;base64," + event.videoUrl}
-                        alt="Team Member"
-                      />
-                    </CarDetailsDialog>
-                  {/if}
+                 
                   <div class="flex flex-col items-start w-full">
                     <h3 class={"font-semibold text-base"}>
                       {#if event.title.includes("car") && event.description !== ""}
@@ -589,7 +577,22 @@
                         })}
                       </p>
                     </span>
+                  </div> -->
+                  <!-- {#if event.title = 'Theft Control'}
+                  <div class="flex flex-col items-start w-full">
+                    <p>Theft Detection</p>
+                    <p>StoreId: {event.store_id}</p>
+                    <p>CameraId: {event.camera_id}</p>
+                    <p>Theft Probability: {event.theftProbability}</p>
+                    <p>Validated By: {event.validated_by}</p>
+                    <p>Validated At: {event.date_validated}</p>
+                    <p>Cost Saved: {event.cost_saved}</p>
                   </div>
+                  {:else if event.title = 'Safety'}
+                  {:else if event.title = 'People Count'}
+                  {:else if event.title = 'Heat Map'}
+                  {:else}
+                  {/if} -->
                 </article>
               {/each}
             {:else}
