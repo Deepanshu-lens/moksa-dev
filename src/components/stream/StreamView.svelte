@@ -31,6 +31,8 @@
     ScanSearch,
     ChevronLeft,
     ChevronDown,
+    Play,
+    Link,
   } from "lucide-svelte";
 
   import { Cctv, LayoutPanelLeft } from "lucide-svelte";
@@ -59,15 +61,14 @@
   import { page } from "$app/stores";
   import { Slider } from "@/components/ui/slider";
   import Switch from "../ui/switch/switch.svelte";
-    import Control from "../PTZ/Control.svelte";
-    import { P } from "flowbite-svelte";
+  import Control from "../PTZ/Control.svelte";
+  import { P } from "flowbite-svelte";
 
-    
-    export let data;
-    export let url;
-    console.log(data)
+  export let data;
+  export let url;
+  console.log(data);
   const selectedDetections = writable([]);
-   let ptzControl = writable('');
+  let ptzControl = writable("");
   const { nodes } = data;
   let animateHeader = false;
   let comfort = false;
@@ -279,7 +280,7 @@
   }
 
   onMount(async () => {
-    PB.autoCancellation(false)
+    PB.autoCancellation(false);
     galleryItems = data.galleryItems;
     unknownItems = data.imposterItems;
     PB.collection("faceGallery").subscribe("*", async (e) => {
@@ -348,7 +349,7 @@
           })
           .then((res) => {
             toast.success("Line crossing detection removed for this camera!");
-             console.log(res);
+            console.log(res);
             roiCamera = null;
             filteredNodeCameras.set($selectedNode.camera);
             $selectedDetections = [];
@@ -439,14 +440,14 @@
   }
 
   $: filteredEvents.set(filterEvents($events));
-  $: console.log($ptzControl)
+  $: console.log($ptzControl);
 </script>
 
 <!-- desk -->
 {#if !$isMobile}
   <section class="sm:flex flex-row-reverse hidden">
-     <div
-      class=" flex flex-col gap-3 2xl:gap-5 items-center justify-center px-2  bg-gradient-to-b from-[#000610] via-[#000307] via-[#050E41] to-[#000307] h-[calc(100vh-75px)]"
+    <div
+      class=" flex flex-col gap-3 2xl:gap-5 items-center justify-center px-2 bg-gradient-to-b from-[#000610] via-[#000307] via-[#050E41] to-[#000307] h-[calc(100vh-75px)]"
     >
       <span class="group flex-col flex items-center justify-center gap-0.5">
         <button
@@ -454,8 +455,7 @@
             toggleFullscreen();
             addUserLog(`user clicked on fulscreen, top panel`);
           }}
-            class={`disabled:cursor-not-allowed  h-[40px] w-[40px] rounded-full shadow-md group border-2 border-solid border-white/[.7] bg-transparent text-white/[.7] group-hover:text-black group-hover:bg-gradient-to-r group-hover:from-[#EBE60B] group-hover:to-[#07E1A4] group-hover:border-none grid place-items-center`}
-
+          class={`disabled:cursor-not-allowed  h-[40px] w-[40px] rounded-full shadow-md group border-2 border-solid border-white/[.7] bg-transparent text-white/[.7] group-hover:text-black group-hover:bg-gradient-to-r group-hover:from-[#EBE60B] group-hover:to-[#07E1A4] group-hover:border-none grid place-items-center`}
           ><Expand class="h-[22px] w-[22px]" /></button
         >
         <p
@@ -465,13 +465,12 @@
         </p>
       </span>
       <span class="group flex-col flex items-center justify-center gap-0.5">
-        <AddCameraDialog sNode="" {nodes} >
+        <AddCameraDialog sNode="" {nodes}>
           <button
             on:click={() => {
               addUserLog(`user clicked on Add Camera button, top panel`);
             }}
             class={`disabled:cursor-not-allowed  h-[40px] w-[40px] rounded-full shadow-md group border-2 border-solid border-white/[.7] bg-transparent text-white/[.7] group-hover:text-black group-hover:bg-gradient-to-r group-hover:from-[#EBE60B] group-hover:to-[#07E1A4] group-hover:border-none grid place-items-center`}
-
             ><Cctv class="h-[22px] w-[22px]" />
           </button>
         </AddCameraDialog>
@@ -482,7 +481,6 @@
         </p>
       </span>
       <span class="group flex-col flex items-center justify-center gap-0.5">
-      
         <button
           on:click={() => {
             alertPanelHide.set(!$alertPanelHide);
@@ -525,7 +523,7 @@
           Extend
         </p>
       </span>
-       <span class="group flex-col flex items-center justify-center gap-0.5">
+      <span class="group flex-col flex items-center justify-center gap-0.5">
         <button
           on:click={() => {
             filteredNodeCameras.set($selectedNode.camera);
@@ -535,7 +533,7 @@
           class={!$markRoi
             ? ` disabled:cursor-not-allowed text-white/[.7] h-[40px] w-[40px] rounded-full shadow-md  border-2 border-solid  dark:border-white border-opacity-70 bg-transparent group-hover:text-black group-hover:bg-gradient-to-r group-hover:from-[#EBE60B] group-hover:to-[#07E1A4] group-hover:border-none grid place-items-center `
             : `disabled:cursor-not-allowed relative border-none rounded-full shadow-md h-[40px] w-[40px] text-black bg-gradient-to-r from-[#EBE60B] to-[#07E1A4] grid place-items-center `}
-         ><ScanSearch class="h-[22px] w-[22px]" />
+          ><ScanSearch class="h-[22px] w-[22px]" />
         </button>
         <p
           class={`pointer-events-none text-xs ${!$markRoi ? "group-hover:text-[#07E1A4] text-white/[.7] dark:group-hover:text-[#07E1A4]" : " text-[#07E1A4]"}`}
@@ -551,8 +549,8 @@
             snipDropDownOpen = false;
             addUserLog("user clicked on start recording, top panel ");
           }}
- class={!recordDropdownOpen
-           ? ` disabled:cursor-not-allowed text-white/[.7] h-[40px] w-[40px] rounded-full shadow-md  border-2 border-solid  dark:border-white border-opacity-70 bg-transparent group-hover:text-black group-hover:bg-gradient-to-r group-hover:from-[#EBE60B] group-hover:to-[#07E1A4] group-hover:border-none grid place-items-center `
+          class={!recordDropdownOpen
+            ? ` disabled:cursor-not-allowed text-white/[.7] h-[40px] w-[40px] rounded-full shadow-md  border-2 border-solid  dark:border-white border-opacity-70 bg-transparent group-hover:text-black group-hover:bg-gradient-to-r group-hover:from-[#EBE60B] group-hover:to-[#07E1A4] group-hover:border-none grid place-items-center `
             : `disabled:cursor-not-allowed relative border-none rounded-full shadow-md h-[40px] w-[40px] text-black bg-gradient-to-r from-[#EBE60B] to-[#07E1A4] grid place-items-center `}
           ><Disc2 class="h-[22px] w-[22px]" />
           {#if recordDropdownOpen}
@@ -605,9 +603,8 @@
             recordDropdownOpen = false;
             addUserLog("user clicked on screen snip, top panel ");
           }}
-        
- class={!snipDropDownOpen
-             ? ` disabled:cursor-not-allowed text-white/[.7] h-[40px] w-[40px] rounded-full shadow-md  border-2 border-solid  dark:border-white border-opacity-70 bg-transparent group-hover:text-black group-hover:bg-gradient-to-r group-hover:from-[#EBE60B] group-hover:to-[#07E1A4] group-hover:border-none grid place-items-center `
+          class={!snipDropDownOpen
+            ? ` disabled:cursor-not-allowed text-white/[.7] h-[40px] w-[40px] rounded-full shadow-md  border-2 border-solid  dark:border-white border-opacity-70 bg-transparent group-hover:text-black group-hover:bg-gradient-to-r group-hover:from-[#EBE60B] group-hover:to-[#07E1A4] group-hover:border-none grid place-items-center `
             : `disabled:cursor-not-allowed relative border-none rounded-full shadow-md h-[40px] w-[40px] text-black bg-gradient-to-r from-[#EBE60B] to-[#07E1A4] grid place-items-center `}
           ><ImageDown class="h-[22px] w-[22px]" />
           {#if snipDropDownOpen}
@@ -668,13 +665,11 @@
         </button>
         <p
           class={`pointer-events-none text-xs ${!snipDropDownOpen ? "group-hover:text-[#07E1A4] text-white/[.7] dark:group-hover:text-[#07E1A4]" : " text-[#07E1A4]"}`}
-
         >
           Snip
         </p>
       </span>
       <span class="group flex-col flex items-center justify-center gap-0.5">
-     
         <button
           on:click={() => {
             displayLayouts = !displayLayouts;
@@ -682,7 +677,7 @@
             addUserLog("user clicked display and layouts, left pane");
           }}
           class={!displayLayouts
-              ? ` disabled:cursor-not-allowed text-white/[.7] h-[40px] w-[40px] rounded-full shadow-md  border-2 border-solid  dark:border-white border-opacity-70 bg-transparent group-hover:text-black group-hover:bg-gradient-to-r group-hover:from-[#EBE60B] group-hover:to-[#07E1A4] group-hover:border-none grid place-items-center `
+            ? ` disabled:cursor-not-allowed text-white/[.7] h-[40px] w-[40px] rounded-full shadow-md  border-2 border-solid  dark:border-white border-opacity-70 bg-transparent group-hover:text-black group-hover:bg-gradient-to-r group-hover:from-[#EBE60B] group-hover:to-[#07E1A4] group-hover:border-none grid place-items-center `
             : `disabled:cursor-not-allowed relative border-none rounded-full shadow-md h-[40px] w-[40px] text-black/[.7] bg-gradient-to-r from-[#EBE60B] to-[#07E1A4] grid place-items-center `}
           ><LayoutPanelLeft class="h-[22px] w-[22px]" />
           {#if displayLayouts}
@@ -759,41 +754,41 @@
       {/if}
 
       {#if showRightPanel}
-      {#if !$alertPanelHide || $markRoi}
-        <!-- class={`-rotate-90 absolute top-44 z-[999] transition-position ease-in-out duration-500 flex ${isAllFullScreen && showRightPanel ? "right-[12.7rem]" : showRightPanel && !isAllFullScreen ? "2xl:right-[12.7rem] xl:right-[8.7em]  right-[8%]" : !showRightPanel ? "-right-20 opacity-0" : "-right-20"}`} -->
+        {#if !$alertPanelHide || $markRoi}
+          <!-- class={`-rotate-90 absolute top-44 z-[999] transition-position ease-in-out duration-500 flex ${isAllFullScreen && showRightPanel ? "right-[12.7rem]" : showRightPanel && !isAllFullScreen ? "2xl:right-[12.7rem] xl:right-[8.7em]  right-[8%]" : !showRightPanel ? "-right-20 opacity-0" : "-right-20"}`} -->
 
-        <span
-                  class={`-rotate-90 absolute  z-[999] transition-position ease-in-out duration-500 flex ${isAllFullScreen && showRightPanel && !$markRoi && !$alertPanelHide ? " min-[1250px]:right-[15.4%] min-[1400px]:right-[14.2%] 2xl:right-[12.7rem] lg:right-[12.7rem] right-[9.8rem] top-44" : isAllFullScreen && showRightPanel && $markRoi && $alertPanelHide ? "min-[1250px]:right-[15.4%] min-[1400px]:right-[14.2%] 2xl:right-[12.7rem] lg:right-[12.7rem] right-[9.8rem] top-44" : isAllFullScreen && showRightPanel && $markRoi && !$alertPanelHide ? "lg:right-[9.8rem] right-[6.7rem]  top-44" : !isAllFullScreen && showRightPanel && $markRoi && !$alertPanelHide ? " min-[1350px]:right-[11.4%] 2xl:right-[9.7rem] lg:top-32 xl:top-36 2xl:top-44 lg:right-[12.6%]" : !isAllFullScreen && showRightPanel && $markRoi && $alertPanelHide ? "2xl:right-[12.8rem] min-[1350px]:right-[15%] min-[1250px]:right-[16.6%] lg:right-[17.5%] md:right-[15.7%] 2l:top-44 xl:top-40 lg:top-32 top-[5.2rem]" : !isAllFullScreen && showRightPanel && !$markRoi && !$alertPanelHide ? "2xl:right-[12.8rem] min-[1350px]:right-[15%] min-[1250px]:right-[16.6%] lg:right-[17.5%] md:right-[15.7%] 2l:top-44 xl:top-40 lg:top-32 top-[5.2rem]" : "right-0"}`}
-        >
-          {#if !$alertPanelHide}
+          <span
+            class={`-rotate-90 absolute  z-[999] transition-position ease-in-out duration-500 flex ${isAllFullScreen && showRightPanel && !$markRoi && !$alertPanelHide ? " min-[1250px]:right-[15.4%] min-[1400px]:right-[14.2%] 2xl:right-[12.7rem] lg:right-[12.7rem] right-[9.8rem] top-44" : isAllFullScreen && showRightPanel && $markRoi && $alertPanelHide ? "min-[1250px]:right-[15.4%] min-[1400px]:right-[14.2%] 2xl:right-[12.7rem] lg:right-[12.7rem] right-[9.8rem] top-44" : isAllFullScreen && showRightPanel && $markRoi && !$alertPanelHide ? "lg:right-[9.8rem] right-[6.7rem]  top-44" : !isAllFullScreen && showRightPanel && $markRoi && !$alertPanelHide ? " min-[1350px]:right-[11.4%] 2xl:right-[9.7rem] lg:top-32 xl:top-36 2xl:top-44 lg:right-[12.6%]" : !isAllFullScreen && showRightPanel && $markRoi && $alertPanelHide ? "2xl:right-[12.8rem] min-[1350px]:right-[15%] min-[1250px]:right-[16.6%] lg:right-[17.5%] md:right-[15.7%] 2l:top-44 xl:top-40 lg:top-32 top-[5.2rem]" : !isAllFullScreen && showRightPanel && !$markRoi && !$alertPanelHide ? "2xl:right-[12.8rem] min-[1350px]:right-[15%] min-[1250px]:right-[16.6%] lg:right-[17.5%] md:right-[15.7%] 2l:top-44 xl:top-40 lg:top-32 top-[5.2rem]" : "right-0"}`}
+          >
+            {#if !$alertPanelHide}
+              <button
+                on:click={() => (currpanel = 1)}
+                class={`cursor-pointer w-[100px] h-[32px] rounded-t-xl ${isAllFullScreen ? "text-white bg-slate-800" : "text-black dark:text-white bg-white dark:bg-slate-800"} z-[800] flex items-center justify-center gap-2 shad text-sm ${currpanel === 1 && "font-extrabold"}`}
+                >Alerts
+              </button>
+            {/if}
             <button
-              on:click={() => (currpanel = 1)}
-              class={`cursor-pointer w-[100px] h-[32px] rounded-t-xl ${isAllFullScreen ? "text-white bg-slate-800" : "text-black dark:text-white bg-white dark:bg-slate-800"} z-[800] flex items-center justify-center gap-2 shad text-sm ${currpanel === 1 && "font-extrabold"}`}
-              >Alerts
+              on:click={() => (currpanel = 2)}
+              class={` cursor-pointer w-[100px] h-[32px] rounded-t-xl ${isAllFullScreen ? "text-white bg-slate-800" : "text-black dark:text-white bg-white dark:bg-slate-800"} shad z-[800] flex items-center justify-center gap-2 text-sm ${currpanel === 2 && "font-extrabold"}`}
+              >Cameras
             </button>
-          {/if}
-          <button
-            on:click={() => (currpanel = 2)}
-            class={` cursor-pointer w-[100px] h-[32px] rounded-t-xl ${isAllFullScreen ? "text-white bg-slate-800" : "text-black dark:text-white bg-white dark:bg-slate-800"} shad z-[800] flex items-center justify-center gap-2 text-sm ${currpanel === 2 && "font-extrabold"}`}
-            >Cameras
-          </button>
-          {#if $markRoi}
-            <button
-              on:click={() => {
-                currpanel = 3;
-                filteredNodeCameras.set($selectedNode.camera);
-              }}
-              class={` cursor-pointer w-[100px] h-[32px] rounded-t-xl ${isAllFullScreen ? "text-white bg-slate-800" : "text-black dark:text-white bg-white dark:bg-slate-800"} shad z-[800] flex items-center justify-center gap-2 text-sm ${currpanel === 3 && "font-extrabold"}`}
-              >Mark ROI
-            </button>
-          {/if}
-        </span>
-      {/if}
+            {#if $markRoi}
+              <button
+                on:click={() => {
+                  currpanel = 3;
+                  filteredNodeCameras.set($selectedNode.camera);
+                }}
+                class={` cursor-pointer w-[100px] h-[32px] rounded-t-xl ${isAllFullScreen ? "text-white bg-slate-800" : "text-black dark:text-white bg-white dark:bg-slate-800"} shad z-[800] flex items-center justify-center gap-2 text-sm ${currpanel === 3 && "font-extrabold"}`}
+                >Mark ROI
+              </button>
+            {/if}
+          </span>
+        {/if}
       {/if}
 
       <button
         on:click={() => (showRightPanel = !showRightPanel)}
-        class={`absolute ${showRightPanel ? ` ${isAllFullScreen ? 'right-[15rem] lg:right-[18rem]' : 'right-[14rem] lg:right-[17rem] xl:right-[18rem]'} ` : "right-0"} py-1 rounded-l-md bg-[#f9f9f9] dark:bg-slate-800 top-1/2 -translate-y-1/2 shadow-md transition-position ease-in-out duration-500 z-[99999]`}
+        class={`absolute ${showRightPanel ? ` ${isAllFullScreen ? "right-[15rem] lg:right-[18rem]" : "right-[14rem] lg:right-[17rem] xl:right-[18rem]"} ` : "right-0"} py-1 rounded-l-md bg-[#f9f9f9] dark:bg-slate-800 top-1/2 -translate-y-1/2 shadow-md transition-position ease-in-out duration-500 z-[99999]`}
       >
         <ChevronRight
           class={`${showRightPanel ? "rotate-0" : "rotate-180"} transition-transform ease-in-out duration-700`}
@@ -816,7 +811,7 @@
         {#if !$alertPanelHide && currpanel === 1}
           <div
             class={`backdrop-filter  
-          z-10 trasition ease-in-out w-full max-w-md 
+          z-10 trasition ease-in-out w-full max-w-md  flex-shrink-0
          duration-200 ${
            animateHeader
              ? "shadow-xl rounded-b-md backdrop-blur supports-[backdrop-filter]:bg-background/60 border-border/40 bg-background/95 "
@@ -916,7 +911,7 @@
                 <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
                 {#if $filteredEvents.length > 0}
                   {#each $filteredEvents as event}
-                    {@const date = new Date(event.created)}
+                    <!-- {@const date = new Date(event.created)} -->
                     <!-- svelte-ignore a11y-click-events-have-key-events -->
                     <li
                       class="w-full fade-in-15 transition-all duration-200"
@@ -977,16 +972,176 @@
                             </p>
                           </span>
                         </div> -->
-                        {#if event.title==='Theft Control Event'}
+                        <!-- {#if event.title==='Theft Control Event'}
                         <p>{event.title}</p>
+                         {:else} -->
+                        <!-- <p>{event.title}</p> -->
+                        <!-- {/if}  -->
+                        {#if event.title === "Theft Control"}
+                          <div class="flex flex-col items-start w-full">
+                            <span
+                              class=" flex w-full items-center justify-between pb-1"
+                            >
+                              <h3 class={"font-bold text-base"}>
+                                {event.title}
+                              </h3>
+                              <span
+                                class="flex items-center gap-1 text-xs text-blue-400 text-semibold cursor-pointer"
+                                ><Link size={12} /> Link</span
+                              >
+                            </span>
+                            <span class="flex items-center gap-4 w-full">
+                              <span class="flex gap-1 flex-col">
+                                <p class="text-xs font-medium">
+                                  StoreId: <span
+                                    class="font-normal text-black/[.6]"
+                                  >
+                                    {event.store_id}
+                                  </span>
+                                </p>
+                                <p class="text-xs font-medium">
+                                  CameraId: <span
+                                    class="font-normal text-black/[.6]"
+                                  >
+                                    {event.camera_id}
+                                  </span>
+                                </p>
+                                <p class="text-xs font-medium">
+                                  Validated At: <span
+                                    class="font-normal text-black/[.6]"
+                                  >
+                                    {event.date_validated}
+                                  </span>
+                                </p>
+                              </span>
+                              <span class="flex gap-1 flex-col">
+                                <p class="text-xs font-medium">
+                                  Theft Probability: <span
+                                    class="font-normal text-black/[.6]"
+                                  >
+                                    {event.theftProbability}
+                                  </span>
+                                </p>
+                                <p class="text-xs font-medium">
+                                  Validated By: <span
+                                    class="font-normal text-black/[.6]"
+                                  >
+                                    {event.validated_by}
+                                  </span>
+                                </p>
+                                <p class="text-xs font-medium">
+                                  Cost Saved: <span
+                                    class="font-normal text-black/[.6]"
+                                  >
+                                    {event.cost_saved}
+                                  </span>
+                                </p>
+                              </span>
+                            </span>
+                          </div>
+                        {:else if event.title === "Safety"}
+                          <div class="flex flex-col items-start w-full">
+                            <h3 class={"font-bold text-base pb-1"}>
+                              {event.title}
+                            </h3>
+                            <span
+                              class="flex gap-2 items-center w-full border-b pb-1"
+                            >
+                              <p class="text-sm font-medium">
+                                Id: <span class="font-normal text-black/[.6]">
+                                  {event.emp_id}
+                                </span>
+                              </p>
+                              <p class="text-sm font-medium">
+                                Time Sop: <span
+                                  class="font-normal text-black/[.6]"
+                                >
+                                  {event.time_sop === "" ||
+                                  event.time_sop === null ||
+                                  event.time_sop === undefined
+                                    ? "N/A"
+                                    : event.time_sop}
+                                </span>
+                              </p>
+                            </span>
+
+                            <span class="flex items-center gap-1 pt-1">
+                              <span class="flex flex-col gap-1 items-end">
+                                <p
+                                  class="flex gap-2 text-semibold text-xs items-center"
+                                >
+                                  <span
+                                    class="w-[2px] h-[10px] rounded-lg bg-[#015a62] flex-shrink-0"
+                                  />Mask
+                                </p>
+                                <p class="text-black/[.6] text-xs">
+                                  {event.wearing_mask}
+                                </p>
+                              </span>
+                              <span class="flex flex-col gap-1 items-end">
+                                <p
+                                  class="flex gap-2 text-semibold text-xs items-center"
+                                >
+                                  <span
+                                    class="w-[2px] h-[10px] rounded-lg bg-[#015a62] flex-shrink-0"
+                                  />Uniform
+                                </p>
+                                <p class="text-black/[.6] text-xs">
+                                  {event.wearing_uniform}
+                                </p>
+                              </span>
+                              <span class="flex flex-col gap-1 items-end">
+                                <p
+                                  class="flex gap-2 text-semibold items-center text-xs"
+                                >
+                                  <span
+                                    class="w-[2px] h-[10px] rounded-lg bg-[#015a62] flex-shrink-0"
+                                  />Apron
+                                </p>
+                                <p class="text-black/[.6] text-xs">
+                                  {event.wearing_apron}
+                                </p>
+                              </span>
+                              <span class="flex flex-col gap-1 items-end">
+                                <p
+                                  class="flex gap-2 items-center text-semibold text-xs"
+                                >
+                                  <span
+                                    class="w-[2px] h-[10px] rounded-lg bg-[#015a62] flex-shrink-0"
+                                  />Hairnet
+                                </p>
+                                <p class="text-black/[.6] text-xs">
+                                  {event.wearing_hair_net}
+                                </p>
+                              </span>
+                              <span class="flex flex-col gap-1 items-end">
+                                <p
+                                  class="flex gap-2 items-center text-semibold text-xs"
+                                >
+                                  <span
+                                    class="w-[2px] h-[10px] rounded-lg bg-[#015a62] flex-shrink-0"
+                                  />gloves
+                                </p>
+                                <p class="text-black/[.6] text-xs">
+                                  {event.wearing_gloves}
+                                </p>
+                              </span>
+                            </span>
+                          </div>
+                        {:else if event.title === "People Count"}
+                          <p>Cost Saved: Perople Count</p>
+                        {:else if event.title === "Heat Map"}
+                          <p>Cost Saved: heatmap</p>
                         {:else}
-                        <p>{event.title}</p>
+                          <p>Cost Saved: EE</p>
                         {/if}
                       </article>
                     </li>
                   {/each}
                 {:else}
-                  <li class='p-4'>No events found, select filters to see events</li>
+                  <li class="p-4">
+                    No events found, select filters to see events
+                  </li>
                 {/if}
               {/if}
             </ul>
@@ -1038,7 +1193,7 @@
                 <select
                   class={`block text-primary capitalize font-semibold rounded-md appearance-none w-full bg-[#F6F6F6] border-2 py-2 text-sm px-2 leading-tight `}
                   on:change={(event) => {
-         const selectedCam = $selectedNode?.camera.find(
+                    const selectedCam = $selectedNode?.camera.find(
                       (cam) => cam.id === event.target.value,
                     );
                     console.log(selectedCam);
@@ -1046,16 +1201,23 @@
                     roiCamera = selectedCam;
                     filteredNodeCameras.set([selectedCam]);
                     // console.log($filteredNodeCameras);
-                    intrusionDetection = selectedCam?.expand?.inference?.intrusionDetection;
+                    intrusionDetection =
+                      selectedCam?.expand?.inference?.intrusionDetection;
                     lineCrossing = selectedCam?.expand?.inference?.lineCrossing;
-                    intrusionPerson = selectedCam?.expand?.inference?.intrusionPerson;
-                    intrusionVehicle = selectedCam?.expand?.inference?.intrusionVehicle;
-                    intrusionPersonThresh = selectedCam?.expand?.inference?.intrusionPersonThresh;
-                    intrusionVehicleThresh = selectedCam?.expand?.inference?.intrusionVehicleThresh;
+                    intrusionPerson =
+                      selectedCam?.expand?.inference?.intrusionPerson;
+                    intrusionVehicle =
+                      selectedCam?.expand?.inference?.intrusionVehicle;
+                    intrusionPersonThresh =
+                      selectedCam?.expand?.inference?.intrusionPersonThresh;
+                    intrusionVehicleThresh =
+                      selectedCam?.expand?.inference?.intrusionVehicleThresh;
                     linePerson = selectedCam?.expand?.inference?.linePerson;
                     lineVehicle = selectedCam?.expand?.inference?.lineVehicle;
-                    linePersonThresh = selectedCam?.expand?.inference?.linePersonThresh;
-                    lineVehicleThresh = selectedCam?.expand?.inference?.lineVehicleThresh;
+                    linePersonThresh =
+                      selectedCam?.expand?.inference?.linePersonThresh;
+                    lineVehicleThresh =
+                      selectedCam?.expand?.inference?.lineVehicleThresh;
                   }}
                 >
                   <option value="" disabled selected>Select from list</option>
@@ -1109,7 +1271,6 @@
                     updateAi();
                   }}>Save</Button
                 >
-             
               </div>
             {/if}
           {:else}
@@ -1118,10 +1279,11 @@
                 >Select Camera</label
               >
               <div class="relative w-full">
-                <select id='selectedCamSelect'
+                <select
+                  id="selectedCamSelect"
                   class={`block text-primary capitalize font-semibold rounded-md appearance-none w-full bg-[#F6F6F6] border-2 py-2 text-sm px-2 leading-tight `}
                   on:change={(event) => {
-                          const selectedCam = $selectedNode?.camera.find(
+                    const selectedCam = $selectedNode?.camera.find(
                       (cam) => cam.id === event.target.value,
                     );
                     // console.log(selectedCam);
@@ -1129,16 +1291,23 @@
                     roiCamera = selectedCam;
                     filteredNodeCameras.set([selectedCam]);
                     // console.log($filteredNodeCameras);
-                    intrusionDetection = selectedCam?.expand?.inference?.intrusionDetection;
+                    intrusionDetection =
+                      selectedCam?.expand?.inference?.intrusionDetection;
                     lineCrossing = selectedCam?.expand?.inference?.lineCrossing;
-                    intrusionPerson = selectedCam?.expand?.inference?.intrusionPerson;
-                    intrusionVehicle = selectedCam?.expand?.inference?.intrusionVehicle;
-                    intrusionPersonThresh = selectedCam?.expand?.inference?.intrusionPersonThresh;
-                    intrusionVehicleThresh = selectedCam?.expand?.inference?.intrusionVehicleThresh;
+                    intrusionPerson =
+                      selectedCam?.expand?.inference?.intrusionPerson;
+                    intrusionVehicle =
+                      selectedCam?.expand?.inference?.intrusionVehicle;
+                    intrusionPersonThresh =
+                      selectedCam?.expand?.inference?.intrusionPersonThresh;
+                    intrusionVehicleThresh =
+                      selectedCam?.expand?.inference?.intrusionVehicleThresh;
                     linePerson = selectedCam?.expand?.inference?.linePerson;
                     lineVehicle = selectedCam?.expand?.inference?.lineVehicle;
-                    linePersonThresh = selectedCam?.expand?.inference?.linePersonThresh;
-                    lineVehicleThresh = selectedCam?.expand?.inference?.lineVehicleThresh;
+                    linePersonThresh =
+                      selectedCam?.expand?.inference?.linePersonThresh;
+                    lineVehicleThresh =
+                      selectedCam?.expand?.inference?.lineVehicleThresh;
                   }}
                 >
                   <option value="" disabled selected>Select from list</option>
@@ -1186,25 +1355,32 @@
                 <Button
                   on:click={() => {
                     updateAi();
-                     document.getElementById('selectedCamSelect').value = '';
+                    document.getElementById("selectedCamSelect").value = "";
                   }}>Save</Button
                 >
-                     <Button variant='secondary'
-                    on:click={() => {
-                      markRoi.set(false)
-            roiCamera = null;
-            filteredNodeCameras.set($selectedNode.camera);
-            $selectedDetections = [];
-             document.getElementById('selectedCamSelect').value = '';
-                    }}>Cancel</Button
-                  >
+                <Button
+                  variant="secondary"
+                  on:click={() => {
+                    markRoi.set(false);
+                    roiCamera = null;
+                    filteredNodeCameras.set($selectedNode.camera);
+                    $selectedDetections = [];
+                    document.getElementById("selectedCamSelect").value = "";
+                  }}>Cancel</Button
+                >
               </div>
             {/if}
           {/if}
         {:else}
           <NodeSelection {isAllFullScreen} {nodes} {url} {data} />
-          <CameraList {isAllFullScreen} {showItems} user={data.user} {data}  {ptzControl} />
-          {#if $ptzControl !== ''}
+          <CameraList
+            {isAllFullScreen}
+            {showItems}
+            user={data.user}
+            {data}
+            {ptzControl}
+          />
+          {#if $ptzControl !== ""}
             <Control {ptzControl} />
           {/if}
         {/if}
