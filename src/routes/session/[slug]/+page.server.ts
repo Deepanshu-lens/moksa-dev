@@ -128,7 +128,7 @@ export const load: PageServerLoad = async ({ locals, cookies }) => {
 
   const moksaEvents = async () => {
     const e = await locals.pb?.collection("moksa_Events").getList(1, 100, {
-      sort: "created",
+      sort: "-created",
     });
     return e?.items.map(
       (ee) =>

@@ -16,9 +16,7 @@
   export let data: PageServerData;
   const { session } = data;
   const moksaUserId = data.user.moksaId
-  // console.log('stores data',data.stores)
   const allStores = data?.stores?.data.data
-  // console.log('allstores',allStores)
   let nodes: Node[] = [];
   let batchedEvents: Event[] = [];
   let searching : boolean = true;
@@ -130,7 +128,7 @@ async function getNodes(): Promise<Node[]> {
         selectedNode.set(nodes[0])
       }
     searching = false
-    events.set(data.events);
+    events.set(data.moksaEvents);
 
     // PB.collection("events").subscribe("*", function (e) {
     //   console.log("event subscription", e.action, e.record);

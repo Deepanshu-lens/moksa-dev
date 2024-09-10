@@ -60,6 +60,7 @@
   import { Slider } from "@/components/ui/slider";
   import Switch from "../ui/switch/switch.svelte";
     import Control from "../PTZ/Control.svelte";
+    import { P } from "flowbite-svelte";
 
     
     export let data;
@@ -69,7 +70,7 @@
    let ptzControl = writable('');
   const { nodes } = data;
   let animateHeader = false;
-  let comfort = true;
+  let comfort = false;
 
   const search = new URLSearchParams(window.location.search);
   const screens = parseInt(search.get("s") ?? "1");
@@ -869,13 +870,13 @@
           <div
             class={`flex flex-row items-center justify-center gap-4 ${isAllFullScreen ? "bg-[#333]" : "bg-[#f9f9f9] dark:bg-[#333]"} p-2`}
           >
-            <button
+            <!-- <button
               on:click={() => (comfort = true)}
               class={!comfort
                 ? `bg-transparent font-medium ${isAllFullScreen ? "text-slate-50" : "text-[#afafaf]"} text-sm`
                 : `font-medium text-sm px-4 py-2 rounded-md ${isAllFullScreen ? "bg-black text-slate-200" : "bg-white text-[#727272] dark:bg-black dark:text-slate-200"}`}
               >Comfortable</button
-            >
+            > -->
             <button
               on:click={() => (comfort = false)}
               class={comfort
@@ -931,32 +932,14 @@
           ${isAllFullScreen ? "bg-black text-white " : "hover:scale-[1.01] dark:shadow-slate-800 hover:shadow-lg "}
         `}
                       >
-                        <img
+                        <!-- <img
                           class="object-cover w-[75px] h-[75px] rounded-md flex-shrink-0"
                           src={"data:image/jpeg;base64," + event.frameImage}
                           alt="Team Member"
                         />
-                        {#if event.title.includes("car") && event.description !== ""}
-                          <CarDetailsDialog
-                            plateImage={event.videoUrl}
-                            plateNumber={event.description}
-                            carColor={event.title.replace(" car", "")}
-                            fullImage={event.frameImage}
-                          >
-                            <img
-                              class="object-cover w-64 h-16 rounded-md col-span-1"
-                              src={"data:image/jpeg;base64," + event.videoUrl}
-                              alt="Team Member"
-                            />
-                          </CarDetailsDialog>
-                        {/if}
                         <div class="w-full">
                           <h3 class={"font-semibold text-sm"}>
-                            {#if event.title.includes("car") && event.description !== ""}
-                              {event.description} {event.title}
-                            {:else}
                               {event.title}
-                            {/if}
                           </h3>
                           <p class={"text-xs text-black/.7"}>
                             Camera {$selectedNode.camera.find(
@@ -993,7 +976,12 @@
                               })}
                             </p>
                           </span>
-                        </div>
+                        </div> -->
+                        {#if event.title==='Theft Control Event'}
+                        <p>{event.title}</p>
+                        {:else}
+                        <p>{event.title}</p>
+                        {/if}
                       </article>
                     </li>
                   {/each}
