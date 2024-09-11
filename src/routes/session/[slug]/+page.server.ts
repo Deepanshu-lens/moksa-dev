@@ -145,6 +145,6 @@ export const load: PageServerLoad = async ({ locals, cookies }) => {
     imposterItems: await imposterItems(),
     stores: await dropwdown(),
     token: cookies.get('moksa-token'),
-    moksaEvents: await moksaEvents(),
+    moksaEvents: [],
   };
 }
