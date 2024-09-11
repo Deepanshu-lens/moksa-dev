@@ -18,14 +18,14 @@
   const dispatch = createEventDispatcher();
 
   // $:console.log(combinedStores)
-  const managerNames = ['Sunaib Lalani', 'Bunty', 'Sanjay'];
+  // const managerNames = ['Sunaib Lalani', 'Bunty', 'Sanjay'];
 
-const dbData = combinedStores.map(store => {
+$: dbData = combinedStores.map(store => {
   return {
     storeName: store.name,
     storeImage: store.storeImage,
-    location: `${store.address}, ${store.country}` === 'address, country' ? 'US' : `${store.address}, ${store.country}`,
-    storeManager: store.manager === 'manager' ? managerNames[Math.floor(Math.random() * managerNames.length)] : store.manager,
+    location: `${store.address}, ${store.country}`,
+    storeManager: store.manager,
     managerImage: store.managerImage,
     dateOfRegistration: store.createdAt,
     camerasAssigned: store.camera_count,
@@ -39,14 +39,14 @@ const dbData = combinedStores.map(store => {
 export let searchStore:string;
 
 // $: console.log(searchStore)
-  const data = writable(dbData);
+  $: data = writable(dbData);
 
-  const readableData = readable([], (set) => {
+  $: readableData = readable([], (set) => {
     const unsubscribe = data.subscribe(set);
     return unsubscribe;
   });
  
-  const table = createTable(readableData, {
+  $: table = createTable(readableData, {
     page: addPagination({ initialPageSize: 3 }),
     sort: addSortBy(),
     filter: addTableFilter({
@@ -56,7 +56,7 @@ export let searchStore:string;
     select: addSelectedRows(),
   });
 
-  const columns = table.createColumns([
+  $: columns = table.createColumns([
     table.column({
       accessor: "storeName",
       header: "Store Name",
@@ -83,16 +83,17 @@ export let searchStore:string;
     }),
   ]);
 
-  const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } =
-    table.createViewModel(columns);
+  $: ({ headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } =
+    table.createViewModel(columns));
 
-  const { hasNextPage, hasPreviousPage, pageIndex, pageCount } =
-    pluginStates.page;
-  const { selectedDataIds } = pluginStates.select;
+  $: ({ hasNextPage, hasPreviousPage, pageIndex, pageCount } =
+    pluginStates.page);
+  $: ({ selectedDataIds } = pluginStates.select);
 
- const { filterValue } = pluginStates.filter;
+ $: ({ filterValue } = pluginStates.filter);
 
-  $: $filterValue = searchStore;
+  $: ($filterValue = searchStore);
+  
   function handleRowClick(rowData) {
     dispatch("rowClick", rowData);
   }

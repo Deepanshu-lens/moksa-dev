@@ -27,7 +27,9 @@ export const load: LayoutServerLoad = async ({ locals, url, cookies }) => {
     console.log("REDIRECTED FROM PROTECTED ROUTE");
     throw redirect(302, "/login?message=Token not found");
   }
+  // console.log(locals.pb?.authStore.token)
   const currentUserToken = decodeJwt(locals.pb?.authStore.token || "");
+  // console.log(currentUserToken)
   if (currentUserToken) {
     let currentUser = await locals.pb
       ?.collection("users")

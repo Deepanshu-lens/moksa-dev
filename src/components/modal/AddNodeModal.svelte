@@ -5,12 +5,25 @@
   import { Label } from "@/components/ui/label";
   import { Button } from "@/components/ui/button";
   import { selectedNode } from "@/lib/stores";
+  import * as Select from "@/components/ui/select/index";
+  import Switch from "../ui/switch/switch.svelte";
 
   let nodeName = "";
   let address = "";
   let pincode = "";
   let country = "";
   let manager = "";
+  let selectedTimezone = ''
+  let storeOpenTime = ''
+  let storeCloseTime = ''
+  let isStore24hr = false
+  selectedTimezone
+  const timezones = [
+    'EST',
+    'PST',
+    'MST',
+    "CST",]
+    
   export let showAddNode: boolean;
   const onSubmit = () =>
     fetch("/api/node/create", {
@@ -25,6 +38,10 @@
         pin: pincode,
         country: country,
         manager: manager,
+        timezone: selectedTimezone,
+        storeOpenTime: storeOpenTime,
+        storeCloseTime: storeCloseTime,
+        isStore24hr: isStore24hr,
       }),
     }).then((response) => {
       if (response.ok) {
@@ -107,6 +124,48 @@
           on:change={(e) => (manager = e.target.value)}
         />
       </div>
+      <div class="grid grid-cols-4 items-center gap-4 py-2">
+            <Label for={`store-timezone`}>Timezone</Label>
+            <Select.Root >
+              <Select.Trigger class="col-span-3">
+                <Select.Value placeholder="Select timezone" />
+              </Select.Trigger>
+              <Select.Content>
+                {#each timezones as timezone}
+                  <Select.Item on:click={() => (selectedTimezone = timezone)} value={timezone}>{timezone}</Select.Item>
+                {/each}
+              </Select.Content>
+            </Select.Root>
+          </div>
+          <div class="grid grid-cols-4 items-center gap-4 py-2">
+            <Label for={`store-24hr`}>24-Hour Operation</Label>
+            <div class="col-span-3">
+              <Switch
+                id={`store-24hr`}
+                bind:checked={isStore24hr}
+              />
+            </div>
+          </div>
+           <div class="grid grid-cols-4 items-center gap-4 py-2">
+            <Label for={`store-open-time`}>Open Time</Label>
+            <Input
+              id={`store-open-time`}
+              type="time"
+              class="col-span-3"
+              bind:value={storeOpenTime}
+              disabled={isStore24hr}
+            />
+          </div>
+          <div class="grid grid-cols-4 items-center gap-4 py-2">
+            <Label for={`store-close-time`}>Close Time</Label>
+            <Input
+              id={`store-close-time`}
+              type="time"
+              class="col-span-3"
+              bind:value={storeCloseTime}
+              disabled={isStore24hr}
+            />
+          </div>
     </div>
 
     <Dialog.Footer>
