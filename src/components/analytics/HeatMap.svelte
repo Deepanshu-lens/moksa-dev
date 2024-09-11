@@ -17,6 +17,37 @@
   export let allStores;
   export let aisleStoreData;
   export let token;
+
+  // $:console.log(allStores)
+
+
+// const getFloorMap = async (storeId) => {
+//   try {
+//     const res = await fetch(`https://api.moksa.ai/store/getFloorMapByStoreid/${storeId}`, {
+//       method: "GET",
+//       headers: {
+//         Authorization: `Bearer ${token}`,
+//         "Content-Type": "application/json"
+//       }
+//     });
+    
+//     if (!res.ok) {
+//       throw new Error(`HTTP error! status: ${res.status}`);
+//     }
+    
+//     const data = await res.json();
+//     console.log(`Floor map for store ${storeId}:`, data);
+//     return data;
+//   } catch (error) {
+//     console.error(`Error fetching floor map for store ${storeId}:`, error);
+//   }
+// }
+let floorMaps = writable([])
+// const getAllFloorMaps = async () => {
+//  await Promise.all(allStores.map(store => getFloorMap(store.id)));
+//   console.log('All floor maps:', $floorMaps);
+// }
+
   let fusiondevicedata = [];
   let fusiondevicecategories = [];
   let selectedStore = writable({
@@ -37,6 +68,7 @@
   let value: DateRange | undefined = undefined;
   let startValue: DateValue | undefined = undefined;
   let customDateLabel = "Custom";
+
   $: {
     if (value?.start && value?.end) {
       const start = new Date(
@@ -120,8 +152,6 @@
       // createChart();
     }
   }
-
-  $: console.log(selectedStoreData)
 
   $: {
     if (selectedStoreData) {
@@ -343,6 +373,7 @@
   onMount(() => {
     setTimeout(() => {
       setupSocketForAllStores();
+        // getAllFloorMaps();
     }, 500);
   });
 
@@ -355,9 +386,6 @@
     });
   });
 
-  $: console.log('c',chartData)
-  $: console.log('s',selectedStoreData)
-  $: console.log('f',fruits)
 </script>
 
 <section
@@ -443,7 +471,7 @@
     </span>
   </div>
   <div class="grid grid-cols-8 grid-rows-8 gap-4 mt-4">
-    <div
+    <!-- <div
       class="col-span-8 row-span-4 border rounded-md flex flex-col rounded-t-xl dark:border-white/[.7]"
     >
       <span
@@ -459,9 +487,9 @@
       <div class="h-full w-full">
         <HeatMapDataTable />
       </div>
-    </div>
+    </div> -->
 
-    <div
+    <!-- <div
       class="col-span-4 row-span-3 border rounded-md flex flex-col dark:border-white/[.7]"
     >
       <span
@@ -523,7 +551,7 @@
           <p class='px-2'>No data available</p>
           {/if}
       </div>
-    </div>
+    </div> -->
     <!-- <div class="col-span-4 row-span-4 rounded-md dark:border-white/[.7]">
       <img
         src="/images/heat1.png"

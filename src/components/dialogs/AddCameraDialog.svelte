@@ -53,6 +53,15 @@
   let camCount = 0;
   let nvrSaving: boolean = false;
   let nvrFace: boolean = false;
+  let storeOpenTime
+  let storeCloseTime
+  let isStore24hr
+  let selectedTimezone
+  const timezones = [
+    'EST',
+    'PST',
+    'MST',
+    "CST",]
 
   export let sNode;
   export let nodes;
@@ -277,6 +286,10 @@
           pin: nodePin[i],
           country: nodeCountry[i],
           manager: nodeManager[i],
+          timezone: selectedTimezone,
+          storeOpenTime: storeOpenTime,
+          storeCloseTime: storeCloseTime,
+          isStore24hr: isStore24hr,
         }),
       }).catch((err) => console.log(err));
     }
@@ -287,6 +300,10 @@
     nodeManager = []
     toast.success('Store Added')
     dialogOpen = false;
+    selectedTimezone = ''
+    storeOpenTime = ''
+    storeCloseTime = ''
+    isStore24hr = false
   }
 
   async function handleAddSubNodes() {
@@ -329,7 +346,11 @@
       disabled = null;
     }
   }
-  
+  // $: {
+  //   console.log(selectedTimezone)
+  //   console.log(storeOpenTime)
+  //   console.log(storeCloseTime)
+  // }
 </script>
 
 <Dialog.Root bind:open={dialogOpen}>
@@ -725,57 +746,7 @@
         </div>
       </div>
     {/if}
-    {#if modeAdd === 2}
-      <div class="flex flex-col px-2">
-        <p class="text-[#212123] dark:text-slate-200 font-medium text-xl mt-2">
-          Add Sub Node
-        </p>
-        <span
-          class=" h-[1px] w-full bg-[#919EAB] border-opacity-15 mt-4 mb-6"
-        />
-        <div class="grid grid-cols-4 items-center gap-4 py-2">
-          <Label for={`node-name`}>Select Node</Label>
-          <div class="relative col-span-3">
-            <ChevronDown
-              size={18}
-              class="text-[#727272] absolute top-1/2 pointer-events-none -translate-y-1/2 right-2"
-            />
-            <select
-              class="w-full p-2 border border-gray-300 rounded-md"
-              bind:value={chosenNode}
-            >
-              {#each nodes as node}
-                <option value={node}>{node.name}</option>
-              {/each}
-            </select>
-          </div>
-        </div>
-        {#each Array(subNodeCounter) as _, index (index)}
-          <div class="grid grid-cols-4 items-center gap-4 py-2">
-            <Label for={`node-name-${index}`}>Node {index + 1} Name</Label>
-            <Input
-              id={`subnode-name-${index}`}
-              placeholder={`SubNode ${index + 1}`}
-              class="col-span-3"
-              bind:value={subNodeNames[index]}
-              on:change={(e) => (subNodeNames[index] = e.target.value)}
-            />
-          </div>
-        {/each}
-      </div>
-      <Button
-        class="w-1/2 mx-auto flex items-center gap-4"
-        variant="secondary"
-        on:click={() => (subNodeCounter += 1)}
-        >Add Another subNode <PlusCircle
-          class="text-[#015a62]"
-          size={18}
-        /></Button
-      >
-      <Button class="w-1/2 mx-auto" on:click={() => handleAddSubNodes()}
-        >Submit</Button
-      >
-    {/if}
+   
     {#if modeAdd === 1}
       <div class="flex flex-col px-2">
         <p class="text-[#212123] dark:text-slate-200 font-medium text-xl mt-2">
@@ -840,14 +811,58 @@
               on:change={(e) => (nodeManager[index] = e.target.value)}
             />
           </div>
+          <div class="grid grid-cols-4 items-center gap-4 py-2">
+            <Label for={`store-timezone-${index}`}>Timezone</Label>
+            <Select.Root >
+              <Select.Trigger class="col-span-3">
+                <Select.Value placeholder="Select timezone" />
+              </Select.Trigger>
+              <Select.Content>
+                {#each timezones as timezone}
+                  <Select.Item on:click={() => (selectedTimezone = timezone)} value={timezone}>{timezone}</Select.Item>
+                {/each}
+              </Select.Content>
+            </Select.Root>
+          </div>
+          <div class="grid grid-cols-4 items-center gap-4 py-2">
+            <Label for={`store-24hr-${index}`}>24-Hour Operation</Label>
+            <div class="col-span-3">
+              <Switch
+                id={`store-24hr-${index}`}
+                bind:checked={isStore24hr}
+              />
+            </div>
+          </div>
+           <div class="grid grid-cols-4 items-center gap-4 py-2">
+            <Label for={`store-open-time-${index}`}>Open Time</Label>
+            <Input
+              id={`store-open-time-${index}`}
+              type="time"
+              class="col-span-3"
+              bind:value={storeOpenTime}
+              disabled={isStore24hr}
+            />
+          </div>
+          <div class="grid grid-cols-4 items-center gap-4 py-2">
+            <Label for={`store-close-time-${index}`}>Close Time</Label>
+            <Input
+              id={`store-close-time-${index}`}
+              type="time"
+              class="col-span-3"
+              bind:value={storeCloseTime}
+              disabled={isStore24hr}
+            />
+          </div>
+          
+          
         {/each}
       </div>
-      <Button
+      <!-- <Button
         class="w-1/2 mx-auto flex items-center gap-4"
         variant="secondary"
         on:click={() => (addNodeCounter += 1)}
         >Add Another Store <PlusCircle class="text-primary" size={18} /></Button
-      >
+      > -->
       <Button class="w-1/2 mx-auto" on:click={() => handleAddNode()}
         >Submit</Button
       >

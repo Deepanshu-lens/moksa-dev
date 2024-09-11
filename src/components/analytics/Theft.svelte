@@ -6,6 +6,7 @@
     TrendingUp,
     Upload,
   } from "lucide-svelte";
+  import type { Theft } from "@/types";
   import { BarController, BarElement } from "chart.js";
   import {
     Chart,
@@ -254,134 +255,6 @@
       }
     }
   }
-
-  // function createTheftChart() {
-  //   if (theftChartCanvas && !theftChart) {
-  //     const ctx = theftChartCanvas.getContext("2d");
-  //     if (ctx) {
-  //       // Sort the data by day of week
-  //       const sortedData = theftData.data.sort((a, b) => {
-  //         const days = [
-  //           "Sunday",
-  //           "Monday",
-  //           "Tuesday",
-  //           "Wednesday",
-  //           "Thursday",
-  //           "Friday",
-  //           "Saturday",
-  //         ];
-  //         return (
-  //           days.indexOf(a.day_of_week.trim()) -
-  //           days.indexOf(b.day_of_week.trim())
-  //         );
-  //       });
-
-  //       const data = {
-  //         labels: sortedData.map((item) => item.day_of_week.trim()),
-  //         datasets: [
-  //           {
-  //             label: "Detected",
-  //             data: sortedData.map((item) => parseInt(-item.theft_detected)),
-  //             backgroundColor: (context) => {
-  //               const chart = context.chart;
-  //               const { ctx, chartArea } = chart;
-  //               if (!chartArea) {
-  //                 return null;
-  //               }
-  //               const gradient = ctx.createLinearGradient(0, 0, chart.width, 0);
-  //               gradient.addColorStop(0, "rgba(4, 158, 243, 1)");
-  //               gradient.addColorStop(1, "rgba(21, 29, 100, 1)");
-  //               return gradient;
-  //             },
-  //             borderColor: "rgba(21, 29, 100, 1)",
-  //             borderWidth: 1,
-  //             borderRadius: 4,
-  //             barThickness: 20,
-  //           },
-  //           {
-  //             label: "Prevented",
-  //             data: sortedData.map((item) => parseInt(item.theft_prevented)),
-  //             backgroundColor: (context) => {
-  //               const chart = context.chart;
-  //               const { ctx, chartArea } = chart;
-  //               if (!chartArea) {
-  //                 return null;
-  //               }
-  //               const gradient = ctx.createLinearGradient(0, 0, chart.width, 0);
-
-  //               gradient.addColorStop(0, "rgba(255, 169, 88, 1)");
-  //               gradient.addColorStop(1, "rgba(255, 1, 120, 1)");
-  //               return gradient;
-  //             },
-  //             borderColor: "rgba(255, 1, 120, 1)",
-  //             borderWidth: 1,
-  //             borderRadius: 4,
-  //             barThickness: 20,
-  //           },
-  //         ],
-  //       };
-
-  //       theftChart = new Chart(ctx, {
-  //         type: "bar",
-  //         data: data,
-  //         options: {
-  //           indexAxis: "y",
-  //           scales: {
-  //             x: {
-  //               beginAtZero: true,
-
-  //               grid: {
-  //                 display: false,
-  //               },
-  //               ticks: {
-  //                 stepSize: 1,
-  //                 display: true,
-  //               },
-  //             },
-  //             y: {
-  //               grid: {
-  //                 color: "rgba(0, 0, 0, 0.1)",
-  //                 drawBorder: false,
-  //               },
-  //             },
-  //           },
-  //           responsive: true,
-  //           maintainAspectRatio: false,
-  //           plugins: {
-  //             legend: {
-  //               position: "top",
-  //               align: "end",
-  //               labels: {
-  //                 usePointStyle: true,
-  //                 pointStyle: "circle",
-  //               },
-  //             },
-  //             tooltip: {
-  //               callbacks: {
-  //                 label: function (context) {
-  //                   let label = context.dataset.label || "";
-  //                   if (label) {
-  //                     label += ": ";
-  //                   }
-  //                   if (context.parsed.x !== null) {
-  //                     label += context.parsed.x;
-  //                   }
-  //                   return label;
-  //                 },
-  //               },
-  //             },
-  //           },
-  //           layout: {
-  //             padding: {
-  //               left: 30,
-  //               right: 30,
-  //             },
-  //           },
-  //         },
-  //       });
-  //     }
-  //   }
-  // }
 
  function createTheftChart() {
   if (theftChartCanvas && !theftChart) {
@@ -933,6 +806,151 @@
     }
   }
 
+  function cleanValue(value: string | number): string {
+    if (typeof value === 'string' && value.includes(',')) {
+      // Split by comma and take the first part
+      return value.split(',')[0].trim();
+    }
+    return String(value);
+  }
+
+  function theftAndCameraConvertToCSV(arr: Theft[]): void  {
+    const date = new Date().toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+    // Extract the headers
+    const headers = Object.keys(arr[0]).join(",");
+
+    // Extract the data rows with value cleaning
+    const rows = arr.map(obj => {
+      return Object.values(obj).map(value => cleanValue(value)).join(",");
+    }).join("\n");
+
+    // Combine headers and rows
+    const csvContent = headers + "\n" + rows;
+
+    // Create a Blob for the CSV content
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+
+    // Create a link element to download the CSV
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `theft&camera_${date}.csv`;
+    document.body.appendChild(link);
+
+    // Programmatically click the link to trigger the download
+    link.click();
+
+    // Clean up the link after download
+    document.body.removeChild(link);
+  }
+
+  function theftTrendConvertToCSV(arr: any[]): void {
+    console.log(arr)
+     const date = new Date().toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+    // Extract the headers
+    const headers = ["Day of Week", "Theft Count"];
+    
+    // Extract the data rows
+    const rows = $dateRange === '7 Days' ? arr.map((item) => [
+        item.day_of_week.trim(),
+        item.theft_count
+    ]): arr.data.map((item) => [
+        item.day_of_week.trim(),
+        item.theft_count
+    ]);
+
+    // Combine headers and rows
+    const csvContent = [headers, ...rows].map(e => e.join(",")).join("\n");
+
+    // Create a Blob for the CSV content
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+
+    // Create a link element to download the CSV
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `theft_trend_${date}.csv`; // file name after download
+    document.body.appendChild(link);
+
+    // Programmatically click the link to trigger the download
+    link.click();
+
+    // Clean up the link after download
+    document.body.removeChild(link);
+}
+
+function listTheftConvertToCSV(arr) {
+  if (!arr || arr.length === 0) {
+    console.error("No data to convert to CSV");
+    return;
+  }
+   const date = new Date().toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+
+  // Extract the headers
+  const headers = Object.keys(arr[0]).join(",");
+
+  // Extract the data rows with value cleaning
+  const rows = arr
+    .map((obj) => {
+      return Object.values(obj)
+        .map((value) => cleanValue(value))
+        .join(",");
+    })
+    .join("\n");
+
+  // Combine headers and rows
+  const csvContent = headers + "\n" + rows;
+
+  // Create a Blob for the CSV content
+  const blob = new Blob([csvContent], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+
+  // Create a link element to download the CSV
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `theft_list_${date}.csv`; // file name after download
+  document.body.appendChild(link);
+
+  // Programmatically click the link to trigger the download
+  link.click();
+
+  // Clean up the link after download
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
+async function exportCSV() {
+     let theftListData;
+    const unsubscribe = listtheft.subscribe(value => {
+      theftListData = value.data || value;
+    });
+    unsubscribe();
+
+    if (theftListData && theftListData.length > 0) {
+      listTheftConvertToCSV(theftListData);
+    } else {
+      console.error("No theft list data to export");
+    }
+}
+
   $: {
     if ($dateRange !== "custom") {
       fetchDataForDateRange();
@@ -947,6 +965,8 @@
       fetchDataStoreWise();
     }
   }
+
+  // $: console.log($theftTrend)
 
 let sockets: { [key: number]: any } = {};
 let liveData = writable([]);
@@ -1146,6 +1166,7 @@ function addMockData() {
         </Select.Content>
       </Select.Root>
       <Button
+        on:click={() => {exportCSV(); theftTrendConvertToCSV($theftTrend); theftAndCameraConvertToCSV(theftandcamera);}}
         class="bg-[#3D81FC] text-white flex items-center gap-1 hover:bg-white hover:text-[#3D81FC]"
         ><Upload size={18} /> Export Reports</Button
       >

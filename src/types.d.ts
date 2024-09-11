@@ -8,6 +8,19 @@ export type User = {
   features;
 };
 
+export interface Theft {
+  id: number;
+  name: string;
+  manager: string;
+  address: string;
+  pincode: string;
+  country: string;
+  camera_count: string;
+  theft_detected_count: string;
+  theft_prevented_count: string;
+  total_count: string;
+}
+
 
 export type Camera = {
   name: string;

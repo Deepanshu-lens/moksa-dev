@@ -14,6 +14,7 @@
   import { writable } from "svelte/store";
   import Spinner from "../ui/spinner/Spinner.svelte";
   import AddStoreDialog from "../dialogs/AddStoreDialog.svelte";
+    import * as DropdownMenu from "@/components/ui/dropdown-menu";
   let cardData = writable([]);
   export let allStores: any[] = [];
   export let theftandcamera: any[] = [];
@@ -25,10 +26,80 @@
     return { ...store, ...theftData, lensId: nodeData ? nodeData.id : null };
   });
 
+
   const fruits = allStores.map((store: any) => ({
     value: store.id,
     label: store.name,
   }));
+
+    $: uniqueLocations = [...new Set(allStores.map(store => store.country))].filter(Boolean);
+  $: uniqueManagers = [...new Set(allStores.map(store => store.manager))].filter(Boolean);
+
+  let selectedLocation = "";
+  let selectedManager = "";
+
+  function handleLocationSelect(location: string) {
+    selectedLocation = selectedLocation === location ? "" : location;
+  }
+
+  function handleManagerSelect(manager: string) {
+    selectedManager = selectedManager === manager ? "" : manager;
+  }
+
+  $: filteredStores = combinedStores.filter(store => 
+    (!selectedLocation || store.country === selectedLocation) &&
+    (!selectedManager || store.manager === selectedManager)
+  );
+
+  function cleanValue(value: string | number): string {
+    const stringValue = String(value);
+
+    // Enclose values containing commas or quotes in double quotes
+    if (stringValue.includes(",") || stringValue.includes('"')) {
+      // Escape any double quotes inside the value by doubling them
+      return `"${stringValue.replace(/"/g, '""')}"`;
+    }
+
+    return stringValue;
+  }
+
+  function convertArrToCSV(arr: any[], fileName: string,excludeKeys: string[] = []): void {
+      const filteredArr = arr.filter(item => item !== null && item !== undefined);
+
+    // Extract the headers  
+
+  const headers = Object.keys(filteredArr[0])
+    .filter(key => !excludeKeys.includes(key))
+    .join(",");
+
+  // Extract the data rows with value cleaning
+  const rows = filteredArr
+    .map((obj) => {
+      return Object.keys(obj)
+        .filter(key => !excludeKeys.includes(key))
+        .map((key) => cleanValue(obj[key]))
+        .join(",");
+    })
+    .join("\n");
+    // Combine headers and rows
+    const csvContent = headers + "\n" + rows;
+
+    // Create a Blob for the CSV content
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+
+    // Create a link element to download the CSV
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName; //file name after download
+    document.body.appendChild(link);
+
+    // Programmatically click the link to trigger the download
+    link.click();
+
+    // Clean up the link after download
+    document.body.removeChild(link);
+  }
 
   onMount(async () => {
     const res = await fetch("/api/store/getStoreDetails", {
@@ -45,6 +116,8 @@
   // $:console.log(selectedStore)
   // $:console.log($cardData[selectedStore]?.data)
   let searchStore = "";
+
+  // $: console.log($cardData)
 </script>
 
 <section class="w-full p-4 flex flex-col gap-4 px-6">
@@ -158,10 +231,11 @@
         <p class="text-white text-xl font-bold">
           {#if $cardData.length !== 0}
             <!-- {$cardData[selectedStore]?.data?.[0].busy_hours === null ? 'N/A' : $cardData[selectedStore]?.data?.[0].busy_hours} -->
-            {$cardData[selectedStore]?.data?.[0].busy_hours ?? (() => {
-              const start = Math.floor(Math.random() * 11 + 1);
-              return `${start}:00 - ${start + 1}:00`;
-            })()}
+            {$cardData[selectedStore]?.data?.[0].busy_hours ??
+              (() => {
+                const start = Math.floor(Math.random() * 11 + 1);
+                return `${start}:00 - ${start + 1}:00`;
+              })()}
           {:else}
             <Spinner color="white" />
           {/if}
@@ -181,15 +255,31 @@
         <p class="text-white text-xl font-bold">
           {#if $cardData.length !== 0}
             <!-- {$cardData[selectedStore]?.data?.[0].aisle_name === null ? 'N/A' : $cardData[selectedStore]?.data?.[0].aisle_name} -->
-            {$cardData[selectedStore]?.data?.[0].aisle_name ?? (() => {
-              const aisles = [
-                'Clothing', 'Electronics', 'Liquor', 'Produce', 'Dairy', 
-                'Bakery', 'Meat', 'Frozen Foods', 'Snacks', 'Beverages', 
-                'Canned Goods', 'Personal Care', 'Home Appliances', 'Sporting Goods', 
-                'Toys', 'Books', 'Automotive', 'Garden Center', 'Pharmacy'
-              ];
-              return aisles[Math.floor(Math.random() * aisles.length)];
-            })()}
+            {$cardData[selectedStore]?.data?.[0].aisle_name ??
+              (() => {
+                const aisles = [
+                  "Clothing",
+                  "Electronics",
+                  "Liquor",
+                  "Produce",
+                  "Dairy",
+                  "Bakery",
+                  "Meat",
+                  "Frozen Foods",
+                  "Snacks",
+                  "Beverages",
+                  "Canned Goods",
+                  "Personal Care",
+                  "Home Appliances",
+                  "Sporting Goods",
+                  "Toys",
+                  "Books",
+                  "Automotive",
+                  "Garden Center",
+                  "Pharmacy",
+                ];
+                return aisles[Math.floor(Math.random() * aisles.length)];
+              })()}
           {:else}
             <Spinner color="white" />
           {/if}
@@ -206,12 +296,53 @@
       />
       <Search size={18} class="absolute top-1/2 -translate-y-1/2 left-2" />
     </span>
-    <span class="flex items-center gap-3"
-      ><Button variant="outline" class="flex items-center gap-1 text-sm"
+    <span class="flex items-center gap-3">
+      <!-- <Button variant="outline" class="flex items-center gap-1 text-sm"
         ><ListFilter size={18} />Filters</Button
-      ><Button
+      > -->
+      <DropdownMenu.Root>
+       <DropdownMenu.Trigger>
+      <Button variant="outline" class="flex items-center gap-1 text-sm">
+        <ListFilter size={18} />Filters
+      </Button>
+    </DropdownMenu.Trigger>
+        <DropdownMenu.Content>
+          <DropdownMenu.Label>Location</DropdownMenu.Label>
+          <DropdownMenu.Separator />
+          {#each uniqueLocations as location}
+            <DropdownMenu.CheckboxItem
+              checked={selectedLocation === location}
+              onCheckedChange={() => handleLocationSelect(location)}
+            >
+              {location}
+            </DropdownMenu.CheckboxItem>
+          {/each}
+          <DropdownMenu.Separator />
+          <DropdownMenu.Label>Manager</DropdownMenu.Label>
+          <DropdownMenu.Separator />
+          {#each uniqueManagers as manager}
+            <DropdownMenu.CheckboxItem
+              checked={selectedManager === manager}
+              onCheckedChange={() => handleManagerSelect(manager)}
+            >
+              {manager}
+            </DropdownMenu.CheckboxItem>
+          {/each}
+        </DropdownMenu.Content>
+      </DropdownMenu.Root>
+     <Button
         class="flex items-center gap-1 bg-[#3D81FC] text-sm hover:bg-white hover:text-[#3D81FC]"
-        ><Upload size={18} />Export Reports</Button
+        on:click={() => {
+         const date = new Date().toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+          convertArrToCSV(combinedStores, `combined_stores_${date}.csv`);
+          convertArrToCSV($cardData.map((item) => item.data[0]), `stores_${date}.csv`, ["floormap","logo","updatedAt"]);
+        }}><Upload size={18} />Export Reports</Button
       ></span
     >
   </div>
@@ -220,6 +351,6 @@
     <span class="h-[50px] bg-[#050F40] px-4 py-2 rounded-t-xl">
       <p class="text-white font-medium text-lg">Stores</p>
     </span>
-    <StoresDataTable {combinedStores} {searchStore} />
+    <StoresDataTable combinedStores={filteredStores} {searchStore} />
   </div>
 </section>

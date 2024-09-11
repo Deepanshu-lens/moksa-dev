@@ -5,8 +5,10 @@
   import { Label } from "@/components/ui/label";
   import { Button } from "@/components/ui/button";
   import { selectedNode } from "@/lib/stores";
-  import { X } from "lucide-svelte";
+  import { ChevronDown, X } from "lucide-svelte";
   import { enhance } from "$app/forms";
+  import * as Select from "@/components/ui/select/index";
+  import Switch from "../ui/switch/switch.svelte";
 
   let dialogOpen = false;
   let nodeName = "";
@@ -14,6 +16,15 @@
   let pincode = "";
   let country = "";
   let manager = "";
+  let storeOpenTime
+  let storeCloseTime
+  let isStore24hr
+  let selectedTimezone
+  const timezones = [
+    'EST',
+    'PST',
+    'MST',
+    "CST",]
 
   const handleSubmit = async () => {
     console.log(nodeName, address, pincode, country, manager)
@@ -28,7 +39,11 @@
           address: address,
           pin: pincode,
           country: country,
-          manager: manager
+          manager: manager,
+          timezone: selectedTimezone,
+          storeOpenTime: storeOpenTime,
+          storeCloseTime: storeCloseTime,
+          isStore24hr: isStore24hr,
         })
     }).then(() => {
       toast("Store added");
@@ -61,7 +76,7 @@
           </div>
           <div class="space-y-2">
             <Label for="pincode" class="block text-sm font-medium text-gray-700">Zip</Label>
-            <Input id="pincode" name="pincode" type="number" bind:value={pincode} placeholder="Enter Zip" class="w-full border border-[#F2F4F7] rounded-md px-3 py-2" />
+            <Input id="pincode" name="pincode"  bind:value={pincode} placeholder="Enter Zip" class="w-full border border-[#F2F4F7] rounded-md px-3 py-2" />
           </div>
           <div class="space-y-2">
             <Label for="country" class="block text-sm font-medium text-gray-700">Country</Label>
@@ -72,7 +87,51 @@
             <Input id="manager" name="manager" bind:value={manager} placeholder="Enter manager name" class="w-full border border-[#F2F4F7] rounded-md px-3 py-2" />
           </div>
         </div>
-        <div class="mt-6 flex justify-end space-x-3">
+      
+        <div class="grid grid-cols-4 items-center gap-4 relative py-2 ">
+            <Label for={`store-timezone`}>Timezone</Label>
+           <select
+    id="store-timezone"
+    bind:value={selectedTimezone}
+    class="col-span-3 w-full border border-[#F2F4F7] rounded-md px-3  py-2"
+  >
+    <option value="" disabled selected>Select timezone</option>
+    {#each timezones as timezone}
+      <option value={timezone}>{timezone}</option>
+    {/each}
+  </select>
+  <ChevronDown class="absolute pointer-events-none right-3 top-1/2 transform -translate-y-1/2 z-20" />
+          </div>
+          <div class="grid grid-cols-4 items-center gap-4 py-2">
+            <Label for={`store-24hr`}>24-Hour Operation</Label>
+            <div class="col-span-3">
+              <Switch
+                id={`store-24hr`}
+                bind:checked={isStore24hr}
+              />
+            </div>
+          </div>
+           <div class="grid grid-cols-4 items-center gap-4 py-2">
+            <Label for={`store-open-time`}>Open Time</Label>
+            <Input
+              id={`store-open-time`}
+              type="time"
+              class="col-span-3"
+              bind:value={storeOpenTime}
+              disabled={isStore24hr}
+            />
+          </div>
+          <div class="grid grid-cols-4 items-center gap-4 py-2">
+            <Label for={`store-close-time`}>Close Time</Label>
+            <Input
+              id={`store-close-time`}
+              type="time"
+              class="col-span-3"
+              bind:value={storeCloseTime}
+              disabled={isStore24hr}
+            />
+          </div>
+            <div class="mt-6 flex justify-end space-x-3">
           <Button type="button" variant="outline" on:click={() => dialogOpen = false} class="px-4 py-2 border border-[#F2F4F7] rounded-md text-gray-700">Cancel</Button>
           <Button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md">Submit</Button>
         </div>
