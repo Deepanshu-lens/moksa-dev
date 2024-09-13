@@ -131,3 +131,19 @@ export type UserLog = {
   created: Date;
   event: string;
 };
+
+
+
+export type ITickets = {
+  id: string;
+  name: string;
+  severity: string;
+  createdAt: string;
+  createdBy: string;
+  location: string;
+  assignedTo: string;
+  status: string;
+  resolvedAt: string;
+  resolvedBy: string;
+  comments: string;
+};

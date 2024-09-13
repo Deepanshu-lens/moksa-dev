@@ -21,47 +21,47 @@
   import { page } from "$app/stores";
   import PocketBase from "pocketbase";
   import type { PageServerData } from "./$types";
-    import { writable } from "svelte/store";
+  import { writable } from "svelte/store";
   let view: number = 1;
   export let data: PageServerData;
-  let allStores: any[] = data?.stores?.data?.data;
-  let allStoresData: any[] = data?.allstoreData?.data;
-  let aisleData: any[] = data?.aisleData?.data?.data;
-  let theftandcamera: any[] = data?.theftandcamera?.data?.data;
-  let busyness: any[] = data?.busyness.data;
-  let efficiency: any[] = data?.efficiency.data;
-  let safetyDetails: any[] = data?.safetyDetails.data;
-  let theftData: any[] = data?.theftData;
-  let usersData: any[] = data?.usersData;
-  // let unreadNotifications: any[] = data?.unreadNotifications;
+  // let allStores: any[] = data?.stores?.data?.data;
+  let allStores: any[] = data?.stores?.data?.data ?? [];
+  let allStoresData: any[] = data?.allstoreData?.data ?? [];
+  let aisleData: any[] = data?.aisleData?.data?.data ?? [];
+  let theftandcamera: any[] = data?.theftandcamera?.data?.data ?? [];
+  let busyness: any[] = data?.busyness?.data ?? [];
+  let efficiency: any[] = data?.efficiency?.data ?? [];
+  let safetyDetails: any[] = data?.safetyDetails?.data ?? [];
+  let theftData: any[] = data?.theftData ?? [];
+  let usersData: any[] = data?.usersData ?? [];
   let aisleStoreData = writable([]);
 
-  // console.log(usersData)
-  // console.log(data)
+  // console.log("pagedata", data);
 
-  const moksaUserId = data.user.moksaId
+  // console.log('allStores:', allStores);
+
+  const moksaUserId = data.user.moksaId;
 
   const session = data.session;
   let nodes: Node[] = [];
   // console.log(data)
   // $:console.log(nodes)
   const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
-// console.log(aisleData)
-onMount(async () => {
-   PB.autoCancellation(false);
+  // console.log(aisleData)
+  onMount(async () => {
+    PB.autoCancellation(false);
     nodes = await getNodes();
-   const s = nodes.find((n) => n.id === session.activeNode);
-          if(s) {
-        selectedNode.set(s)
-      } else {
-        selectedNode.set(nodes[0])
-      }
-  const asd = await getAisleData()
-  aisleStoreData.set(asd)
-})
+    const s = nodes.find((n) => n.id === session.activeNode);
+    if (s) {
+      selectedNode.set(s);
+    } else {
+      selectedNode.set(nodes[0]);
+    }
+    const asd = await getAisleData();
+    aisleStoreData.set(asd);
+  });
 
- async function getNodes(): Promise<Node[]> {
-  
+  async function getNodes(): Promise<Node[]> {
     if (session.node.length > 0) {
       const nodes = await PB.collection("node").getFullList(200, {
         sort: "created",
@@ -87,16 +87,16 @@ onMount(async () => {
     return [];
   }
 
-async function getAisleData(){
-    const response = await fetch(`/api/aisle/getByStoreId`,{
-      method: 'POST',
+  async function getAisleData() {
+    const response = await fetch(`/api/aisle/getByStoreId`, {
+      method: "POST",
       body: JSON.stringify({
         storeId: allStores,
-      })
-    })
-    const data = await response.json()
-    return data
-}
+      }),
+    });
+    const data = await response.json();
+    return data;
+  }
 </script>
 
 <main class="flex flex-row-reverse h-[calc(100vh-75px)] w-full">
@@ -249,18 +249,40 @@ async function getAisleData(){
   </div>
 
   {#if view === 1}
-    <Dashboard {moksaUserId} {allStores} {allStoresData} {aisleData} {theftandcamera} {busyness} {efficiency} {safetyDetails} {theftData} token={data.moksaToken}/>
+    <Dashboard
+      {moksaUserId}
+      {allStores}
+      {allStoresData}
+      {aisleData}
+      {theftandcamera}
+      {busyness}
+      {efficiency}
+      {safetyDetails}
+      {theftData}
+      token={data.moksaToken}
+    />
   {:else if view === 2}
-    <Stores {allStores} {theftandcamera} {nodes} {moksaUserId}/>
+    <Stores {allStores} {theftandcamera} {nodes} {moksaUserId} />
   {:else if view === 3}
-    <Theft {theftandcamera} {allStores} {theftData} token={data.moksaToken} {moksaUserId}/>
+    <Theft
+      {theftandcamera}
+      {allStores}
+      {theftData}
+      token={data.moksaToken}
+      {moksaUserId}
+    />
   {:else if view === 4}
-    <EE {allStores} token={data.moksaToken}/>
+    <EE {allStores} token={data.moksaToken} />
   {:else if view === 5}
-    <PeopleCounter {allStores} token={data.moksaToken} {usersData} curruser={data.user}/>
-  <!-- {:else if view === 6}
-    <HeatMap {aisleStoreData} {allStores} token={data.moksaToken}/> -->
+    <PeopleCounter
+      {allStores}
+      token={data.moksaToken}
+      {usersData}
+      curruser={data.user}
+    />
+  {:else if view === 6}
+    <HeatMap {aisleStoreData} {allStores} token={data.moksaToken} />
   {:else if view === 7}
-    <Safety {allStores} token={data.moksaToken}/>
+    <Safety {allStores} token={data.moksaToken} />
   {/if}
 </main>

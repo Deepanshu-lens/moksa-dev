@@ -164,9 +164,9 @@
         >
           <DarkModeSwitch />
           <!-- <AddUserDialog> -->
-          <span
+          <a href="/tickets/{sessionId}"
             class="bg-[#061149] size-[40px] grid place-items-center rounded-md p-1 border border-white/[.08] text-white hover:bg-white hover:text-black hover:dark:text-white hover:dark:bg-[#272727]"
-            ><MessageCircleQuestion size={22} /></span
+            ><MessageCircleQuestion size={22} /></a
           >
           <!-- </AddUserDialog> -->
           <button

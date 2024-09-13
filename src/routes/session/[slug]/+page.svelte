@@ -14,9 +14,11 @@
     import { toast } from "svelte-sonner";
 
   export let data: PageServerData;
+  console.log('data',data)
   const { session } = data;
   const moksaUserId = data.user.moksaId
-  const allStores = data?.stores?.data.data
+  const allStores = data.stores === [] ? [] : data.stores?.data?.data
+  const moksaEvents = data.moksaEvents
   let nodes: Node[] = [];
   let batchedEvents: Event[] = [];
   let searching : boolean = true;
@@ -75,7 +77,6 @@ onMount(() => {
   }, 500);
 });
 
-$: console.log($liveData)
 
 onDestroy(() => {
   Object.values(sockets).forEach((socket) => {
@@ -202,12 +203,13 @@ async function getNodes(): Promise<Node[]> {
   });
 
 
-  function setupSocketForAllStores() {
-    console.log('allstores',allStores)
-  allStores?.forEach((store: any) => {
-    setupTheftSockets(store.id);
-  });
-}
+//   function setupSocketForAllStores() {
+//     // console.log('allstores',allStores)
+//   // allStores?.forEach((store: any) => {
+//   console.log($selectedNode.moksaId)
+//     setupTheftSockets($selectedNode.moksaId);
+//   // });
+// }
 
 function setupTheftSockets(storeId: number) {
   const userID = moksaUserId
@@ -247,11 +249,17 @@ function setupTheftSockets(storeId: number) {
   });
 }
 
-onMount(() => {
-  setTimeout(() => {
-    setupSocketForAllStores();
-  }, 500);
-});
+// onMount(() => {
+//   setTimeout(() => {
+//     setupSocketForAllStores();
+//   }, 500);
+// });
+
+$: if($selectedNode?.moksaId) {
+   setTimeout(() => {
+  setupTheftSockets($selectedNode?.moksaId);
+}, 500);
+}
 
 // $: console.log($liveData)
 

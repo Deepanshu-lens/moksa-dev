@@ -159,7 +159,7 @@ onDestroy(() => {
 {/if} -->
  {#if $safetyData.length > 0}
     {#if $safetyData.find(store => store.storeId === $selectedStore.id)?.employees.data.data.length > 0}
-      <SafetyDataTable safetyData={$safetyData.find(store => store.storeId === $selectedStore.id).employees.data.data}/>
+      <SafetyDataTable token={token} safetyData={$safetyData.find(store => store.storeId === $selectedStore.id).employees.data.data}/>
     {:else}
       <p class='text-center text-gray-500'>No data found for the selected store</p>
     {/if}
