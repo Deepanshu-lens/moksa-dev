@@ -4,75 +4,42 @@ import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch,cookies,locals }) => {
 
-    await fetch(`https://api.moksa.ai/store/getUserStoreDetailsByUserId/${locals.user.record.moksaId}`, {
-        headers: {
-            "Content-Type": "application/json",
-            'Authorization': `Bearer ${cookies.get('moksa-token')}`
-        },
-    }).then(async (res) => {
-        const data = await res.json();
-        console.log(data)
-    })
-    // if (!cookies.get('moksa-token')) {
-    //     await fetch(`https://api.moksa.ai/auth/login`, {
-    //         method: "POST", headers: {
-    //             'Content-Type': 'application/json'
-    //         },
-    //         body: JSON.stringify({ email: 'anushiya@gmail.com', password: 'anushiya' }),
-    //     }).then(async (res) => {
-    //         const data = await res.json();
-    //         // console.log(data);
-    //         if (data.data && data.data.token) {
-    //             const token = data.data.token;
-    //             // Set the token in a cookie
-    //             const cookieOptions = {
-    //                 httpOnly: true,
-    //                 secure: false,
-    //                 sameSite: "lax",
-    //                 domain: undefined,
-    //                 maxAge: 60 * 60 * 23
-    //             };
-    //             // console.log("TOKEN!!!!!!!!!!")
-    //             cookies.set('moksa-token', token, cookieOptions);
-    //             // console.log('Token saved in cookie');
-    //         } else {
-    //             console.log('Token not found in response');
-    //         }
-    //     }).catch((err) => {
-    //         console.log(err);
-    //     });
-    // } 
-    // else {
-    //     cookies.delete('moksa-token', { path: '/' });
-    //     await fetch(`https://api.moksa.ai/auth/login`, {
-    //         method: "POST", headers: {
-    //             'Content-Type': 'application/json'
-    //         },
-    //         body: JSON.stringify({ email: 'anushiya@gmail.com', password: 'anushiya' }),
-    //     }).then(async (res) => {
-    //         const data = await res.json();
-    //         // console.log(data);
-    //         if (data.data && data.data.token) {
-    //             const token = data.data.token;
-    //             // Set the token in a cookie
-    //             const cookieOptions = {
-    //                 httpOnly: true,
-    //                 secure: false,
-    //                 sameSite: "lax",
-    //                 domain: undefined,
-    //                 maxAge: 60 * 60 * 23
-    //             };
-    //             // console.log("TOKEN!!!!!!!!!!")
-    //             cookies.set('moksa-token', token, cookieOptions);
-    //             // console.log('Token saved in cookie');
-    //         } else {
-    //             console.log('Token not found in response');
-    //         }
-    //     }).catch((err) => {
-    //         console.log(err);
-    //     });
-    // }
-    // console.log(cookies.get('moksa-token'))
+
+    // const safeExecute = async (fn: () => Promise<any>, fallbackValue: any = []) => {
+    //     try {
+    //         const result = await fn();
+    //         console.log(result)
+    //         return result !== null && result !== undefined ? result : fallbackValue;
+    //     } catch (error) {
+    //         console.error(`Error executing function: ${error}`);
+    //         return fallbackValue;
+    //     }
+    // };
+
+    const safeExecute = async (fn: () => Promise<any>, fallbackValue: any = []) => {
+        try {
+            const timeoutPromise = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Request timed out')), 30000)
+            );
+            const result = await Promise.race([fn(), timeoutPromise]);
+            // console.log(result);
+            return result !== null && result !== undefined ? result : fallbackValue;
+        } catch (error) {
+            console.error(`Error executing function: ${error}`);
+            return fallbackValue;
+        }
+    };
+
+    // await fetch(`https://api.moksa.ai/store/getUserStoreDetailsByUserId/${locals.user.record.moksaId}`, {
+    //     headers: {
+    //         "Content-Type": "application/json",
+    //         'Authorization': `Bearer ${cookies.get('moksa-token')}`
+    //     },
+    // }).then(async (res) => {
+    //     const data = await res.json();
+    //     console.log(data)
+    // })
+
     const today = new Date();
     const oneYearAgo = new Date(today);
     const oneWeekAgo = new Date(today);
@@ -81,7 +48,9 @@ export const load: PageServerLoad = async ({ fetch,cookies,locals }) => {
 
     const formatDate = (date: Date) => date.toISOString().split('T')[0];
 
-
+// console.log(formatDate(oneWeekAgo))
+// console.log(formatDate(oneYearAgo))
+// console.log(formatDate(today))
     const dropwdown = async () => {
         const response = await fetch('https://api.moksa.ai/store/getAllStoresForDropdown', {
             method: 'GET',
@@ -178,25 +147,58 @@ export const load: PageServerLoad = async ({ fetch,cookies,locals }) => {
         return allUsers.json();
     }
 
-    const safeExecute = async (fn: () => Promise<any>) => {
-        try {
-            return await fn() || [];
-        } catch (error) {
-            console.error(`Error executing function: ${error}`);
-            return [];
+    const apiCalls = {
+        theftData: () => theftDetectionDetails(),
+        stores: () => dropwdown(),
+        allstoreData: () => allStoreData(),
+        aisleData: () => aisleData(),
+        theftandcamera: () => alltheftandcamera(),
+        busyness: () => busyness(),
+        efficiency: () => efficiency(),
+        safetyDetails: () => safetyDetails(),
+        usersData: () => allUsers(),
+        userStoreDetails: async () => {
+            const res = await fetch(`https://api.moksa.ai/store/getUserStoreDetailsByUserId/${locals.user.record.moksaId}`, {
+                headers: {
+                    "Content-Type": "application/json",
+                    'Authorization': `Bearer ${cookies.get('moksa-token')}`
+                },
+            });
+            return res.json();
         }
     };
 
+    const results = await Promise.all(
+        Object.entries(apiCalls).map(async ([key, fn]) => {
+            const value = await safeExecute(fn);
+            return [key, value];
+        })
+    );
+
+
+    // return {
+    //     theftData: await safeExecute(theftDetectionDetails),
+    //     stores: await safeExecute(dropwdown),
+    //     allstoreData: await safeExecute(allStoreData),
+    //     aisleData: await safeExecute(aisleData),
+    //     theftandcamera: await safeExecute(alltheftandcamera),
+    //     busyness: await safeExecute(busyness),
+    //     efficiency: await safeExecute(efficiency),
+    //     safetyDetails: await safeExecute(safetyDetails),
+    //     moksaToken: cookies.get('moksa-token'),
+    //     usersData: await safeExecute(allUsers),
+    //     userStoreDetails: await safeExecute(async () => {
+    //         const res = await fetch(`https://api.moksa.ai/store/getUserStoreDetailsByUserId/${locals.user.record.moksaId}`, {
+    //             headers: {
+    //                 "Content-Type": "application/json",
+    //                 'Authorization': `Bearer ${cookies.get('moksa-token')}`
+    //             },
+    //         });
+    //         return res.json();
+    //     }, null)
+    // };
     return {
-        theftData: await safeExecute(theftDetectionDetails),
-        stores: await safeExecute(dropwdown),
-        allstoreData: await safeExecute(allStoreData),
-        aisleData: await safeExecute(aisleData),
-        theftandcamera: await safeExecute(alltheftandcamera),
-        busyness: await safeExecute(busyness),
-        efficiency: await safeExecute(efficiency),
-        safetyDetails: await safeExecute(safetyDetails),
-        moksaToken: cookies.get('moksa-token'),
-        usersData: await safeExecute(allUsers)
+        ...Object.fromEntries(results),
+        moksaToken: cookies.get('moksa-token')
     };
 };

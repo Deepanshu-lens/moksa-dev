@@ -3,6 +3,7 @@
   import Stream from "./Stream.svelte";
   import { onDestroy, onMount } from "svelte";
   import { toast } from "svelte-sonner";
+  import Spinner from "../ui/spinner/Spinner.svelte";
   import {
     activeCamera,
     fullscreen,
@@ -15,37 +16,28 @@
     view,
   } from "@/lib/stores";
   import {
-    Search,
-    ScanFace,
     Disc2,
     ImageDown,
     Bell,
     Expand,
-    Menu,
     Filter,
     Minimize,
     Monitor,
-    X,
-    Plus,
     ChevronRight,
     ScanSearch,
-    ChevronLeft,
     ChevronDown,
-    Play,
     Link,
+    Users,
+    Heater,
   } from "lucide-svelte";
 
   import { Cctv, LayoutPanelLeft } from "lucide-svelte";
-  import * as DropdownMenu from "@/components/ui/dropdown-menu";
   import { Button } from "../ui/button";
   import PocketBase from "pocketbase";
   import html2canvas from "html2canvas";
   import { Settings } from "lucide-svelte";
-  import RegisterDialog from "../dialogs/RegisterDialog.svelte";
   import StreamLayout from "../layouts/StreamLayout.svelte";
   import JSZip from "jszip";
-  import SearchDialog from "../dialogs/SearchDialog.svelte";
-  import CarDetailsDialog from "../dialogs/CarDetailsDialog.svelte";
   import EventModal from "../modal/EventModal.svelte";
   import type { Gallery } from "@/types";
   import ComfortableProfileCard from "../cards/ComfortableProfileCard.svelte";
@@ -59,14 +51,14 @@
   import LayoutDialog from "../dialogs/LayoutDialog.svelte";
   import AddCameraDialog from "../dialogs/AddCameraDialog.svelte";
   import { page } from "$app/stores";
-  import { Slider } from "@/components/ui/slider";
   import Switch from "../ui/switch/switch.svelte";
   import Control from "../PTZ/Control.svelte";
-  import { P } from "flowbite-svelte";
 
+  import * as Dialog from "@/components/ui/dialog";
   export let data;
   export let url;
   console.log(data);
+  const token = data.token;
   const selectedDetections = writable([]);
   let ptzControl = writable("");
   const { nodes } = data;
@@ -441,6 +433,34 @@
 
   $: filteredEvents.set(filterEvents($events));
   $: console.log($ptzControl);
+
+  let selectedVideo = null;
+  let dialogOpen = false;
+
+  async function openVideoDialog(videoUri) {
+    dialogOpen = true;
+
+    const response = await fetch("https://api.moksa.ai/stream", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ key: videoUri }),
+    });
+    console.log(response);
+    if (!response.ok) {
+      throw new Error("Failed to get signed URL");
+    }
+    const blob = await response.blob();
+    const videoUrl = URL.createObjectURL(blob);
+    selectedVideo = videoUrl;
+    console.log("Video URL:", selectedVideo);
+  }
+
+  // $: if (dialogOpen === false && selectedVideo) {
+  //   URL.revokeObjectURL(selectedVideo);
+  // }
 </script>
 
 <!-- desk -->
@@ -927,56 +947,6 @@
           ${isAllFullScreen ? "bg-black text-white " : "hover:scale-[1.01] dark:shadow-slate-800 hover:shadow-lg "}
         `}
                       >
-                        <!-- <img
-                          class="object-cover w-[75px] h-[75px] rounded-md flex-shrink-0"
-                          src={"data:image/jpeg;base64," + event.frameImage}
-                          alt="Team Member"
-                        />
-                        <div class="w-full">
-                          <h3 class={"font-semibold text-sm"}>
-                              {event.title}
-                          </h3>
-                          <p class={"text-xs text-black/.7"}>
-                            Camera {$selectedNode.camera.find(
-                              (c) => c.id === event.camera,
-                            )?.name}
-                          </p>
-                          <span
-                            class="flex items-center justify-between border-b border-solid border-[#1c1c1c]/.1 gap-2 w-full"
-                          >
-                            <p class="text-[10px] text-[#D28E3D] font-medium">
-                              {event.matchScore !== 0 &&
-                              event.matchScore !== undefined &&
-                              event.matchScore !== null
-                                ? `Match Score : ${event?.matchScore.toFixed(3)}`
-                                : "No matches found"}
-                            </p>
-                            <p class="text-[10px] font-semibold">
-                              {event?.score.toFixed(3)}
-                            </p>
-                          </span>
-                          <span class="flex items-center justify-between gap-2">
-                            <p class={"text-[10px]"}>
-                              {date.toLocaleDateString("en-US", {
-                                year: "numeric",
-                                month: "short",
-                                day: "numeric",
-                              })}
-                            </p>
-                            <p class={"text-[10px]"}>
-                              {date.toLocaleTimeString("en-US", {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                                second: "2-digit",
-                              })}
-                            </p>
-                          </span>
-                        </div> -->
-                        <!-- {#if event.title==='Theft Control Event'}
-                        <p>{event.title}</p>
-                         {:else} -->
-                        <!-- <p>{event.title}</p> -->
-                        <!-- {/if}  -->
                         {#if event.title === "Theft Control"}
                           <div class="flex flex-col items-start w-full">
                             <span
@@ -985,10 +955,17 @@
                               <h3 class={"font-bold text-base"}>
                                 {event.title}
                               </h3>
-                              <span
-                                class="flex items-center gap-1 text-xs text-blue-400 text-semibold cursor-pointer"
-                                ><Link size={12} /> Link</span
-                              >
+                              {#if event.video_uri !== ""}
+                                <button
+                                  class="flex items-center gap-1 text-xs text-blue-400 text-semibold cursor-pointer"
+                                  on:click={() => {
+                                    console.log("video_url");
+                                    openVideoDialog(event.video_uri);
+                                  }}
+                                >
+                                  <Link size={12} /> Link
+                                </button>
+                              {/if}
                             </span>
                             <span class="flex items-center gap-4 w-full">
                               <span class="flex gap-1 flex-col">
@@ -1129,11 +1106,163 @@
                             </span>
                           </div>
                         {:else if event.title === "People Count"}
-                          <p>Cost Saved: Perople Count</p>
+                          <div class="flex flex-col items-start w-full">
+                            <span
+                              class="flex items-start gap-2 border-b pb-2 w-full relative"
+                            >
+                              <span
+                                class="rounded-full bg-white size-[40px] grid place-items-center text-[#000065] "
+                              >
+                                <Users size={20} />
+                              </span>
+                              <span class="flex flex-col gap-2">
+                                <h3 class={"font-semibold text-sm leading-4"}>
+                                  {event.title}
+                                </h3>
+                                <p
+                                  class="w-full font-semibold text-[#186AFD] text-[10px] leading-[14px] whitespace-nowrap"
+                                >
+                                  Camera ID: {event.camera_id} | Moksa ID: {event.moksa_id}
+                                </p>
+                              </span>
+                              <p
+                                class="font-semibold text-[10px] text-black whitespace-nowrap absolute right-1 -top-1"
+                              >
+                                Store ID: {event.store_id}
+                              </p>
+                            </span>
+                            <span
+                              class="flex w-full items-center justify-between py-1"
+                            >
+                              <p class="text-xs font-semibold text-black">
+                                Going in: {event.going_in}
+                              </p>
+                              <p class="text-xs font-semibold text-black">
+                                Going out: {event.going_out}
+                              </p>
+                            </span>
+                          </div>
                         {:else if event.title === "Heat Map"}
-                          <p>Cost Saved: heatmap</p>
-                        {:else}
-                          <p>Cost Saved: EE</p>
+                                                   <div class="flex flex-col items-start w-full">
+                                            <span class="flex items-start gap-4 w-full">
+  <span
+                                class="rounded-full bg-white size-[40px] grid place-items-center text-[#000065] "
+                              >
+                                <Heater size={20} />
+                              </span>
+                                              <h3 class={"font-medium text-base leading-5"}>
+                                                {event.title} Data Updated for
+                                                Store ID: <span class='text-semibold text-[#186AFD]'>{event.storeId}</span>
+                                              </h3>
+                                            </span>
+</div>
+                        {:else if event.title === "Employee Efficiency"}
+                          <div class="flex flex-col items-start w-full">
+                              <span
+                              class="flex items-start gap-2 border-b pb-2 w-full relative"
+                            >
+                              <span
+                                class="rounded-full bg-white size-[40px] grid place-items-center text-[#000065] "
+                              >
+                                <Users size={20} />
+                              </span>
+                              <span class="flex flex-col gap-2">
+                                <h3 class={"font-semibold text-sm leading-4"}>
+                                  {event.title}
+                                </h3>
+                                <p
+                                  class="w-full font-semibold text-[#186AFD] text-[10px] leading-[14px] whitespace-nowrap"
+                                >
+                                  Camera ID: {event.camera_id} | Moksa ID: {event.moksa_id}
+                                </p>
+                              </span>
+                              <p
+                                class="font-semibold text-[10px] text-black whitespace-nowrap absolute right-1 -top-1"
+                              >
+                                Store ID: {event.store_id}
+                              </p>
+                            </span>
+  <span class="flex items-center gap-4 w-full">
+                              <span class="flex gap-1 flex-col">
+                                <p class="text-xs font-medium">
+                                  Mobile: <span
+                                    class="font-normal text-black/[.6]"
+                                  >
+                                    {event.mobile}
+                                  </span>
+                                </p>
+                                <p class="text-xs font-medium">
+                                  Mobile used: <span
+                                    class="font-normal text-black/[.6]"
+                                  >
+                                    {event.mobile_used}
+                                  </span>
+                                </p>
+                                <p class="text-xs font-medium">
+                                  Efficiency score: <span
+                                    class="font-normal text-black/[.6]"
+                                  >
+                                    {event.employeeEfficiency}
+                                  </span>
+                                </p>
+                              </span>
+                              <span class="flex gap-1 flex-col">
+                                <p class="text-xs font-medium">
+                                  Quantity: <span
+                                    class="font-normal text-black/[.6]"
+                                  >
+                                    {event.quantity}
+                                  </span>
+                                </p>
+                                <p class="text-xs font-medium">
+                                  Customer: <span
+                                    class="font-normal text-black/[.6]"
+                                  >
+                                    {event.customer}
+                                  </span>
+                                </p>
+                                 <p class="text-xs font-medium">
+                                  Idle: <span
+                                    class="font-normal text-black/[.6]"
+                                  >
+                                    {event.idle}
+                                  </span>
+                                </p>
+                                <p class="text-xs font-medium">
+                                  Log In: <span
+                                    class="font-normal text-black/[.6]"
+                                  >
+                                    {event.log_in}
+                                  </span>
+                                </p>
+                              </span>
+                              <span class="flex gap-1 flex-col">
+                               
+                                <p class="text-xs font-medium">
+                                  Follow safety: <span
+                                    class="font-normal text-black/[.6]"
+                                  >
+                                    {event.follow_safety}
+                                  </span>
+                                </p>
+                                <p class="text-xs font-medium">
+                                  Present in store: <span
+                                    class="font-normal text-black/[.6]"
+                                  >
+                                    {event.present_in_store}
+                                  </span>
+                                </p>
+                                 <p class="text-xs font-medium">
+                                  Log Out: <span
+                                    class="font-normal text-black/[.6]"
+                                  >
+                                    {event.log_out}
+                                  </span>
+                                </p>
+                              </span>
+                            
+                            </span>
+                          </div>
                         {/if}
                       </article>
                     </li>
@@ -1419,13 +1548,39 @@
     />
   </section>
 {/if}
-{#if selectedEvent}
+<!-- {#if selectedEvent}
   <EventModal {selectedEvent} on:close={() => (selectedEvent = null)} />
-{/if}
+{/if} -->
+
+<Dialog.Root bind:open={dialogOpen}>
+  <Dialog.Content class="sm:max-w-[720px]">
+    <Dialog.Header>
+      <Dialog.Title>Video Playback</Dialog.Title>
+    </Dialog.Header>
+    <div class="flex items-center justify-center w-full h-full">
+      {#if selectedVideo}
+        <video
+          class="video-player"
+          width="640"
+          height="360"
+          controls
+          autoplay
+          muted
+          controlsList="nodownload"
+          disablePictureInPicture
+        >
+          <source src={selectedVideo} type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+      {:else}
+        <Spinner />
+      {/if}
+    </div>
+  </Dialog.Content>
+</Dialog.Root>
 
 <style>
   .shad {
     box-shadow: -3px 3px 4px 0px #0000001f;
   }
 </style>
-

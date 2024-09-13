@@ -5,6 +5,8 @@ import { decodeJwt } from "@/lib/jwt";
 import os from "os";
 
 export const load: LayoutServerLoad = async ({ locals, url, cookies }) => {
+  locals.pb?.autoCancellation(false)
+  // const allRoles = await locals.pb?.collection("roles").getFullList();
   const protectedRoutes = [
     "session",
     "playback",
@@ -12,6 +14,8 @@ export const load: LayoutServerLoad = async ({ locals, url, cookies }) => {
     "users",
     "settings",
   ];
+
+  // console.log(locals.user)
 
   if (
     !locals.pb?.authStore.isValid &&

@@ -18,7 +18,7 @@
   import { readable, writable } from "svelte/store";
   import * as Dialog from "@/components/ui/dialog";
     import Spinner from "@/components/ui/spinner/Spinner.svelte";
-
+    import axios from "axios";
   const dispatch = createEventDispatcher();
   export let theftData;
   export let token;
@@ -55,7 +55,7 @@
       : getRandomName(),
       date: formattedDate,
       videoLink: "Watch Video",
-      videoUri: item.video_uri,
+      videoUri: 'https://s3.amazonaws.com/prod.moksa.upload/None/nzvwfm5sswn7vc4_20240905083644.mp4',
       time: formattedTime,
       theftProbability: item.theftProbability,
       live: item.live,
@@ -65,30 +65,9 @@
   let selectedVideo = null;
   let dialogOpen = false;
 
-  async function openVideoDialog(videoUri) {
-    dialogOpen = true;
 
-    const response = await fetch("https://api.moksa.ai/stream", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ key: videoUri }),
-    });
-    console.log(response);
-    if (!response.ok) {
-      throw new Error("Failed to get signed URL");
-    }
-    const blob = await response.blob();
-    const videoUrl = URL.createObjectURL(blob);
-    selectedVideo = videoUrl;
-    console.log("Video URL:", selectedVideo);
-  }
 
-  $: if(dialogOpen === false && selectedVideo){
-    URL.revokeObjectURL(selectedVideo);
-  }
+ 
 
   $: data = writable(dbData);
 
@@ -141,8 +120,37 @@
   $: ({ headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } =
     table.createViewModel(columns));
 
-  $: ({ pageIndex, hasNextPage, hasPreviousPage, pageSize,pageCount } =
+  $: ({ pageIndex, hasNextPage, hasPreviousPage, pageCount } =
     pluginStates.page);
+
+
+    const openVideoDialog = async (videoUri) => {
+        const data = { key: videoUri };
+         dialogOpen = true;
+          try {
+        const response = await axios.post(`https://api.moksa.ai/stream`,
+          data,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            responseType: 'blob',
+          }
+        );
+        const contentType = response.headers['content-type'];
+        // Check if the content type is a valid video type
+        if (!contentType.startsWith('video/')) {
+          throw new Error('Invalid content type for video');
+        }
+        const videoBlob = new Blob([response.data], { type: contentType });
+        const videoUrl = URL.createObjectURL(videoBlob);
+        selectedVideo = videoUrl;
+        console.log(selectedVideo);
+      } catch (error) {
+        console.error('Error fetching video:', error);
+      }
+    }
 
 </script>
 
@@ -286,17 +294,10 @@
     </Dialog.Header>
     <div class="flex items-center justify-center w-full h-full">
       {#if selectedVideo}
-      <!-- <video controls src={selectedVideo} type='video/mp4' class="w-auto h-[300px]">
-      Your browser does not support the video tag.
-      </video> -->
       <video  class="video-player" width="640" height="360" controls autoplay muted  controlsList="nodownload"   disablePictureInPicture >
         <source src={selectedVideo} type="video/mp4" />
         Your browser does not support the video tag.
       </video>
-      
-      <!-- <p>
-        {selectedVideo}
-      </p> -->
       {:else}
       <Spinner />
       {/if}

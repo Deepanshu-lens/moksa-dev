@@ -49,24 +49,10 @@
   import type { DateRange } from "bits-ui";
 
   import {
-    CalendarDate,
     DateFormatter,
     type DateValue,
-    getLocalTimeZone,
   } from "@internationalized/date";
   import { RangeCalendar } from "@/components/ui/range-calendar";
-  import { cn } from "@/lib/utils.js";
-
-  const df = new DateFormatter("en-US", {
-    dateStyle: "medium",
-  });
-
-  // let value: DateRange | undefined = {
-  //   start: new CalendarDate(2022, 1, 20),
-  //   end: new CalendarDate(2022, 1, 20).add({ days: 20 })
-  // };
-
-  // let startValue: DateValue | undefined = undefined;
 
   let value: DateRange | undefined = undefined;
   let startValue: DateValue | undefined = undefined;
@@ -736,7 +722,8 @@
         </span>
       </span>
       <div class="h-full w-full">
-        <canvas bind:this={barChartCanvas}></canvas>
+      
+          <canvas bind:this={barChartCanvas}></canvas>
       </div>
     </div>
     <div
@@ -753,8 +740,11 @@
         </AddStoreDialog>
       </span>
       <div class="flex flex-col max-h-[300px] overflow-y-auto hide-scrollbar">
-        {#each theftandcamera as data, index}
-          <DashboardStoreCard
+        {#if theftandcamera.length === 0}
+          <p class="text-center text-gray-500 mt-8">No data available</p>
+        {:else}
+          {#each theftandcamera as data, index}
+            <DashboardStoreCard
             storeName={data.name}
             cameraCount={data.camera_count}
             managerName={data.manager}
@@ -763,9 +753,10 @@
             bgColor={index % 2 === 0 ? "#F5F5F5" : "white"}
           />
         {/each}
+        {/if}
       </div>
     </div>
-    <!-- {#if $selectedStore.label === "All Stores"}
+    {#if $selectedStore.label === "All Stores"}
       <div
         class="col-span-3 row-span-3 border rounded-md p-4 flex flex-col gap-4 h-[375px] dark:border-white/[.7]"
       >
@@ -785,15 +776,19 @@
           {/if}
         </div>
       </div>
-    {/if} -->
+    {/if}
     <div
-      class="col-span-8 row-span-3 border rounded-md p-4 flex flex-col gap-4 h-[375px] dark:border-white/[.7]"
+      class="col-span-5 row-span-3 border rounded-md p-4 flex flex-col gap-4 h-[375px] dark:border-white/[.7]"
     >
       <span class="flex items-center justify-between font-semibold">
         <p class="text-[#323232] dark:text-white">Stores Overview</p>
       </span>
-      <div class="w-full h-full max-h-[300px] overflow-y-auto hide-scrollbar">
-        <DashboardStoresOverviewtable {aisleData} />
+      <div class="w-full h-full max-h-[300px] overflow-y-auto hide-scrollbar relative">
+        {#if aisleData.length === 0}
+          <p class="text-center text-gray-500 mt-8">No data available</p>
+        {:else}
+          <DashboardStoresOverviewtable {aisleData} />
+        {/if}
       </div>
     </div>
     {#if $selectedStore.label === "All Stores"}
@@ -831,7 +826,7 @@
         </Select.Root> -->
         </span>
         <span class="w-full h-full">
-          {#if efficiency.data.length === 0}
+          {#if efficiency.length ===0 || efficiency.data.length === 0}
             <p class="text-center text-gray-500 mt-8">No data available</p>
           {:else}
             <DashboardEfficiencyDataTable {efficiency} />
@@ -847,7 +842,7 @@
           </p>
         </span>
         <div class="h-full w-full">
-          {#if safetyDetails.data.length === 0}
+          {#if safetyDetails?.length === 0 || safetyDetails?.data?.length === 0}
             <p class="text-center text-gray-500 mt-8">No data available</p>
           {:else}
             <DashboardSaftetyDataTable safetyData={safetyDetails} />
