@@ -14,8 +14,8 @@
   import { readable, writable } from "svelte/store";
 
   const dispatch = createEventDispatcher();
-  export let d: any;
-  export let selectedStore
+  export let efficiencyData;
+  export let selectedStore;
 
   function generateRandomMinutes() {
   // Generate random time between 30 and 240 minutes (4 hours)
@@ -33,27 +33,28 @@ function generateRandomEfficiency() {
   return Math.floor(Math.random() * (100 - 50 + 1) + 50);
 }
 
-const dbData = d.map((item: any) => {
-  return {
-    employee: `${item.first_name} ${item.last_name}`,
-      storeName: item.storeName === undefined ? selectedStore : item.storeName,
+
+$: dbData = $efficiencyData.data.data.map((item: any) => {
+return {
+  employee: `${item.first_name} ${item.last_name}`,
+      storeName: item.storeName === undefined ? $selectedStore : item.storeName,
     role: item.role,
-    withCustomers: formatMinutes(item.customer ?? generateRandomMinutes()),
-    onMobile: formatMinutes(item.mobile ?? generateRandomMinutes()),
-    sittingIdle: formatMinutes(item.idle ?? generateRandomMinutes()),
-    fillingShelf: formatMinutes(item.fillingShelf ?? generateRandomMinutes()),
-    efficiencyScore: item.efficiency ?? generateRandomEfficiency(),
+    withCustomers: 'Coming Soon',
+    onMobile: item.mobile === null ? 'N/A' : item.mobile,
+    sittingIdle: 'Coming Soon',
+    fillingShelf: 'Coming Soon',
+    efficiencyScore: 'Coming Soon',
   }
 })
 
-  const data = writable(dbData);
+  $: data = writable(dbData);
 
-  const readableData = readable(dbData, (set) => {
+  $: readableData = readable(dbData, (set) => {
     const unsubscribe = data.subscribe(set);
     return unsubscribe;
   });
 
-  const table = createTable(readableData, {
+  $: table = createTable(readableData, {
     page: addPagination({ initialPageSize: 3 }),
     sort: addSortBy(),
     filter: addTableFilter({
@@ -63,7 +64,7 @@ const dbData = d.map((item: any) => {
     select: addSelectedRows(),
   });
 
-  const columns = table.createColumns([
+  $: columns = table.createColumns([
     // table.column({
     //   id: 'select',
     //   header: '',
@@ -103,10 +104,10 @@ const dbData = d.map((item: any) => {
     }),
   ]);
 
-  const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } =
-    table.createViewModel(columns);
-      const { hasNextPage, hasPreviousPage, pageIndex, pageCount } =
-    pluginStates.page;
+  $: ({ headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } =
+    table.createViewModel(columns));
+$: ({ hasNextPage, hasPreviousPage, pageIndex, pageCount } =
+    pluginStates.page)
 
 </script>
 
@@ -127,7 +128,7 @@ const dbData = d.map((item: any) => {
               >
                 <Table.Head
                   {...attrs}
-                  class="text-[#727272] whitespace-nowrap h-full flex items-center justify-center flex-1 w-[11.11px]"
+                  class="text-[#727272] whitespace-nowrap h-full flex items-center justify-center w-full"
                 >
                   <Button
                     variant="ghost"
@@ -150,7 +151,7 @@ const dbData = d.map((item: any) => {
           <Table.Row {...rowAttrs} class="border-b flex items-center w-full justify-between">
             {#each row.cells as cell (cell.id)}
               <Subscribe attrs={cell.attrs()} let:attrs>
-                <Table.Cell {...attrs} class='flex items-center justify-center whitespace-nowrap w-[11.11%]'>
+                <Table.Cell {...attrs} class='flex items-center justify-center whitespace-nowrap w-full'>
                   {#if cell.id === 'select'}
                     <input type="checkbox" class="form-checkbox h-4 w-4 text-blue-600" />
                   {:else if cell.id === 'employee'}
@@ -165,8 +166,8 @@ const dbData = d.map((item: any) => {
                       <Store class="w-4 h-4" />
                       <span>{row.original.storeName}</span>
                     </div>
-                  {:else if cell.id === 'efficiencyScore'}
-                    <div class="relative w-10 h-10">
+                  <!-- {:else if cell.id === 'efficiencyScore'} -->
+                    <!-- <div class="relative w-10 h-10">
                       <svg class="w-10 h-10" viewBox="0 0 36 36">
                         <path
                           d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
@@ -185,7 +186,7 @@ const dbData = d.map((item: any) => {
                       <span class="absolute inset-0 flex items-center justify-center text-xs scale-90 font-semibold">
                         {row.original.efficiencyScore}%
                       </span>
-                    </div>
+                    </div> -->
                   {:else}
                     <Render of={cell.render()} />
                   {/if}
