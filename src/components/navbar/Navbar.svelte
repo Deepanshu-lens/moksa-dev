@@ -25,7 +25,6 @@
   import NotificationDropdown from "../dropdown/NotificationDropdown.svelte";
 
   const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
-  let showNotifications: boolean = false;
   const menuList = [
     {
       text: "Live",
@@ -95,6 +94,23 @@
 
   onDestroy(() => {
     PB.collection("session").unsubscribe("*");
+  });
+
+    let showNotifications: boolean = false;
+  let notificationDropdownRef: HTMLElement;
+
+  function handleClickOutside(event: MouseEvent) {
+    if (showNotifications && notificationDropdownRef && !notificationDropdownRef.contains(event.target as Node)) {
+      showNotifications = false;
+    }
+  }
+
+  onMount(() => {
+    document.addEventListener('click', handleClickOutside);
+  });
+
+  onDestroy(() => {
+    document.removeEventListener('click', handleClickOutside);
   });
 
   // $: console.log(data)
@@ -169,14 +185,21 @@
             ><MessageCircleQuestion size={22} /></a
           >
           <!-- </AddUserDialog> -->
+          <!-- on:click={() => (showNotifications = !showNotifications)} -->
           <button
-            on:click={() => (showNotifications = !showNotifications)}
+          on:click|stopPropagation={() => (showNotifications = !showNotifications)}
+    
             class="bg-[#061149] size-[40px] grid place-items-center rounded-md p-1 border border-white/[.08] text-white hover:bg-white hover:text-black hover:dark:text-white hover:dark:bg-[#272727]"
             ><BellDot size={22} /></button
           >
-          {#if showNotifications}
+          <!-- {#if showNotifications}
             <NotificationDropdown />
-          {/if}
+          {/if} -->
+          {#if showNotifications}
+    <div bind:this={notificationDropdownRef}>
+      <NotificationDropdown />
+    </div>
+  {/if}
         </span>
         {#if user}
           <span class="flex items-center gap-2">

@@ -19,7 +19,7 @@ export const load: PageServerLoad = async ({ fetch,cookies,locals }) => {
     const safeExecute = async (fn: () => Promise<any>, fallbackValue: any = []) => {
         try {
             const timeoutPromise = new Promise((_, reject) =>
-                setTimeout(() => reject(new Error('Request timed out')), 30000)
+                setTimeout(() => reject(new Error('Request timed out')), 10000)
             );
             const result = await Promise.race([fn(), timeoutPromise]);
             // console.log(result);

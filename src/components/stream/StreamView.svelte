@@ -758,7 +758,6 @@
         <!-- svelte-ignore a11y-click-events-have-key-events -->
         <!-- svelte-ignore a11y-no-static-element-interactions -->
         <button
-          disabled
           class="absolute disabled:cursor-not-allowed top-2 left-2 flex items-center gap-2 cursor-pointer bg-[rgba(0,0,0,.5)] text-white z-20"
           on:click={() => {
             if (document.fullscreenElement) {
@@ -1299,7 +1298,7 @@
               </div>
             </div>
           </div>
-          <div
+          <!-- <div
             class="flex items-center justify-center rounded-lg border-black/[.13] dark:border-white/[.13] border-solid border-[1px] p-1 w-[90%] h-[60px] mx-auto my-4"
           >
             <button
@@ -1307,12 +1306,12 @@
               class={`rounded-lg text-xs leading-[18px] px-[10px] py-[3px] font-medium w-full h-full ${$view === 1 ? "text-white bg-[#015a62]" : "bg-transparent"}`}
               >Line Crossing</button
             >
-            <!-- <button
+            <button
               on:click={() => view.set(2)}
               class={`rounded-lg text-xs leading-[18px] px-[10px] py-[3px] font-medium w-1/2 h-full ${$view === 2 ? "text-white bg-[#015a62]" : "bg-transparent"}`}
               >Intrusion Detection</button
-            > -->
-          </div>
+            >
+          </div> -->
           {#if $view === 2}
             <div class="px-4 py-4 flex flex-col gap-1">
               <label for="camera" class="text-black/[.7] text-sm"

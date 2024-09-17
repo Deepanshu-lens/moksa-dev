@@ -961,12 +961,12 @@
     }
   }
 
-  // onMount(() => {
-  //   if ($selectedNode) {
-  //     stopRefreshing();
-  //     setTimeout(startRefreshing, 15000);
-  //   }
-  // });
+  onMount(() => {
+    if ($selectedNode) {
+      stopRefreshing();
+      setTimeout(startRefreshing, 15000);
+    }
+  });
 
   onDestroy(() => {
     stopRefreshing();

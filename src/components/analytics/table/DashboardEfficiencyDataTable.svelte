@@ -67,14 +67,14 @@
       accessor: "employee",
       header: "Employee",
     }),
-    table.column({
-      accessor: "hoursWithCustomers",
-      header: "Hours With Customers",
-    }),
-    table.column({
-      accessor: "sittingIdle",
-      header: "Sitting Idle",
-    }),
+    // table.column({
+    //   accessor: "hoursWithCustomers",
+    //   header: "Hours With Customers",
+    // }),
+    // table.column({
+    //   accessor: "sittingIdle",
+    //   header: "Sitting Idle",
+    // }),
     table.column({
       accessor: "onMobile",
       header: "On Mobile",
