@@ -61,14 +61,14 @@
       accessor: "hairnet",
       header: "Hairnet",
     }),
-    table.column({
-      accessor: "uniform",
-      header: "Uniform",
-    }),
-    table.column({
-      accessor: "breakingSops",
-      header: "Breaking SOP's",
-    }),
+    // table.column({
+    //   accessor: "uniform",
+    //   header: "Uniform",
+    // }),
+    // table.column({
+    //   accessor: "breakingSops",
+    //   header: "Breaking SOP's",
+    // }),
   ]);
 
     const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } =

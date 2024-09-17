@@ -1,7 +1,9 @@
 <script lang="ts">
+	import  PocketBase  from 'pocketbase';
   import { Button } from "@/components/ui/button";
   import { Input } from "@/components/ui/input";
   import UsersDataTable from "@/components/users/dataTable/UsersDataTable.svelte";
+    import * as DropdownMenu from "@/components/ui/dropdown-menu";
   import {
     Cog,
     Expand,
@@ -24,6 +26,7 @@
   } from "chart.js";
   import Spinner from "@/components/ui/spinner/Spinner.svelte";
     import AddUserDialog from "@/components/dialogs/AddUserDialog.svelte";
+    import { page } from '$app/stores';
   let view: number = 1;
   export let data;
   let userData = data.usersData.status === 200 ? data.usersData.data.data : []
@@ -47,6 +50,16 @@
   let theftChart: Chart | null = null;
   let chartLoading = true;
   let searchVal:string ='';
+let roles = []
+// $: console.log(roles)
+
+$:console.log(selectedRole)
+
+  const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
+
+  onMount(async() => {
+     roles = await PB?.collection("roles").getFullList()
+  })
 
   function createChart() {
     if (chartCanvas && !chart) {
@@ -441,13 +454,18 @@ function createTheftChart() {
       }
     };
   });
+    let selectedRole = "";
+
+  function handleRoleSelect(role: string) {
+    selectedRole = selectedRole === role ? "" : role;
+  }
 </script>
 
 <main class="flex flex-row-reverse h-[calc(100vh-75px)] w-full">
   <div
     class=" flex flex-col gap-6 items-center justify-center px-2 bg-gradient-to-b from-[#000610] via-[#000307] via-[#050E41] to-[#000307] h-[calc(100vh-75px)]"
   >
-    <span class="group flex-col flex items-center justify-center gap-0.5">
+    <!-- <span class="group flex-col flex items-center justify-center gap-0.5">
       <button
         class={`disabled:cursor-not-allowed  h-[40px] w-[40px] rounded-full shadow-md group border-2 border-solid border-white bg-transparent text-white group-hover:text-black group-hover:bg-gradient-to-r group-hover:from-[#EBE60B] group-hover:to-[#07E1A4] group-hover:border-none grid place-items-center`}
         ><Search class="h-[22px] w-[22px]" /></button
@@ -457,7 +475,7 @@ function createTheftChart() {
       >
         Search
       </p>
-    </span>
+    </span> -->
     <span class="group flex-col flex items-center justify-center gap-0.5">
       <button
         on:click={() => (view = 1)}
@@ -500,9 +518,32 @@ function createTheftChart() {
               class="absolute top-1/2 -translate-y-1/2 left-4"
             />
           </span>
-          <Button variant="outline" class="flex items-center gap-1"
-            ><ListFilterIcon size={18} /> Filters</Button
-          >
+          <!-- <Button variant="outline" class="flex items-center gap-1"
+            >
+            <ListFilterIcon size={18} /> Filters</Button
+          > -->
+            <DropdownMenu.Root>
+       <DropdownMenu.Trigger>
+      <Button variant="outline" class="flex items-center gap-1 text-sm">
+        <ListFilterIcon size={18} />Filters
+      </Button>
+    </DropdownMenu.Trigger>
+        <DropdownMenu.Content class="max-h-[200px] overflow-y-auto w-[150px]">
+          <DropdownMenu.Label>Roles</DropdownMenu.Label>
+          <DropdownMenu.Separator />
+          {#if roles.length > 0}
+          {#each roles as role}
+            <DropdownMenu.CheckboxItem
+              checked={selectedRole === role.roleName}
+              onCheckedChange={() => handleRoleSelect(role.roleName)}
+            >
+              {role?.roleName?.toLowerCase()}
+            </DropdownMenu.CheckboxItem>
+          {/each}
+          {/if}
+          <DropdownMenu.Separator />
+        </DropdownMenu.Content>
+      </DropdownMenu.Root>
           <AddUserDialog user={data.user}>
             <Button class="text-white bg-[#3D81FC] hover:bg-white hover:text-[#3D81FC] flex items-center gap-1"
             ><Plus size={18} /> Add User</Button
@@ -517,7 +558,7 @@ function createTheftChart() {
         >
           Users
         </div>
-        <UsersDataTable token={moksaToken} users={userData} {searchVal} />
+        <UsersDataTable token={moksaToken} users={userData} {searchVal} filter={selectedRole}/>
       </div>
     </section>
   {:else}

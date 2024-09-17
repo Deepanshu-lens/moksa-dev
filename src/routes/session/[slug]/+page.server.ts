@@ -58,7 +58,7 @@ export const load: PageServerLoad = async ({ locals, cookies }) => {
 
   locals.pb?.autoCancellation(false)
   const events = async () => {
-    const e = await locals.pb?.collection("events").getList(1, 200, {
+    const e = await locals.pb?.collection("events").getList(1, 100, {
       sort: "created",
       fields:
         "title,description,created,updated,frameImage,score,matchScore,session,node,camera",
@@ -114,7 +114,7 @@ export const load: PageServerLoad = async ({ locals, cookies }) => {
         console.log('Request timed out');
         return [];
       }
-      throw error;
+      return [];
     }
   };
 

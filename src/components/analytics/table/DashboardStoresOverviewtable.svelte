@@ -68,10 +68,10 @@
       accessor: "busyHours",
       header: "Busy Hours",
     }),
-    table.column({
-      accessor: "mostVisitedAisle",
-      header: "Most Visited Aisle",
-    }),
+    // table.column({
+    //   accessor: "mostVisitedAisle",
+    //   header: "Most Visited Aisle",
+    // }),
     // table.column({
     //   accessor: "futurePrediction",
     //   header: "Future Prediction",
@@ -128,10 +128,10 @@
                         <Store size={16} class='flex-shrink-0'/>
                         <span class='text-sm'>{row.original.storeName}</span>
                     </div>
-                  {:else if cell.id === 'mostVisitedAisle'}
+                  <!-- {:else if cell.id === 'mostVisitedAisle'}
                     <span class="px-2 py-1 rounded-full text-xs dark:text-black" style="background-color: {getAisleColor(row.original.mostVisitedAisle)};">
                       {row.original.mostVisitedAisle}
-                    </span>
+                    </span> -->
                   {:else if cell.id === 'futurePrediction'}
                     <span class="flex items-center justify-center text-center">
                       {#if row.original.futurePrediction === "uptrend"}

@@ -19,10 +19,12 @@
   export let users 
 export let searchVal:string;
 export let token:string;
+export let filter:string;
 
 // $: console.log(searchVal)
 
-$: console.log(users)
+// $: console.log(users)
+// $: console.log(filter)
 
 
 const dbData = users.map((user) => {
@@ -41,21 +43,6 @@ const dbData = users.map((user) => {
   }
 })
 
-  // Static data
-  const staticData = [
-    {
-      username: "John Doe",
-      userImage: "https://example.com/john-doe.jpg",
-      email: "john.doe@example.com",
-      designation: "Manager",
-      dateOfRegistration: "2024-03-15T12:00:00Z",
-      storeName: "Store A",
-      storesAssigned: 3,
-      action: "Edit",
-    },
-    // Add more static data entries here
-  ];
-
 
   const data = writable(dbData);
 
@@ -64,15 +51,32 @@ const dbData = users.map((user) => {
     return unsubscribe;
   });
 
-  const table = createTable(readableData, {
+  // const table = createTable(readableData, {
+  //   page: addPagination({ initialPageSize: 5 }),
+  //   sort: addSortBy(),
+  //   filter: addTableFilter({
+  //     fn: ({ filterValue, value }) =>
+  //       value.toLowerCase().includes(filterValue.toLowerCase()),
+  //   }),
+  //   select: addSelectedRows(),
+  // });
+
+    const table = createTable(readableData, {
     page: addPagination({ initialPageSize: 5 }),
     sort: addSortBy(),
     filter: addTableFilter({
-      fn: ({ filterValue, value }) =>
-        value.toLowerCase().includes(filterValue.toLowerCase()),
+      fn: ({ filterValue, value }) => {
+        if (filter && filter !== '') {
+          return value.toLowerCase() === filter.toLowerCase();
+        } else {
+          return value.toLowerCase().includes(filterValue.toLowerCase());
+        }
+      },
     }),
     select: addSelectedRows(),
   });
+
+    
 
   const columns = table.createColumns([
     table.column({
@@ -108,7 +112,15 @@ const dbData = users.map((user) => {
     pluginStates.page;
   const { selectedDataIds } = pluginStates.select;
  const { filterValue } = pluginStates.filter;
-  $: $filterValue = searchVal;
+
+   $: {
+    $filterValue = searchVal;
+    if (filter && filter !== '') {
+      $filterValue = filter;
+    }
+  }
+
+
 
   function handleRowClick(rowData) {
     dispatch("rowClick", rowData);
