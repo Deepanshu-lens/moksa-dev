@@ -53,6 +53,7 @@
     type DateValue,
   } from "@internationalized/date";
   import { RangeCalendar } from "@/components/ui/range-calendar";
+    import { toast } from "svelte-sonner";
 
   let value: DateRange | undefined = undefined;
   let startValue: DateValue | undefined = undefined;
@@ -569,6 +570,92 @@
       fetchDataStoreWise();
     }
   }
+
+   function cleanValue(value: string | number): string {
+    const stringValue = String(value);
+
+    // Enclose values containing commas or quotes in double quotes
+    if (stringValue.includes(",") || stringValue.includes('"')) {
+      // Escape any double quotes inside the value by doubling them
+      return `"${stringValue.replace(/"/g, '""')}"`;
+    }
+
+    return stringValue;
+  }
+
+  function convertArrToCSV(
+    arr: any[],
+    fileName: string,
+    excludeKeys: string[] = [],
+  ): void {
+    // Extract the headers
+    const headers = Object.keys(arr[0])
+      .filter((key) => !excludeKeys.length || !excludeKeys.includes(key)) // Filter out excluded keys
+      .join(",");
+
+    // Extract the data rows with value cleaning
+    const rows = arr
+      .map((obj) => {
+        return Object.keys(obj)
+          .filter((key) => !excludeKeys.length || !excludeKeys.includes(key)) // Filter out excluded keys
+          .map((key) => cleanValue(obj[key]))
+          .join(",");
+      })
+      .join("\n");
+    // Combine headers and rows
+    const csvContent = headers + "\n" + rows;
+
+    // Create a Blob for the CSV content
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+
+    // Create a link element to download the CSV
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName; //file name after download
+    document.body.appendChild(link);
+
+    // Programmatically click the link to trigger the download
+    link.click();
+
+    // Clean up the link after download
+    document.body.removeChild(link);
+  }
+
+   function exportCSV(){
+    const date = new Date().toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+          if (aisleData.length > 0) {
+            convertArrToCSV(aisleData, `dashboard_store_data_${date}.csv`);
+          }else{
+            toast.error("No store data available to export");
+          }
+          if (efficiency.data.length > 0) {
+            convertArrToCSV(efficiency.data, `dashboard_employee_efficiency_data_${date}.csv`);
+          }else{
+            toast.error("No employee efficiency data available to export");
+          }
+          if (safetyDetails.data.length > 0) {
+            convertArrToCSV(safetyDetails.data, `dashboard_safety_data_${date}.csv`);
+          }else{
+            toast.error("No safety data available to export");
+          }
+          if(theftData.data.length > 0){
+            convertArrToCSV(theftData.data, `dashboard_theft_data_${date}.csv`);
+          }else{
+            toast.error("No theft data available to export");
+          }
+          if(allStores.length > 0){
+            convertArrToCSV(allStores, `dashboard_all_stores_data_${date}.csv`);
+          }else{
+            toast.error("No all stores data available to export");
+          }
+  }
 </script>
 
 <section
@@ -615,8 +702,10 @@
       </Popover.Root>
     </span>
     <span class="flex items-center gap-3">
-      <Button variant="outline" class="flex items-center gap-1"
-        ><Upload size={18} /> Export</Button
+     <Button
+        variant="outline"
+        class="flex items-center gap-1"
+        on:click={exportCSV}><Upload size={18} /> Export</Button
       >
       <Button
         class="flex items-center flex-row-reverse justify-between px-2 gap-1 font-medium text-white rounded-xl bg-[#00A569] hover:text-[#00A569] hover:bg-white"

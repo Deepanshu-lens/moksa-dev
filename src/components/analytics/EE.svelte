@@ -225,21 +225,34 @@
     }
   });
 
-  async function getbystoreID() {
+  async function getEfficiencyData(){
     loading = true;
-    const response = await fetch("/api/employee/getByStoreId", {
+    const response = await fetch("/api/employee/getEfficiencyByStoreId", {
       method: "POST",
-      body: JSON.stringify({ storeId: stores[0].value }),
+      body: JSON.stringify({ storeId: $selectedStoreId }),
       headers: { "Content-Type": "application/json" },
     });
     const data = await response.json();
-    console.log(data);
-    employeeData.set(data);
+    // console.log(data);
+    efficiencyData.set(data);
     loading = false;
+  }
+
+  async function getbystoreID() {
+    employeeData.set([]);
+    const response = await fetch("/api/employee/getByStoreId", {
+      method: "POST",
+      body: JSON.stringify({ storeId: $selectedStoreId }),
+      headers: { "Content-Type": "application/json" },
+    });
+    const data = await response.json();
+    // console.log(data);
+    employeeData.set(data);
   }
 
   async function getEmployeeDetails(id: number) {
     // console.log(id)
+    // employeeDetails.set([]);
     const response = await fetch("/api/employee/getByEmpId", {
       method: "POST",
       body: JSON.stringify({ id: id }),
@@ -250,50 +263,13 @@
     employeeDetails.set(data);
   }
 
-  $: console.log("empdetails", $employeeDetails);
-  $: console.log("empd", $employeeData);
+  // $: console.log("empdetails", $employeeDetails);
+  // $: console.log("empd", $employeeData);
 </script>
 
 <section
   class="w-full p-4 flex flex-col max-h-[calc(100vh-75px)] hide-scrollbar overflow-y-auto"
 >
-  <!-- <div class="flex items-center justify-between">
-    <span
-      class="flex items-center border-black border-opacity-[18%] border-[1px] rounded-md"
-    >
-      <button
-        class="2xl:py-2 2xl:px-3 py-1 px-2 border-r border-black border-opacity-[18%] text-black text-sm"
-        >1 Hour</button
-      >
-      <button
-        class="2xl:py-2 2xl:px-3 py-1 px-2 border-r border-black border-opacity-[18%] text-black text-sm"
-        >24 Hours</button
-      >
-      <button
-        class="2xl:py-2 2xl:px-3 py-1 px-2 border-r border-black border-opacity-[18%] text-black text-sm"
-        >7 Days</button
-      >
-      <button
-        class="2xl:py-2 2xl:px-3 py-1 px-2 border-r border-black border-opacity-[18%] text-black text-sm"
-        >30 Days</button
-      >
-      <button
-        class="2xl:py-2 2xl:px-3 py-1 px-2 border-r border-black border-opacity-[18%] text-black text-sm"
-        >12 Months</button
-      >
-      <button class="2xl:py-2 2xl:px-3 py-1 px-2 text-black text-sm"
-        >Custom</button
-      >
-    </span>
-    <span class="flex items-center gap-3">
-      <Button variant="outline" class="flex items-center gap-1"
-        ><ListFilter size={18} /> Filters</Button
-      >
-      <Button class="flex items-center gap-1 bg-[#3D81FC] text-white hover:bg-white hover:text-[#3D81FC]"
-        ><Upload size={18} /> Export Reports</Button
-      >
-    </span>
-  </div> -->
   <div class="grid grid-cols-8 grid-rows-4 gap-4 mt-4">
     <div
       class="col-span-8 row-span-4 h-[400px] border rounded-md rounded-t-xl bg-white dark:bg-transparent dark:border-white/[.7] flex flex-col gap-3 flex-shrink-0"
@@ -303,9 +279,6 @@
       >
         <p class="text-white flex items-center gap-2 text-xl font-bold">
           Employee Tracking
-          <!-- <span
-            class="text-xs text-white bg-pink-500 rounded-md p-1">Live</span
-          > -->
         </p>
         <Select.Root portal={null}>
           <Select.Trigger
@@ -325,6 +298,7 @@
                       selectedStore.set(store.label);
                       selectedStoreId.set(store.value);
                       await getbystoreID(store.value);
+                      await getEfficiencyData(store.value);
                     }}
                     value={store.value}
                     label={store.label}>{store.label}</Select.Item
@@ -349,8 +323,8 @@
           </span>
         {:else if $efficiencyData && $efficiencyData.data && $efficiencyData?.data?.data?.length > 0}
           <EmployeeTrackingDataTable
-            d={$efficiencyData?.data?.data}
-            selectedStore={$selectedStore}
+            {efficiencyData}
+            selectedStore={selectedStore}
           />
         {:else}
           <span class="flex items-center justify-center h-full w-full">
