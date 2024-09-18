@@ -19,6 +19,7 @@
   export let allStores: any[] = [];
   export let theftandcamera: any[] = [];
   export let nodes;
+  export let user
 
   $: combinedStores = allStores?.map((store) => {
     const theftData = theftandcamera.find((t) => t.name === store.name) || {};
@@ -122,6 +123,7 @@
 
 <section class="w-full p-4 flex flex-col gap-4 px-6">
   <div class="flex items-center justify-end gap-4">
+    {#if user.role !== 'Operators' && user.role !== 'admin' && user.role !== 'storeManager' && user.role !== 'storeEmployee'}
     <AddStoreDialog>
       <Button
         class="bg-[#3D81FC] text-white hover:bg-white hover:text-[#3D81FC]"
@@ -129,6 +131,7 @@
         Add Store +
       </Button>
     </AddStoreDialog>
+    {/if}
     <Select.Root portal={null}>
       <Select.Trigger
         class="w-[180px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg bg-transparent"
@@ -230,12 +233,12 @@
         <p class="text font-semibold text-white">Busy hours</p>
         <p class="text-white text-xl font-bold">
           {#if $cardData.length !== 0}
-            <!-- {$cardData[selectedStore]?.data?.[0].busy_hours === null ? 'N/A' : $cardData[selectedStore]?.data?.[0].busy_hours} -->
-            {$cardData[selectedStore]?.data?.[0].busy_hours ??
+            {$cardData[selectedStore]?.data?.[0].busy_hours === null ? 'N/A' : $cardData[selectedStore]?.data?.[0].busy_hours}
+            <!-- {$cardData[selectedStore]?.data?.[0].busy_hours ??
               (() => {
                 const start = Math.floor(Math.random() * 11 + 1);
                 return `${start}:00 - ${start + 1}:00`;
-              })()}
+              })()} -->
           {:else}
             <Spinner color="white" />
           {/if}
@@ -254,8 +257,8 @@
         <p class="text font-semibold text-white">Most visited Aisle</p>
         <p class="text-white text-xl font-bold">
           {#if $cardData.length !== 0}
-            <!-- {$cardData[selectedStore]?.data?.[0].aisle_name === null ? 'N/A' : $cardData[selectedStore]?.data?.[0].aisle_name} -->
-            {$cardData[selectedStore]?.data?.[0].aisle_name ??
+            {$cardData[selectedStore]?.data?.[0].aisle_name === null ? 'N/A' : $cardData[selectedStore]?.data?.[0].aisle_name}
+            <!-- {$cardData[selectedStore]?.data?.[0].aisle_name ??
               (() => {
                 const aisles = [
                   "Clothing",
@@ -279,7 +282,7 @@
                   "Pharmacy",
                 ];
                 return aisles[Math.floor(Math.random() * aisles.length)];
-              })()}
+              })()} -->
           {:else}
             <Spinner color="white" />
           {/if}
@@ -330,6 +333,7 @@
           {/each}
         </DropdownMenu.Content>
       </DropdownMenu.Root>
+      {#if user.role !== 'Operators' && user.role !== 'adminNonPaid' && user.role !== 'storeEmployee'}
      <Button
         class="flex items-center gap-1 bg-[#3D81FC] text-sm hover:bg-white hover:text-[#3D81FC]"
         on:click={() => {
@@ -343,7 +347,9 @@
           convertArrToCSV(combinedStores, `combined_stores_${date}.csv`);
           convertArrToCSV($cardData.map((item) => item.data[0]), `stores_${date}.csv`, ["floormap","logo","updatedAt"]);
         }}><Upload size={18} />Export Reports</Button
-      ></span
+      >
+      {/if}
+      </span
     >
   </div>
 

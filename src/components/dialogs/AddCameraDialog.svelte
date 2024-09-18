@@ -11,6 +11,7 @@
   import * as Select from "@/components/ui/select/index";
   import { page } from "$app/stores";
   import { onMount } from "svelte";
+  export let user
   let cameraName = "";
   let cameraNumber: number | null = null;
   let cameraURL = "";
@@ -361,6 +362,8 @@
     <Dialog.Header>
       <Dialog.Title>Add Network</Dialog.Title>
     </Dialog.Header>
+    {#if user.role !== 'Operators' && user.role !== 'admin' && user.role !== 'storeManager' && user.role !== 'storeEmployee'}
+
     <div class="flex items-center justify-between w-full">
       <!-- disabled={$page.url.pathname.includes("frs")} -->
       <button
@@ -381,6 +384,7 @@
         >Add Devices</button
       >
     </div>
+    {/if}
     {#if modeAdd === 3}
       <div class=" drop-shadow-md px-2">
         <div class="w-full flex flex-col items-start justify-center py-4 gap-4">

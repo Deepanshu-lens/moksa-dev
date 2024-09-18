@@ -12,6 +12,7 @@
   import { io } from "socket.io-client";
     import { writable } from "svelte/store";
     import { toast } from "svelte-sonner";
+    // import { browser } from "$app/environment";
 
   export let data: PageServerData;
   console.log('data',data)
@@ -28,6 +29,19 @@ let liveData = writable([]);
   // $: console.log("data", data);
 
   const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
+
+    // $: if (browser) {
+    //   const urlParams = new URLSearchParams(window.location.search);
+    //   const message = urlParams.get("message");
+    //   console.log('message',message)
+    //   if (message) {
+    //     toast.error(`${message}`);
+    //     setTimeout(() => {
+    //       const newUrl = window.location.pathname;
+    //       window.history.pushState({ path: newUrl }, "", newUrl);
+    //     }, 2000);
+    //   }
+    // }
 
 
 

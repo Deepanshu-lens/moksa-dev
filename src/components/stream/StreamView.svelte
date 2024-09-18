@@ -57,11 +57,12 @@
   import * as Dialog from "@/components/ui/dialog";
   export let data;
   export let url;
-  console.log(data);
-  const token = data.token;
+  // console.log('streamviwe',data);
+  const {user} = data;
+  const {token} = data;
+  const { nodes } = data;
   const selectedDetections = writable([]);
   let ptzControl = writable("");
-  const { nodes } = data;
   let animateHeader = false;
   let comfort = false;
 
@@ -1500,11 +1501,11 @@
             {/if}
           {/if}
         {:else}
-          <NodeSelection {isAllFullScreen} {nodes} {url} {data} />
+          <NodeSelection {isAllFullScreen} {nodes} {url} {user} />
           <CameraList
             {isAllFullScreen}
             {showItems}
-            user={data.user}
+            {user}
             {data}
             {ptzControl}
           />

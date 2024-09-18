@@ -2,11 +2,13 @@ import { redirect } from "@sveltejs/kit";
 import type { LayoutServerLoad } from "./$types";
 import type { User } from "@/types";
 import { decodeJwt } from "@/lib/jwt";
-import os from "os";
 
 export const load: LayoutServerLoad = async ({ locals, url, cookies }) => {
   locals.pb?.autoCancellation(false)
-  // const allRoles = await locals.pb?.collection("roles").getFullList();
+
+  const allRoles = await locals.pb?.collection("roles").getFullList();
+  const userRole = allRoles?.find(role => role.id === locals.user.record.role);
+
   const protectedRoutes = [
     "session",
     "playback",
@@ -14,8 +16,6 @@ export const load: LayoutServerLoad = async ({ locals, url, cookies }) => {
     "users",
     "settings",
   ];
-
-  // console.log(locals.user)
 
   if (
     !locals.pb?.authStore.isValid &&
@@ -31,12 +31,19 @@ export const load: LayoutServerLoad = async ({ locals, url, cookies }) => {
     console.log("REDIRECTED FROM PROTECTED ROUTE");
     throw redirect(302, "/login?message=Token not found");
   }
+
+  if ((userRole?.roleName === 'Operators' || userRole?.roleName === 'adminNonPaid') && (url.pathname.startsWith('/analytics') || url.pathname.startsWith('/users'))) {
+    console.log(`REDIRECTED: ${userRole?.roleName} not allowed in this route`);
+    throw redirect(302, `/`);
+  }
   // console.log(locals.pb?.authStore.token)
   const currentUserToken = decodeJwt(locals.pb?.authStore.token || "");
   // console.log(currentUserToken)
   if (currentUserToken) {
     let currentUser = await locals.pb
-      ?.collection("users")
+      ?.collection("users",{
+        expand: "role"
+      })
       .getOne(currentUserToken.id);
     if (currentUser) {
       if (currentUser.nonce) {
@@ -48,7 +55,9 @@ export const load: LayoutServerLoad = async ({ locals, url, cookies }) => {
             credits: currentUser.credits + userToken.credits,
           });
           currentUser = await locals.pb
-            ?.collection("users")
+            ?.collection("users",{
+              expand: "role"
+            })
             .getOne(currentUserToken.id);
         }
       }
@@ -72,18 +81,11 @@ export const load: LayoutServerLoad = async ({ locals, url, cookies }) => {
           ?.collection("feature")
           .getFullList();
 
-        // console.log(featureList);
-
-        // const matchedFeatures = featureList
-        //   ?.filter((feature) => role?.[0]?.features?.includes(feature.id))
-        //   ?.map((feature) => feature.feature);
         const matchedFeatures = featureList
         ?.filter((feature) => currentUser?.features?.includes(feature.id))
         ?.map((feature) => feature.feature);
 
-        // console.log(matchedFeatures);
-        // console.log(session)
-// console.log(locals.user.record)
+
         return {
           loggedIn: locals.pb?.authStore.isValid,
           user: {
