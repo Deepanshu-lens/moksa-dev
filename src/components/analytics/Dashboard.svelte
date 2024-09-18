@@ -9,6 +9,7 @@
   export let efficiency;
   export let safetyDetails;
   export let theftData;
+  export let user;
   import * as Popover from "../ui/popover";
 
   // console.log('busyness',busyness)
@@ -702,11 +703,13 @@
       </Popover.Root>
     </span>
     <span class="flex items-center gap-3">
+      {#if user.role !== 'Operators' && user.role !== 'adminNonPaid' && user.role !== 'storeEmployee'}
      <Button
         variant="outline"
         class="flex items-center gap-1"
         on:click={exportCSV}><Upload size={18} /> Export</Button
       >
+      {/if}
       <Button
         class="flex items-center flex-row-reverse justify-between px-2 gap-1 font-medium text-white rounded-xl bg-[#00A569] hover:text-[#00A569] hover:bg-white"
         ><img src="/images/money.svg" alt="export" class="scale-90" /> Cost Saving</Button

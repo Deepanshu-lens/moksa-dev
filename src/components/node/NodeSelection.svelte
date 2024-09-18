@@ -18,6 +18,9 @@
   export let url: string;
   export let nodes: Node[];
   export let isAllFullScreen: boolean;
+  export let user;
+
+
   let dropdownOpen = false
   let showAddNode = writable(false);
 
@@ -122,7 +125,7 @@ let searchTerm = writable('');
       )
     : resultGroupNodes;
 
-  $: console.log('dropdown Open', dropdownOpen)
+$: console.log('user', user)
 </script>
 
 <div
@@ -143,11 +146,14 @@ let searchTerm = writable('');
     bind:open={dropdownOpen}
       class="z-[99999999] dark:text-slate-200 dark:bg-black border dark:border-slate-300 dark:border-opacity-35 min-w-[10rem] max-h-[16rem] overflow-y-auto rounded-sm  shadow-md pb-4"
     >
+    {#if user.role !== 'Operators' && user.role !== 'admin' && user.role !== 'storeManager' && user.role !== 'storeEmployee'}
       <DropdownItem class='flex text-[#3D81FC] items-center justify-between py-1 px-2 font-semibold'
         on:click={() => handleNodeSelect({ target: { value: "Add Node +" } })}
       >
         Add Store <span class='rounded-full bg-[#3D81FC] p-1 grid place-items-center scale-75'><Plus size={20} class=' text-white'/></span>
+
       </DropdownItem>
+      {/if} 
       <DropdownItem class='relative px-1'>
         <Input type='text' placeholder='Search'  bind:value={$searchTerm} class='border-[#EBEDF0] border text-xs pl-6 text-[#323232] dark:text-white/[.7]'/>
         <Search size={14} class='text-[#323232] dark:text-white/[.7] absolute  left-2.5 top-1/2 -translate-y-1/2' />
@@ -175,7 +181,7 @@ let searchTerm = writable('');
   </div>
   {#if url.includes(`/session/`)}
     <span class="flex items-center gap-2 justify-between flex-shrink-0">
-      <AddCameraDialog sNode={""} {nodes}>
+      <AddCameraDialog sNode={""} {nodes} {user}>
         <button
           class={`w-[26px] h-[26px] bg-[#F9F9F9] dark:bg-black rounded-full ${isAllFullScreen && "text-primary"} grid place-items-center disabled:cursor-not-allowed`}
         >

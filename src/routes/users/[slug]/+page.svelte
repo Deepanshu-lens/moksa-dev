@@ -528,7 +528,7 @@ function createTheftChart() {
         <ListFilterIcon size={18} />Filters
       </Button>
     </DropdownMenu.Trigger>
-        <DropdownMenu.Content class="max-h-[200px] overflow-y-auto w-[150px]">
+        <DropdownMenu.Content class="max-h-[200px] overflow-y-auto min-w-[150px]">
           <DropdownMenu.Label>Roles</DropdownMenu.Label>
           <DropdownMenu.Separator />
           {#if roles.length > 0}

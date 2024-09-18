@@ -36,6 +36,8 @@
   let usersData: any[] = data?.usersData ?? [];
   let aisleStoreData = writable([]);
 
+  const {user} = data;
+
   // console.log("pagedata", data);
 
   // console.log('allStores:', allStores);
@@ -260,9 +262,10 @@
       {safetyDetails}
       {theftData}
       token={data.moksaToken}
+      {user}
     />
   {:else if view === 2}
-    <Stores {allStores} {theftandcamera} {nodes} {moksaUserId} />
+    <Stores {allStores} {theftandcamera} {nodes} {moksaUserId} {user}/>
   {:else if view === 3}
     <Theft
       {theftandcamera}
@@ -270,6 +273,7 @@
       {theftData}
       token={data.moksaToken}
       {moksaUserId}
+      {user}
     />
   {:else if view === 4}
     <EE {allStores} token={data.moksaToken} />

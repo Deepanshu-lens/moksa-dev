@@ -32,6 +32,7 @@
   export let theftData;
   export let moksaUserId
   export let token: string;
+  export let user;
   let chartLoading = true;
   let dateRange = writable("7 Days");
   let selectedStore = writable({ value: -1, label: "All Stores" });
@@ -1165,11 +1166,13 @@ function addMockData() {
           </Select.Group>
         </Select.Content>
       </Select.Root>
+      {#if user.role !== 'Operators' && user.role !== 'adminNonPaid' && user.role !== 'storeEmployee'}
       <Button
         on:click={() => {exportCSV(); theftTrendConvertToCSV($theftTrend); theftAndCameraConvertToCSV(theftandcamera);}}
         class="bg-[#3D81FC] text-white flex items-center gap-1 hover:bg-white hover:text-[#3D81FC]"
         ><Upload size={18} /> Export Reports</Button
       >
+      {/if}
     </span>
   </div>
   <div class="grid grid-cols-8 grid-rows-12 gap-4 my-4 h-[1600px]">

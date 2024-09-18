@@ -25,7 +25,22 @@
   import NotificationDropdown from "../dropdown/NotificationDropdown.svelte";
 
   const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
-  const menuList = [
+  const menuList =
+  user.role === 'Operators' || user.role === 'adminNonPaid' ? [
+    {
+      text: "Live",
+      href: `/session/${sessionId}`,
+    },
+    {
+      text: "Playback",
+      href: `/playback/${sessionId}`,
+    },
+    {
+      text: "Settings",
+      href: `/settings/${sessionId}`,
+    },
+  ] :
+   [
     {
       text: "Live",
       href: `/session/${sessionId}`,
@@ -96,8 +111,10 @@
     PB.collection("session").unsubscribe("*");
   });
 
-    let showNotifications: boolean = false;
+  let showNotifications: boolean = false;
   let notificationDropdownRef: HTMLElement;
+
+  $: console.log('user navbar',user)
 
   function handleClickOutside(event: MouseEvent) {
     if (showNotifications && notificationDropdownRef && !notificationDropdownRef.contains(event.target as Node)) {
@@ -148,24 +165,6 @@
                 {item.text}
               </span>
             </a>
-            <!-- {:else}
-            <button
-            disabled
-              on:click={() => {
-                addUserLog(`user clicked on navbar link "${item.text}"`);
-              }}
-            >
-             <span
-                class={` cursor-not-allowed${
-                  $page.url.pathname === item.href.split("?")[0]
-                    ? `text-[#07E1A4] font-bold text-lg `
-                    : " text-white"
-                }`}
-              >
-                {item.text}
-              </span>
-            </button>
-            {/if} -->
           {/key}
         {/each}
       </div>
