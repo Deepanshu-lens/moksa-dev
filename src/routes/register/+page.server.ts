@@ -7,7 +7,7 @@ const loginWithEmailPassword = async (
   password: string,
 ) => {
   try {
-  
+
     await locals.pb?.collection("users").authWithPassword(email, password);
     const isProd = process.env.NODE_ENV === "production" ? true : false;
     if (locals.pb?.authStore.isValid) {
@@ -73,7 +73,7 @@ export const actions = {
         .catch((e) => {
           console.error("[Session Create Error]: ", e);
         });
- const create = await locals.pb?.collection("users").create({
+      const create = await locals.pb?.collection("users").create({
         firstName,
         lastName,
         email,
@@ -82,20 +82,27 @@ export const actions = {
         session: session?.id,
       });
 
-      console.log(create)
+      // console.log(create)
 
-      await fetch(`https:api.moksa.ai/auth/register`, {
+      const moksa_api = await fetch(`https://api.moksa.ai/auth/register`, {
         method: "POST", headers: {
           'Content-Type': 'application/json'
         }, body: JSON.stringify({
           first_name: firstName,
           lastName: lastName,
           role: 'adminNonPaid',
-          email:email ,
-          password:passwordConfirm,
+          email: email,
+          password: passwordConfirm,
           lensId: create.id,
         })
       })
+
+      // console.log(moksa_api)
+
+      if (!moksa_api.ok) {
+        // throw redirect(303, `/register?message=OOPS! Failed to create user by Moksha Api.`);
+        throw new Error("OOPS! Failed to create user by Moksha Api.");
+      }
 
     } catch (e: any) {
       const message = e.message;

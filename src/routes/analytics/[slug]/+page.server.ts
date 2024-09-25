@@ -2,7 +2,7 @@ export const ssr = false;
 
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ fetch,cookies,locals }) => {
+export const load: PageServerLoad = async ({ fetch, cookies, locals }) => {
 
 
     // const safeExecute = async (fn: () => Promise<any>, fallbackValue: any = []) => {
@@ -48,21 +48,21 @@ export const load: PageServerLoad = async ({ fetch,cookies,locals }) => {
 
     const formatDate = (date: Date) => date.toISOString().split('T')[0];
 
-// console.log(formatDate(oneWeekAgo))
-// console.log(formatDate(oneYearAgo))
-// console.log(formatDate(today))
+    // console.log(formatDate(oneWeekAgo))
+    // console.log(formatDate(oneYearAgo))
+    // console.log(formatDate(today))
     const dropwdown = async () => {
         const response = await fetch('https://api.moksa.ai/store/getAllStoresForDropdown', {
             method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${cookies.get('moksa-token')}`
-          }
+            headers: {
+                'Authorization': `Bearer ${cookies.get('moksa-token')}`
+            }
         });
-      return response.json();
+        return response.json();
     }
 
-    const allStoreData = async () => {   
-        const allstoreData = await fetch(`https://api.moksa.ai/store/getAllStoresTotals/${formatDate(oneYearAgo)}/${formatDate(today)}`, {
+    const allStoreData = async () => {
+        const allstoreData = await fetch(`https://api.moksa.ai/store/getAllStoresTotals/${formatDate(oneWeekAgo)}/${formatDate(today)}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${cookies.get('moksa-token')}`
@@ -90,7 +90,7 @@ export const load: PageServerLoad = async ({ fetch,cookies,locals }) => {
         });
         return theftandcamera.json();
     }
-    
+
     const theftDetectionDetails = async () => {
         const theftDetectionDetails = await fetch(`https://api.moksa.ai/theft/theftDetectionDetailsByStoreid/-1`, {
             method: 'GET',

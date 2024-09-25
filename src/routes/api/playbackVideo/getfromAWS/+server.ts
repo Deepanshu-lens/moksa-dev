@@ -81,10 +81,10 @@ export const POST: RequestHandler = async ({ request }) => {
     // const { cameraId, date, startTime, endTime } = await request.json();
     const data = await request.json();
     console.log(data)
-    const cameraId = 'rn9k5cqzny2v6nn';
-    const date = '2024_07_31';
-    const startTime = '07:00';
-    const endTime = '08:50'; 
+    const cameraId = '24kt5coxo1didu7';
+    const date = '2024_08_15';
+    const startTime = '06:40';
+    const endTime = '07:05';
     return new Promise((resolve) => {
         findVideoFiles(cameraId, date, startTime, endTime, (matchingFiles) => {
             if (matchingFiles.length > 0) {

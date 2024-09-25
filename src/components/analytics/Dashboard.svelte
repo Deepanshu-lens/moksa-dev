@@ -68,7 +68,6 @@
   let close = false;
 
 
-  $: console.log('user dashboard',user)
 
   $: {
     if (value?.start && value?.end) {
@@ -352,7 +351,7 @@
         },
       ).then((res) => res.json());
 
-      console.log(theftD);
+      console.log('theftD',theftD);
       theftDataa.set(theftD);
 
       // Update the bar chart with new data
@@ -479,8 +478,9 @@
       // eeScore.set(eeScore)
       // storesTotal.set(storesTotal)
       // storesAisle.set(storesAisle)
-      theftDataa.set(theftD);
+      allStoresData = storesTotal.data
 
+      theftDataa.set(theftD);
       updateBarChart(theftD);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -555,8 +555,8 @@
       // eeScore.set(eeScore)
       // storesTotal.set(storesTotal)
       // storesAisle.set(storesAisle)
+      allStoresData = storesTotal.data
       theftDataa.set(theftD);
-
       updateBarChart(theftD);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -941,7 +941,7 @@
       >
         <span class="flex items-center justify-between">
           <p class="text-[#323232] dark:text-white text-lg font-semibold">
-            Safety Protocol
+           Kitchen Safety Protocol
           </p>
         </span>
         <div class="h-full w-full">

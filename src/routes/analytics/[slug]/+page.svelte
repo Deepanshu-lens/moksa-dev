@@ -36,12 +36,13 @@
   let usersData: any[] = data?.usersData ?? [];
   let aisleStoreData = writable([]);
 
-  const {user} = data;
+  const { user } = data;
 
   // console.log("pagedata", data);
 
-  console.log('allStores:', allStores);
-  $: allStoresLackKitchen = allStores.length > 0 ? allStores.every(store => !store.hasKitchen) : true;
+  // console.log('allStores:', allStores);
+  $: allStoresLackKitchen =
+    allStores.length > 0 ? allStores.every((store) => !store.hasKitchen) : true;
 
   const moksaUserId = data.user.moksaId;
 
@@ -247,7 +248,7 @@
       <p
         class={`text-center pointer-events-none text-xs ${view !== 7 ? "group-hover:text-[#07E1A4] text-white dark:group-hover:text-[#07E1A4]" : " text-[#07E1A4]"}`}
       >
-       Kitchen Safety
+        Kitchen Safety
       </p>
     </span>
   </div>
@@ -267,11 +268,19 @@
       {user}
     />
   {:else if view === 2}
-  <Stores {allStores} {theftandcamera} {nodes} {moksaUserId} {user} token={data.moksaToken}/>
+    <Stores
+      {allStores}
+      {theftandcamera}
+      {nodes}
+      {moksaUserId}
+      {user}
+      token={data.moksaToken}
+    />
   {:else if view === 3}
     <Theft
       {theftandcamera}
       {allStores}
+      {allStoresData}
       {theftData}
       token={data.moksaToken}
       {moksaUserId}
@@ -289,7 +298,6 @@
   {:else if view === 6}
     <HeatMap {aisleStoreData} {allStores} token={data.moksaToken} />
   {:else if view === 7}
-  <Safety {allStores} token={data.moksaToken} {user}/>
-
+    <Safety {allStores} token={data.moksaToken} {user} />
   {/if}
 </main>

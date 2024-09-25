@@ -301,6 +301,7 @@
       );
       // efficiencyData.set(data?.data?.data === undefined ? [] : data?.data?.data);
       efficiencyData.set(data?.data?.data === undefined ? [] : data);
+      await getEmployeeDetails(data?.data?.data?.[0]?.id);
       loading = false;
     } catch (error) {
       console.log(error);
@@ -324,9 +325,11 @@
     const data = await response.json();
     // console.log(data);
     employeeData.set(data);
+    return data;
   }
 
   async function getEmployeeDetails(id: number) {
+    employeeDetails.set([]);
     const today = new Date();
     let startDate = new Date(today);
  console.log($dateRange)
@@ -375,6 +378,7 @@
 
     // }
   }
+
 </script>
 
 <section
@@ -448,8 +452,10 @@
                     on:click={async () => {
                       selectedStore.set(store.label);
                       selectedStoreId.set(store.value);
+                      console.log(store.value)
                       const emp = await getbystoreID(store.value);
-                      await getEmployeeDetails(emp.data[0].id);
+                      console.log(emp)
+                      // await getEmployeeDetails(emp.data[0].id);
                       await getEfficiencyDataByTime();
                     }}
                     value={store.value}

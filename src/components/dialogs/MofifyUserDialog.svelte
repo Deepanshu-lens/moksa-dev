@@ -133,7 +133,7 @@
 
     for (const node of nodes) {
       await PB.collection("node").update(node, {
-        "session+": [U[0].session],
+        "session+": U[0].session,
       });
     }
 

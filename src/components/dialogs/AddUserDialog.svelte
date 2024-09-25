@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { toast } from "svelte-sonner";
   import * as Dialog from "@/components/ui/dialog";
   import { Input } from "@/components/ui/input";
   import { Label } from "@/components/ui/label";
@@ -12,6 +11,8 @@
   import { onMount } from "svelte";
   import { enhance } from "$app/forms";
 
+  // dialogOpen = false;
+
   let dialogOpen = false;
   let userType = "";
   let userID = "";
@@ -22,6 +23,7 @@
   let password = "";
   let cPassword = "";
   export let user;
+  export let handleSubmit;
   const token = user.moksaToken;
   let nodes: any[] = [];
   let moksaNodes: any[] = [];
@@ -37,30 +39,12 @@
     // nodes = stores
     nodes = stores.map((store) => store.id);
     // moksaNodes = stores.map((store) => store.moksaId);
-    moksaNodes = stores.map((store) => store.moksaId === 0 ? null : store.moksaId).filter(Boolean);
+    moksaNodes = stores
+      .map((store) => (store.moksaId === 0 ? null : store.moksaId))
+      .filter(Boolean);
     console.log("moksaNodes", moksaNodes);
     // console.log(nodes);
   });
-
-  const validateFields = () => {
-    const fields = [
-      { name: "User Type", value: userType },
-      { name: "First Name", value: firstName },
-      { name: "Last Name", value: lastName },
-      { name: "Phone Number", value: phoneNumber },
-      { name: "Mail ID", value: mailId },
-      { name: "Password", value: password },
-      { name: "Confirm Password", value: cPassword },
-    ];
-
-    for (const field of fields) {
-      if (!field.value.trim()) {
-        toast.error(`${field.name} is required`);
-        return false;
-      }
-    }
-    return true;
-  };
 
   // const handleSubmit = async () => {
   //   if (password !== cPassword) {
@@ -114,85 +98,6 @@
   //   }
   //   return true;
   // };
-
-  const handleSubmit = async () => {
-    if (!validateFields()) {
-      return;
-    }
-
-    if (password !== cPassword) {
-      toast.error("Passwords don't match");
-      return;
-    }
-
-    try {
-      const session = await PB.collection("session").create({
-        owned: true,
-        node: userType === "superAdmin" ? nodes : null,
-      });
-
-      const user = await PB.collection("users").create({
-        firstName,
-        lastName,
-        email: mailId,
-        role: userID,
-        session: session.id,
-        password,
-        passwordConfirm: cPassword,
-      });
-
-      const moksa = await fetch("/api/user/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          firstName,
-          lastName,
-          mailId,
-          password,
-          userType,
-          lensId: user.id,
-        }),
-      });
-      const d = await moksa.json();
-      console.log("mopksa user", d);
-      console.log("mopksa user id", d.data.id);
-      await PB.collection("users").update(user.id, {
-        moksaId: d.data.id,
-      });
-
-      if (userType === "superAdmin") {
-        for (const node of nodes) {
-          await PB.collection("node").update(node, {
-            "session+": [session.id],
-          });
-        }
-        const updateMoksaUserStores = await fetch(
-          `https://api.moksa.ai/store/userStore/updateUserByUserId`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-              userId: d.data.id,
-              storeIds: moksaNodes,
-            }),
-          },
-        );
-
-        console.log(updateMoksaUserStores);
-      }
-
-      toast.success("User added successfully");
-      dialogOpen = false;
-    } catch (error) {
-      console.error("Error adding user:", error);
-      toast.error(error.message || "Failed to add user");
-    }
-  };
 </script>
 
 <Dialog.Root bind:open={dialogOpen}>
@@ -355,7 +260,19 @@
           >Cancel</Button
         >
         <Button
-          on:click={handleSubmit}
+          on:click={() => {
+            handleSubmit(
+              userType,
+              firstName,
+              lastName,
+              phoneNumber,
+              mailId,
+              password,
+              cPassword,
+            ).then((res) => {
+              if (res.message === "success") dialogOpen = false;
+            });
+          }}
           type="submit"
           class="px-4 py-2 bg-blue-500 hover:text-blue-500 hover:bg-white text-white rounded-md"
           >Submit</Button

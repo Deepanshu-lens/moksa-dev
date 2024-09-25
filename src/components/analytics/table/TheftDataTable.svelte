@@ -20,20 +20,19 @@
   export let dateRange;
   export let selectedStore;
 
+  let currentApiPage = 1;
+  let apiPageSize = 100;
+  let localPageSize = 5;
+  let localPageIndex = 0;
 
-let currentApiPage = 1;
-let apiPageSize = 100;
-let localPageSize = 5;
-let localPageIndex = 0;
-
-$: totalApiPages = Math.ceil(($theftData?.total || 0) / apiPageSize);
-$: totalLocalPages = Math.ceil(($theftData?.data?.length || 0) / localPageSize);
-
-
+  $: totalApiPages = Math.ceil(($theftData?.total || 0) / apiPageSize);
+  $: totalLocalPages = Math.ceil(
+    ($theftData?.data?.length || 0) / localPageSize,
+  );
 
   async function loadTheftData(page, size) {
-     currentApiPage = page;
-     currentApiPage++;
+    currentApiPage = page;
+    currentApiPage++;
     const today = new Date();
     let startDate = new Date(today);
 
@@ -70,11 +69,9 @@ $: totalLocalPages = Math.ceil(($theftData?.data?.length || 0) / localPageSize);
       );
       const data = await newData.json();
       console.log(data);
-      const oldData = $theftData.data
+      const oldData = $theftData.data;
 
-    $theftData.data = [...oldData, ...data.data.data]
-
-
+      $theftData.data = [...oldData, ...data.data.data];
     } catch (error) {
       console.error("Error fetching theft data:", error);
     }
@@ -99,18 +96,18 @@ $: totalLocalPages = Math.ceil(($theftData?.data?.length || 0) / localPageSize);
         })
       : "N/A";
 
-    const getRandomName = () => {
-      const firstNames = ["John", "Jane", "Alex", "Emma"];
-      const lastNames = ["Smith", "Johnson", "Williams"];
-      return `${firstNames[Math.floor(Math.random() * firstNames.length)]} ${lastNames[Math.floor(Math.random() * lastNames.length)]}`;
-    };
+    // const getRandomName = () => {
+    //   const firstNames = ["John", "Jane", "Alex", "Emma"];
+    //   const lastNames = ["Smith", "Johnson", "Williams"];
+    //   return `${firstNames[Math.floor(Math.random() * firstNames.length)]} ${lastNames[Math.floor(Math.random() * lastNames.length)]}`;
+    // };
 
     return {
       storeName: item.name || "N/A",
-      employee:
-        item.first_name || item.last_name
-          ? `${item.first_name || ""} ${item.last_name || ""}`.trim()
-          : getRandomName(),
+      // employee:
+      //   item.first_name || item.last_name
+      //     ? `${item.first_name || ""} ${item.last_name || ""}`.trim()
+      //     : getRandomName(),
       date: formattedDate,
       videoLink: "Watch Video",
       videoUri: item.video_uri,
@@ -145,10 +142,10 @@ $: totalLocalPages = Math.ceil(($theftData?.data?.length || 0) / localPageSize);
       accessor: "storeName",
       header: "Store Name",
     }),
-    table.column({
-      accessor: "employee",
-      header: "Employee",
-    }),
+    // table.column({
+    //   accessor: "employee",
+    //   header: "Employee",
+    // }),
     table.column({
       accessor: "date",
       header: "Date",
@@ -177,16 +174,16 @@ $: totalLocalPages = Math.ceil(($theftData?.data?.length || 0) / localPageSize);
   $: ({ pageIndex, hasNextPage, hasPreviousPage, pageCount } =
     pluginStates.page);
 
-    $: ({ pageIndex, hasNextPage, hasPreviousPage, pageCount } = pluginStates.page);
+  $: ({ pageIndex, hasNextPage, hasPreviousPage, pageCount } =
+    pluginStates.page);
 
-$: {
-  if ($pageIndex === totalLocalPages - 1) {
-    console.log("loading more data");
-    loadTheftData(currentApiPage + 1, apiPageSize)
-   
+  $: if (dialogOpen === false) {
+    if (selectedVideo) {
+      console.log("revoking video");
+      URL.revokeObjectURL(selectedVideo);
+      selectedVideo = null;
+    }
   }
-}
-
 
   const openVideoDialog = async (videoUri) => {
     const data = { key: videoUri };
@@ -338,7 +335,7 @@ $: {
     </span> Page.
   </div>
 
-   <Button
+  <Button
     size="sm"
     variant="outline"
     disabled={!$hasNextPage && currentApiPage >= totalApiPages}
@@ -351,18 +348,18 @@ $: {
   >
     Next
   </Button>
- 
 </div>
 
-<Dialog.Root
-  bind:open={dialogOpen}
-  on:close={() => {
+<!-- on:close={() => {
+    console.log("revoking video");
     if (selectedVideo) {
+      console.log("revoking video");
       URL.revokeObjectURL(selectedVideo);
       selectedVideo = null;
     }
-  }}
->
+  }} -->
+
+<Dialog.Root bind:open={dialogOpen}>
   <Dialog.Content class="sm:max-w-[720px]">
     <Dialog.Header>
       <Dialog.Title>Video Playback</Dialog.Title>
@@ -381,7 +378,7 @@ $: {
           muted
           controlsList="nodownload"
           disablePictureInPicture
-          class='video-player aspect-video h-[360px] w-auto'
+          class="video-player aspect-video h-[360px] w-auto"
         >
           <source src={selectedVideo} type="video/mp4" />
           Your browser does not support the video tag.

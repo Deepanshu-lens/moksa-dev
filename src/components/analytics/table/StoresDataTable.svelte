@@ -275,13 +275,9 @@
               class="bg-transparent grid grid-cols-4 grid-row-1 gap-4 p-4"
             >
               <div
-                class="col-span-1 px-4 py-3 h-[85px] relative flex items-center gap-3 min-w-1/4"
+                class="col-span-1 px-4 py-3 h-[40px] relative flex items-center gap-3 min-w-1/4"
               >
-                <!-- <span
-                  class="size-[60px] grid place-items-center text-white bg-white bg-opacity-20 rounded-full"
-                >
-                  <Camera size={40} />
-                </span> -->
+     
                 <span>
                   <p class="text font-semibold dark:text-white text-black/[.7]">
                     Cameras in Service
@@ -292,13 +288,9 @@
                 </span>
               </div>
               <div
-                class="col-span-1 px-4 py-3 h-[85px] relative flex items-center gap-3 min-w-1/4"
+                class="col-span-1 px-4 py-3 h-[55px] relative flex items-center gap-3 min-w-1/4"
               >
-                <!-- <span
-                  class="size-[60px] grid place-items-center text-white bg-white bg-opacity-20 rounded-full"
-                >
-                  <AlertOctagon size={40} />
-                </span> -->
+               
                 <span>
                   <p class="text font-semibold dark:text-white text-black/[.7]">
                     Suspicious Activities Detected
@@ -309,13 +301,9 @@
                 </span>
               </div>
               <div
-                class="col-span-1 px-4 py-3 h-[85px] relative flex items-center gap-3 min-w-1/4"
+                class="col-span-1 px-4 py-3 h-[40px] relative flex items-center gap-3 min-w-1/4"
               >
-                <!-- <span
-                  class="size-[60px] grid place-items-center text-white bg-white bg-opacity-20 rounded-full"
-                >
-                  <AlertOctagon size={40} />
-                </span> -->
+               
                 <span>
                   <p class="text font-semibold dark:text-white text-black/[.7]">
                     Incidents Cleared by Operator
@@ -328,14 +316,7 @@
                 </span>
               </div>
 
-              <!-- <Table.Cell colspan={columns.length} class="p-4">
-            <div class="text-sm">
-              <p><strong>Store Details:</strong></p>
-              <p>Address: {row.original.location}</p>
-              <p>Manager: {row.original.storeManager}</p>
-              <p>Cameras: {row.original.camerasAssigned}</p>
-            </div>
-          </Table.Cell> -->
+         
             </Table.Row>
           {/if}
         </Subscribe>

@@ -21,7 +21,8 @@
   export let token: string;
   let safetyData = writable([]);
 
-    const fruits = allStores?.filter((store: any) => store.hasKitchen)
+  const fruits = allStores
+    ?.filter((store: any) => store.hasKitchen)
     .map((store: any) => ({
       value: store.id,
       label: store.name,
@@ -29,7 +30,7 @@
 
   let selectedStore = writable(fruits[0]);
 
-  $: console.log($selectedStore)
+  $: console.log($selectedStore);
 
   let dateRange = writable("7 Days");
   let value: DateRange | undefined = undefined;
@@ -43,7 +44,7 @@
   // $: console.log($selectedStore);
   // $: console.log('daterange',$dateRange);
 
-   $: {
+  $: {
     if (value?.start && value?.end) {
       const start = new Date(
         value.start.year,
@@ -113,15 +114,18 @@
         },
       );
       const data = await response.json();
-      console.log(`recieved safety data for ${$selectedStore.value}, ${$dateRange}`, data);
+      console.log(
+        `recieved safety data for ${$selectedStore.value}, ${$dateRange}`,
+        data,
+      );
       safetyData.set(data?.data?.data === undefined ? [] : data?.data?.data);
     } catch (error) {
       console.log(error);
     }
   }
 
-  async function getSafetyDataforCustomDate(time){
-      const start = value?.start
+  async function getSafetyDataforCustomDate(time) {
+    const start = value?.start
       ? `${value.start.year}-${String(value.start.month).padStart(2, "0")}-${String(value.start.day).padStart(2, "0")}`
       : "";
     const end = value?.end
@@ -143,7 +147,10 @@
         },
       );
       const data = await response.json();
-      console.log(`recieved safety data for ${$selectedStore.value}, ${$dateRange}`, data);
+      console.log(
+        `recieved safety data for ${$selectedStore.value}, ${$dateRange}`,
+        data,
+      );
       safetyData.set(data?.data?.data === undefined ? [] : data?.data?.data);
     } catch (error) {
       console.log(error);
@@ -151,15 +158,13 @@
   }
 
   $: if ($selectedStore || $dateRange) {
-    if($dateRange === 'custom'){
+    if ($dateRange === "custom") {
       getSafetyDataforCustomDate($dateRange);
-    }
-    else{
+    } else {
       getSafetyDataByStoreId($dateRange);
     }
   }
-$:console.log('allStores kitchen',allStores)
-
+  $: console.log("allStores kitchen", allStores);
 
   let sockets: { [key: number]: any } = {};
   let liveData = writable([]);
@@ -223,6 +228,48 @@ $:console.log('allStores kitchen',allStores)
     });
   });
 
+  function cleanValue(value: string | number): string {
+    const stringValue = String(value);
+    // Enclose values containing commas or quotes in double quotes
+    if (stringValue.includes(",") || stringValue.includes('"')) {
+      // Escape any double quotes inside the value by doubling them
+      return `"${stringValue.replace(/"/g, '""')}"`;
+    }
+    return stringValue;
+  }
+  function convertArrToCSV(
+    arr: any[],
+    fileName: string,
+    excludeKeys: string[] = [],
+  ): void {
+    // Extract the headers
+    const headers = Object.keys(arr[0])
+      .filter((key) => !excludeKeys.length || !excludeKeys.includes(key)) // Filter out excluded keys
+      .join(",");
+    // Extract the data rows with value cleaning
+    const rows = arr
+      .map((obj) => {
+        return Object.keys(obj)
+          .filter((key) => !excludeKeys.length || !excludeKeys.includes(key)) // Filter out excluded keys
+          .map((key) => cleanValue(obj[key]))
+          .join(",");
+      })
+      .join("\n");
+    // Combine headers and rows
+    const csvContent = headers + "\n" + rows;
+    // Create a Blob for the CSV content
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    // Create a link element to download the CSV
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName; //file name after download
+    document.body.appendChild(link);
+    // Programmatically click the link to trigger the download
+    link.click();
+    // Clean up the link after download
+    document.body.removeChild(link);
+  }
 
   // $: console.log('safety Data',$safetyData)
 </script>
@@ -271,13 +318,29 @@ $:console.log('allStores kitchen',allStores)
       </Popover.Root>
     </span>
     <span class="flex items-center gap-3">
-      <Button variant="outline" class="flex items-center gap-1">
+      <!-- <Button variant="outline" class="flex items-center gap-1">
         <ListFilter size={18} /> Filters</Button
-      >
+      > -->
       <Button
         class="flex items-center gap-1 bg-[#3D81FC] text-white hover:bg-white hover:text-[#3D81FC]"
-        ><Upload size={18} /> Export Reports</Button
+        on:click={() => {
+          const date = new Date().toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+          convertArrToCSV($safetyData, `safety_${date}.csv`, [
+            "floormap",
+            "logo",
+            "updatedAt",
+          ]);
+        }}
       >
+        <Upload size={18} />
+        Export Reports
+      </Button>
     </span>
   </div>
   <div class="grid grid-cols-8 grid-rows-4 gap-4 mt-4">
@@ -331,7 +394,10 @@ $:console.log('allStores kitchen',allStores)
                 {#each fruits as fruit}
                   <Select.Item
                     on:click={() =>
-                      selectedStore.set({ value: fruit.value, label: fruit.label })}
+                      selectedStore.set({
+                        value: fruit.value,
+                        label: fruit.label,
+                      })}
                     class="px-1"
                     value={fruit.value}
                     label={fruit.label}>{fruit.label}</Select.Item
@@ -353,15 +419,12 @@ $:console.log('allStores kitchen',allStores)
 <p class='text-center text-gray-500'>No data found</p>
 {/if} -->
         {#if $safetyData.length > 0}
-            <SafetyDataTable
-              {token}
-              safetyData={$safetyData}
-            />
-          {:else}
-            <p class="text-center text-gray-500">
-              No data found for the selected store
-            </p>
-          {/if}
+          <SafetyDataTable {token} safetyData={$safetyData} />
+        {:else}
+          <p class="text-center text-gray-500">
+            No data found for the selected store
+          </p>
+        {/if}
         <!-- {:else}
           <p class="text-center text-gray-500">No data available</p>
         {/if} -->

@@ -23,9 +23,9 @@
   export let user;
   export let token: string;
 
-  $: console.log('aallstores',allStores)
+  // $: console.log('aallstores',allStores)
 
-    onMount(async () => {
+  onMount(async () => {
     const res = await fetch("/api/store/getStoreDetails", {
       method: "POST",
       body: JSON.stringify({
@@ -33,7 +33,7 @@
       }),
     });
     const data = await res.json();
-    console.log(data);
+    // console.log(data);
     cardData.set(data);
   });
 
@@ -55,10 +55,8 @@
     label: store.name,
   }));
 
-
-
-  $: console.log('uniqueLocations',uniqueLocations)
-  $: console.log('uniquemanager',uniqueManagers)
+  // $: console.log('uniqueLocations',uniqueLocations)
+  // $: console.log('uniquemanager',uniqueManagers)
 
   let selectedLocation = "";
   let selectedManager = "";
@@ -133,12 +131,13 @@
     document.body.removeChild(link);
   }
 
-
   let selectedStore = 0;
   let searchStore = "";
 </script>
 
-<section class="w-full p-4 flex flex-col gap-4 px-6">
+<section
+  class="w-full p-4 flex flex-col gap-4 px-6 max-h-[calc(100vh-75px)] overflow-y-auto overflow-x-clip"
+>
   <div class="flex items-center justify-end gap-4">
     {#if user.role !== "Operators" && user.role !== "admin" && user.role !== "storeManager" && user.role !== "storeEmployee"}
       <AddStoreDialog>
@@ -317,7 +316,7 @@
             <ListFilter size={18} />Filters
           </Button>
         </DropdownMenu.Trigger>
-        <DropdownMenu.Content class='max-h-[250px] overflow-y-scroll'>
+        <DropdownMenu.Content class="max-h-[250px] overflow-y-scroll">
           <DropdownMenu.Label>Location</DropdownMenu.Label>
           <DropdownMenu.Separator />
           {#each uniqueLocations as location}
@@ -368,6 +367,6 @@
     <span class="h-[50px] bg-[#050F40] px-4 py-2 rounded-t-xl">
       <p class="text-white font-medium text-lg">Stores</p>
     </span>
-    <StoresDataTable combinedStores={filteredStores} {searchStore} {token}/>
+    <StoresDataTable combinedStores={filteredStores} {searchStore} {token} />
   </div>
 </section>

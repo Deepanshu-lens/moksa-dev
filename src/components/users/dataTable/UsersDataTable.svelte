@@ -2,7 +2,15 @@
   import { createTable, Render, Subscribe } from "svelte-headless-table";
   import * as Table from "@/components/ui/table";
   import { Button } from "@/components/ui/button";
-  import { ArrowUpDown, ChevronLeft, ChevronRight, Edit, StoreIcon, Trash2, User } from "lucide-svelte";
+  import {
+    ArrowUpDown,
+    ChevronLeft,
+    ChevronRight,
+    Edit,
+    StoreIcon,
+    Trash2,
+    User,
+  } from "lucide-svelte";
   import { createEventDispatcher } from "svelte";
   import ModifyUserDialog from "@/components/dialogs/MofifyUserDialog.svelte";
   import {
@@ -12,42 +20,52 @@
     addSortBy,
   } from "svelte-headless-table/plugins";
   import { readable, writable } from "svelte/store";
-    import UserDeleteDialog from "@/components/dialogs/UserDeleteDialog.svelte";
+  import UserDeleteDialog from "@/components/dialogs/UserDeleteDialog.svelte";
 
   const dispatch = createEventDispatcher();
 
-  export let users 
-export let searchVal:string;
-export let token:string;
-export let filter:string;
+  export let users;
+  export let searchVal: string;
+  export let token: string;
+  export let filter: string;
+  export let role: string;
+  // $: console.log(searchVal)
 
-// $: console.log(searchVal)
+  // $: console.log(users)
+  // $: console.log(filter)
 
-// $: console.log(users)
-// $: console.log(filter)
+  console.log(role);
+  $: users = users
+    .filter(
+      (u) =>
+        role === "superAdmin" ||
+        (role !== "superAdmin" && u.role !== "superAdmin"),
+    )
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
 
+  $: dbData = users.map((user) => {
+    return {
+      moksaId: user.id,
+      lensId: user.lensId,
+      username: user.first_name + " " + user.last_name,
+      firstName: user.first_name,
+      lastName: user.last_name,
+      userImage: user.profile,
+      email: user.email,
+      designation: user.role,
+      dateOfRegistration: user.createdAt,
+      storesAssigned: user.store_count,
+      action: "Edit",
+      mobile: user.mobile_number,
+    };
+  });
 
-const dbData = users.map((user) => {
-  return {
-    moksaId: user.id,
-    lensId: user.lensId,
-    username: user.first_name + ' ' + user.last_name,
-    firstName: user.first_name,
-    lastName: user.last_name,
-    userImage: user.profile,
-    email: user.email,
-    designation: user.role,
-    dateOfRegistration: user.createdAt,
-    storesAssigned: user.store_count,
-    action: "Edit",
-    mobile: user.mobile_number
-  }
-})
+  $: data = writable(dbData);
 
-
-  const data = writable(dbData);
-
-  const readableData = readable(dbData, (set) => {
+  $: readableData = readable(dbData, (set) => {
     const unsubscribe = data.subscribe(set);
     return unsubscribe;
   });
@@ -62,12 +80,12 @@ const dbData = users.map((user) => {
   //   select: addSelectedRows(),
   // });
 
-    const table = createTable(readableData, {
+  $: table = createTable(readableData, {
     page: addPagination({ initialPageSize: 5 }),
     sort: addSortBy(),
     filter: addTableFilter({
       fn: ({ filterValue, value }) => {
-        if (filter && filter !== '') {
+        if (filter && filter !== "") {
           return value.toLowerCase() === filter.toLowerCase();
         } else {
           return value.toLowerCase().includes(filterValue.toLowerCase());
@@ -77,9 +95,7 @@ const dbData = users.map((user) => {
     select: addSelectedRows(),
   });
 
-    
-
-  const columns = table.createColumns([
+  $: columns = table.createColumns([
     table.column({
       accessor: "username",
       header: "Username",
@@ -106,36 +122,33 @@ const dbData = users.map((user) => {
     }),
   ]);
 
-  const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } =
-    table.createViewModel(columns);
+  $: ({ headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } =
+    table.createViewModel(columns));
 
-  const { hasNextPage, hasPreviousPage, pageIndex, pageCount, setPageIndex } =
-    pluginStates.page;
-  const { selectedDataIds } = pluginStates.select;
- const { filterValue } = pluginStates.filter;
+  $: ({ hasNextPage, hasPreviousPage, pageIndex, pageCount, setPageIndex } =
+    pluginStates.page);
 
-   $: {
+  $: selectedDataIds = pluginStates.select.selectedDataIds;
+  $: filterValue = pluginStates.filter.filterValue;
+
+  $: {
     $filterValue = searchVal;
-    if (filter && filter !== '') {
+    if (filter && filter !== "") {
       $filterValue = filter;
     }
   }
-
-
 
   function handleRowClick(rowData) {
     dispatch("rowClick", rowData);
   }
 
-function goToNextPage() {
-  $pageIndex = $pageIndex + 1
+  function goToNextPage() {
+    $pageIndex = $pageIndex + 1;
   }
 
   function goToPreviousPage() {
- $pageIndex = $pageIndex - 1
+    $pageIndex = $pageIndex - 1;
   }
-
-
 </script>
 
 <div class="rounded-md mt-0">
@@ -192,22 +205,25 @@ function goToNextPage() {
                 >
                   {#if cell.id === "action"}
                     <span class="w-full flex items-center gap-3">
-                      <ModifyUserDialog data={row.original} token={token}>
-                      <Button
-                        class="text-[#4976F4] bg-[#4976F4]/[.1] rounded-2xl text-xs text-start flex items-center gap-1"
-                        variant="ghost"
+                      <ModifyUserDialog data={row.original} {token}>
+                        <Button
+                          class="text-[#4976F4] bg-[#4976F4]/[.1] rounded-2xl text-xs text-start flex items-center gap-1"
+                          variant="ghost"
+                        >
+                          <Edit size={14} /> Modify</Button
+                        ></ModifyUserDialog
                       >
-                        <Edit size={14} /> Modify</Button
-                      ></ModifyUserDialog>
-                      <UserDeleteDialog data={row.original} token={token}>
-                        <Button 
-                        class="text-[#F44336] bg-[#F44336]/[.1] rounded-2xl text-xs text-start flex items-center gap-1"
-                        variant="ghost"><Trash2 size={14} /> Delete</Button
+                      <UserDeleteDialog data={row.original} {token}>
+                        <Button
+                          class="text-[#F44336] bg-[#F44336]/[.1] rounded-2xl text-xs text-start flex items-center gap-1"
+                          variant="ghost"><Trash2 size={14} /> Delete</Button
                         >
                       </UserDeleteDialog>
                     </span>
                   {:else if cell.id === "username"}
-                    <span class="flex items-center gap-2 text-start justify-start">
+                    <span
+                      class="flex items-center gap-2 text-start justify-start"
+                    >
                       <User size={26} class="text-[#4976F4]" />
                       <span class="flex flex-col gap-1">
                         <p class="text-sm font-medium">
@@ -218,12 +234,21 @@ function goToNextPage() {
                         </p>
                       </span>
                     </span>
-                    {:else if cell.id === 'dateOfRegistration'}
+                  {:else if cell.id === "dateOfRegistration"}
                     <span class="text-sm text-[#727272]">
-                      {new Date(row.original.dateOfRegistration).toLocaleDateString('en-US', { weekday: 'short', month: 'long', day: 'numeric', year: 'numeric' })}
+                      {new Date(
+                        row.original.dateOfRegistration,
+                      ).toLocaleDateString("en-US", {
+                        weekday: "short",
+                        month: "long",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
                     </span>
-                    {:else if cell.id === 'storeName'}
-                    <span class="text-sm text-[#727272] flex items-center gap-2">
+                  {:else if cell.id === "storeName"}
+                    <span
+                      class="text-sm text-[#727272] flex items-center gap-2"
+                    >
                       <StoreIcon size={16} />
                       {row.original.storeName}
                     </span>
@@ -241,28 +266,27 @@ function goToNextPage() {
 </div>
 
 <div class="flex items-center justify-between flex-row-reverse px-2 mt-4">
-    <div class="flex items-center gap-2">
-      <Button
-        variant="outline"
-        size="sm"
-        on:click={goToPreviousPage}
-        disabled={!$hasPreviousPage}
-      >
-        <ChevronLeft class="h-4 w-4" />
-        Previous
-      </Button>
-      <Button
-        variant="outline"
-        size="sm"
-        on:click={goToNextPage}
-        disabled={!$hasNextPage}
-      >
-        Next
-        <ChevronRight class="h-4 w-4" />
-      </Button>
-    </div>
-    <div class="text-sm text-gray-500">
-      Page {$pageIndex + 1} of {$pageCount}
-    </div>
+  <div class="flex items-center gap-2">
+    <Button
+      variant="outline"
+      size="sm"
+      on:click={goToPreviousPage}
+      disabled={!$hasPreviousPage}
+    >
+      <ChevronLeft class="h-4 w-4" />
+      Previous
+    </Button>
+    <Button
+      variant="outline"
+      size="sm"
+      on:click={goToNextPage}
+      disabled={!$hasNextPage}
+    >
+      Next
+      <ChevronRight class="h-4 w-4" />
+    </Button>
   </div>
-
+  <div class="text-sm text-gray-500">
+    Page {$pageIndex + 1} of {$pageCount}
+  </div>
+</div>

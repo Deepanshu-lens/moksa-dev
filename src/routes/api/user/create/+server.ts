@@ -26,8 +26,11 @@ export const POST: RequestHandler = async ({ request,cookies }) => {
                 }),
             },
         );
-
+        if (!moksa.ok) {
+            return json({ error: 'moksa_failed' }, { status: 500 });
+        }
         const response = await moksa.json();
+        
         return json(response);
     } catch (error) {
         console.error('Error creating user:', error);

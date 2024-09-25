@@ -32,6 +32,7 @@
   export let features;
   const nodes = data.nodes;
 
+  const user = data.user;
   const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
 
   $: if ($selectedNode && addMode === 1) {
@@ -252,6 +253,7 @@
         {nodes}
         url={data.url ?? "/"}
         isAllFullScreen={playbackFullscreen}
+        {user}
       />
       <!-- <div class='flex gap-2 items-center border rounded-md px-2 py-1 justify-center dark:bg-transparent dark:border-none bg-[#DADFEA] mx-4 my-1'>
         <Button class={`hover:bg-[#050F41] hover:text-white ${addMode===1 ? 'text-white bg-[#050F41] font-medium w-full': 'font-medium w-full bg-transparent text-[#00000066] dark:text-white/[.6]'} `} on:click={()=>addMode=1}>NVR</Button>

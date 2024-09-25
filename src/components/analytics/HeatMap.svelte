@@ -72,81 +72,82 @@
     }, 1000);
   });
 
-
   function drawHeatmap() {
-  const canvas = document.getElementById('heatmapCanvas') as HTMLCanvasElement;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return;
-console.log($heatMapData)
-  const image = document.querySelector('img') as HTMLImageElement;
-  canvas.width = image.width;
-  canvas.height = image.height;
+    const canvas = document.getElementById(
+      "heatmapCanvas",
+    ) as HTMLCanvasElement;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    console.log($heatMapData);
+    const image = document.querySelector("img") as HTMLImageElement;
+    canvas.width = image.width;
+    canvas.height = image.height;
 
- let hd = $heatMapData.data
-  if (!Array.isArray(hd) || !Array.isArray(hd[0])) {
-    console.error('Heatmap data is not a 2D array:', hd);
-    toast.error('Heatmap data empty or not a 2D array');
-    return;
-  }
+    let hd = $heatMapData.data;
+    if (!Array.isArray(hd) || !Array.isArray(hd[0])) {
+      console.error("Heatmap data is not a 2D array:", hd);
+      toast.error("Heatmap data empty or not a 2D array");
+      return;
+    }
 
-  const maxValue = Math.max(...hd.map(row => Math.max(...row)));
+    const maxValue = Math.max(...hd.map((row) => Math.max(...row)));
 
-  for (let y = 0; y < hd.length; y++) {
-    for (let x = 0; x < hd[y].length; x++) {
-      const value = hd[y][x];
-      const intensity = value / maxValue;
-      const color = `rgba(255, 0, 0, ${intensity * 1})`;
+    for (let y = 0; y < hd.length; y++) {
+      for (let x = 0; x < hd[y].length; x++) {
+        const value = hd[y][x];
+        const intensity = value / maxValue;
+        const color = `rgba(255, 0, 0, ${intensity * 1})`;
 
-      ctx.fillStyle = color;
-      ctx.fillRect(
-        (x / hd[y].length) * canvas.width,
-        (y / hd.length) * canvas.height,
-        canvas.width / hd[y].length,
-        canvas.height / hd.length
-      );
+        ctx.fillStyle = color;
+        ctx.fillRect(
+          (x / hd[y].length) * canvas.width,
+          (y / hd.length) * canvas.height,
+          canvas.width / hd[y].length,
+          canvas.height / hd.length,
+        );
+      }
     }
   }
-}
 
-// Modify the updateSelectedFloorMap function
-// async function updateSelectedFloorMap() {
-//   loadingFloor = true;
-//   // ... existing code ...
+  // Modify the updateSelectedFloorMap function
+  // async function updateSelectedFloorMap() {
+  //   loadingFloor = true;
+  //   // ... existing code ...
 
-//   if (selectedFloorMap !== "" && selectedFloorMap !== null) {
-//     // ... existing code ...
+  //   if (selectedFloorMap !== "" && selectedFloorMap !== null) {
+  //     // ... existing code ...
 
-//     const mapData = await fetch(`https://api.moksa.ai/heatmap/getHeatMapByTimeAndStoreId/1hr/${$selectedStore.value}`, {
-//       method: "GET",
-//       headers: {
-//         Authorization: `Bearer ${token}`,
-//         "Content-Type": "application/json",
-//       },
-//     });
-//     const data = await mapData.json();
-//     console.log('mapData', data);
-//     heatMapData.set(data);
+  //     const mapData = await fetch(`https://api.moksa.ai/heatmap/getHeatMapByTimeAndStoreId/1hr/${$selectedStore.value}`, {
+  //       method: "GET",
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //         "Content-Type": "application/json",
+  //       },
+  //     });
+  //     const data = await mapData.json();
+  //     console.log('mapData', data);
+  //     heatMapData.set(data);
 
-//     // ... existing code to set storeFloorImg ...
+  //     // ... existing code to set storeFloorImg ...
 
-//     loadingFloor = false;
+  //     loadingFloor = false;
 
-//     // Draw heatmap after the image has loaded
-//     setTimeout(() => {
-//       drawHeatmap($heatMapData);
-//     }, 100);
-//   } else {
-//     storeFloorImg = null;
-//     loadingFloor = false;
-//   }
-// }
+  //     // Draw heatmap after the image has loaded
+  //     setTimeout(() => {
+  //       drawHeatmap($heatMapData);
+  //     }, 100);
+  //   } else {
+  //     storeFloorImg = null;
+  //     loadingFloor = false;
+  //   }
+  // }
 
-// Add this to ensure the heatmap is redrawn when the component updates
-// $: if ($heatMapData && storeFloorImg) {
-//   setTimeout(() => {
-//     drawHeatmap($heatMapData);
-//   }, 100);
-// }
+  // Add this to ensure the heatmap is redrawn when the component updates
+  // $: if ($heatMapData && storeFloorImg) {
+  //   setTimeout(() => {
+  //     drawHeatmap($heatMapData);
+  //   }, 100);
+  // }
 
   // Add this function to update the selected floor map
   async function updateSelectedFloorMap() {
@@ -159,16 +160,19 @@ console.log($heatMapData)
 
     if (selectedFloorMap !== "" && selectedFloorMap !== null) {
       // console.log('selectedFloorMap',selectedFloorMap)
-      const mapData = await fetch(`https://api.moksa.ai/heatmap/getHeatMapByTimeAndStoreId/${$dateRange}/${$selectedStore.value}`,{
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
+      const mapData = await fetch(
+        `https://api.moksa.ai/heatmap/getHeatMapByTimeAndStoreId/${$dateRange}/${$selectedStore.value}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         },
-      })
-      const data = await mapData.json()
-      console.log('mapData',data)
-      heatMapData.set(data)
+      );
+      const data = await mapData.json();
+      console.log("mapData", data);
+      heatMapData.set(data);
       const res = await fetch("https://api.moksa.ai/stream", {
         method: "POST",
         headers: {
@@ -185,9 +189,9 @@ console.log($heatMapData)
       // console.log('data',data)
       storeFloorImg = imageUrl;
       loadingFloor = false;
-        setTimeout(() => {
-      drawHeatmap($heatMapData);
-    }, 100);
+      setTimeout(() => {
+        drawHeatmap($heatMapData);
+      }, 100);
     } else {
       storeFloorImg = null;
       loadingFloor = false;
@@ -610,13 +614,13 @@ console.log($heatMapData)
       </Select.Root>
     </span>
     <span class="flex items-center gap-3">
-      <Button variant="outline" class="flex items-center gap-1">
+      <!-- <Button variant="outline" class="flex items-center gap-1">
         <ListFilter size={18} /> Filters</Button
-      >
-      <Button
+      > -->
+      <!-- <Button
         class="flex items-center gap-1 bg-[#3D81FC] text-white hover:bg-white hover:text-[#3D81FC]"
         ><Upload size={18} /> Export Reports</Button
-      >
+      > -->
     </span>
   </div>
   <div class="grid grid-cols-8 grid-rows-8 gap-4 mt-4">
@@ -634,22 +638,24 @@ console.log($heatMapData)
           alt="storeFloorImg"
           class=" w-full h-full max-h-[400px] rounded-md"
         />
-         <canvas
-        id="heatmapCanvas"
-        class="absolute top-0 left-0 w-full h-full pointer-events-none z-20"
-      ></canvas>
+        <canvas
+          id="heatmapCanvas"
+          class="absolute top-0 left-0 w-full h-full pointer-events-none z-20"
+        ></canvas>
       </div>
     {:else if loadingFloor === true}
       <div
         class="col-span-8 row-span-6 border rounded-md flex flex-col justify-center items-center rounded-t-xl dark:border-white/[.7]"
       >
-        <Spinner  />
+        <Spinner />
       </div>
     {:else}
       <div
         class="col-span-8 row-span-6 border rounded-md flex flex-col justify-center items-center rounded-t-xl dark:border-white/[.7]"
       >
-        <p class="text-lg font-semibold">Floor map not available for this store</p>
+        <p class="text-lg font-semibold">
+          Floor map not available for this store
+        </p>
       </div>
     {/if}
     <!-- <div

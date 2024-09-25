@@ -1,4 +1,4 @@
-<script lang='ts'>
+<script lang="ts">
   import { Calendar } from "@/components/ui/calendar";
   import { toast } from "svelte-sonner";
   import { convertedVideos, allVideos, selectedNode } from "@/lib/stores";
@@ -15,8 +15,8 @@
   export let addMode;
 
   // let playbackurl = writable();
-  export let isLoading
-  let checkInterval
+  export let isLoading;
+  let checkInterval;
   let chosenNode;
   let markedDates = [];
   let selectedMode = 1;
@@ -184,87 +184,92 @@
     return data;
   }
 
- 
-//   async function fetchfroms3(cameraId, date, startTime) {
-//   console.log(date);
-//   const localDate = new Date(date);
-//   const formattedDate = localDate.toLocaleDateString('en-CA').replace(/-/g, '_');
-//   console.log(formattedDate);
-//   isLoading.set(true);
+  //   async function fetchfroms3(cameraId, date, startTime) {
+  //   console.log(date);
+  //   const localDate = new Date(date);
+  //   const formattedDate = localDate.toLocaleDateString('en-CA').replace(/-/g, '_');
+  //   console.log(formattedDate);
+  //   isLoading.set(true);
 
-//   try {
-//     const fetchPromise = fetch("/api/playbackVideo/getfromAWS", {
-//       method: "POST",
-//       headers: {
-//         "Content-Type": "application/json",
-//       },
-//       body: JSON.stringify({ cameraId, date: formattedDate, startTime }),
-//     });
+  //   try {
+  //     const fetchPromise = fetch("/api/playbackVideo/getfromAWS", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({ cameraId, date: formattedDate, startTime }),
+  //     });
 
-//     const timeoutPromise = new Promise((_, reject) => {
-//       setTimeout(() => reject(new Error('Timeout')), 15000);
-//     });
+  //     const timeoutPromise = new Promise((_, reject) => {
+  //       setTimeout(() => reject(new Error('Timeout')), 15000);
+  //     });
 
-//     try {
-//       const response = await Promise.race([fetchPromise, timeoutPromise]);
-      
-//       if (response.status === 404 || response.status === 500) {
-//         toast.error('Failed to find videos in this time range');
-//         throw new Error(`HTTP error! status: ${response.status}`);
-//       }
-      
-//       // If the response is successful, wait for it to complete
-//       await response.json();
+  //     try {
+  //       const response = await Promise.race([fetchPromise, timeoutPromise]);
 
-//       // Only call checkForOutputFile if we reach this point (no errors)
-//       checkForOutputFile(cameraId.id, formattedDate, startTime);
-//     } catch (error) {
-//       if (error.message === 'Timeout') {
-//         console.log('Request timed out, proceeding to check for output file');
-//         checkForOutputFile(cameraId.id, formattedDate, startTime);
-//       } else {
-//         throw error; // Re-throw other errors
-//       }
-//     }
-//   } catch (error) {
-//     console.error("Error:", error);
-//     toast.error('An error occurred while fetching the video');
-//     // Do not call checkForOutputFile here
-//   } finally {
-//     isLoading.set(false);
-//   }
-// }
+  //       if (response.status === 404 || response.status === 500) {
+  //         toast.error('Failed to find videos in this time range');
+  //         throw new Error(`HTTP error! status: ${response.status}`);
+  //       }
 
+  //       // If the response is successful, wait for it to complete
+  //       await response.json();
 
-async function fetchfroms3(cameraId, date, startTime,endTime) {
-  console.log(date);
-  const localDate = new Date(date);
-  const formattedDate = localDate.toLocaleDateString('en-CA').replace(/-/g, '_');
-  console.log(formattedDate);
-  isLoading.set(true);
+  //       // Only call checkForOutputFile if we reach this point (no errors)
+  //       checkForOutputFile(cameraId.id, formattedDate, startTime);
+  //     } catch (error) {
+  //       if (error.message === 'Timeout') {
+  //         console.log('Request timed out, proceeding to check for output file');
+  //         checkForOutputFile(cameraId.id, formattedDate, startTime);
+  //       } else {
+  //         throw error; // Re-throw other errors
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.error("Error:", error);
+  //     toast.error('An error occurred while fetching the video');
+  //     // Do not call checkForOutputFile here
+  //   } finally {
+  //     isLoading.set(false);
+  //   }
+  // }
 
-  try {
-    const response = await fetch("/api/playbackVideo/getfromAWS", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ cameraId, date: formattedDate, startTime,endTime }),
-    });
+  async function fetchfroms3(cameraId, date, startTime, endTime) {
+    console.log(date);
+    const localDate = new Date(date);
+    const formattedDate = localDate
+      .toLocaleDateString("en-CA")
+      .replace(/-/g, "_");
+    console.log(formattedDate);
+    isLoading.set(true);
 
-    if (response.status === 200) {
-      const data = await response.json();
-      console.log(data)
-      convertedVideos.set(data.files);
-    } else {
-      console.error(`Error: Received status code ${response.status}`);
+    try {
+      const response = await fetch("/api/playbackVideo/getfromAWS", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          cameraId,
+          date: formattedDate,
+          startTime,
+          endTime,
+        }),
+      });
+
+      if (response.status === 200) {
+        const data = await response.json();
+        console.log(data);
+        convertedVideos.set(data.files);
+      } else {
+        console.error(`Error: Received status code ${response.status}`);
+      }
+    } catch (error) {
+      console.error("Error fetching video from S3:", error);
+    } finally {
+      isLoading.set(false);
     }
-  } catch (error) {
-    console.error('Error fetching video from S3:', error);
-  } finally {
-    isLoading.set(false);
   }
-}
 
   // function checkForOutputFile(cameraId, formattedDate,startTime) {
   //   checkInterval = setInterval(async () => {
@@ -304,12 +309,13 @@ async function fetchfroms3(cameraId, date, startTime,endTime) {
   });
   // console.log('playbacklist',features)
 
-// $: console.log($playbackurl)
+  // $: console.log($playbackurl)
 
-
-    function handleVideoError(event: Event & { currentTarget: EventTarget & Element; }) {
-        throw new Error("Function not implemented.");
-    }
+  function handleVideoError(
+    event: Event & { currentTarget: EventTarget & Element },
+  ) {
+    throw new Error("Function not implemented.");
+  }
 </script>
 
 {#if addMode === 1}
@@ -415,7 +421,7 @@ async function fetchfroms3(cameraId, date, startTime,endTime) {
         />
       </span>
     </div>
-    
+
     <div class="px-4 w-full">
       <button
         class="text-white bg-[#050F41] w-full py-2 text-sm font-medium mt-4 rounded-md cursor-pointer disabled:cursor-not-allowed"
@@ -564,43 +570,44 @@ async function fetchfroms3(cameraId, date, startTime,endTime) {
     </div>
   </div>
   <div class="px-4 w-full py-4 flex flex-row items-center gap-3">
-      <span>
-        <label for="start-time" class="text-black/[.7] dark:text-slate-200"
-          >Start Time</label
-        >
-        <input
-          type="time"
-          id="start-time"
-          bind:value={startTime}
-          placeholder="00:00"
-          class="block rounded-md capitalize border-2 text-sm px-2 py-2 leading-tight w-full bg-[#f6f6f6] text-[#979797] dark:bg-black"
-        />
-      </span>
-      <span>
-        <label for="end-time" class="text-black/[.7]">End Time</label>
-        <input
-          type="time"
-          id="end-time"
-          bind:value={endTime}
-          placeholder="00:00"
-          class="block rounded-md capitalize border-2 text-sm px-2 py-2 leading-tight w-full bg-[#f6f6f6] text-[#979797] dark:bg-black"
-        />
-      </span>
-    </div>
+    <span>
+      <label for="start-time" class="text-black/[.7] dark:text-slate-200"
+        >Start Time</label
+      >
+      <input
+        type="time"
+        id="start-time"
+        bind:value={startTime}
+        placeholder="00:00"
+        class="block rounded-md capitalize border-2 text-sm px-2 py-2 leading-tight w-full bg-[#f6f6f6] text-[#979797] dark:bg-black"
+      />
+    </span>
+    <span>
+      <label for="end-time" class="text-black/[.7]">End Time</label>
+      <input
+        type="time"
+        id="end-time"
+        bind:value={endTime}
+        placeholder="00:00"
+        class="block rounded-md capitalize border-2 text-sm px-2 py-2 leading-tight w-full bg-[#f6f6f6] text-[#979797] dark:bg-black"
+      />
+    </span>
+  </div>
   <div class="px-4 w-full">
     <button
-    class="text-white bg-[#050F41] w-full py-2 text-sm font-medium mt-4 rounded-md cursor-pointer disabled:cursor-not-allowed"
-    on:click={() => {
-      isLoading.set(true) 
-      fetchfroms3(selectedCamera, searchDate, startTime,endTime)
-        .finally(() => {
-          isLoading.set( false)
-        });
-    }}
-    disabled={$isLoading}
-  >
-    {$isLoading ? 'Loading...' : 'Submit'}
-  </button>
+      class="text-white bg-[#050F41] w-full py-2 text-sm font-medium mt-4 rounded-md cursor-pointer disabled:cursor-not-allowed"
+      on:click={() => {
+        isLoading.set(true);
+        fetchfroms3(selectedCamera, searchDate, startTime, endTime).finally(
+          () => {
+            isLoading.set(false);
+          },
+        );
+      }}
+      disabled={$isLoading}
+    >
+      {$isLoading ? "Loading..." : "Submit"}
+    </button>
   </div>
   <!-- {#if isLoading}
   <p class="text-center mt-4">Loading video...</p>
@@ -608,7 +615,6 @@ async function fetchfroms3(cameraId, date, startTime,endTime) {
     <AWSPlayer videoPath={$playbackurl} mimeType={$mimet}/>
 {/if} -->
 {/if}
-
 
 <style>
   video {
