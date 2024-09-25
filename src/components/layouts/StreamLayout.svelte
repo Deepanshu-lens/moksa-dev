@@ -37,6 +37,7 @@
   export let isAllFullScreen: boolean;
   export let data;
   export let currpanel;
+  export let user;
 
   let streamCount =
     $selectedNode.camera.length === $filteredNodeCameras.length
@@ -1357,7 +1358,7 @@
                               ? "grid-area: bigCell1"
                               : ""}
                   >
-                    <AddCameraDialog nodes={data.nodes} sNode={""}>
+                    <AddCameraDialog nodes={data.nodes} sNode={""} {user}>
                       <!-- svelte-ignore a11y-click-events-have-key-events -->
                       <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
                       <button class=" disabled:cursor-not-allowed">
@@ -1396,7 +1397,7 @@
   <div
     class={`h-full w-full ${streamCount === 0 ? "flex justify-center items-center" : "relative"}`}
   >
-    <AddCameraDialog nodes={data.nodes} sNode={""}>
+    <AddCameraDialog nodes={data.nodes} sNode={""} {user}>
       <!-- svelte-ignore a11y-click-events-have-key-events -->
       <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
       <button class="disabled:cursor-not-allowed">

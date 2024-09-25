@@ -72,7 +72,7 @@ export const load: PageServerLoad = async ({ fetch,cookies,locals }) => {
     }
 
     const aisleData = async () => {
-        const aisleData = await fetch(`https://api.moksa.ai/store/getAllStoresWithAisleDetails/1/10/${formatDate(oneYearAgo)}/${formatDate(today)}`, {
+        const aisleData = await fetch(`https://api.moksa.ai/store/getAllStoresWithAisleDetails/1/100/${formatDate(oneYearAgo)}/${formatDate(today)}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${cookies.get('moksa-token')}`
@@ -82,7 +82,7 @@ export const load: PageServerLoad = async ({ fetch,cookies,locals }) => {
     }
 
     const alltheftandcamera = async () => {
-        const theftandcamera = await fetch(`https://api.moksa.ai/store/getAllStoresWithTheftAndCameraDetails/1/50/${formatDate(oneYearAgo)}/${formatDate(today)}`, {
+        const theftandcamera = await fetch(`https://api.moksa.ai/store/getAllStoresWithTheftAndCameraDetails/1/100/${formatDate(oneYearAgo)}/${formatDate(today)}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${cookies.get('moksa-token')}`

@@ -26,6 +26,15 @@
   import CreateEmployeeDialog from "../dialogs/CreateEmployeeDialog.svelte";
   import UpdateEmployeeDialog from "../dialogs/UpdateEmployeeDialog.svelte";
   import DeleteEmployeeDialog from "../dialogs/DeleteEmployeeDialog.svelte";
+  import type { DateRange } from "bits-ui";
+  import {
+    CalendarDate,
+    DateFormatter,
+    type DateValue,
+    getLocalTimeZone,
+  } from "@internationalized/date";
+  import { RangeCalendar } from "@/components/ui/range-calendar";
+  import * as Popover from "../ui/popover";
   let chartLoading = true;
   export let allStores;
   export let token;
@@ -76,6 +85,10 @@
   let employeeData = writable([]);
   let employeeDetails = writable([]);
   let selectedEmployee = writable(null);
+  let dateRange = writable("7 Days");
+  let value: DateRange | undefined = undefined;
+  let startValue: DateValue | undefined = undefined;
+  let customDateLabel = "Custom";
 
   function createChart() {
     if (chartCanvas && !chart) {
@@ -188,6 +201,7 @@
   async function updateEmployee() {}
 
   async function deleteEmployee() {}
+
   let loading = false;
 
   onMount(async () => {
@@ -225,17 +239,79 @@
     }
   });
 
-  async function getEfficiencyData(){
-    loading = true;
-    const response = await fetch("/api/employee/getEfficiencyByStoreId", {
-      method: "POST",
-      body: JSON.stringify({ storeId: $selectedStoreId }),
-      headers: { "Content-Type": "application/json" },
-    });
-    const data = await response.json();
-    // console.log(data);
-    efficiencyData.set(data);
-    loading = false;
+  // async function getEfficiencyData(){
+  //   loading = true;
+  //   const response = await fetch("/api/employee/getEfficiencyByStoreId", {
+  //     method: "POST",
+  //     body: JSON.stringify({ storeId: $selectedStoreId }),
+  //     headers: { "Content-Type": "application/json" },
+  //   });
+  //   const data = await response.json();
+  //   // console.log(data);
+  //   efficiencyData.set(data);
+  //   loading = false;
+  // }
+
+  async function getCustomEfficiencyData() {}
+
+  async function getEfficiencyDataByTime() {
+    console.log($selectedStoreId);
+    console.log("effdatabytunecallera");
+    const today = new Date();
+    let startDate = new Date(today);
+
+    switch ($dateRange) {
+      case "7 Days":
+        startDate.setDate(today.getDate() - 7);
+        break;
+      case "15 Days":
+        startDate.setDate(today.getDate() - 15);
+        break;
+      case "30 Days":
+        startDate.setDate(today.getDate() - 30);
+        break;
+      case "12 Months":
+        startDate.setFullYear(today.getFullYear() - 1);
+        break;
+      default:
+        startDate.setDate(today.getDate() - 7);
+    }
+
+    const formatDate = (date: Date) => date.toISOString().split("T")[0];
+
+    console.log(formatDate(startDate));
+    console.log(formatDate(today));
+
+    try {
+      loading = true;
+      const response = await fetch(
+        `https://api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreid/${$selectedStoreId}/${formatDate(startDate)}/1/100/${formatDate(today)}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+      const data = await response.json();
+      console.log(
+        `recieved efficiency data for ${$selectedStoreId}, ${$dateRange}`,
+        data,
+      );
+      // efficiencyData.set(data?.data?.data === undefined ? [] : data?.data?.data);
+      efficiencyData.set(data?.data?.data === undefined ? [] : data);
+      loading = false;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  $: {
+    if ($dateRange !== "custom" && $dateRange !== "7 Days") {
+      console.log("getting efficiency data by time", $dateRange);
+      getEfficiencyDataByTime();
+    }
   }
 
   async function getbystoreID() {
@@ -251,25 +327,100 @@
   }
 
   async function getEmployeeDetails(id: number) {
-    // console.log(id)
-    // employeeDetails.set([]);
-    const response = await fetch("/api/employee/getByEmpId", {
-      method: "POST",
-      body: JSON.stringify({ id: id }),
-      headers: { "Content-Type": "application/json" },
-    });
-    const data = await response.json();
-    console.log(data);
-    employeeDetails.set(data);
-  }
+    const today = new Date();
+    let startDate = new Date(today);
+ console.log($dateRange)
+    switch ($dateRange) {
+      case "7 Days":
+        startDate.setDate(today.getDate() - 7);
+        break;
+      case "15 Days":
+        startDate.setDate(today.getDate() - 15);
+        break;
+      case "30 Days":
+        startDate.setDate(today.getDate() - 30);
+        break;
+      case "12 Months":
+        startDate.setFullYear(today.getFullYear() - 1);
+        break;
+      default:
+        startDate.setDate(today.getDate() - 7);
+    }
 
-  // $: console.log("empdetails", $employeeDetails);
-  // $: console.log("empd", $employeeData);
+    const formatDate = (date: Date) => date.toISOString().split("T")[0];
+
+    console.log(formatDate(startDate));
+    console.log(formatDate(today));
+    console.log(id)
+
+    try {
+      const response = await fetch(
+        `https://api.moksa.ai/employeeEfficiency/getEmployeeEfficiencyByEmpid/${id}/${formatDate(startDate)}/${formatDate(today)}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch employees");
+      }
+      const data = await response.json();
+      employeeDetails.set(data);
+    } catch (error) {
+      console.log(error);
+    }
+
+    // }
+  }
 </script>
 
 <section
   class="w-full p-4 flex flex-col max-h-[calc(100vh-75px)] hide-scrollbar overflow-y-auto"
 >
+  <div class="flex items-center justify-start">
+    <span
+      class="flex items-center border-black h-[40px] border-opacity-[18%] border-[1px] rounded-md dark:border-white"
+    >
+      <button
+        class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "7 Days" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
+        on:click={() => dateRange.set("7 Days")}>7 Days</button
+      >
+      <button
+        class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "15 Days" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
+        on:click={() => dateRange.set("15 Days")}>15 Days</button
+      >
+      <button
+        class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "30 Days" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
+        on:click={() => dateRange.set("30 Days")}>30 Days</button
+      >
+      <button
+        class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "12 Months" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
+        on:click={() => dateRange.set("12 Months")}>12 Months</button
+      >
+      <Popover.Root openFocus>
+        <Popover.Trigger asChild let:builder>
+          <Button
+            builders={[builder]}
+            class={`2xl:py-2 2xl:px-3 py-1 px-2  text-sm hover:bg-[#0BA5E9] hover:text-white ${$dateRange === "custom" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white bg-transparent dark:border-white"}`}
+          >
+            {customDateLabel}</Button
+          >
+        </Popover.Trigger>
+        <Popover.Content class="w-auto p-0" align="start">
+          <RangeCalendar
+            bind:value
+            bind:startValue
+            initialFocus
+            numberOfMonths={2}
+            placeholder={value?.start}
+          />
+        </Popover.Content>
+      </Popover.Root>
+    </span>
+  </div>
   <div class="grid grid-cols-8 grid-rows-4 gap-4 mt-4">
     <div
       class="col-span-8 row-span-4 h-[400px] border rounded-md rounded-t-xl bg-white dark:bg-transparent dark:border-white/[.7] flex flex-col gap-3 flex-shrink-0"
@@ -297,8 +448,9 @@
                     on:click={async () => {
                       selectedStore.set(store.label);
                       selectedStoreId.set(store.value);
-                      await getbystoreID(store.value);
-                      await getEfficiencyData(store.value);
+                      const emp = await getbystoreID(store.value);
+                      await getEmployeeDetails(emp.data[0].id);
+                      await getEfficiencyDataByTime();
                     }}
                     value={store.value}
                     label={store.label}>{store.label}</Select.Item
@@ -322,10 +474,7 @@
             <Spinner />
           </span>
         {:else if $efficiencyData && $efficiencyData.data && $efficiencyData?.data?.data?.length > 0}
-          <EmployeeTrackingDataTable
-            {efficiencyData}
-            selectedStore={selectedStore}
-          />
+          <EmployeeTrackingDataTable {efficiencyData} {selectedStore} />
         {:else}
           <span class="flex items-center justify-center h-full w-full">
             <p class="text-black">No data</p>
@@ -413,7 +562,7 @@
               >
             </UpdateEmployeeDialog>
             <DeleteEmployeeDialog
-              employeeData={employeeData}
+              {employeeData}
               empId={$selectedEmployee === null
                 ? $employeeData?.data?.[0]?.id
                 : $selectedEmployee?.id}
@@ -461,25 +610,28 @@
       {#if $employeeDetails?.data?.length > 0 && $employeeData !== null}
         <span class="flex flex-col gap-3 mt-2">
           {#each [{ label: "Total Hours With Customers", hours: $employeeDetails?.data?.[0]?.customer, color1: "#02A7FD", color2: "#141C64" }, { label: "Total Hours on Mobile", hours: $employeeDetails?.data?.[0]?.mobile, color1: "#00FEA3", color2: "#007077" }, { label: "Total Hours Sitting Idle", hours: $employeeDetails?.data?.[0]?.idle, color1: "#FFB156", color2: "#FF007A" }] as activity}
-         
             <div class="my-2">
               <div class="flex justify-between text-sm mb-2">
                 <span class="text-[#323232]">{activity.label}</span>
-                <span class="font-semibold"
-                  >{activity.hours === null
-                    ? 0
-                    : Number(activity.hours).toFixed(2)} Hrs</span
-                >
+                <!-- {#if activity.label === "Total Hours on Mobile"} -->
+                  <span class="font-semibold"
+                    >{activity.hours === null ? 0 : activity.hours} Hrs</span
+                  >
+                <!-- {/if} -->
               </div>
               <div class="w-full h-5 rounded-sm flex gap-2">
-                {#each Array(36) as _, i}
-                  <span
-                    class={`w-[3%] h-full rounded-lg ${i < calculateFilledSegments(activity.hours) ? "" : "bg-gray-200"}`}
-                    style={i < calculateFilledSegments(activity.hours)
-                      ? `background-color: ${interpolateColor(activity.color1, activity.color2, i / (calculateFilledSegments(activity.hours) - 1))}`
-                      : ""}
-                  />
-                {/each}
+                <!-- {#if activity.label === "Total Hours on Mobile"} -->
+                  {#each Array(36) as _, i}
+                    <span
+                      class={`w-[3%] h-full rounded-lg ${i < calculateFilledSegments(activity.hours) ? "" : "bg-gray-200"}`}
+                      style={i < calculateFilledSegments(activity.hours)
+                        ? `background-color: ${interpolateColor(activity.color1, activity.color2, i / (calculateFilledSegments(activity.hours) - 1))}`
+                        : ""}
+                    />
+                  {/each}
+                <!-- {:else}
+                  <p class="text-primary font-semibold">Coming Soon</p>
+                {/if} -->
               </div>
             </div>
           {/each}
@@ -496,7 +648,7 @@
     <div
       class="col-span-5 row-span-2 border rounded-md p-2 flex items-center justify-between flex-shrink-0 h-[200px] dark:border-white/[.7]"
     >
-      <span class="flex flex-col w-1/2">
+      <span class="flex flex-col w-1/2 justify-start items-start h-full">
         <p
           class="text-[#323232] text-lg flex items-center gap-2 font-semibold dark:text-white"
         >
@@ -505,7 +657,7 @@
         <p
           class="flex items-center gap-3 mt-4 mb-2 text-[#4D6674] dark:text-white/[.8]"
         >
-          Based on Factor 1 <span class="text-[#0D2846] font-medium">69%</span>
+          Based on Factor 1 <span class="text-[#0D2846] font-medium">-</span>
           <svg
             width="37"
             height="21"
@@ -537,7 +689,7 @@
           </svg>
         </p>
         <p class="flex items-center gap-3 mt-4 mb-2 text-[#4D6674]">
-          Based on Factor 2 <span class="text-[#0D2846] font-medium">62%</span>
+          Based on Factor 2 <span class="text-[#0D2846] font-medium">-</span>
           <svg
             width="37"
             height="21"
@@ -569,7 +721,7 @@
           </svg>
         </p>
         <p class="flex items-center gap-3 mt-4 mb-2 text-[#4D6674]">
-          Based on Factor 3 <span class="text-[#0D2846] font-medium">77%</span>
+          Based on Factor 3 <span class="text-[#0D2846] font-medium">-</span>
           <svg
             width="37"
             height="21"
@@ -640,11 +792,11 @@
           <div
             class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center"
           >
-            <span class="text-3xl font-bold">70%</span>
-            <p class="text-sm text-gray-500">Efficiency</p>
+            <span class="text-3xl font-bold">%</span>
+            <p class="text-sm text-gray-500">Coming Soon</p>
           </div>
-        </div></span
-      >
+        </div>
+      </span>
     </div>
 
     <div
@@ -658,7 +810,12 @@
         </p>
       </span>
       <span class="h-full w-full">
-        <canvas bind:this={chartCanvas}></canvas>
+        <!-- <canvas bind:this={chartCanvas}></canvas> -->
+        <p
+          class="text-primary font-semibold w-full h-full flex items-center justify-center"
+        >
+          Coming Soon
+        </p>
       </span>
     </div>
   </div>

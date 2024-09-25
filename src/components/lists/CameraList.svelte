@@ -109,7 +109,7 @@ cameraCounts.update(counts => {
   <div class="w-full py-24 flex justify-center items-center">
     <div class="flex flex-col space-y-6 mx-auto items-center">
       <Cctv size={64} />
-      <AddCameraDialog nodes={data.nodes} sNode={""}>
+      <AddCameraDialog nodes={data.nodes} sNode={""} {user}>
         <Button class="mx-auto text-center disabled:cursor-not-allowed" >Add Camera</Button>
       </AddCameraDialog>
     </div>

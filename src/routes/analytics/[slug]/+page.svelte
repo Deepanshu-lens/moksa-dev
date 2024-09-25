@@ -40,7 +40,8 @@
 
   // console.log("pagedata", data);
 
-  // console.log('allStores:', allStores);
+  console.log('allStores:', allStores);
+  $: allStoresLackKitchen = allStores.length > 0 ? allStores.every(store => !store.hasKitchen) : true;
 
   const moksaUserId = data.user.moksaId;
 
@@ -220,7 +221,7 @@
         People <br /> Counter
       </p>
     </span>
-    <!-- <span class="group flex-col flex items-center justify-center gap-0.5">
+    <span class="group flex-col flex items-center justify-center gap-0.5">
       <button
         on:click={() => (view = 6)}
         class={view !== 6
@@ -233,10 +234,11 @@
       >
         Heat Map
       </p>
-    </span> -->
+    </span>
     <span class="group flex-col flex items-center justify-center gap-0.5">
       <button
         on:click={() => (view = 7)}
+        disabled={allStoresLackKitchen}
         class={view !== 7
           ? ` disabled:cursor-not-allowed text-white h-[40px] w-[40px] rounded-full shadow-md  border-2 border-solid  dark:border-white bg-transparent group-hover:text-black group-hover:bg-gradient-to-r group-hover:from-[#EBE60B] group-hover:to-[#07E1A4] group-hover:border-none grid place-items-center `
           : `disabled:cursor-not-allowed relative border-none rounded-full shadow-md h-[40px] w-[40px] text-black bg-gradient-to-r from-[#EBE60B] to-[#07E1A4] grid place-items-center `}
@@ -245,7 +247,7 @@
       <p
         class={`text-center pointer-events-none text-xs ${view !== 7 ? "group-hover:text-[#07E1A4] text-white dark:group-hover:text-[#07E1A4]" : " text-[#07E1A4]"}`}
       >
-        Safety
+       Kitchen Safety
       </p>
     </span>
   </div>
@@ -265,7 +267,7 @@
       {user}
     />
   {:else if view === 2}
-    <Stores {allStores} {theftandcamera} {nodes} {moksaUserId} {user}/>
+  <Stores {allStores} {theftandcamera} {nodes} {moksaUserId} {user} token={data.moksaToken}/>
   {:else if view === 3}
     <Theft
       {theftandcamera}
@@ -287,6 +289,7 @@
   {:else if view === 6}
     <HeatMap {aisleStoreData} {allStores} token={data.moksaToken} />
   {:else if view === 7}
-    <Safety {allStores} token={data.moksaToken} />
+  <Safety {allStores} token={data.moksaToken} {user}/>
+
   {/if}
 </main>

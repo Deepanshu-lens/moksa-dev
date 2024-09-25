@@ -24,6 +24,7 @@
     'EST',
     'PST',
     'MST',
+    'UTC',
     "CST",]
 
   const handleSubmit = async () => {

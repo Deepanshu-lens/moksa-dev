@@ -10,106 +10,167 @@
   import PocketBase from "pocketbase";
   import { page } from "$app/stores";
 
-
   let dialogOpen = false;
   export let data;
-  export let token
+  export let token;
 
   let firstName = data.firstName;
   let lastName = data.lastName;
-  let phoneNumber = data.mobile_number;
+  let phoneNumber = data.mobile;
   let mailId = data.email;
   let lensId = data.lensId;
   let moksaId = data.moksaId;
-  let userType = data.designation
-  let userID
-  let allStores =[]
-  let curStores=[]
+  let userType = data.designation;
+  let userID;
+  let allStores = [];
+  let curStores = [];
 
-  $:console.log(data)
-  console.log(token)
+  // $:console.log(data)
+  // console.log(token)
   let nodes: any[] = [];
 
   let roles: any[] = [];
 
+  
+
   const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
 
-async function initiate(){
-  PB.autoCancellation(false);
+  async function initiate() {
+    PB.autoCancellation(false);
     const res = await PB.collection("roles").getFullList();
-    const allStoress =await fetch('https://api.moksa.ai/store/getAllStoresForDropdown', {
-            method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-    const currentStores = await fetch(`https://api.moksa.ai/store/getUserStoreDetailsByUserId/${moksaId}`,{
+    const allStoress = await fetch(
+      "https://api.moksa.ai/store/getAllStoresForDropdown",
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    const currentStores = await fetch(
+      `https://api.moksa.ai/store/getUserStoreDetailsByUserId/${moksaId}`,
+      {
         headers: {
           "Content-Type": "application/json",
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-      });
+      },
+    );
     const allStoresData = await allStoress.json();
     const currentStoresData = await currentStores.json();
-    console.log(allStoresData)
-    console.log(currentStoresData)
+    // console.log(allStoresData.data)
+    // console.log(currentStoresData)
     allStores = allStoresData.data.data
-    curStores = currentStoresData.data[0].stores
+    // console.log(allStores)
+    // curStores = currentStoresData.data[0].stores
+    curStores = currentStoresData.data[0].stores.map((store) => store.storeId);
+    console.log(res);
     roles = res;
 
-}
+    userID = res.find(
+      (role) => role.roleName.toLowerCase() === data.designation.toLowerCase(),
+    )?.id;
+  }
 
-let initiatePromise: Promise<void> | null = null;
+  let initiatePromise: Promise<void> | null = null;
 
-$: if (dialogOpen) {
-  initiatePromise = initiate();
-}
-
-
-
+  $: if (dialogOpen) {
+    initiatePromise = initiate();
+  }
 
   const handleSubmit = async () => {
+  try {
+    PB.autoCancellation(false);
+    const U = await PB.collection("users").getFullList({
+      filter: `id="${data.lensId}"`,
+    });
 
-    console.log(session);
-    const user = await PB.collection("users").create({
-      firstName,
-      lastName,
+    if (!U || U.length === 0) {
+      throw new Error("User not found");
+    }
+
+    const nodes = [];
+    for (const store of curStores) {
+      const storeNodes = await PB.collection("node").getFullList({
+        filter: `moksaId="${store}"`,
+      });
+      if (storeNodes.length > 0) {
+        nodes.push(storeNodes[0].id);
+      }
+    }
+
+    await PB.collection("session").update(U[0].session[0], {
+      node: nodes,
+    });
+
+    await PB.collection('users').update(data.lensId, {
+      first_name: firstName,
+      last_name: lastName,
       email: mailId,
       role: userID,
-      session: session.id,
-      password,
-      passwordConfirm: cPassword,
+      phoneNumber: phoneNumber
     });
-    console.log(user);
 
-    const moksa = await fetch("/api/user/create", {
+    const updateMoksaUser = await fetch(`https://api.moksa.ai/auth/updateUser`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
       },
       body: JSON.stringify({
-        firstName,
-        lastName,
-        mailId,
-        password,
-        userType,
-        lensId: user.id,
-      }),
+        first_name: firstName,
+        last_name: lastName,
+        email: mailId,
+        role: userType,
+        mobile_number: phoneNumber,
+        id: data.moksaId
+      })
     });
-    console.log(moksa);
-    dialogOpen = false;
 
-    if (userType === "superAdmin") {
-      for (const node of nodes) {
-        await PB.collection("node").update(node, {
-          "session+": [session.id],
-        });
-      }
+    if (!updateMoksaUser.ok) {
+      throw new Error("Failed to update Moksa user");
     }
+
+    for (const node of nodes) {
+      await PB.collection("node").update(node, {
+        "session+": [U[0].session],
+      });
+    }
+
+    const filteredCurStores = curStores.filter((id) => id !== 0);
+    const updateMoksaUserStores = await fetch(
+      `https://api.moksa.ai/store/userStore/updateUserByUserId`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          userId: data.moksaId,
+          storeIds: filteredCurStores,
+        }),
+      }
+    );
+
+    if (!updateMoksaUserStores.ok) {
+      throw new Error("Failed to update Moksa user stores");
+    }
+
+    toast.success("User updated successfully");
+    dialogOpen = false;
     return true;
-  };
+  } catch (error) {
+    console.error("Error updating user:", error);
+    dialogOpen = false
+    toast.error("Failed to update user. Please try again.");
+    return false;
+  }
+};
 
-
+  // $: console.log(typeof curStores);
+  // $: console.log(curStores);
+  // $: console.log(allStores);
 </script>
 
 <Dialog.Root bind:open={dialogOpen}>
@@ -121,7 +182,7 @@ $: if (dialogOpen) {
     <div class="px-4 py-2">
       <Dialog.Header class="relative">
         <Dialog.Title class="text-2xl font-semibold mb-6"
-          >Add New User</Dialog.Title
+          >Modify User</Dialog.Title
         >
         <button
           class=" absolute -top-1 right-4 p-2 grid place-items-center rounded-full text-[#E71D36] bg-[#E71D36]/15 cursor-pointer"
@@ -213,47 +274,62 @@ $: if (dialogOpen) {
           />
         </div>
         <div class="space-y-2">
-  <Label class="block text-sm font-medium text-gray-700">Assigned Stores</Label>
-  <div class="grid grid-cols-3 px-1 gap-2 max-h-[150px] overflow-y-auto">
-{#if allStores.length > 0 && typeof curStores === 'object'}
-      {#each allStores as store}
-      <label class="flex items-center space-x-2">
-        <input
-          type="checkbox"
-          value={store.id}
-          checked={curStores.some(s => s.storeId === store.id)}
-          class="form-checkbox h-4 w-4 text-blue-600"
-        />
-        <span class="text-sm text-gray-700">{store.name}</span>
-      </label>
-    {/each}
-    {:else}
-    <p>Loading..</p>
-  {/if}
-  </div>
+          <Label class="block text-sm font-medium text-gray-700"
+            >Assigned Stores</Label
+          >
+          <div
+            class="grid grid-cols-3 px-1 gap-2 max-h-[150px] overflow-y-auto"
+          >
+            {#if allStores.length > 0 && typeof curStores === "object"}
+              {#each allStores as store}
+                <label class="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    value={store.id}
+                    checked={curStores.includes(store.id)}
+                    on:change={(e) => {
+                      if (e.target.checked) {
+                        curStores = [...curStores, store.id];
+                      } else {
+                        curStores = curStores.filter((id) => id !== store.id);
+                      }
+                    }}
+                    class="form-checkbox h-4 w-4 text-blue-600"
+                  />
+                  <span class="text-sm text-gray-700">{store.name}</span>
+                </label>
+              {/each}
+            {:else}
+              <p>Loading..</p>
+            {/if}
+          </div>
+        </div>
+        <div class="mt-6 flex justify-end space-x-3">
+          <Button
+            type="button"
+            variant="outline"
+            on:click={() => (dialogOpen = false)}
+            class="px-4 py-2 border border-[#F2F4F7] rounded-md text-gray-700"
+            >Cancel</Button
+          >
+          <Button
+            on:click={() => {
+              handleSubmit();
+              console.log("clicked");
+            }}
+            type="button"
+            class="px-4 py-2 bg-blue-500 text-white hover:text-blue-500 hover:bg-white  rounded-md"
+            >Submit</Button
+          >
+        </div>
+        <!-- </form> -->
       </div>
-      <div class="mt-6 flex justify-end space-x-3">
-        <Button
-          type="button"
-          variant="outline"
-          on:click={() => (dialogOpen = false)}
-          class="px-4 py-2 border border-[#F2F4F7] rounded-md text-gray-700"
-          >Cancel</Button
-        >
-        <Button
-          on:click={handleSubmit}
-          type="submit"
-          class="px-4 py-2 bg-blue-500 text-white rounded-md">Submit</Button
-        >
-      </div>
-      <!-- </form> -->
-    </div>
-  </Dialog.Content>
+    </div></Dialog.Content
+  >
 </Dialog.Root>
 
-
 <style>
-    input[type="checkbox"]{
-        accent-color: #0175ff;
-    }
+  input[type="checkbox"] {
+    accent-color: #0175ff;
+  }
 </style>

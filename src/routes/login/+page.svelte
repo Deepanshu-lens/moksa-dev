@@ -45,21 +45,6 @@
       <div
         class="flex items-center justify-center sm:justify-start sm:self-start gap-4 -ml-4"
       >
-        <!-- <img
-          src={"/images/coreIp.jpg"}
-          alt="logo"
-          height={80}
-          width={140}
-          class="block dark:hidden"
-        />
-        <img
-          src={"/images/coreIP2.png"}
-          alt="logo"
-          height={80}
-          width={140}
-          class="hidden dark:block"
-        />
-        <span class="w-[1px] h-[80%] bg-slate-300" /> -->
         <img
           src={"/images/moksa.png"}
           alt="logo"
@@ -152,13 +137,13 @@
         >
           Sign In
         </button>
-        <!-- <a
+        <a
           href="/register"
           class="inline-block cursor-pointer align-baseline font-bold text-sm text-[#797c80] /[.7] mt-4"
         >
           Don't have an account yet?
           <span class="ml-1 text-primary font-semibold"> Sign up </span>
-        </a> -->
+        </a>
       </div>
     </div>
   </form>

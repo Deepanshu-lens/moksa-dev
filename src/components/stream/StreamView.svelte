@@ -486,7 +486,7 @@
         </p>
       </span>
       <span class="group flex-col flex items-center justify-center gap-0.5">
-        <AddCameraDialog sNode="" {nodes}>
+        <AddCameraDialog sNode="" {nodes} {user}>
           <button
             on:click={() => {
               addUserLog(`user clicked on Add Camera button, top panel`);
@@ -751,7 +751,7 @@
           ? "w-full h-screen flex items-center justify-center"
           : "w-full h-full flex items-center justify-center"}
       >
-        <StreamLayout {handleSingleSS} {isAllFullScreen} {data} {currpanel} />
+        <StreamLayout {handleSingleSS} {isAllFullScreen} {data} {currpanel} {user}/>
         <!-- <Player {videos} /> -->
       </div>
 
@@ -768,6 +768,11 @@
             }
           }}
         >
+
+
+
+
+
           <Minimize />
           Exit Fullscreen
         </button>

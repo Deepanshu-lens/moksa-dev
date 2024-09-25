@@ -33,15 +33,16 @@ function generateRandomEfficiency() {
   return Math.floor(Math.random() * (100 - 50 + 1) + 50);
 }
 
+$: console.log('emp table',$efficiencyData.data.data)
 
 $: dbData = $efficiencyData.data.data.map((item: any) => {
 return {
   employee: `${item.first_name} ${item.last_name}`,
       storeName: item.storeName === undefined ? $selectedStore : item.storeName,
     role: item.role,
-    withCustomers: 'Coming Soon',
-    onMobile: item.mobile === null ? 'N/A' : item.mobile,
-    sittingIdle: 'Coming Soon',
+    withCustomers: item.customer,
+    onMobile: item.mobile,
+    sittingIdle: item.idle,
     fillingShelf: 'Coming Soon',
     efficiencyScore: 'Coming Soon',
   }

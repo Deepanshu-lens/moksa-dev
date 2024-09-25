@@ -97,7 +97,7 @@ export const load: PageServerLoad = async ({ locals, cookies }) => {
   const dropdown = async () => {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
 
       const response = await fetch('https://api.moksa.ai/store/getAllStoresForDropdown', {
         method: 'GET',
@@ -106,14 +106,17 @@ export const load: PageServerLoad = async ({ locals, cookies }) => {
         },
         signal: controller.signal
       });
-
+      // console.log(response)
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
       clearTimeout(timeoutId);
       return response.json();
     } catch (error) {
-      if (error.name === 'AbortError') {
+      // if (error.name === 'AbortError') {
         console.log('Request timed out');
-        return [];
-      }
+        // return [];
+      // }
       return [];
     }
   };
@@ -141,7 +144,7 @@ export const load: PageServerLoad = async ({ locals, cookies }) => {
   }
 
   const moksaEvents = async () => {
-    const e = await locals.pb?.collection("moksa_Events").getList(1, 100, {
+    const e = await locals.pb?.collection("moksa_Events").getList(1, 10, {
       sort: "-created",
     });
     return e?.items.map(
@@ -154,11 +157,11 @@ export const load: PageServerLoad = async ({ locals, cookies }) => {
   }
   
   return {
-    events: await events(),
-    galleryItems: await gelleryItems(),
-    imposterItems: await imposterItems(),
+    events: [],
+    galleryItems: [],
+    imposterItems: [],
     stores: await dropdown(),
     token: cookies.get('moksa-token'),
-    moksaEvents: await moksaEvents(),
+    moksaEvents: [],
   };
 }

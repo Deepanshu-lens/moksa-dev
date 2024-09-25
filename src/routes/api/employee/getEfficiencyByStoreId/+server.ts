@@ -9,7 +9,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
     }
     const today = new Date();
     const weekAgo = new Date(today);
-    weekAgo.setDate(weekAgo.getDate() - 7);
+    weekAgo.setDate(weekAgo.getDate() - 15);
 
     const formatDate = (date: Date) => {
         return date.toISOString().split('T')[0];
@@ -19,7 +19,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
     try {
         const { storeId } = await request.json();
         console.log(storeId)
-        const response = await fetch(`https://api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreid/${storeId}/${formatDate(weekAgo)}/1/10/${formatDate(today)}`, {
+        const response = await fetch(`https://api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreid/${storeId}/${formatDate(weekAgo)}/1/100/${formatDate(today)}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,

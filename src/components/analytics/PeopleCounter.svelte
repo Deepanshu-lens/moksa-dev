@@ -397,6 +397,12 @@ import { RangeCalendar } from "@/components/ui/range-calendar";
         </Popover.Content>
       </Popover.Root>
     </span>
+   
+        </span>
+          <span class="flex items-center gap-3">
+      <!-- <Button variant="outline" class="flex items-center gap-1">
+        <ListFilter size={18} /> Filters</Button
+      > -->
       <Select.Root portal={null}>
         <Select.Trigger
         class="w-[100px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg dark:bg-transparent"
@@ -405,11 +411,6 @@ import { RangeCalendar } from "@/components/ui/range-calendar";
         </Select.Trigger>
         <Select.Content class="max-h-[200px] overflow-y-auto">
           <Select.Group>
-            <!-- <Select.Item on:click={() => selectedStore.set({ value: -1, label: 'All Stores' })}
-              class="px-1"
-              value="All Stores"
-              label="All Stores">All Stores</Select.Item
-              > -->
               {#if fruits.length > 0}
               {#each fruits as fruit}
               <Select.Item on:click={() => {selectedStore.set(fruit); }}
@@ -421,13 +422,7 @@ import { RangeCalendar } from "@/components/ui/range-calendar";
                 {/if}
               </Select.Group>
             </Select.Content>
-            <Select.Input name="favoriteFruit" />
           </Select.Root>
-        </span>
-          <span class="flex items-center gap-3">
-      <Button variant="outline" class="flex items-center gap-1">
-        <ListFilter size={18} /> Filters</Button
-      >
       <Button
         class="flex items-center gap-1 bg-[#3D81FC] text-white hover:bg-white hover:text-[#3D81FC]"
         ><Upload size={18} /> Export Reports</Button

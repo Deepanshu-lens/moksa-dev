@@ -6,13 +6,6 @@
     ArrowUpDown,
     Check,
     X,
-    ChevronRight,
-    Edit,
-    Store,
-    StoreIcon,
-    Trash2,
-    TrendingDown,
-    TrendingUp,
   } from "lucide-svelte";
   import { createEventDispatcher } from "svelte";
   import {
@@ -66,25 +59,25 @@ console.log(imageUri)
 
   const dispatch = createEventDispatcher();
 
-  const dbData = safetyData?.map((item: any) => ({
-    employee: `${item.first_name} ${item.last_name}`,
-    masks: item.wearing_mask,
+  $: dbData = safetyData?.map((item: any) => ({
+  employee: `${item.first_name} ${item.last_name}`,
+  masks: item.wearing_mask,
     gloves: item.wearing_gloves,
     hairnet: item.wearing_hair_net,
     uniform: item.wearing_uniform,
-    breakingSOPs: item.time_sop,
+    breakingSOPs: 'Coming Soon',
     videoLink: "Image",
-    videourl: 'https://s3.amazonaws.com/prod.moksa.upload/default/1726133859887_white_background.png',
+    videourl: item.img_link,
   }));
 
-  const data = writable(dbData);
+  $: data = writable(dbData);
 
-  const readableData = readable(dbData, (set) => {
+  $: readableData = readable(dbData, (set) => {
     const unsubscribe = data.subscribe(set);
     return unsubscribe;
   });
 
-  const table = createTable(readableData, {
+  $: table = createTable(readableData, {
     page: addPagination({ initialPageSize: 3 }),
     sort: addSortBy(),
     filter: addTableFilter({
@@ -94,7 +87,7 @@ console.log(imageUri)
     select: addSelectedRows(),
   });
 
-  const columns = table.createColumns([
+  $: columns = table.createColumns([
     table.column({
       accessor: "employee",
       header: "Employee",
@@ -115,20 +108,20 @@ console.log(imageUri)
       accessor: "uniform",
       header: "Uniform",
     }),
-    table.column({
-      accessor: "breakingSOPs",
-      header: "Breaking SOPs",
-    }),
+    // table.column({
+    //   accessor: "breakingSOPs",
+    //   header: "Breaking SOPs",
+    // }),
     table.column({
       accessor: "videoLink",
       header: "Image",
     }),
   ]);
 
-  const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } =
-    table.createViewModel(columns);
-  const { hasNextPage, hasPreviousPage, pageIndex, pageCount } =
-    pluginStates.page;
+  $: ({ headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } =
+    table.createViewModel(columns));
+  $: ({ hasNextPage, hasPreviousPage, pageIndex, pageCount } =
+    pluginStates.page);
 </script>
 
 <div class="m-0">
@@ -151,7 +144,7 @@ console.log(imageUri)
                 {:else}
                   <Table.Head
                     {...attrs}
-                    class="text-[#727272] whitespace-nowrap text-sm h-full flex items-start text-start justify-start py-2 w-[14.285%]"
+                    class="text-[#727272] whitespace-nowrap text-sm h-full flex items-center text-center justify-center py-2 w-full"
                   >
                     <Button
                       variant="ghost"
@@ -180,7 +173,7 @@ console.log(imageUri)
               <Subscribe attrs={cell.attrs()} let:attrs>
                 <Table.Cell
                   {...attrs}
-                  class="flex items-center justify-center whitespace-nowrap flex-1 py-2 w-[14.285%] text-center"
+                  class="flex items-center justify-center whitespace-nowrap flex-1 py-2 text-center"
                 >
                   {#if cell.id === "employee"}
                     <div class="flex items-center gap-2 text-center">
@@ -191,7 +184,7 @@ console.log(imageUri)
                       </div>
                       <span>{row.original.employee}</span>
                     </div>
-                  {:else if ["masks", "gloves", "hairnet", "uniform"].includes(cell.id)}
+                  {:else if ['masks','uniform', "gloves", "hairnet" ].includes(cell.id)}
                     {#if row.original[cell.id]}
                       <Check class="w-5 h-5 text-blue-500" />
                     {:else}

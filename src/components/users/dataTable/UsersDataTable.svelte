@@ -40,6 +40,7 @@ const dbData = users.map((user) => {
     dateOfRegistration: user.createdAt,
     storesAssigned: user.store_count,
     action: "Edit",
+    mobile: user.mobile_number
   }
 })
 

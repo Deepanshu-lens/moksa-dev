@@ -7,6 +7,7 @@ const loginWithEmailPassword = async (
   password: string,
 ) => {
   try {
+  
     await locals.pb?.collection("users").authWithPassword(email, password);
     const isProd = process.env.NODE_ENV === "production" ? true : false;
     if (locals.pb?.authStore.isValid) {
@@ -72,7 +73,7 @@ export const actions = {
         .catch((e) => {
           console.error("[Session Create Error]: ", e);
         });
- await locals.pb?.collection("users").create({
+ const create = await locals.pb?.collection("users").create({
         firstName,
         lastName,
         email,
@@ -80,6 +81,21 @@ export const actions = {
         passwordConfirm,
         session: session?.id,
       });
+
+      console.log(create)
+
+      await fetch(`https:api.moksa.ai/auth/register`, {
+        method: "POST", headers: {
+          'Content-Type': 'application/json'
+        }, body: JSON.stringify({
+          first_name: firstName,
+          lastName: lastName,
+          role: 'adminNonPaid',
+          email:email ,
+          password:passwordConfirm,
+          lensId: create.id,
+        })
+      })
 
     } catch (e: any) {
       const message = e.message;

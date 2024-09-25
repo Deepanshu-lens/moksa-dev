@@ -24,7 +24,7 @@
   export let user;
   const token = user.moksaToken;
   let nodes: any[] = [];
-
+  let moksaNodes: any[] = [];
   let roles: any[] = [];
 
   const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
@@ -32,22 +32,25 @@
     PB.autoCancellation(false);
     const res = await PB.collection("roles").getFullList();
     const stores = await PB.collection("node").getFullList();
-    // console.log(res);
+    console.log(stores);
     roles = res;
     // nodes = stores
     nodes = stores.map((store) => store.id);
+    // moksaNodes = stores.map((store) => store.moksaId);
+    moksaNodes = stores.map((store) => store.moksaId === 0 ? null : store.moksaId).filter(Boolean);
+    console.log("moksaNodes", moksaNodes);
     // console.log(nodes);
   });
 
-   const validateFields = () => {
+  const validateFields = () => {
     const fields = [
-      { name: 'User Type', value: userType },
-      { name: 'First Name', value: firstName },
-      { name: 'Last Name', value: lastName },
-      { name: 'Phone Number', value: phoneNumber },
-      { name: 'Mail ID', value: mailId },
-      { name: 'Password', value: password },
-      { name: 'Confirm Password', value: cPassword },
+      { name: "User Type", value: userType },
+      { name: "First Name", value: firstName },
+      { name: "Last Name", value: lastName },
+      { name: "Phone Number", value: phoneNumber },
+      { name: "Mail ID", value: mailId },
+      { name: "Password", value: password },
+      { name: "Confirm Password", value: cPassword },
     ];
 
     for (const field of fields) {
@@ -102,7 +105,6 @@
   //   });
   //   dialogOpen = false;
 
-
   //   if (userType === "superAdmin") {
   //     for (const node of nodes) {
   //       await PB.collection("node").update(node, {
@@ -113,7 +115,7 @@
   //   return true;
   // };
 
-   const handleSubmit = async () => {
+  const handleSubmit = async () => {
     if (!validateFields()) {
       return;
     }
@@ -154,9 +156,10 @@
         }),
       });
       const d = await moksa.json();
-
+      console.log("mopksa user", d);
+      console.log("mopksa user id", d.data.id);
       await PB.collection("users").update(user.id, {
-        moksaToken: d.id,
+        moksaId: d.data.id,
       });
 
       if (userType === "superAdmin") {
@@ -165,6 +168,22 @@
             "session+": [session.id],
           });
         }
+        const updateMoksaUserStores = await fetch(
+          `https://api.moksa.ai/store/userStore/updateUserByUserId`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              userId: d.data.id,
+              storeIds: moksaNodes,
+            }),
+          },
+        );
+
+        console.log(updateMoksaUserStores);
       }
 
       toast.success("User added successfully");
@@ -174,7 +193,6 @@
       toast.error(error.message || "Failed to add user");
     }
   };
-
 </script>
 
 <Dialog.Root bind:open={dialogOpen}>
@@ -233,7 +251,10 @@
                     userID = type.id;
                   }}
                   class="capitalize cursor-pointer"
-                  value={type.id}>{type.roleName === "superAdmin" ? "Super Admin" : type.roleName}</Select.Item
+                  value={type.id}
+                  >{type.roleName === "superAdmin"
+                    ? "Super Admin"
+                    : type.roleName}</Select.Item
                 >
               {/each}
             </Select.Content>
@@ -336,7 +357,8 @@
         <Button
           on:click={handleSubmit}
           type="submit"
-          class="px-4 py-2 bg-blue-500 hover:text-blue-500 hover:bg-white text-white rounded-md">Submit</Button
+          class="px-4 py-2 bg-blue-500 hover:text-blue-500 hover:bg-white text-white rounded-md"
+          >Submit</Button
         >
       </div>
       <!-- </form> -->

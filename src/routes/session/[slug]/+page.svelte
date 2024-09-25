@@ -17,6 +17,7 @@
   export let data: PageServerData;
   console.log('data',data)
   const { session } = data;
+  const {user} = data
   const moksaUserId = data.user.moksaId
   const allStores = data.stores === [] ? [] : data.stores?.data?.data
   const moksaEvents = data.moksaEvents
@@ -284,7 +285,7 @@ onDestroy(() => {
   });
 });
 
-
+$: console.log('strem user',user)
 </script>
 
 
@@ -296,6 +297,9 @@ onDestroy(() => {
 {#if $selectedNode}
   <StreamView {data} url={data.url ?? "/"} features={data?.user?.features} />
 {:else}
+<!-- {#if user.role === 'admin'}
+<p class='text-xl'>Ask SuperAdmin for store access</p>
+{:else} -->
   <div class="hidden sm:flex">
     <AddNode />
   </div>
@@ -304,3 +308,4 @@ onDestroy(() => {
   </div>
 {/if}
 {/if}
+<!-- {/if} -->

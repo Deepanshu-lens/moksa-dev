@@ -3,7 +3,7 @@ import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ request,cookies }) => {
     try {
-        const { firstName, lastName, mailId, password, userType, lensId } = await request.json();
+        const { firstName, lastName, mailId, password, userType, lensId,phoneNumber } = await request.json();
         const token = cookies.get('moksa-token');
 
         const moksa = await fetch(
@@ -21,6 +21,8 @@ export const POST: RequestHandler = async ({ request,cookies }) => {
                     password,
                     lensId,
                     role: userType.toLowerCase(),
+                    mobile_number:phoneNumber
+
                 }),
             },
         );

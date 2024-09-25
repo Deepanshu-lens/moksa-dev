@@ -4,6 +4,9 @@
   import { Button } from "@/components/ui/button";
   import { ArrowUpDown, Edit, Store, StoreIcon, Trash2, TrendingDown, TrendingUp, User } from "lucide-svelte";
   import { createEventDispatcher } from "svelte";
+  import Spinner from "@/components/ui/spinner/Spinner.svelte";
+  import * as Dialog from "@/components/ui/dialog";
+
   import {
     addPagination,
     addTableFilter,
@@ -13,20 +16,52 @@
   import { readable, writable } from "svelte/store";
 
   export let safetyData;
+  export let token
+  let dialogOpen = false;
+  let selectedImage = null;
 
-  // console.log('safetyDataTable',safetyData)
+  console.log('safetyDataTable',safetyData)
 
-  const dbData = safetyData?.data.map((item: any) => ({
+const   dbData = safetyData?.data.map((item: any) => ({
     employee: `${item.first_name} ${item.last_name}`,
-    mask: item.wearing_mask,
+    masks: item.wearing_mask,
     gloves: item.wearing_gloves,
     hairnet: item.wearing_hair_net,
     uniform: item.wearing_uniform,
-    breakingSops: item.time_sop,
-    videoLink: item.video_link
+    breakingSOPs: item.time_sop,
+    videoLink: "Image",
+    videourl: item.img_link,
   }));
 
   const data = writable(dbData);
+
+  async function openImageDialog(imageUri) {
+    dialogOpen = true;
+    selectedImage = null; // Reset selectedImage before fetching
+console.log(imageUri)
+    try {
+      const response = await fetch("https://api.moksa.ai/stream", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ key: imageUri }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to get image");
+      }
+
+      const blob = await response.blob();
+      const imageUrl = URL.createObjectURL(blob);
+      selectedImage = imageUrl;
+      console.log("Image URL:", selectedImage);
+    } catch (error) {
+      console.error("Error fetching image:", error);
+      // Optionally, set an error state or show an error message to the user
+    }
+  }
 
   
   const readableData = readable(dbData, (set) => {
@@ -49,10 +84,10 @@
       accessor: "employee",
       header: "Employee",
     }),
-    table.column({
-      accessor: "mask",
-      header: "Mask",
-    }),
+    // table.column({
+    //   accessor: "mask",
+    //   header: "Mask",
+    // }),
     table.column({
       accessor: "gloves",
       header: "Gloves",
@@ -69,6 +104,10 @@
     //   accessor: "breakingSops",
     //   header: "Breaking SOP's",
     // }),
+    table.column({
+      accessor: "videoLink",
+      header: "Image",
+    }),
   ]);
 
     const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } =
@@ -117,6 +156,14 @@
                     {/if}
                   {:else if cell.id === 'breakingSops'}
                     <span class="text-sm">{row.original.breakingSops}</span>
+                    {:else if cell.id === "videoLink"}
+                    <Button
+                      variant="link"
+                      class="text-red-500"
+                      on:click={() => openImageDialog(row.original.videourl)}
+                    >
+                      {row.original.videoLink}
+                    </Button>
                   {:else}
                     <Render of={cell.render()} />
                   {/if}
@@ -160,3 +207,24 @@
   </div>
   {/if}
 </div>
+
+
+<Dialog.Root bind:open={dialogOpen}>
+  <Dialog.Content class="sm:max-w-[720px]">
+    <Dialog.Header>
+      <Dialog.Title>Safety Event Image View</Dialog.Title>
+    </Dialog.Header>
+    <div class="flex items-center justify-center w-full h-full">
+      {#if selectedImage}
+        <!-- svelte-ignore a11y-img-redundant-alt -->
+        <img
+          src={selectedImage}
+          alt="Safety Data Image"
+          class="max-w-full w-auto h-[300px] object-contain border"
+        />
+      {:else}
+        <Spinner />
+      {/if}
+    </div>
+  </Dialog.Content>
+</Dialog.Root>

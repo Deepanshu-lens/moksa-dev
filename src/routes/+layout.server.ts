@@ -7,7 +7,7 @@ export const load: LayoutServerLoad = async ({ locals, url, cookies }) => {
   locals.pb?.autoCancellation(false)
 
   const allRoles = await locals.pb?.collection("roles").getFullList();
-  const userRole = allRoles?.find(role => role.id === locals.user.record.role);
+  const userRole = locals.user === undefined ? undefined : allRoles?.find(role => role.id === locals.user.record.role);
 
   const protectedRoutes = [
     "session",

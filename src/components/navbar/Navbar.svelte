@@ -114,7 +114,7 @@
   let showNotifications: boolean = false;
   let notificationDropdownRef: HTMLElement;
 
-  $: console.log('user navbar',user)
+  // $: console.log('user navbar',user)
 
   function handleClickOutside(event: MouseEvent) {
     if (showNotifications && notificationDropdownRef && !notificationDropdownRef.contains(event.target as Node)) {
@@ -123,11 +123,13 @@
   }
 
   onMount(() => {
-    document.addEventListener('click', handleClickOutside);
+    setTimeout(() => {
+    document?.addEventListener('click', handleClickOutside);
+  }, 2000);
   });
 
   onDestroy(() => {
-    document.removeEventListener('click', handleClickOutside);
+    document?.removeEventListener('click', handleClickOutside);
   });
 
   // $: console.log(data)

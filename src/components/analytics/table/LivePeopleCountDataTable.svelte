@@ -75,11 +75,11 @@ export let selectedStore;
       accessor: "created",
       header: "Created At",
     }),
-    table.column({
-      id: 'chevron',
-      header: '',
-      cell: () => '',
-    }),
+    // table.column({
+    //   id: 'chevron',
+    //   header: '',
+    //   cell: () => '',
+    // }),
   ]);
 
   $: ({ headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } = table.createViewModel(columns));
@@ -110,7 +110,7 @@ export let selectedStore;
                 {#if cell.id === 'chevron'}
                 <p class='w-1/5'></p>
                 {:else}
-                <Table.Head {...attrs} class="text-[#727272] whitespace-nowrap text-sm h-full flex items-center text-center justify-center py-2 w-1/4">
+                <Table.Head {...attrs} class="text-[#727272] whitespace-nowrap text-sm h-full flex items-center text-center justify-center py-2 w-1/3">
                   <Button variant="ghost" on:click={props.sort.toggle} class="hover:bg-transparent text-[#727272] opacity-60 text-xs">
                     <Render of={cell.render()} />
                     <ArrowUpDown class="ml-2 h-4 w-4" />
@@ -129,7 +129,7 @@ export let selectedStore;
           <Table.Row {...rowAttrs} class="border-b flex items-center w-full justify-between">
             {#each row.cells as cell (cell.id)}
               <Subscribe attrs={cell.attrs()} let:attrs>
-                <Table.Cell {...attrs} class={`flex items-center ${cell.id !== 'storeName' ? 'justify-center': 'justify-start'} whitespace-nowrap flex-1 py-2 w-1/4`}>
+                <Table.Cell {...attrs} class={`flex items-center justify-center whitespace-nowrap flex-1 py-2 w-1/3`}>
                   {#if cell.id === 'storeName'}
                     <div class="flex items-center gap-2">
                       <div class="w-8 h-8 rounded text-start bg-blue-900 flex items-center justify-center">

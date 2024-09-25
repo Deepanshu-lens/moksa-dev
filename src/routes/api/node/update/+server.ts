@@ -8,9 +8,9 @@ export const PATCH: RequestHandler = async ({
   console.log("Editing Node");
   const data = await request.json();
 
-  await locals.pb?.collection("node").update(data.id, {
-    name: data.name,
-  });
+  // await locals.pb?.collection("node").update(data.id, {
+  //   name: data.name,
+  // });
 
   await fetch(`https://api.moksa.ai/store/update`, {
     headers: {
@@ -24,7 +24,11 @@ export const PATCH: RequestHandler = async ({
       address: data.address,
       pincode: data.pincode,
       country: data.country,
-      manager: data.manager
+      manager: data.manager,
+      openingTime: data.openingTime,
+      closingTime: data.closingTime,
+      is24HrStore: data.is24HrStore,
+      timezone: data.timezone,
     })
   })
 

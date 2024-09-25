@@ -76,7 +76,8 @@
     return {
       storeName: item.store,
       customerCount: item.noofcustomers,
-      busyHourProjections: item.busyhour,
+      busyHourProjections: 'Coming Soon',
+      date: item.date
     };
   });
 
@@ -103,6 +104,10 @@
       header: "Store Name",
     }),
     table.column({
+      accessor: "date",
+      header: "Date",
+    }),
+    table.column({
       accessor: "customerCount",
       header: "Customer Count",
     }),
@@ -114,11 +119,11 @@
     //   accessor: "customerProjection",
     //   header: "Customer Projection",
     // }),
-      table.column({
-      id: 'chevron',
-      header: '',
-      cell: () => '',
-    }),
+    //   table.column({
+    //   id: 'chevron',
+    //   header: '',
+    //   cell: () => '',
+    // }),
 
   ]);
 

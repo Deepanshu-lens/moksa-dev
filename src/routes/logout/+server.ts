@@ -28,9 +28,9 @@ export const GET: RequestHandler = async ({ locals, cookies }: RequestEvent) => 
     console.log(err)
   })
 
-  if (cookies.get("moksa-token")) {
+  // if (cookies.get("moksa-token")) {
     cookies.delete("moksa-token", { path: "/" });
-  }
+  // }
   // return new Response(null, { status: 303 });
   throw redirect(302, "/login");
 };

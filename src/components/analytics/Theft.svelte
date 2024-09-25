@@ -1333,6 +1333,7 @@ function addMockData() {
           </Select.Trigger>
           <Select.Content class="max-h-[200px] overflow-y-auto">
             <Select.Group>
+              {#if user.role !== 'superAdmin'}
               <Select.Item
                 on:click={() => {
                   selectedStore.set({ value: -1, label: "All Stores" })
@@ -1343,6 +1344,7 @@ function addMockData() {
                 value="All Stores"
                 label="All Stores">All Stores</Select.Item
               >
+              {/if}
               {#each fruits as fruit}
                 <Select.Item
                   on:click={() => selectedStore.set(fruit)}
@@ -1419,7 +1421,7 @@ function addMockData() {
       <span class="w-full h-full">
         {#if $listtheft?.data?.length > 0}
           {#key tableKey}
-          <TheftDataTable {token} theftData={listtheft} />
+          <TheftDataTable {token} theftData={listtheft}  {dateRange} {selectedStore}/>
           {/key}
         {:else}
           <p class="text-[#323232] dark:text-white text-lg font-semibold">

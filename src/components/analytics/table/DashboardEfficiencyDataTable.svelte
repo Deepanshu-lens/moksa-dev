@@ -36,9 +36,9 @@
   const dbData = efficiency.data.map((item) => {
   return {
     employee: `${item.first_name} ${item.last_name}`,
-    hoursWithCustomers: item.customer != null && item.customer !== undefined ? String(item.customer) : generateRandomMinutes(),
-    sittingIdle: item.idle != null && item.idle !== undefined ? String(item.idle) : generateRandomMinutes(),
-    onMobile: item.mobile != null && item.mobile !== undefined ? String(item.mobile) : generateRandomMinutes(),
+    hoursWithCustomers: item.customer ,
+    sittingIdle: item.idle ,
+    onMobile: item.mobile,
   }
 })
 

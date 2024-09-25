@@ -2,12 +2,7 @@
   import { createTable, Render, Subscribe } from "svelte-headless-table";
   import * as Table from "@/components/ui/table";
   import { Button } from "@/components/ui/button";
-  import {
-    ArrowUpDown,
-    Play,
-    Store,
-    User,
-  } from "lucide-svelte";
+  import { ArrowUpDown, Play, Store, User } from "lucide-svelte";
   import { createEventDispatcher } from "svelte";
   import {
     addPagination,
@@ -17,11 +12,73 @@
   } from "svelte-headless-table/plugins";
   import { readable, writable } from "svelte/store";
   import * as Dialog from "@/components/ui/dialog";
-    import Spinner from "@/components/ui/spinner/Spinner.svelte";
-    import axios from "axios";
+  import Spinner from "@/components/ui/spinner/Spinner.svelte";
+  import axios from "axios";
   const dispatch = createEventDispatcher();
   export let theftData;
   export let token;
+  export let dateRange;
+  export let selectedStore;
+
+
+let currentApiPage = 1;
+let apiPageSize = 100;
+let localPageSize = 5;
+let localPageIndex = 0;
+
+$: totalApiPages = Math.ceil(($theftData?.total || 0) / apiPageSize);
+$: totalLocalPages = Math.ceil(($theftData?.data?.length || 0) / localPageSize);
+
+
+
+  async function loadTheftData(page, size) {
+     currentApiPage = page;
+     currentApiPage++;
+    const today = new Date();
+    let startDate = new Date(today);
+
+    switch ($dateRange) {
+      case "7 Days":
+        startDate.setDate(today.getDate() - 7);
+        break;
+      case "15 Days":
+        startDate.setDate(today.getDate() - 15);
+        break;
+      case "30 Days":
+        startDate.setDate(today.getDate() - 30);
+        break;
+      case "12 Months":
+        startDate.setFullYear(today.getFullYear() - 1);
+        break;
+      default:
+        startDate.setDate(today.getDate() - 7);
+    }
+
+    const formatDate = (date: Date) => date.toISOString().split("T")[0];
+
+    console.log(formatDate(startDate));
+    console.log(formatDate(today));
+    try {
+      const newData = await fetch(
+        `https://api.moksa.ai/theft/theftListBasedOnStoreId/${$selectedStore.value}/${formatDate(startDate)}/${formatDate(today)}/${currentApiPage}/${apiPageSize}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+      const data = await newData.json();
+      console.log(data);
+      const oldData = $theftData.data
+
+    $theftData.data = [...oldData, ...data.data.data]
+
+
+    } catch (error) {
+      console.error("Error fetching theft data:", error);
+    }
+  }
 
   // $: console.log("Table data updated:", $theftData);
 
@@ -42,20 +99,21 @@
         })
       : "N/A";
 
-      const getRandomName = () => {
-    const firstNames = ['John', 'Jane', 'Alex', 'Emma'];
-    const lastNames = ['Smith', 'Johnson', 'Williams'];
-    return `${firstNames[Math.floor(Math.random() * firstNames.length)]} ${lastNames[Math.floor(Math.random() * lastNames.length)]}`;
-  };
+    const getRandomName = () => {
+      const firstNames = ["John", "Jane", "Alex", "Emma"];
+      const lastNames = ["Smith", "Johnson", "Williams"];
+      return `${firstNames[Math.floor(Math.random() * firstNames.length)]} ${lastNames[Math.floor(Math.random() * lastNames.length)]}`;
+    };
 
     return {
       storeName: item.name || "N/A",
-      employee: (item.first_name || item.last_name) 
-      ? `${item.first_name || ''} ${item.last_name || ''}`.trim() 
-      : getRandomName(),
+      employee:
+        item.first_name || item.last_name
+          ? `${item.first_name || ""} ${item.last_name || ""}`.trim()
+          : getRandomName(),
       date: formattedDate,
       videoLink: "Watch Video",
-      videoUri: 'https://s3.amazonaws.com/prod.moksa.upload/None/nzvwfm5sswn7vc4_20240905083644.mp4',
+      videoUri: item.video_uri,
       time: formattedTime,
       theftProbability: item.theftProbability,
       live: item.live,
@@ -65,10 +123,6 @@
   let selectedVideo = null;
   let dialogOpen = false;
 
-
-
- 
-
   $: data = writable(dbData);
 
   $: readableData = readable(dbData, (set) => {
@@ -77,7 +131,7 @@
   });
 
   $: table = createTable(readableData, {
-    page: addPagination({ initialPageSize: 5 }),
+    page: addPagination({ initialPageSize: localPageSize }),
     sort: addSortBy(),
     filter: addTableFilter({
       fn: ({ filterValue, value }: { filterValue: string; value: string }) =>
@@ -123,35 +177,42 @@
   $: ({ pageIndex, hasNextPage, hasPreviousPage, pageCount } =
     pluginStates.page);
 
+    $: ({ pageIndex, hasNextPage, hasPreviousPage, pageCount } = pluginStates.page);
 
-    const openVideoDialog = async (videoUri) => {
-        const data = { key: videoUri };
-         dialogOpen = true;
-          try {
-        const response = await axios.post(`https://api.moksa.ai/stream`,
-          data,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            responseType: 'blob',
-          }
-        );
-        const contentType = response.headers['content-type'];
-        // Check if the content type is a valid video type
-        if (!contentType.startsWith('video/')) {
-          throw new Error('Invalid content type for video');
-        }
-        const videoBlob = new Blob([response.data], { type: contentType });
-        const videoUrl = URL.createObjectURL(videoBlob);
-        selectedVideo = videoUrl;
-        console.log(selectedVideo);
-      } catch (error) {
-        console.error('Error fetching video:', error);
-      }
+$: {
+  if ($pageIndex === totalLocalPages - 1) {
+    console.log("loading more data");
+    loadTheftData(currentApiPage + 1, apiPageSize)
+   
+  }
+}
+
+
+  const openVideoDialog = async (videoUri) => {
+    const data = { key: videoUri };
+    dialogOpen = true;
+    try {
+      const response = await axios.post(`https://api.moksa.ai/stream`, data, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        responseType: "blob",
+      });
+      // Log the response headers to check the content type and other details
+      console.log("Response headers:", response.headers);
+
+      // Create a Blob from the response data
+      const videoBlob = new Blob([response.data], {
+        type: response.headers["content-type"],
+      });
+      const videoUrl = URL.createObjectURL(videoBlob);
+      selectedVideo = videoUrl;
+      console.log("Video URL:", selectedVideo);
+    } catch (error) {
+      console.error("Error fetching video:", error);
     }
-
+  };
 </script>
 
 <div class="m-0">
@@ -276,35 +337,61 @@
       {$pageCount < 10 ? "0" + $pageCount : $pageCount}
     </span> Page.
   </div>
-  <Button
+
+   <Button
     size="sm"
     variant="outline"
-    disabled={!$hasNextPage}
+    disabled={!$hasNextPage && currentApiPage >= totalApiPages}
     class="bg-transparent hover:bg-transparent text-[#727272] gap-2"
-    on:click={() => ($pageIndex = $pageIndex + 1)}
+    on:click={() => {
+      if ($pageIndex < totalLocalPages - 1) {
+        $pageIndex = $pageIndex + 1;
+      }
+    }}
   >
     Next
   </Button>
+ 
 </div>
 
-<Dialog.Root bind:open={dialogOpen}>
+<Dialog.Root
+  bind:open={dialogOpen}
+  on:close={() => {
+    if (selectedVideo) {
+      URL.revokeObjectURL(selectedVideo);
+      selectedVideo = null;
+    }
+  }}
+>
   <Dialog.Content class="sm:max-w-[720px]">
     <Dialog.Header>
       <Dialog.Title>Video Playback</Dialog.Title>
     </Dialog.Header>
     <div class="flex items-center justify-center w-full h-full">
       {#if selectedVideo}
-      <video  class="video-player" width="640" height="360" controls autoplay muted  controlsList="nodownload"   disablePictureInPicture >
+        <!-- <video  class="video-player" width="640" height="360" controls autoplay muted  controlsList="nodownload"   disablePictureInPicture >
         <source src={selectedVideo} type="video/mp4" />
         Your browser does not support the video tag.
-      </video>
+      </video> -->
+        <video
+          width="640"
+          height="360"
+          controls
+          autoplay
+          muted
+          controlsList="nodownload"
+          disablePictureInPicture
+          class='video-player aspect-video h-[360px] w-auto'
+        >
+          <source src={selectedVideo} type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
       {:else}
-      <Spinner />
+        <Spinner />
       {/if}
     </div>
   </Dialog.Content>
 </Dialog.Root>
-
 
 <style>
   .video-player::-internal-media-controls-download-button {

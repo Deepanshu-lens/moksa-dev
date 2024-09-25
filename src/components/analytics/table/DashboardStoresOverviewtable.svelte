@@ -16,14 +16,13 @@
 
   const dispatch = createEventDispatcher();
 
- const aisleNames = ['Liqour', 'Grocery', 'Clothing', 'Electronics'];
 
   const dbdata = aisleData.map((item: any) => {
     return {
       storeName: item.name,
-      customers: item.count != null || item.count === undefined ? String(item.count) : String(Math.floor(Math.random() * 1000)),
-      busyHours: item.busy_hours != null || item.busy_hours === undefined ? String(item.busy_hours)  : `${Math.floor(Math.random() * 12 + 9)}:00 - ${Math.floor(Math.random() * 12 + 9)}:00`,
-      mostVisitedAisle: item.aisle_name != null || item.aisle_name === undefined ? String(item.aisle_name) : aisleNames[Math.floor(Math.random() * aisleNames.length)],
+      customers: item.count ,
+      busyHours: item.busy_hours ,
+      mostVisitedAisle: item.aisle_name ,
     }
   })
 

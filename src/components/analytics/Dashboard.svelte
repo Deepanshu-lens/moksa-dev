@@ -11,6 +11,7 @@
   export let theftData;
   export let user;
   import * as Popover from "../ui/popover";
+  let selectedStore = writable({ value: -1, label: "All Stores" });
 
   // console.log('busyness',busyness)
 
@@ -18,6 +19,12 @@
     value: store.id,
     label: store.name,
   }));
+
+  // onMount(() => {
+//     if(allStores?.length > 0) {
+// selectedStore.set(fruits[0])
+//     }
+//   })
 
   import * as Select from "../ui/select";
   import { BarController, BarElement } from "chart.js";
@@ -42,7 +49,6 @@
   let chart: Chart | null = null;
   let barChart: Chart | null = null;
   let barChartCanvas: HTMLCanvasElement;
-  let selectedStore = writable({ value: -1, label: "All Stores" });
   let dateRange = writable("7 Days");
   let isInitialLoad = true;
   let isLoading = writable(false);
@@ -60,6 +66,9 @@
   let startValue: DateValue | undefined = undefined;
   let customDateLabel = "Custom";
   let close = false;
+
+
+  $: console.log('user dashboard',user)
 
   $: {
     if (value?.start && value?.end) {
@@ -710,10 +719,10 @@
         on:click={exportCSV}><Upload size={18} /> Export</Button
       >
       {/if}
-      <Button
+      <!-- <Button
         class="flex items-center flex-row-reverse justify-between px-2 gap-1 font-medium text-white rounded-xl bg-[#00A569] hover:text-[#00A569] hover:bg-white"
         ><img src="/images/money.svg" alt="export" class="scale-90" /> Cost Saving</Button
-      >
+      > -->
     </span>
   </div>
   <div
@@ -788,6 +797,7 @@
             </Select.Trigger>
             <Select.Content class="max-h-[200px] overflow-y-auto">
               <Select.Group>
+                {#if user.role === 'superAdmin'}
                 <Select.Item
                   on:click={() => {
                     selectedStore.set({ value: -1, label: "All Stores" });
@@ -797,6 +807,7 @@
                   value="All Stores"
                   label="All Stores">All Stores</Select.Item
                 >
+                {/if}
                 {#if allStores.length > 0}
                   {#each fruits as fruit}
                     <Select.Item
@@ -937,7 +948,7 @@
           {#if safetyDetails?.length === 0 || safetyDetails?.data?.length === 0}
             <p class="text-center text-gray-500 mt-8">No data available</p>
           {:else}
-            <DashboardSaftetyDataTable safetyData={safetyDetails} />
+            <DashboardSaftetyDataTable safetyData={safetyDetails} {token}/>
           {/if}
         </div>
       </div>
