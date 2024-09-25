@@ -35,6 +35,9 @@
   } from "@internationalized/date";
   import { RangeCalendar } from "@/components/ui/range-calendar";
   import * as Popover from "../ui/popover";
+  import { Input } from "../ui/input";
+  import { createEventDispatcher } from "svelte";
+
   let chartLoading = true;
   export let allStores;
   export let token;
@@ -43,6 +46,18 @@
     value: store.id,
     label: store.name,
   }));
+
+  let filterText = "";
+  $: filteredFruits = stores.filter((fruit) =>
+    fruit.label.toLowerCase().includes(filterText.toLowerCase()),
+  );
+
+  const dispatch = createEventDispatcher();
+
+  function handleSelect(fruit) {
+    selectedStore.set(fruit);
+    dispatch("select", fruit);
+  }
 
   let selectedStore = writable(stores.length > 0 ? stores?.[0].label : null);
   let selectedStoreId = writable(stores.length > 0 ? stores?.[0].value : null);
@@ -332,7 +347,7 @@
     employeeDetails.set([]);
     const today = new Date();
     let startDate = new Date(today);
- console.log($dateRange)
+    // console.log($dateRange);
     switch ($dateRange) {
       case "7 Days":
         startDate.setDate(today.getDate() - 7);
@@ -352,9 +367,9 @@
 
     const formatDate = (date: Date) => date.toISOString().split("T")[0];
 
-    console.log(formatDate(startDate));
-    console.log(formatDate(today));
-    console.log(id)
+    // console.log(formatDate(startDate));
+    // console.log(formatDate(today));
+    // console.log(id);
 
     try {
       const response = await fetch(
@@ -378,7 +393,6 @@
 
     // }
   }
-
 </script>
 
 <section
@@ -437,7 +451,7 @@
         </p>
         <Select.Root portal={null}>
           <Select.Trigger
-            class="w-auto min-w-[100px] bg-[#3D81FC] text-white border-none text-xs px-1 rounded-lg"
+            class="w-auto min-w-[150px] bg-[#3D81FC] text-white border-none text-xs px-1 rounded-lg"
           >
             <Select.Value
               placeholder={stores.length > 0 ? stores?.[0]?.label : "No Stores"}
@@ -445,7 +459,7 @@
           </Select.Trigger>
           <Select.Content class="max-h-[200px] overflow-y-auto">
             <Select.Group>
-              {#if stores.length > 0}
+              <!-- {#if stores.length > 0}
                 {#each stores as store}
                   <Select.Item
                     class="px-1"
@@ -466,6 +480,34 @@
                 <Select.Item class="px-1" label="No Stores Found"
                   >No Stores Found</Select.Item
                 >
+              {/if} -->
+              <div class="p-2">
+                <Input
+                  type="text"
+                  placeholder="Search stores..."
+                  bind:value={filterText}
+                  class="mb-2"
+                />
+              </div>
+              {#if filteredFruits.length > 0}
+                {#each filteredFruits as store}
+                  <Select.Item
+                    on:click={async () => {
+                      selectedStore.set(store.label);
+                      selectedStoreId.set(store.value);
+                      console.log(store.value);
+                      const emp = await getbystoreID(store.value);
+                      console.log(emp);
+                      // await getEmployeeDetails(emp.data[0].id);
+                      await getEfficiencyDataByTime();
+                    }}
+                    class="px-1"
+                    value={store.value}
+                    label={store.label}>{store.label}</Select.Item
+                  >
+                {/each}
+              {:else}
+                <Select.Item disabled>No matching stores</Select.Item>
               {/if}
             </Select.Group>
           </Select.Content>
@@ -620,21 +662,21 @@
               <div class="flex justify-between text-sm mb-2">
                 <span class="text-[#323232]">{activity.label}</span>
                 <!-- {#if activity.label === "Total Hours on Mobile"} -->
-                  <span class="font-semibold"
-                    >{activity.hours === null ? 0 : activity.hours} Hrs</span
-                  >
+                <span class="font-semibold"
+                  >{activity.hours === null ? 0 : activity.hours} Hrs</span
+                >
                 <!-- {/if} -->
               </div>
               <div class="w-full h-5 rounded-sm flex gap-2">
                 <!-- {#if activity.label === "Total Hours on Mobile"} -->
-                  {#each Array(36) as _, i}
-                    <span
-                      class={`w-[3%] h-full rounded-lg ${i < calculateFilledSegments(activity.hours) ? "" : "bg-gray-200"}`}
-                      style={i < calculateFilledSegments(activity.hours)
-                        ? `background-color: ${interpolateColor(activity.color1, activity.color2, i / (calculateFilledSegments(activity.hours) - 1))}`
-                        : ""}
-                    />
-                  {/each}
+                {#each Array(36) as _, i}
+                  <span
+                    class={`w-[3%] h-full rounded-lg ${i < calculateFilledSegments(activity.hours) ? "" : "bg-gray-200"}`}
+                    style={i < calculateFilledSegments(activity.hours)
+                      ? `background-color: ${interpolateColor(activity.color1, activity.color2, i / (calculateFilledSegments(activity.hours) - 1))}`
+                      : ""}
+                  />
+                {/each}
                 <!-- {:else}
                   <p class="text-primary font-semibold">Coming Soon</p>
                 {/if} -->

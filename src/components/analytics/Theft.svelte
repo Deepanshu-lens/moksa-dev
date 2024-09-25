@@ -24,23 +24,20 @@
   import { onDestroy, onMount } from "svelte";
   import TheftDataTable from "./table/TheftDataTable.svelte";
   import { writable } from "svelte/store";
-    import { toast } from "svelte-sonner";
-  import {
-    type DateValue,
-  } from "@internationalized/date";
+  import { toast } from "svelte-sonner";
+  import { type DateValue } from "@internationalized/date";
   import { RangeCalendar } from "@/components/ui/range-calendar";
   import * as Popover from "../ui/popover";
-    import Spinner from "../ui/spinner/Spinner.svelte";
+  import Spinner from "../ui/spinner/Spinner.svelte";
   export let theftandcamera;
   export let allStores;
   export let theftData;
-  export let moksaUserId
+  export let moksaUserId;
   export let token: string;
   export let user;
   export let allStoresData;
 
-
-  $: console.log('allstoata', allStoresData)
+  $: console.log("allstoata", allStoresData);
 
   let chartLoading = true;
   let dateRange = writable("7 Days");
@@ -52,7 +49,6 @@
     value: store.id,
     label: store.name,
   }));
-
 
   let barChart: Chart | null = null;
   let barChartCanvas: HTMLCanvasElement;
@@ -169,81 +165,95 @@
   // }
 
   function createBarChart() {
-  if (barChartCanvas && !barChart) {
-    const ctx = barChartCanvas.getContext("2d");
+    if (barChartCanvas && !barChart) {
+      const ctx = barChartCanvas.getContext("2d");
 
-    if (ctx) {
-      Chart.register(BarController, BarElement, CategoryScale, LinearScale);
+      if (ctx) {
+        Chart.register(BarController, BarElement, CategoryScale, LinearScale);
 
-      const allDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-      const dataMap = new Map(theftData.data.map(item => [item.day_of_week.trim(), item]));
+        const allDays = [
+          "Sunday",
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+        ];
+        const dataMap = new Map(
+          theftData.data.map((item) => [item.day_of_week.trim(), item]),
+        );
 
-      const labels = allDays.map(day => day);
-      const detectedData = labels.map(day => dataMap.get(day) ? parseInt(dataMap.get(day).theft_detected) : 0);
-      const preventedData = labels.map(day => dataMap.get(day) ? parseInt(dataMap.get(day).theft_prevented) : 0);
+        const labels = allDays.map((day) => day);
+        const detectedData = labels.map((day) =>
+          dataMap.get(day) ? parseInt(dataMap.get(day).theft_detected) : 0,
+        );
+        const preventedData = labels.map((day) =>
+          dataMap.get(day) ? parseInt(dataMap.get(day).theft_prevented) : 0,
+        );
 
-      barChart = new Chart(ctx, {
-        type: "bar",
-        data: {
-          labels: labels,
-          datasets: [
-            {
-              label: "Theft Detected",
-              data: detectedData,
-              backgroundColor: "#FF3B30",
-              borderRadius: 4,
-            },
-            {
-              label: "Theft Prevented",
-              data: preventedData,
-              backgroundColor: "#00A86B",
-              borderRadius: 4,
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            x: {
-              grid: {
-                display: false,
+        barChart = new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: "Theft Detected",
+                data: detectedData,
+                backgroundColor: "#FF3B30",
+                borderRadius: 4,
               },
-            },
-            y: {
-              beginAtZero: true,
-              ticks: {
-                stepSize: 1,
+              {
+                label: "Theft Prevented",
+                data: preventedData,
+                backgroundColor: "#00A86B",
+                borderRadius: 4,
               },
-              grid: {
-                color: "rgba(0, 0, 0, 0.1)",
-              },
-            },
+            ],
           },
-          plugins: {
-            legend: {
-              display: true,
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: {
+                grid: {
+                  display: false,
+                },
+              },
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  stepSize: 1,
+                },
+                grid: {
+                  color: "rgba(0, 0, 0, 0.1)",
+                },
+              },
             },
-            tooltip: {
-              callbacks: {
-                label: function (context) {
-                  let label = context.dataset.label || "";
-                  if (label) {
-                    label += ": ";
-                  }
-                  if (context.parsed.y !== null) {
-                    label += context.parsed.y;
-                  }
-                  return label;
+            plugins: {
+              legend: {
+                display: true,
+              },
+              tooltip: {
+                callbacks: {
+                  label: function (context) {
+                    let label = context.dataset.label || "";
+                    if (label) {
+                      label += ": ";
+                    }
+                    if (context.parsed.y !== null) {
+                      label += context.parsed.y;
+                    }
+                    return label;
+                  },
                 },
               },
             },
           },
-        },
-      });
+        });
+      }
     }
   }
-}
 
   function createChart() {
     if (chartCanvas && !chart) {
@@ -340,266 +350,272 @@
     }
   }
 
-//  function createTheftChart() {
-//   if (theftChartCanvas && !theftChart) {
-//     const ctx = theftChartCanvas.getContext("2d");
-//     if (ctx) {
-//       // Sort the data by day of week
-//       const sortedData = theftData.data.sort((a, b) => {
-//         const days = [
-//           "Sunday",
-//           "Monday",
-//           "Tuesday",
-//           "Wednesday",
-//           "Thursday",
-//           "Friday",
-//           "Saturday",
-//         ];
-//         return (
-//           days.indexOf(a.day_of_week.trim()) -
-//           days.indexOf(b.day_of_week.trim())
-//         );
-//       });
+  //  function createTheftChart() {
+  //   if (theftChartCanvas && !theftChart) {
+  //     const ctx = theftChartCanvas.getContext("2d");
+  //     if (ctx) {
+  //       // Sort the data by day of week
+  //       const sortedData = theftData.data.sort((a, b) => {
+  //         const days = [
+  //           "Sunday",
+  //           "Monday",
+  //           "Tuesday",
+  //           "Wednesday",
+  //           "Thursday",
+  //           "Friday",
+  //           "Saturday",
+  //         ];
+  //         return (
+  //           days.indexOf(a.day_of_week.trim()) -
+  //           days.indexOf(b.day_of_week.trim())
+  //         );
+  //       });
 
-//       const data = {
-//         labels: sortedData.map((item) => item.day_of_week.trim()),
-//         datasets: [
-//           {
-//             label: "Detected",
-//             data: sortedData.map((item) => -parseInt(item.theft_detected)),
-//             backgroundColor: (context) => {
-//               const chart = context.chart;
-//               const { ctx, chartArea } = chart;
-//               if (!chartArea) {
-//                 return null;
-//               }
-//               const gradient = ctx.createLinearGradient(0, 0, chart.width, 0);
-//               gradient.addColorStop(0, "rgba(4, 158, 243, 1)");
-//               gradient.addColorStop(1, "rgba(21, 29, 100, 1)");
-//               return gradient;
-//             },
-//             borderColor: "rgba(21, 29, 100, 1)",
-//             borderWidth: 1,
-//             borderRadius: 4,
-//             barThickness: 20,
-//           },
-//           {
-//             label: "Prevented",
-//             data: sortedData.map((item) => parseInt(item.theft_prevented)),
-//             backgroundColor: (context) => {
-//               const chart = context.chart;
-//               const { ctx, chartArea } = chart;
-//               if (!chartArea) {
-//                 return null;
-//               }
-//               const gradient = ctx.createLinearGradient(0, 0, chart.width, 0);
-//               gradient.addColorStop(0, "rgba(255, 169, 88, 1)");
-//               gradient.addColorStop(1, "rgba(255, 1, 120, 1)");
-//               return gradient;
-//             },
-//             borderColor: "rgba(255, 1, 120, 1)",
-//             borderWidth: 1,
-//             borderRadius: 4,
-//             barThickness: 20,
-//           },
-//         ],
-//       };
+  //       const data = {
+  //         labels: sortedData.map((item) => item.day_of_week.trim()),
+  //         datasets: [
+  //           {
+  //             label: "Detected",
+  //             data: sortedData.map((item) => -parseInt(item.theft_detected)),
+  //             backgroundColor: (context) => {
+  //               const chart = context.chart;
+  //               const { ctx, chartArea } = chart;
+  //               if (!chartArea) {
+  //                 return null;
+  //               }
+  //               const gradient = ctx.createLinearGradient(0, 0, chart.width, 0);
+  //               gradient.addColorStop(0, "rgba(4, 158, 243, 1)");
+  //               gradient.addColorStop(1, "rgba(21, 29, 100, 1)");
+  //               return gradient;
+  //             },
+  //             borderColor: "rgba(21, 29, 100, 1)",
+  //             borderWidth: 1,
+  //             borderRadius: 4,
+  //             barThickness: 20,
+  //           },
+  //           {
+  //             label: "Prevented",
+  //             data: sortedData.map((item) => parseInt(item.theft_prevented)),
+  //             backgroundColor: (context) => {
+  //               const chart = context.chart;
+  //               const { ctx, chartArea } = chart;
+  //               if (!chartArea) {
+  //                 return null;
+  //               }
+  //               const gradient = ctx.createLinearGradient(0, 0, chart.width, 0);
+  //               gradient.addColorStop(0, "rgba(255, 169, 88, 1)");
+  //               gradient.addColorStop(1, "rgba(255, 1, 120, 1)");
+  //               return gradient;
+  //             },
+  //             borderColor: "rgba(255, 1, 120, 1)",
+  //             borderWidth: 1,
+  //             borderRadius: 4,
+  //             barThickness: 20,
+  //           },
+  //         ],
+  //       };
 
-//       theftChart = new Chart(ctx, {
-//         type: "bar",
-//         data: data,
-//         options: {
-//           indexAxis: "y",
-//           scales: {
-//             x: {
-//               position: 'top',
-//               stacked: false,
-//               beginAtZero: true,
-//               grid: {
-//                 display: false,
-//               },
-//               ticks: {
-//                 callback: function(value) {
-//                   return Math.abs(value);
-//                 }
-//               },
-//             },
-//             y: {
-//               stacked: true,
-//               grid: {
-//                 color: "rgba(0, 0, 0, 0.1)",
-//                 drawBorder: false,
-//               },
-//             },
-//           },
-//           responsive: true,
-//           maintainAspectRatio: false,
-//           plugins: {
-//             legend: {
-//               position: "top",
-//               align: "end",
-//               labels: {
-//                 usePointStyle: true,
-//                 pointStyle: "circle",
-//               },
-//             },
-//             tooltip: {
-//               callbacks: {
-//                 label: function (context) {
-//                   let label = context.dataset.label || "";
-//                   if (label) {
-//                     label += ": ";
-//                   }
-//                   if (context.parsed.x !== null) {
-//                     label += Math.abs(context.parsed.x);
-//                   }
-//                   return label;
-//                 },
-//               },
-//             },
-//           },
-//           layout: {
-//             padding: {
-//               left: 30,
-//               right: 30,
-//             },
-//           },
-//         },
-//       });
-//     }
-//   }
-// }
+  //       theftChart = new Chart(ctx, {
+  //         type: "bar",
+  //         data: data,
+  //         options: {
+  //           indexAxis: "y",
+  //           scales: {
+  //             x: {
+  //               position: 'top',
+  //               stacked: false,
+  //               beginAtZero: true,
+  //               grid: {
+  //                 display: false,
+  //               },
+  //               ticks: {
+  //                 callback: function(value) {
+  //                   return Math.abs(value);
+  //                 }
+  //               },
+  //             },
+  //             y: {
+  //               stacked: true,
+  //               grid: {
+  //                 color: "rgba(0, 0, 0, 0.1)",
+  //                 drawBorder: false,
+  //               },
+  //             },
+  //           },
+  //           responsive: true,
+  //           maintainAspectRatio: false,
+  //           plugins: {
+  //             legend: {
+  //               position: "top",
+  //               align: "end",
+  //               labels: {
+  //                 usePointStyle: true,
+  //                 pointStyle: "circle",
+  //               },
+  //             },
+  //             tooltip: {
+  //               callbacks: {
+  //                 label: function (context) {
+  //                   let label = context.dataset.label || "";
+  //                   if (label) {
+  //                     label += ": ";
+  //                   }
+  //                   if (context.parsed.x !== null) {
+  //                     label += Math.abs(context.parsed.x);
+  //                   }
+  //                   return label;
+  //                 },
+  //               },
+  //             },
+  //           },
+  //           layout: {
+  //             padding: {
+  //               left: 30,
+  //               right: 30,
+  //             },
+  //           },
+  //         },
+  //       });
+  //     }
+  //   }
+  // }
 
   function createTheftChart() {
-  if (theftChartCanvas && !theftChart) {
-    const ctx = theftChartCanvas.getContext("2d");
-    if (ctx) {
-      const allDays = [
-        "Sunday",
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
-      ];
+    if (theftChartCanvas && !theftChart) {
+      const ctx = theftChartCanvas.getContext("2d");
+      if (ctx) {
+        const allDays = [
+          "Sunday",
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+        ];
 
-      // Create a map of the data
-      const dataMap = new Map(theftData.data.map(item => [item.day_of_week.trim(), item]));
+        // Create a map of the data
+        const dataMap = new Map(
+          theftData.data.map((item) => [item.day_of_week.trim(), item]),
+        );
 
-      // Ensure all days are included in the labels array
-      const labels = allDays.map(day => day);
-      const detectedData = labels.map(day => dataMap.get(day) ? -parseInt(dataMap.get(day).theft_detected) : 0);
-      const preventedData = labels.map(day => dataMap.get(day) ? parseInt(dataMap.get(day).theft_prevented) : 0);
+        // Ensure all days are included in the labels array
+        const labels = allDays.map((day) => day);
+        const detectedData = labels.map((day) =>
+          dataMap.get(day) ? -parseInt(dataMap.get(day).theft_detected) : 0,
+        );
+        const preventedData = labels.map((day) =>
+          dataMap.get(day) ? parseInt(dataMap.get(day).theft_prevented) : 0,
+        );
 
-      const data = {
-        labels: labels,
-        datasets: [
-          {
-            label: "Detected",
-            data: detectedData,
-            backgroundColor: (context) => {
-              const chart = context.chart;
-              const { ctx, chartArea } = chart;
-              if (!chartArea) {
-                return null;
-              }
-              const gradient = ctx.createLinearGradient(0, 0, chart.width, 0);
-              gradient.addColorStop(0, "rgba(4, 158, 243, 1)");
-              gradient.addColorStop(1, "rgba(21, 29, 100, 1)");
-              return gradient;
-            },
-            borderColor: "rgba(21, 29, 100, 1)",
-            borderWidth: 1,
-            borderRadius: 4,
-            barThickness: 20,
-          },
-          {
-            label: "Prevented",
-            data: preventedData,
-            backgroundColor: (context) => {
-              const chart = context.chart;
-              const { ctx, chartArea } = chart;
-              if (!chartArea) {
-                return null;
-              }
-              const gradient = ctx.createLinearGradient(0, 0, chart.width, 0);
-              gradient.addColorStop(0, "rgba(255, 169, 88, 1)");
-              gradient.addColorStop(1, "rgba(255, 1, 120, 1)");
-              return gradient;
-            },
-            borderColor: "rgba(255, 1, 120, 1)",
-            borderWidth: 1,
-            borderRadius: 4,
-            barThickness: 20,
-          },
-        ],
-      };
-
-      theftChart = new Chart(ctx, {
-        type: "bar",
-        data: data,
-        options: {
-          indexAxis: "y",
-          scales: {
-            x: {
-              position: 'top',
-              stacked: false,
-              beginAtZero: true,
-              grid: {
-                display: false,
-              },
-              ticks: {
-                callback: function(value) {
-                  return Math.abs(value);
+        const data = {
+          labels: labels,
+          datasets: [
+            {
+              label: "Detected",
+              data: detectedData,
+              backgroundColor: (context) => {
+                const chart = context.chart;
+                const { ctx, chartArea } = chart;
+                if (!chartArea) {
+                  return null;
                 }
+                const gradient = ctx.createLinearGradient(0, 0, chart.width, 0);
+                gradient.addColorStop(0, "rgba(4, 158, 243, 1)");
+                gradient.addColorStop(1, "rgba(21, 29, 100, 1)");
+                return gradient;
               },
+              borderColor: "rgba(21, 29, 100, 1)",
+              borderWidth: 1,
+              borderRadius: 4,
+              barThickness: 20,
             },
-            y: {
-              stacked: true,
-              grid: {
-                color: "rgba(0, 0, 0, 0.1)",
-                drawBorder: false,
+            {
+              label: "Prevented",
+              data: preventedData,
+              backgroundColor: (context) => {
+                const chart = context.chart;
+                const { ctx, chartArea } = chart;
+                if (!chartArea) {
+                  return null;
+                }
+                const gradient = ctx.createLinearGradient(0, 0, chart.width, 0);
+                gradient.addColorStop(0, "rgba(255, 169, 88, 1)");
+                gradient.addColorStop(1, "rgba(255, 1, 120, 1)");
+                return gradient;
               },
+              borderColor: "rgba(255, 1, 120, 1)",
+              borderWidth: 1,
+              borderRadius: 4,
+              barThickness: 20,
             },
-          },
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: "top",
-              align: "end",
-              labels: {
-                usePointStyle: true,
-                pointStyle: "circle",
+          ],
+        };
+
+        theftChart = new Chart(ctx, {
+          type: "bar",
+          data: data,
+          options: {
+            indexAxis: "y",
+            scales: {
+              x: {
+                position: "top",
+                stacked: false,
+                beginAtZero: true,
+                grid: {
+                  display: false,
+                },
+                ticks: {
+                  callback: function (value) {
+                    return Math.abs(value);
+                  },
+                },
               },
-            },
-            tooltip: {
-              callbacks: {
-                label: function (context) {
-                  let label = context.dataset.label || "";
-                  if (label) {
-                    label += ": ";
-                  }
-                  if (context.parsed.x !== null) {
-                    label += Math.abs(context.parsed.x);
-                  }
-                  return label;
+              y: {
+                stacked: true,
+                grid: {
+                  color: "rgba(0, 0, 0, 0.1)",
+                  drawBorder: false,
                 },
               },
             },
-          },
-          layout: {
-            padding: {
-              left: 30,
-              right: 30,
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: "top",
+                align: "end",
+                labels: {
+                  usePointStyle: true,
+                  pointStyle: "circle",
+                },
+              },
+              tooltip: {
+                callbacks: {
+                  label: function (context) {
+                    let label = context.dataset.label || "";
+                    if (label) {
+                      label += ": ";
+                    }
+                    if (context.parsed.x !== null) {
+                      label += Math.abs(context.parsed.x);
+                    }
+                    return label;
+                  },
+                },
+              },
+            },
+            layout: {
+              padding: {
+                left: 30,
+                right: 30,
+              },
             },
           },
-        },
-      });
+        });
+      }
     }
   }
-}
 
   onMount(async () => {
     chartLoading = false;
@@ -609,9 +625,8 @@
       // createChart();
       createTheftChart();
     }, 100);
-    chartLoading = false
+    chartLoading = false;
   });
-
 
   async function gettheftList(storeId: number) {
     const theftList = await fetch("/api/theft/listByStoreId", {
@@ -648,22 +663,25 @@
     }
   }
 
-  $: totalThefts = allStoresData.totaldetectedthefts
+  $: totalThefts = allStoresData.totaldetectedthefts;
   // theftandcamera.#FF3B30uce(
   //   (sum: number, store: any) => sum + parseInt(store.theft_detected_count),
   //   0,
   // );
-  $: totalPreventions = allStoresData.totalpreventedthefts
+  $: totalPreventions = allStoresData.totalpreventedthefts;
   // theftandcamera.#FF3B30uce(
   //   (sum: number, store: any) => sum + parseInt(store.theft_prevented_count),
   //   0,
   // );
 
   $: totalIncidents = Number(totalThefts) + Number(totalPreventions);
-  $:console.log(totalIncidents)
-$: detectionPercentage = totalIncidents > 0 ? (Number(totalThefts) / Number(totalIncidents)) * 100 : 0;
-$: preventionPercentage = totalIncidents > 0 ? (totalPreventions / totalIncidents) * 100 : 0;
-
+  $: console.log(totalIncidents);
+  $: detectionPercentage =
+    totalIncidents > 0
+      ? (Number(totalThefts) / Number(totalIncidents)) * 100
+      : 0;
+  $: preventionPercentage =
+    totalIncidents > 0 ? (totalPreventions / totalIncidents) * 100 : 0;
 
   const today = new Date().toLocaleDateString("en-US", {
     month: "long",
@@ -800,31 +818,64 @@ $: preventionPercentage = totalIncidents > 0 ? (totalPreventions / totalIncident
   //   }
   // }
 
-    function updateBarChart(theftD) {
+  function updateBarChart(theftD) {
     console.log($dateRange);
     console.log("first");
     if (barChart) {
-    console.log("first");
-    console.log(theftD);
-    const allDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday","Sunday"];
-    const allMonths = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    
-    let labels, theftDetectedData, theftPreventedData;
+      console.log("first");
+      console.log(theftD);
+      const allDays = [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday",
+      ];
+      const allMonths = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+      ];
 
-    if ($dateRange === "12 Months") {
-      const dataMap = new Map(theftD?.data.map(item => [item.month_name.trim(), item]));
-      labels = allMonths.map(month => month);
-      theftDetectedData = labels.map(month => dataMap.get(month) ? parseInt(dataMap.get(month).theft_detected) : 0);
-      theftPreventedData = labels.map(month => dataMap.get(month) ? parseInt(dataMap.get(month).theft_prevented) : 0);
-    } else {
-      const dataMap = new Map(theftD?.data.map(item => [item.day_of_week.trim(), item]));
-      labels = allDays.map(day => day);
-      theftDetectedData = labels.map(day => dataMap.get(day) ? parseInt(dataMap.get(day).theft_detected) : 0);
-      theftPreventedData = labels.map(day => dataMap.get(day) ? parseInt(dataMap.get(day).theft_prevented) : 0);
-    }
-    barChart.data.labels = labels;
-    barChart.data.datasets[0].data = theftDetectedData;
-    barChart.data.datasets[1].data = theftPreventedData;
+      let labels, theftDetectedData, theftPreventedData;
+
+      if ($dateRange === "12 Months") {
+        const dataMap = new Map(
+          theftD?.data.map((item) => [item.month_name.trim(), item]),
+        );
+        labels = allMonths.map((month) => month);
+        theftDetectedData = labels.map((month) =>
+          dataMap.get(month) ? parseInt(dataMap.get(month).theft_detected) : 0,
+        );
+        theftPreventedData = labels.map((month) =>
+          dataMap.get(month) ? parseInt(dataMap.get(month).theft_prevented) : 0,
+        );
+      } else {
+        const dataMap = new Map(
+          theftD?.data.map((item) => [item.day_of_week.trim(), item]),
+        );
+        labels = allDays.map((day) => day);
+        theftDetectedData = labels.map((day) =>
+          dataMap.get(day) ? parseInt(dataMap.get(day).theft_detected) : 0,
+        );
+        theftPreventedData = labels.map((day) =>
+          dataMap.get(day) ? parseInt(dataMap.get(day).theft_prevented) : 0,
+        );
+      }
+      barChart.data.labels = labels;
+      barChart.data.datasets[0].data = theftDetectedData;
+      barChart.data.datasets[1].data = theftPreventedData;
       barChart.update();
     }
   }
@@ -856,35 +907,68 @@ $: preventionPercentage = totalIncidents > 0 ? (totalPreventions / totalIncident
   //   }
   // }
 
-    function updateTheftChart(theftD) {
-  console.log($dateRange);
-  console.log("first");
-  if (theftChart) {
+  function updateTheftChart(theftD) {
+    console.log($dateRange);
     console.log("first");
-    console.log(theftD);
-    const allDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-    const allMonths = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    
-    let labels, theftDetectedData, theftPreventedData;
+    if (theftChart) {
+      console.log("first");
+      console.log(theftD);
+      const allDays = [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+      ];
+      const allMonths = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+      ];
 
-    if ($dateRange === "12 Months") {
-      const dataMap = new Map(theftD?.data.map(item => [item.month_name.trim(), item]));
-      labels = allMonths.map(month => month);
-      theftDetectedData = labels.map(month => dataMap.get(month) ? parseInt(-dataMap.get(month).theft_detected) : 0);
-      theftPreventedData = labels.map(month => dataMap.get(month) ? parseInt(dataMap.get(month).theft_prevented) : 0);
-    } else {
-      const dataMap = new Map(theftD?.data.map(item => [item.day_of_week.trim(), item]));
-      labels = allDays.map(day => day);
-      theftDetectedData = labels.map(day => dataMap.get(day) ? parseInt(-dataMap.get(day).theft_detected) : 0);
-      theftPreventedData = labels.map(day => dataMap.get(day) ? parseInt(dataMap.get(day).theft_prevented) : 0);
+      let labels, theftDetectedData, theftPreventedData;
+
+      if ($dateRange === "12 Months") {
+        const dataMap = new Map(
+          theftD?.data.map((item) => [item.month_name.trim(), item]),
+        );
+        labels = allMonths.map((month) => month);
+        theftDetectedData = labels.map((month) =>
+          dataMap.get(month) ? parseInt(-dataMap.get(month).theft_detected) : 0,
+        );
+        theftPreventedData = labels.map((month) =>
+          dataMap.get(month) ? parseInt(dataMap.get(month).theft_prevented) : 0,
+        );
+      } else {
+        const dataMap = new Map(
+          theftD?.data.map((item) => [item.day_of_week.trim(), item]),
+        );
+        labels = allDays.map((day) => day);
+        theftDetectedData = labels.map((day) =>
+          dataMap.get(day) ? parseInt(-dataMap.get(day).theft_detected) : 0,
+        );
+        theftPreventedData = labels.map((day) =>
+          dataMap.get(day) ? parseInt(dataMap.get(day).theft_prevented) : 0,
+        );
+      }
+
+      theftChart.data.labels = labels;
+      theftChart.data.datasets[0].data = theftDetectedData;
+      theftChart.data.datasets[1].data = theftPreventedData;
+      theftChart.update();
     }
-
-    theftChart.data.labels = labels;
-    theftChart.data.datasets[0].data = theftDetectedData;
-    theftChart.data.datasets[1].data = theftPreventedData;
-    theftChart.update();
   }
-}
 
   function updateTrendChart(theftT) {
     if (chart) {
@@ -995,9 +1079,9 @@ $: preventionPercentage = totalIncidents > 0 ? (totalPreventions / totalIncident
       updateBarChart(theftD);
       updateTheftChart(theftD);
       updateTrendChart(theftT.data);
-      console.log(storesTotal)
-      totalThefts = storesTotal.data.totaldetectedthefts
-      totalPreventions = storesTotal.data.totalpreventedthefts
+      console.log(storesTotal);
+      totalThefts = storesTotal.data.totaldetectedthefts;
+      totalPreventions = storesTotal.data.totalpreventedthefts;
       tableKey += 1;
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -1060,15 +1144,12 @@ $: preventionPercentage = totalIncidents > 0 ? (totalPreventions / totalIncident
             },
           },
         ).then((res) => res.json()),
-        fetch(
-          `https://api.moksa.ai/store/getAllStoresTotals/${start}/${end}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
+        fetch(`https://api.moksa.ai/store/getAllStoresTotals/${start}/${end}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
-        ).then((res) => res.json()),
+        }).then((res) => res.json()),
       ]);
 
       console.log(storesTotal);
@@ -1080,8 +1161,8 @@ $: preventionPercentage = totalIncidents > 0 ? (totalPreventions / totalIncident
       theftTrend.set(theftT);
       listtheft.set(theftL.data);
 
-      totalThefts = storesTotal.data.totaldetectedthefts
-      totalPreventions = storesTotal.data.totalpreventedthefts
+      totalThefts = storesTotal.data.totaldetectedthefts;
+      totalPreventions = storesTotal.data.totalpreventedthefts;
 
       updateBarChart(theftD);
       updateTheftChart(theftD);
@@ -1095,38 +1176,42 @@ $: preventionPercentage = totalIncidents > 0 ? (totalPreventions / totalIncident
   }
 
   function cleanValue(value: string | number): string {
-    if (typeof value === 'string' && value.includes(',')) {
+    if (typeof value === "string" && value.includes(",")) {
       // Split by comma and take the first part
-      return value.split(',')[0].trim();
+      return value.split(",")[0].trim();
     }
     return String(value);
   }
 
-  function theftAndCameraConvertToCSV(arr: Theft[]): void  {
-    const date = new Date().toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+  function theftAndCameraConvertToCSV(arr: Theft[]): void {
+    const date = new Date().toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
     // Extract the headers
     const headers = Object.keys(arr[0]).join(",");
 
     // Extract the data rows with value cleaning
-    const rows = arr.map(obj => {
-      return Object.values(obj).map(value => cleanValue(value)).join(",");
-    }).join("\n");
+    const rows = arr
+      .map((obj) => {
+        return Object.values(obj)
+          .map((value) => cleanValue(value))
+          .join(",");
+      })
+      .join("\n");
 
     // Combine headers and rows
     const csvContent = headers + "\n" + rows;
 
     // Create a Blob for the CSV content
-    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const blob = new Blob([csvContent], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
 
     // Create a link element to download the CSV
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
     link.download = `theft&camera_${date}.csv`;
     document.body.appendChild(link);
@@ -1139,28 +1224,25 @@ $: preventionPercentage = totalIncidents > 0 ? (totalPreventions / totalIncident
   }
 
   function theftTrendConvertToCSV(arr: any[]): void {
-    console.log(arr)
-     const date = new Date().toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    console.log(arr);
+    const date = new Date().toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
     // Extract the headers
     const headers = ["Day of Week", "Theft Count"];
-    
+
     // Extract the data rows
-    const rows = $dateRange === '7 Days' ? arr.map((item) => [
-        item.day_of_week.trim(),
-        item.theft_count
-    ]): arr.data.map((item) => [
-        item.day_of_week.trim(),
-        item.theft_count
-    ]);
+    const rows =
+      $dateRange === "7 Days"
+        ? arr.map((item) => [item.day_of_week.trim(), item.theft_count])
+        : arr.data.map((item) => [item.day_of_week.trim(), item.theft_count]);
 
     // Combine headers and rows
-    const csvContent = [headers, ...rows].map(e => e.join(",")).join("\n");
+    const csvContent = [headers, ...rows].map((e) => e.join(",")).join("\n");
 
     // Create a Blob for the CSV content
     const blob = new Blob([csvContent], { type: "text/csv" });
@@ -1177,57 +1259,57 @@ $: preventionPercentage = totalIncidents > 0 ? (totalPreventions / totalIncident
 
     // Clean up the link after download
     document.body.removeChild(link);
-}
-
-function listTheftConvertToCSV(arr) {
-  if (!arr || arr.length === 0) {
-    console.error("No data to convert to CSV");
-    return;
   }
-   const date = new Date().toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+
+  function listTheftConvertToCSV(arr) {
+    if (!arr || arr.length === 0) {
+      console.error("No data to convert to CSV");
+      return;
+    }
+    const date = new Date().toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
 
-  // Extract the headers
-  const headers = Object.keys(arr[0]).join(",");
+    // Extract the headers
+    const headers = Object.keys(arr[0]).join(",");
 
-  // Extract the data rows with value cleaning
-  const rows = arr
-    .map((obj) => {
-      return Object.values(obj)
-        .map((value) => cleanValue(value))
-        .join(",");
-    })
-    .join("\n");
+    // Extract the data rows with value cleaning
+    const rows = arr
+      .map((obj) => {
+        return Object.values(obj)
+          .map((value) => cleanValue(value))
+          .join(",");
+      })
+      .join("\n");
 
-  // Combine headers and rows
-  const csvContent = headers + "\n" + rows;
+    // Combine headers and rows
+    const csvContent = headers + "\n" + rows;
 
-  // Create a Blob for the CSV content
-  const blob = new Blob([csvContent], { type: "text/csv" });
-  const url = URL.createObjectURL(blob);
+    // Create a Blob for the CSV content
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
 
-  // Create a link element to download the CSV
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `theft_list_${date}.csv`; // file name after download
-  document.body.appendChild(link);
+    // Create a link element to download the CSV
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `theft_list_${date}.csv`; // file name after download
+    document.body.appendChild(link);
 
-  // Programmatically click the link to trigger the download
-  link.click();
+    // Programmatically click the link to trigger the download
+    link.click();
 
-  // Clean up the link after download
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
-}
+    // Clean up the link after download
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
 
-async function exportCSV() {
-     let theftListData;
-    const unsubscribe = listtheft.subscribe(value => {
+  async function exportCSV() {
+    let theftListData;
+    const unsubscribe = listtheft.subscribe((value) => {
       theftListData = value.data || value;
     });
     unsubscribe();
@@ -1237,7 +1319,7 @@ async function exportCSV() {
     } else {
       console.error("No theft list data to export");
     }
-}
+  }
 
   $: {
     if ($dateRange !== "custom") {
@@ -1256,87 +1338,104 @@ async function exportCSV() {
 
   // $: console.log($theftTrend)
 
-let sockets: { [key: number]: any } = {};
-let liveData = writable([]);
+  let sockets: { [key: number]: any } = {};
+  let liveData = writable([]);
 
-function setupSocketForAllStores() {
-  allStores.forEach((store: any) => {
-    setupSocket(store.id);
-  });
-}
-
-function setupSocket(storeId: number) {
-  const userID = moksaUserId
-  if (sockets[storeId]) {
-    sockets[storeId].disconnect();
+  function setupSocketForAllStores() {
+    allStores.forEach((store: any) => {
+      setupSocket(store.id);
+    });
   }
 
-  sockets[storeId] = io("https://api.moksa.ai", {
-    withCredentials: true,
-    extraHeaders: {
-      Authorization: `Bearer ${token}`,
-    },
-    transports: ["websocket", "polling"],
-  });
+  function setupSocket(storeId: number) {
+    const userID = moksaUserId;
+    if (sockets[storeId]) {
+      sockets[storeId].disconnect();
+    }
 
-  const socket = sockets[storeId];
-
-  socket.on("error", (err) => {
-    console.log(`error for store ${storeId}:`, err);
-  });
-
-  socket.on("connect", () => {
-    console.log(`connected for store ${storeId}`);
-    socket.emit("joinUser", userID);
-    socket.emit("joinStore", storeId);
-  });
-
-  socket.on(`theft_store_${storeId}`, (data) => {
-    console.log(`Received theft data for store ${storeId}:`, data);
-    toast(`Received theft data for store ${storeId}:`, {
-      description: `Store: ${storeId}, Theft Probability: ${data?.theftProbability}, Camera: ${data?.camera_id}`
+    sockets[storeId] = io("https://api.moksa.ai", {
+      withCredentials: true,
+      extraHeaders: {
+        Authorization: `Bearer ${token}`,
+      },
+      transports: ["websocket", "polling"],
     });
 
-    listtheft.update((currentData) => {
-  const dataArray = Array.isArray(currentData) ? currentData : [];
-  
-  if (currentData && Array.isArray(currentData.data)) {
-    return {
-      ...currentData,
-      data: [{ storeId, ...data, live: true }, ...currentData.data].slice(0, 100)
-    };
+    const socket = sockets[storeId];
+
+    socket.on("error", (err) => {
+      console.log(`error for store ${storeId}:`, err);
+    });
+
+    socket.on("connect", () => {
+      console.log(`connected for store ${storeId}`);
+      socket.emit("joinUser", userID);
+      socket.emit("joinStore", storeId);
+    });
+
+    socket.on(`theft_store_${storeId}`, (data) => {
+      console.log(`Received theft data for store ${storeId}:`, data);
+      toast(`Received theft data for store ${storeId}:`, {
+        description: `Store: ${storeId}, Theft Probability: ${data?.theftProbability}, Camera: ${data?.camera_id}`,
+      });
+
+      listtheft.update((currentData) => {
+        const dataArray = Array.isArray(currentData) ? currentData : [];
+
+        if (currentData && Array.isArray(currentData.data)) {
+          return {
+            ...currentData,
+            data: [{ storeId, ...data, live: true }, ...currentData.data].slice(
+              0,
+              100,
+            ),
+          };
+        }
+
+        return [{ storeId, ...data, live: true }, ...dataArray].slice(0, 100);
+      });
+      return [storeId, ...dataArray].slice(0, 100);
+    });
+
+    socket.on("disconnect", () => {
+      console.log(`disconnected for store ${storeId}`);
+    });
   }
 
-  return [{ storeId, ...data, live: true }, ...dataArray].slice(0, 100);
-});
-    return [storeId, ...dataArray].slice(0, 100);
+  // $: console.log('theft list',$listtheft)
+
+  onMount(() => {
+    setTimeout(() => {
+      setupSocketForAllStores();
+    }, 500);
   });
 
-  socket.on("disconnect", () => {
-    console.log(`disconnected for store ${storeId}`);
+  // $: console.log($liveData)
+
+  onDestroy(() => {
+    Object.values(sockets).forEach((socket) => {
+      console.log("disconnecting socket");
+      socket.disconnect();
+    });
   });
-}
 
-// $: console.log('theft list',$listtheft)
+  // $: console.log(chartLoading)
+  import { Input } from "../ui/input";
+  import { createEventDispatcher } from "svelte";
 
-onMount(() => {
-  setTimeout(() => {
-    setupSocketForAllStores();
-  }, 500);
-});
+  // ... existing code ...
 
-// $: console.log($liveData)
+  let filterText = "";
+  $: filteredFruits = fruits.filter((fruit) =>
+    fruit.label.toLowerCase().includes(filterText.toLowerCase()),
+  );
 
-onDestroy(() => {
-  Object.values(sockets).forEach((socket) => {
-    console.log('disconnecting socket')
-    socket.disconnect();
-  });
-});
+  const dispatch = createEventDispatcher();
 
-// $: console.log(chartLoading)
-
-
+  function handleSelect(fruit) {
+    selectedStore.set(fruit);
+    dispatch("select", fruit);
+  }
 </script>
 
 <section
@@ -1385,34 +1484,54 @@ onDestroy(() => {
     <span class="flex items-center gap-3">
       <Select.Root portal={null}>
         <Select.Trigger
-          class="w-[100px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg dark:bg-transparent"
+          class="w-[150px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg dark:bg-transparent"
         >
           <Select.Value placeholder={$selectedStore.label} />
         </Select.Trigger>
         <Select.Content class="max-h-[200px] overflow-y-auto">
+          <div class="p-2">
+            <Input
+              type="text"
+              placeholder="Search stores..."
+              bind:value={filterText}
+              class="mb-2"
+            />
+          </div>
           <Select.Group>
-            <Select.Item on:click={() =>{ selectedStore.set({ value: -1, label: 'All Stores'}); fetchDataStoreWise()}}
-                class="px-1"
-                value="All Stores"
-                label="All Stores">All Stores</Select.Item
-              >
-            {#each fruits as fruit}
-              <Select.Item
-                on:click={() => selectedStore.set(fruit)}
-                class="px-1"
-                value={fruit.value}
-                label={fruit.label}>{fruit.label}</Select.Item
-              >
-            {/each}
+            <Select.Item
+              on:click={() => {
+                selectedStore.set({ value: -1, label: "All Stores" });
+                fetchDataStoreWise();
+              }}
+              class="px-1"
+              value="All Stores"
+              label="All Stores">All Stores</Select.Item
+            >
+            {#if filteredFruits.length > 0}
+              {#each filteredFruits as fruit}
+                <Select.Item
+                  on:click={() => handleSelect(fruit)}
+                  class="px-1"
+                  value={fruit.value}
+                  label={fruit.label}>{fruit.label}</Select.Item
+                >
+              {/each}
+            {:else}
+              <Select.Item disabled>N/A</Select.Item>
+            {/if}
           </Select.Group>
         </Select.Content>
       </Select.Root>
-      {#if user.role !== 'Operators' && user.role !== 'adminNonPaid' && user.role !== 'storeEmployee'}
-      <Button
-        on:click={() => {exportCSV(); theftTrendConvertToCSV($theftTrend); theftAndCameraConvertToCSV(theftandcamera);}}
-        class="bg-[#3D81FC] text-white flex items-center gap-1 hover:bg-white hover:text-[#3D81FC]"
-        ><Upload size={18} /> Export Reports</Button
-      >
+      {#if user.role !== "Operators" && user.role !== "adminNonPaid" && user.role !== "storeEmployee"}
+        <Button
+          on:click={() => {
+            exportCSV();
+            theftTrendConvertToCSV($theftTrend);
+            theftAndCameraConvertToCSV(theftandcamera);
+          }}
+          class="bg-[#3D81FC] text-white flex items-center gap-1 hover:bg-white hover:text-[#3D81FC]"
+          ><Upload size={18} /> Export Reports</Button
+        >
       {/if}
     </span>
   </div>
@@ -1568,32 +1687,51 @@ onDestroy(() => {
         </p>
         <Select.Root portal={null}>
           <Select.Trigger
-            class="w-[100px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg dark:bg-transparent"
+            class="w-[150px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg dark:bg-transparent"
           >
             <Select.Value placeholder={$selectedStore.label} />
           </Select.Trigger>
           <Select.Content class="max-h-[200px] overflow-y-auto">
+            <div class="p-2">
+              <Input
+                type="text"
+                placeholder="Search stores..."
+                bind:value={filterText}
+                class="mb-2"
+              />
+            </div>
             <Select.Group>
-              {#if user.role !== 'superAdmin'}
-              <Select.Item
-                on:click={() => {
-                  selectedStore.set({ value: -1, label: "All Stores" })
-                  fetchDataStoreWise();
-                }}
-
-                class="px-1"
-                value="All Stores"
-                label="All Stores">All Stores</Select.Item
-              >
+              {#if user.role !== "superAdmin"}
+                <Select.Item
+                  on:click={() => {
+                    selectedStore.set({ value: -1, label: "All Stores" });
+                    fetchDataStoreWise();
+                  }}
+                  class="px-1"
+                  value="All Stores"
+                  label="All Stores">All Stores</Select.Item
+                >
               {/if}
-              {#each fruits as fruit}
+              <!-- {#each fruits as fruit}
                 <Select.Item
                   on:click={() => selectedStore.set(fruit)}
                   class="px-1"
                   value={fruit.value}
                   label={fruit.label}>{fruit.label}</Select.Item
                 >
-              {/each}
+              {/each} -->
+              {#if filteredFruits.length > 0}
+                {#each filteredFruits as fruit}
+                  <Select.Item
+                    on:click={() => handleSelect(fruit)}
+                    class="px-1"
+                    value={fruit.value}
+                    label={fruit.label}>{fruit.label}</Select.Item
+                  >
+                {/each}
+              {:else}
+                <Select.Item disabled>No matching stores</Select.Item>
+              {/if}
             </Select.Group>
           </Select.Content>
         </Select.Root>
@@ -1657,23 +1795,25 @@ onDestroy(() => {
           Theft History
         </p>
         <!-- <Button on:click={addMockData}>Add Mock Data</Button> -->
-
       </span>
       <span class="w-full h-full">
         {#if chartLoading}
           <div class="flex items-center justify-center h-full w-full">
             <Spinner />
           </div>
-        {:else}
-        {#if $listtheft?.data?.length > 0}
+        {:else if $listtheft?.data?.length > 0}
           {#key tableKey}
-          <TheftDataTable {token} theftData={listtheft}  {dateRange} {selectedStore}/>
+            <TheftDataTable
+              {token}
+              theftData={listtheft}
+              {dateRange}
+              {selectedStore}
+            />
           {/key}
         {:else}
           <p class="text-[#323232] dark:text-white text-lg font-semibold">
             No data found
           </p>
-        {/if}
         {/if}
       </span>
     </div>

@@ -21,10 +21,10 @@
   }));
 
   // onMount(() => {
-//     if(allStores?.length > 0) {
-// selectedStore.set(fruits[0])
-//     }
-//   })
+  //     if(allStores?.length > 0) {
+  // selectedStore.set(fruits[0])
+  //     }
+  //   })
 
   import * as Select from "../ui/select";
   import { BarController, BarElement } from "chart.js";
@@ -55,19 +55,14 @@
   export let token: string;
   import type { DateRange } from "bits-ui";
 
-  import {
-    DateFormatter,
-    type DateValue,
-  } from "@internationalized/date";
+  import { DateFormatter, type DateValue } from "@internationalized/date";
   import { RangeCalendar } from "@/components/ui/range-calendar";
-    import { toast } from "svelte-sonner";
+  import { toast } from "svelte-sonner";
 
   let value: DateRange | undefined = undefined;
   let startValue: DateValue | undefined = undefined;
   let customDateLabel = "Custom";
   let close = false;
-
-
 
   $: {
     if (value?.start && value?.end) {
@@ -90,7 +85,6 @@
       customDateLabel = "Custom";
     }
   }
-
 
   function createBarChart() {
     if (barChartCanvas && !barChart) {
@@ -351,7 +345,7 @@
         },
       ).then((res) => res.json());
 
-      console.log('theftD',theftD);
+      console.log("theftD", theftD);
       theftDataa.set(theftD);
 
       // Update the bar chart with new data
@@ -478,7 +472,7 @@
       // eeScore.set(eeScore)
       // storesTotal.set(storesTotal)
       // storesAisle.set(storesAisle)
-      allStoresData = storesTotal.data
+      allStoresData = storesTotal.data;
 
       theftDataa.set(theftD);
       updateBarChart(theftD);
@@ -555,7 +549,7 @@
       // eeScore.set(eeScore)
       // storesTotal.set(storesTotal)
       // storesAisle.set(storesAisle)
-      allStoresData = storesTotal.data
+      allStoresData = storesTotal.data;
       theftDataa.set(theftD);
       updateBarChart(theftD);
     } catch (error) {
@@ -581,7 +575,7 @@
     }
   }
 
-   function cleanValue(value: string | number): string {
+  function cleanValue(value: string | number): string {
     const stringValue = String(value);
 
     // Enclose values containing commas or quotes in double quotes
@@ -632,39 +626,57 @@
     document.body.removeChild(link);
   }
 
-   function exportCSV(){
+  function exportCSV() {
     const date = new Date().toLocaleDateString("en-GB", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          });
-          if (aisleData.length > 0) {
-            convertArrToCSV(aisleData, `dashboard_store_data_${date}.csv`);
-          }else{
-            toast.error("No store data available to export");
-          }
-          if (efficiency.data.length > 0) {
-            convertArrToCSV(efficiency.data, `dashboard_employee_efficiency_data_${date}.csv`);
-          }else{
-            toast.error("No employee efficiency data available to export");
-          }
-          if (safetyDetails.data.length > 0) {
-            convertArrToCSV(safetyDetails.data, `dashboard_safety_data_${date}.csv`);
-          }else{
-            toast.error("No safety data available to export");
-          }
-          if(theftData.data.length > 0){
-            convertArrToCSV(theftData.data, `dashboard_theft_data_${date}.csv`);
-          }else{
-            toast.error("No theft data available to export");
-          }
-          if(allStores.length > 0){
-            convertArrToCSV(allStores, `dashboard_all_stores_data_${date}.csv`);
-          }else{
-            toast.error("No all stores data available to export");
-          }
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    if (aisleData.length > 0) {
+      convertArrToCSV(aisleData, `dashboard_store_data_${date}.csv`);
+    } else {
+      toast.error("No store data available to export");
+    }
+    if (efficiency.data.length > 0) {
+      convertArrToCSV(
+        efficiency.data,
+        `dashboard_employee_efficiency_data_${date}.csv`,
+      );
+    } else {
+      toast.error("No employee efficiency data available to export");
+    }
+    if (safetyDetails.data.length > 0) {
+      convertArrToCSV(safetyDetails.data, `dashboard_safety_data_${date}.csv`);
+    } else {
+      toast.error("No safety data available to export");
+    }
+    if (theftData.data.length > 0) {
+      convertArrToCSV(theftData.data, `dashboard_theft_data_${date}.csv`);
+    } else {
+      toast.error("No theft data available to export");
+    }
+    if (allStores.length > 0) {
+      convertArrToCSV(allStores, `dashboard_all_stores_data_${date}.csv`);
+    } else {
+      toast.error("No all stores data available to export");
+    }
+  }
+
+  import { Input } from "../ui/input";
+  import { createEventDispatcher } from "svelte";
+
+  let filterText = "";
+  $: filteredFruits = fruits.filter((fruit) =>
+    fruit.label.toLowerCase().includes(filterText.toLowerCase()),
+  );
+
+  const dispatch = createEventDispatcher();
+
+  function handleSelect(fruit) {
+    selectedStore.set(fruit);
+    dispatch("select", fruit);
   }
 </script>
 
@@ -712,12 +724,12 @@
       </Popover.Root>
     </span>
     <span class="flex items-center gap-3">
-      {#if user.role !== 'Operators' && user.role !== 'adminNonPaid' && user.role !== 'storeEmployee'}
-     <Button
-        variant="outline"
-        class="flex items-center gap-1"
-        on:click={exportCSV}><Upload size={18} /> Export</Button
-      >
+      {#if user.role !== "Operators" && user.role !== "adminNonPaid" && user.role !== "storeEmployee"}
+        <Button
+          variant="outline"
+          class="flex items-center gap-1"
+          on:click={exportCSV}><Upload size={18} /> Export</Button
+        >
       {/if}
       <!-- <Button
         class="flex items-center flex-row-reverse justify-between px-2 gap-1 font-medium text-white rounded-xl bg-[#00A569] hover:text-[#00A569] hover:bg-white"
@@ -791,24 +803,21 @@
           >
           <Select.Root portal={null}>
             <Select.Trigger
-              class="w-[100px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg dark:bg-transparent"
+              class="w-[150px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg dark:bg-transparent"
             >
               <Select.Value placeholder={$selectedStore?.label} />
             </Select.Trigger>
             <Select.Content class="max-h-[200px] overflow-y-auto">
+              <div class="p-2">
+                <Input
+                  type="text"
+                  placeholder="Search stores..."
+                  bind:value={filterText}
+                  class="mb-2"
+                />
+              </div>
               <Select.Group>
-                {#if user.role === 'superAdmin'}
-                <Select.Item
-                  on:click={() => {
-                    selectedStore.set({ value: -1, label: "All Stores" });
-                    fetchDataStoreWise();
-                  }}
-                  class="px-1"
-                  value="All Stores"
-                  label="All Stores">All Stores</Select.Item
-                >
-                {/if}
-                {#if allStores.length > 0}
+                <!-- {#if allStores.length > 0}
                   {#each fruits as fruit}
                     <Select.Item
                       on:click={() => selectedStore.set(fruit)}
@@ -817,6 +826,29 @@
                       label={fruit.label}>{fruit.label}</Select.Item
                     >
                   {/each}
+                {/if} -->
+                {#if filteredFruits.length > 0}
+                  {#if user.role === "superAdmin"}
+                    <Select.Item
+                      on:click={() => {
+                        selectedStore.set({ value: -1, label: "All Stores" });
+                        fetchDataStoreWise();
+                      }}
+                      class="px-1"
+                      value="All Stores"
+                      label="All Stores">All Stores</Select.Item
+                    >
+                  {/if}
+                  {#each filteredFruits as fruit}
+                    <Select.Item
+                      on:click={() => handleSelect(fruit)}
+                      class="px-1"
+                      value={fruit.value}
+                      label={fruit.label}>{fruit.label}</Select.Item
+                    >
+                  {/each}
+                {:else}
+                  <Select.Item disabled>N/A</Select.Item>
                 {/if}
               </Select.Group>
             </Select.Content>
@@ -825,8 +857,7 @@
         </span>
       </span>
       <div class="h-full w-full">
-      
-          <canvas bind:this={barChartCanvas}></canvas>
+        <canvas bind:this={barChartCanvas}></canvas>
       </div>
     </div>
     <div
@@ -848,14 +879,14 @@
         {:else}
           {#each theftandcamera as data, index}
             <DashboardStoreCard
-            storeName={data.name}
-            cameraCount={data.camera_count}
-            managerName={data.manager}
-            activeCount={parseInt(data.theft_prevented_count)}
-            totalCount={parseInt(data.theft_detected_count)}
-            bgColor={index % 2 === 0 ? "#F5F5F5" : "white"}
-          />
-        {/each}
+              storeName={data.name}
+              cameraCount={data.camera_count}
+              managerName={data.manager}
+              activeCount={parseInt(data.theft_prevented_count)}
+              totalCount={parseInt(data.theft_detected_count)}
+              bgColor={index % 2 === 0 ? "#F5F5F5" : "white"}
+            />
+          {/each}
         {/if}
       </div>
     </div>
@@ -886,7 +917,9 @@
       <span class="flex items-center justify-between font-semibold">
         <p class="text-[#323232] dark:text-white">Stores Overview</p>
       </span>
-      <div class="w-full h-full max-h-[300px] overflow-y-auto hide-scrollbar relative">
+      <div
+        class="w-full h-full max-h-[300px] overflow-y-auto hide-scrollbar relative"
+      >
         {#if aisleData.length === 0}
           <p class="text-center text-gray-500 mt-8">No data available</p>
         {:else}
@@ -929,7 +962,7 @@
         </Select.Root> -->
         </span>
         <span class="w-full h-full">
-          {#if efficiency.length ===0 || efficiency.data.length === 0}
+          {#if efficiency.length === 0 || efficiency.data.length === 0}
             <p class="text-center text-gray-500 mt-8">No data available</p>
           {:else}
             <DashboardEfficiencyDataTable {efficiency} />
@@ -941,14 +974,14 @@
       >
         <span class="flex items-center justify-between">
           <p class="text-[#323232] dark:text-white text-lg font-semibold">
-           Kitchen Safety Protocol
+            Kitchen Safety Protocol
           </p>
         </span>
         <div class="h-full w-full">
           {#if safetyDetails?.length === 0 || safetyDetails?.data?.length === 0}
             <p class="text-center text-gray-500 mt-8">No data available</p>
           {:else}
-            <DashboardSaftetyDataTable safetyData={safetyDetails} {token}/>
+            <DashboardSaftetyDataTable safetyData={safetyDetails} {token} />
           {/if}
         </div>
       </div>

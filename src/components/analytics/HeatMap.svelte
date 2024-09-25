@@ -23,6 +23,23 @@
     value: store.id,
     label: store.name,
   }));
+
+  import { Input } from "../ui/input";
+  import { createEventDispatcher } from "svelte";
+
+  // ... existing code ...
+
+  let filterText = "";
+  $: filteredFruits = fruits.filter((fruit) =>
+    fruit.label.toLowerCase().includes(filterText.toLowerCase()),
+  );
+
+  const dispatch = createEventDispatcher();
+
+  function handleSelect(fruit) {
+    selectedStore.set(fruit);
+    dispatch("select", fruit);
+  }
   // $:console.log(allStores)
 
   const getFloorMap = async (storeId) => {
@@ -589,25 +606,33 @@
       </span>
       <Select.Root portal={null}>
         <Select.Trigger
-          class="w-[100px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg dark:bg-transparent"
+          class="w-[150px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg dark:bg-transparent"
         >
           <Select.Value
             placeholder={fruits.length > 0 ? $selectedStore.label : "No Stores"}
           />
         </Select.Trigger>
-        <Select.Content class="max-h-[200px] overflow-y-auto">
+        <Select.Content class="max-h-[300px] overflow-y-auto">
+          <div class="p-2">
+            <Input
+              type="text"
+              placeholder="Search stores..."
+              bind:value={filterText}
+              class="mb-2"
+            />
+          </div>
           <Select.Group>
-            {#if fruits.length > 0}
-              {#each fruits as fruit}
+            {#if filteredFruits.length > 0}
+              {#each filteredFruits as fruit}
                 <Select.Item
-                  on:click={() => selectedStore.set(fruit)}
+                  on:click={() => handleSelect(fruit)}
                   class="px-1"
                   value={fruit.value}
                   label={fruit.label}>{fruit.label}</Select.Item
                 >
               {/each}
             {:else}
-              <Select.Item class="px-1">No Stores</Select.Item>
+              <Select.Item disabled>No matching stores</Select.Item>
             {/if}
           </Select.Group>
         </Select.Content>

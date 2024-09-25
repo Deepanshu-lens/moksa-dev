@@ -24,10 +24,8 @@
   import LivePeopleCountDataTable from "./table/LivePeopleCountDataTable.svelte";
   import * as Popover from "../ui/popover";
   import type { DateRange } from "bits-ui";
-import {
-  type DateValue,
-} from "@internationalized/date";
-import { RangeCalendar } from "@/components/ui/range-calendar";
+  import { type DateValue } from "@internationalized/date";
+  import { RangeCalendar } from "@/components/ui/range-calendar";
   export let allStores;
   export let token;
   let isInitialLoad = true;
@@ -41,14 +39,19 @@ import { RangeCalendar } from "@/components/ui/range-calendar";
   let customDateLabel = "Custom";
   let close = false;
   const userID = 8;
-    const fruits = allStores?.map((store: any) => ({
+  const fruits = allStores?.map((store: any) => ({
     value: store.id,
     label: store.name,
   }));
 
-  let selectedStore= writable({ value: allStores?.[0]?.id, label: allStores?.[0]?.name })
+  let selectedStore = writable({
+    value: allStores?.[0]?.id,
+    label: allStores?.[0]?.name,
+  });
 
-    let socket: any;
+  let allS = writable(fruits);
+
+  let socket: any;
 
   function setupSocket() {
     if (socket) {
@@ -74,15 +77,18 @@ import { RangeCalendar } from "@/components/ui/range-calendar";
     });
 
     socket.on(`people_count_store_${$selectedStore.value}`, (data) => {
-      console.log(`Received live people count for store ${$selectedStore.value}:`, data);
-      liveData.update(currentData => {
+      console.log(
+        `Received live people count for store ${$selectedStore.value}:`,
+        data,
+      );
+      liveData.update((currentData) => {
         return [data, ...currentData].slice(0, 100);
       });
     });
 
     socket.on("disconnect", () => {
       console.log("disconnected");
-      liveData.set([])
+      liveData.set([]);
     });
   }
 
@@ -110,11 +116,10 @@ import { RangeCalendar } from "@/components/ui/range-calendar";
 
   $: {
     if ($selectedStore.value !== undefined) {
-      if($dateRange === '7 Days') {
-
+      if ($dateRange === "7 Days") {
         getWeekData($selectedStore.value);
       } else {
-        fetchDataForDateRange()
+        fetchDataForDateRange();
       }
       setupSocket();
     }
@@ -159,92 +164,92 @@ import { RangeCalendar } from "@/components/ui/range-calendar";
       },
     );
     const d = await weekData.json();
-    console.log('week data people count',d);
-    if(d.status === 200) {
-      storeData.set(d.data.data)
+    console.log("week data people count", d);
+    if (d.status === 200) {
+      storeData.set(d.data.data);
     }
   }
 
-  function createChart() {
-    if (chartCanvas && !chart) {
-      const ctx = chartCanvas.getContext("2d");
-      if (!ctx) return;
+  // function createChart() {
+  //   if (chartCanvas && !chart) {
+  //     const ctx = chartCanvas.getContext("2d");
+  //     if (!ctx) return;
 
-      Chart.register(
-        LineController,
-        LineElement,
-        PointElement,
-        LinearScale,
-        CategoryScale,
-      );
+  //     Chart.register(
+  //       LineController,
+  //       LineElement,
+  //       PointElement,
+  //       LinearScale,
+  //       CategoryScale,
+  //     );
 
-      const labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-      const onlineData = [65, 59, 80, 81, 56, 55, 40];
-      const offlineData = [15, 29, 30, 41, 56, 65, 80];
+  //     const labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  //     const onlineData = [65, 59, 80, 81, 56, 55, 40];
+  //     const offlineData = [15, 29, 30, 41, 56, 65, 80];
 
-      chart = new Chart(ctx, {
-        type: "line",
-        data: {
-          labels: labels,
-          datasets: [
-            {
-              label: "Online",
-              borderColor: "#F86624",
-              borderWidth: 2,
-              data: onlineData,
-              fill: true,
-              tension: 0,
-              pointBackgroundColor: "white",
-              pointBorderColor: "#F86624",
-              pointBorderWidth: 2,
-              pointRadius: 4,
-              pointHoverRadius: 6,
-            },
-            {
-              label: "Offline",
-              borderColor: "#883DCF",
-              borderWidth: 2,
-              data: offlineData,
-              fill: true,
-              tension: 0,
-              pointBackgroundColor: "white",
-              pointBorderColor: "#883DCF",
-              pointBorderWidth: 2,
-              pointRadius: 4,
-              pointHoverRadius: 6,
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            x: {
-              grid: { color: "rgba(0,0,0,.05)" },
-              ticks: { maxRotation: 0 },
-            },
-            y: {
-              display: true,
-              title: { display: false, text: "Activity Percentage" },
-              grid: { display: false },
-              beginAtZero: true,
-              suggestedMax: 100,
-              ticks: { stepSize: 20, callback: (value) => value + "%" },
-            },
-          },
-          plugins: {
-            legend: { display: true, position: "top" },
-            tooltip: {
-              callbacks: {
-                label: (context) =>
-                  `${context.dataset.label}: ${context.parsed.y.toFixed(2)}%`,
-              },
-            },
-          },
-        },
-      });
-    }
-  }
+  //     chart = new Chart(ctx, {
+  //       type: "line",
+  //       data: {
+  //         labels: labels,
+  //         datasets: [
+  //           {
+  //             label: "Online",
+  //             borderColor: "#F86624",
+  //             borderWidth: 2,
+  //             data: onlineData,
+  //             fill: true,
+  //             tension: 0,
+  //             pointBackgroundColor: "white",
+  //             pointBorderColor: "#F86624",
+  //             pointBorderWidth: 2,
+  //             pointRadius: 4,
+  //             pointHoverRadius: 6,
+  //           },
+  //           {
+  //             label: "Offline",
+  //             borderColor: "#883DCF",
+  //             borderWidth: 2,
+  //             data: offlineData,
+  //             fill: true,
+  //             tension: 0,
+  //             pointBackgroundColor: "white",
+  //             pointBorderColor: "#883DCF",
+  //             pointBorderWidth: 2,
+  //             pointRadius: 4,
+  //             pointHoverRadius: 6,
+  //           },
+  //         ],
+  //       },
+  //       options: {
+  //         responsive: true,
+  //         maintainAspectRatio: false,
+  //         scales: {
+  //           x: {
+  //             grid: { color: "rgba(0,0,0,.05)" },
+  //             ticks: { maxRotation: 0 },
+  //           },
+  //           y: {
+  //             display: true,
+  //             title: { display: false, text: "Activity Percentage" },
+  //             grid: { display: false },
+  //             beginAtZero: true,
+  //             suggestedMax: 100,
+  //             ticks: { stepSize: 20, callback: (value) => value + "%" },
+  //           },
+  //         },
+  //         plugins: {
+  //           legend: { display: true, position: "top" },
+  //           tooltip: {
+  //             callbacks: {
+  //               label: (context) =>
+  //                 `${context.dataset.label}: ${context.parsed.y.toFixed(2)}%`,
+  //             },
+  //           },
+  //         },
+  //       },
+  //     });
+  //   }
+  // }
 
   async function fetchDataForDateRange() {
     if (isInitialLoad) {
@@ -276,27 +281,27 @@ import { RangeCalendar } from "@/components/ui/range-calendar";
 
     console.log(formatDate(startDate));
     console.log(formatDate(today));
-    const storeId = $selectedStore.value
-    console.log(storeId)
-    console.log(token)
+    const storeId = $selectedStore.value;
+    console.log(storeId);
+    console.log(token);
     try {
       // Call the three APIs
-        const d = await fetch(
-          `https://api.moksa.ai/people/getPeopleCount/${storeId}/${startDate}/${today}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
+      const d = await fetch(
+        `https://api.moksa.ai/people/getPeopleCount/${storeId}/${startDate}/${today}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
-        )
-        console.log(d)
-        const peopleCount = await d.json()
+        },
+      );
+      console.log(d);
+      const peopleCount = await d.json();
 
-      console.log('poeplecount',peopleCount);
-    if(peopleCount.status === 200) {
-      storeData.set(peopleCount?.data?.data)
-    }
+      console.log("poeplecount", peopleCount);
+      if (peopleCount.status === 200) {
+        storeData.set(peopleCount?.data?.data);
+      }
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -312,27 +317,28 @@ import { RangeCalendar } from "@/components/ui/range-calendar";
       : "";
     console.log(start);
     console.log(end);
-    const storeId = $selectedStore.value
+    const storeId = $selectedStore.value;
     try {
       // Call the three APIs
-        const d = await fetch(
-          `https://api.moksa.ai/people/getPeopleCount/${storeId}/${start}/${end}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
+      const d = await fetch(
+        `https://api.moksa.ai/people/getPeopleCount/${storeId}/${start}/${end}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
-        )
-        console.log(d)
-        const peopleCount = await d.json()
+        },
+      );
+      console.log(d);
+      const peopleCount = await d.json();
 
-      console.log('poeplecount',peopleCount);
-    if(peopleCount.status === 200) {
-      storeData.set(peopleCount?.data?.data)
-    }} catch (error) {
+      console.log("poeplecount", peopleCount);
+      if (peopleCount.status === 200) {
+        storeData.set(peopleCount?.data?.data);
+      }
+    } catch (error) {
       console.error("Error fetching data:", error);
-    } 
+    }
   }
 
   $: {
@@ -345,84 +351,135 @@ import { RangeCalendar } from "@/components/ui/range-calendar";
     fetchCustomDateData();
   }
 
-  onMount(async () => {
-    setTimeout(() => {
-      createChart();
-    }, 100);
-  });
+  // onMount(async () => {
+  //   setTimeout(() => {
+  //     createChart();
+  //   }, 100);
+  // });
 
+  import { Input } from "../ui/input";
+  import { createEventDispatcher } from "svelte";
+
+  let filterText = "";
+  $: filteredFruits = fruits.filter((fruit) =>
+    fruit.label.toLowerCase().includes(filterText.toLowerCase()),
+  );
+
+  const dispatch = createEventDispatcher();
+
+  function handleSelect(fruit) {
+    selectedStore.set(fruit);
+    dispatch("select", fruit);
+  }
 </script>
 
 <section
   class="w-full p-4 flex flex-col max-h-[calc(100vh-75px)] overflow-y-auto hide-scrollbar"
 >
   <div class="flex items-center justify-between">
-    <span class='flex gap-4 items-center'>
+    <span class="flex gap-4 items-center">
       <span
-      class="flex items-center border-black border-opacity-[18%] h-[40px] border-[1px] rounded-md dark:border-white"
-    >
-      <button
-        class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "7 Days" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
-        on:click={() => dateRange.set("7 Days")}>7 Days</button
+        class="flex items-center border-black border-opacity-[18%] h-[40px] border-[1px] rounded-md dark:border-white"
       >
-      <button
-        class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "15 Days" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
-        on:click={() => dateRange.set("15 Days")}>15 Days</button
-      >
-      <button
-        class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "30 Days" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
-        on:click={() => dateRange.set("30 Days")}>30 Days</button
-      >
-      <button
-        class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "12 Months" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
-        on:click={() => dateRange.set("12 Months")}>12 Months</button
-      >
-      <Popover.Root openFocus bind:open={close}>
-        <Popover.Trigger asChild let:builder>
-          <Button
-            builders={[builder]}
-            class={`2xl:py-2 2xl:px-3 py-1 px-2  text-sm hover:bg-[#0BA5E9] hover:text-white ${$dateRange === "custom" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white bg-transparent dark:border-white"}`}
-          >
-            {customDateLabel}</Button
-          >
-        </Popover.Trigger>
-        <Popover.Content class="w-auto p-0" align="start">
-          <RangeCalendar
-            bind:value
-            bind:startValue
-            initialFocus
-            numberOfMonths={2}
-            placeholder={value?.start}
-          />
-        </Popover.Content>
-      </Popover.Root>
+        <button
+          class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "7 Days" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
+          on:click={() => dateRange.set("7 Days")}>7 Days</button
+        >
+        <button
+          class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "15 Days" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
+          on:click={() => dateRange.set("15 Days")}>15 Days</button
+        >
+        <button
+          class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "30 Days" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
+          on:click={() => dateRange.set("30 Days")}>30 Days</button
+        >
+        <button
+          class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "12 Months" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
+          on:click={() => dateRange.set("12 Months")}>12 Months</button
+        >
+        <Popover.Root openFocus bind:open={close}>
+          <Popover.Trigger asChild let:builder>
+            <Button
+              builders={[builder]}
+              class={`2xl:py-2 2xl:px-3 py-1 px-2  text-sm hover:bg-[#0BA5E9] hover:text-white ${$dateRange === "custom" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white bg-transparent dark:border-white"}`}
+            >
+              {customDateLabel}</Button
+            >
+          </Popover.Trigger>
+          <Popover.Content class="w-auto p-0" align="start">
+            <RangeCalendar
+              bind:value
+              bind:startValue
+              initialFocus
+              numberOfMonths={2}
+              placeholder={value?.start}
+            />
+          </Popover.Content>
+        </Popover.Root>
+      </span>
     </span>
-   
-        </span>
-          <span class="flex items-center gap-3">
+    <span class="flex items-center gap-3">
       <!-- <Button variant="outline" class="flex items-center gap-1">
         <ListFilter size={18} /> Filters</Button
       > -->
-      <Select.Root portal={null}>
+      <!-- <Select.Root portal={null}>
         <Select.Trigger
-        class="w-[100px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg dark:bg-transparent"
+          class="w-[100px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg dark:bg-transparent"
         >
-        <Select.Value placeholder={fruits.length> 0 ? $selectedStore.label: 'No Stores'} />
+          <Select.Value
+            placeholder={fruits.length > 0 ? $selectedStore.label : "No Stores"}
+          />
         </Select.Trigger>
         <Select.Content class="max-h-[200px] overflow-y-auto">
           <Select.Group>
-              {#if fruits.length > 0}
+            {#if fruits.length > 0}
               {#each fruits as fruit}
-              <Select.Item on:click={() => {selectedStore.set(fruit); }}
-                class="px-1"
-                value={fruit.value}
-                label={fruit.label}>{fruit.label}</Select.Item
+                <Select.Item
+                  on:click={() => {
+                    selectedStore.set(fruit);
+                  }}
+                  class="px-1"
+                  value={fruit.value}
+                  label={fruit.label}>{fruit.label}</Select.Item
                 >
-                {/each}
-                {/if}
-              </Select.Group>
-            </Select.Content>
-          </Select.Root>
+              {/each}
+            {/if}
+          </Select.Group>
+        </Select.Content>
+      </Select.Root> -->
+      <Select.Root portal={null}>
+        <Select.Trigger
+          class="w-[200px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg dark:bg-transparent"
+        >
+          <Select.Value
+            placeholder={fruits.length > 0 ? $selectedStore.label : "No Stores"}
+          />
+        </Select.Trigger>
+        <Select.Content class="max-h-[300px] overflow-y-auto">
+          <div class="p-2">
+            <Input
+              type="text"
+              placeholder="Search stores..."
+              bind:value={filterText}
+              class="mb-2"
+            />
+          </div>
+          <Select.Group>
+            {#if filteredFruits.length > 0}
+              {#each filteredFruits as fruit}
+                <Select.Item
+                  on:click={() => handleSelect(fruit)}
+                  class="px-1"
+                  value={fruit.value}
+                  label={fruit.label}>{fruit.label}</Select.Item
+                >
+              {/each}
+            {:else}
+              <Select.Item disabled>N/A</Select.Item>
+            {/if}
+          </Select.Group>
+        </Select.Content>
+      </Select.Root>
       <Button
         class="flex items-center gap-1 bg-[#3D81FC] text-white hover:bg-white hover:text-[#3D81FC]"
         ><Upload size={18} /> Export Reports</Button
@@ -452,7 +509,12 @@ import { RangeCalendar } from "@/components/ui/range-calendar";
         <Clock size={40} />
       </span>
       <span>
-        <p class="text-white text-xl font-bold">{$storeData?.[0]?.busyhour === undefined || $storeData?.[0].busyhour === null ? 'N/A' : $storeData?.[0]?.busyhour}</p>
+        <p class="text-white text-xl font-bold">
+          {$storeData?.[0]?.busyhour === undefined ||
+          $storeData?.[0].busyhour === null
+            ? "N/A"
+            : $storeData?.[0]?.busyhour}
+        </p>
         <p class="text-sm font-semibold text-white">peak hours</p>
       </span>
     </div>
@@ -499,11 +561,16 @@ import { RangeCalendar } from "@/components/ui/range-calendar";
         </p>
       </span>
       <div class="h-full w-full max-h-[300px] overflow-y-auto">
-         {#if $liveData.length > 0}
-    <LivePeopleCountDataTable liveData={$liveData} selectedStore={$selectedStore}/>
-  {:else}
-    <p class="flex items-center justify-center py-4">No live data available</p>
-  {/if}
+        {#if $liveData.length > 0}
+          <LivePeopleCountDataTable
+            liveData={$liveData}
+            selectedStore={$selectedStore}
+          />
+        {:else}
+          <p class="flex items-center justify-center py-4">
+            No live data available
+          </p>
+        {/if}
       </div>
     </div>
     <!-- <div
@@ -533,7 +600,7 @@ import { RangeCalendar } from "@/components/ui/range-calendar";
               {$selectedStore.label}
             </p>
           </span>
-          <p class="flex items-center justify-center ">No data</p>
+          <p class="flex items-center justify-center">No data</p>
         {/if}
       </div>
     </div>

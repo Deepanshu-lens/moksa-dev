@@ -133,6 +133,20 @@
 
   let selectedStore = 0;
   let searchStore = "";
+
+  import { createEventDispatcher } from "svelte";
+
+  let filterText = "";
+  $: filteredFruits = fruits.filter((fruit) =>
+    fruit.label.toLowerCase().includes(filterText.toLowerCase()),
+  );
+
+  const dispatch = createEventDispatcher();
+
+  function handleSelect(fruit) {
+    selectedStore.set(fruit);
+    dispatch("select", fruit);
+  }
 </script>
 
 <section
@@ -150,7 +164,7 @@
     {/if}
     <Select.Root portal={null}>
       <Select.Trigger
-        class="w-[180px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg bg-transparent"
+        class="w-[150px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg bg-transparent"
       >
         <Select.Value
           placeholder={allStores.length > 0
@@ -159,15 +173,35 @@
         />
       </Select.Trigger>
       <Select.Content class="max-h-[200px] overflow-y-auto">
+        <div class="p-2">
+          <Input
+            type="text"
+            placeholder="Search stores..."
+            bind:value={filterText}
+            class="mb-2"
+          />
+        </div>
         <Select.Group>
-          {#each fruits as fruit, index}
+          <!-- {#each fruits as fruit, index}
             <Select.Item
               on:click={() => (selectedStore = index)}
               class="px-1"
               value={fruit.value}
               label={fruit.label}>{fruit.label}</Select.Item
             >
-          {/each}
+          {/each} -->
+          {#if filteredFruits.length > 0}
+            {#each filteredFruits as fruit, index}
+              <Select.Item
+                on:click={() => (selectedStore = index)}
+                class="px-1"
+                value={fruit.value}
+                label={fruit.label}>{fruit.label}</Select.Item
+              >
+            {/each}
+          {:else}
+            <Select.Item disabled>N/A</Select.Item>
+          {/if}
         </Select.Group>
       </Select.Content>
     </Select.Root>
