@@ -19,10 +19,14 @@
   export let aisleStoreData;
   export let token;
 
-  const fruits = allStores?.map((store: any) => ({
-    value: store.id,
-    label: store.name,
-  }));
+  const fruits = allStores
+    ?.filter((store: any) => store.id !== -1)
+    ?.map((store: any) => ({
+      value: store.id,
+      label: store.name,
+    }));
+
+  $: console.log("fruits", fruits);
 
   import { Input } from "../ui/input";
   import { createEventDispatcher } from "svelte";
@@ -73,7 +77,11 @@
   let floorMaps = writable([]);
 
   const getAllFloorMaps = async () => {
-    await Promise.all(allStores.map((store) => getFloorMap(store.id)));
+    await Promise.all(
+      allStores
+        ?.filter((store: any) => store.id !== -1)
+        ?.map((store: any) => getFloorMap(store.id)),
+    );
     // console.log('All floor maps:', $floorMaps);
   };
 
@@ -223,8 +231,8 @@
   let fusiondevicedata = [];
   let fusiondevicecategories = [];
   let selectedStore = writable({
-    value: allStores?.[0]?.id,
-    label: allStores?.[0]?.name,
+    value: fruits?.[0]?.value,
+    label: fruits?.[0]?.label,
   });
   let isInitialLoad = true;
   let isLoading = writable(false);

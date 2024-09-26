@@ -171,25 +171,33 @@
       if (ctx) {
         Chart.register(BarController, BarElement, CategoryScale, LinearScale);
 
-        const allDays = [
-          "Sunday",
-          "Monday",
-          "Tuesday",
-          "Wednesday",
-          "Thursday",
-          "Friday",
-          "Saturday",
-        ];
-        const dataMap = new Map(
-          theftData.data.map((item) => [item.day_of_week.trim(), item]),
-        );
+        // const allDays = [
+        //   "Sunday",
+        //   "Monday",
+        //   "Tuesday",
+        //   "Wednesday",
+        //   "Thursday",
+        //   "Friday",
+        //   "Saturday",
+        // ];
+        // const dataMap = new Map(
+        //   theftData.data.map((item) => [item.day_of_week.trim(), item]),
+        // );
 
-        const labels = allDays.map((day) => day);
-        const detectedData = labels.map((day) =>
-          dataMap.get(day) ? parseInt(dataMap.get(day).theft_detected) : 0,
-        );
-        const preventedData = labels.map((day) =>
-          dataMap.get(day) ? parseInt(dataMap.get(day).theft_prevented) : 0,
+        const data = theftData.data;
+
+        const labels = data.map((item) => item.day_of_week.trim());
+
+        // const labels = allDays.map((day) => day);
+        // const detectedData = labels.map((day) =>
+        //   dataMap.get(day) ? parseInt(dataMap.get(day).theft_detected) : 0,
+        // );
+        // const preventedData = labels.map((day) =>
+        //   dataMap.get(day) ? parseInt(dataMap.get(day).theft_prevented) : 0,
+        // );
+        const detectedData = data.map((item) => parseInt(item.theft_detected));
+        const preventedData = data.map((item) =>
+          parseInt(item.theft_prevented),
         );
 
         barChart = new Chart(ctx, {
@@ -791,88 +799,26 @@
     }
   }
 
-  // function updateBarChart(theftD) {
-  //   // console.log($dateRange);
-  //   // console.log("first");
-  //   if (barChart) {
-  //     // console.log("first");
-  //     // console.log(theftD);
-  //     const labels = theftD?.data.map((item) =>
-  //       $dateRange === "7 Days"
-  //         ? item.day_of_week.trim()
-  //         : $dateRange === "12 Months"
-  //           ? item.month_name.trim()
-  //           : item.date.trim(),
-  //     );
-  //     const theftDetectedData = theftD?.data.map((item) =>
-  //       parseInt(item.theft_detected),
-  //     );
-  //     const theftPreventedData = theftD?.data.map((item) =>
-  //       parseInt(item.theft_prevented),
-  //     );
-
-  //     barChart.data.labels = labels;
-  //     barChart.data.datasets[0].data = theftDetectedData;
-  //     barChart.data.datasets[1].data = theftPreventedData;
-  //     barChart.update();
-  //   }
-  // }
-
   function updateBarChart(theftD) {
-    console.log($dateRange);
-    console.log("first");
+    // console.log($dateRange);
+    // console.log("first");
     if (barChart) {
-      console.log("first");
-      console.log(theftD);
-      const allDays = [
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
-        "Sunday",
-      ];
-      const allMonths = [
-        "January",
-        "February",
-        "March",
-        "April",
-        "May",
-        "June",
-        "July",
-        "August",
-        "September",
-        "October",
-        "November",
-        "December",
-      ];
+      // console.log("first");
+      // console.log(theftD);
+      const labels = theftD?.data.map((item) =>
+        $dateRange === "7 Days"
+          ? item.day_of_week.trim()
+          : $dateRange === "12 Months"
+            ? item.month_name.trim()
+            : item.date.trim(),
+      );
+      const theftDetectedData = theftD?.data.map((item) =>
+        parseInt(item.theft_detected),
+      );
+      const theftPreventedData = theftD?.data.map((item) =>
+        parseInt(item.theft_prevented),
+      );
 
-      let labels, theftDetectedData, theftPreventedData;
-
-      if ($dateRange === "12 Months") {
-        const dataMap = new Map(
-          theftD?.data.map((item) => [item.month_name.trim(), item]),
-        );
-        labels = allMonths.map((month) => month);
-        theftDetectedData = labels.map((month) =>
-          dataMap.get(month) ? parseInt(dataMap.get(month).theft_detected) : 0,
-        );
-        theftPreventedData = labels.map((month) =>
-          dataMap.get(month) ? parseInt(dataMap.get(month).theft_prevented) : 0,
-        );
-      } else {
-        const dataMap = new Map(
-          theftD?.data.map((item) => [item.day_of_week.trim(), item]),
-        );
-        labels = allDays.map((day) => day);
-        theftDetectedData = labels.map((day) =>
-          dataMap.get(day) ? parseInt(dataMap.get(day).theft_detected) : 0,
-        );
-        theftPreventedData = labels.map((day) =>
-          dataMap.get(day) ? parseInt(dataMap.get(day).theft_prevented) : 0,
-        );
-      }
       barChart.data.labels = labels;
       barChart.data.datasets[0].data = theftDetectedData;
       barChart.data.datasets[1].data = theftPreventedData;
@@ -880,30 +826,65 @@
     }
   }
 
-  // function updateTheftChart(theftD) {
+  // function updateBarChart(theftD) {
   //   console.log($dateRange);
   //   console.log("first");
-  //   if (theftChart) {
+  //   if (barChart) {
   //     console.log("first");
   //     console.log(theftD);
-  //     const labels = theftD?.data.map((item) =>
-  //       $dateRange === "7 Days"
-  //         ? item.day_of_week.trim()
-  //         : $dateRange === "12 Months"
-  //           ? item.month_name.trim()
-  //           : item.date.trim(),
-  //     );
-  //     const theftDetectedData = theftD?.data.map((item) =>
-  //       parseInt(-item.theft_detected),
-  //     );
-  //     const theftPreventedData = theftD?.data.map((item) =>
-  //       Number(item.theft_prevented),
-  //     );
+  //     const allDays = [
+  //       "Monday",
+  //       "Tuesday",
+  //       "Wednesday",
+  //       "Thursday",
+  //       "Friday",
+  //       "Saturday",
+  //       "Sunday",
+  //     ];
+  //     const allMonths = [
+  //       "January",
+  //       "February",
+  //       "March",
+  //       "April",
+  //       "May",
+  //       "June",
+  //       "July",
+  //       "August",
+  //       "September",
+  //       "October",
+  //       "November",
+  //       "December",
+  //     ];
 
-  //     theftChart.data.labels = labels;
-  //     theftChart.data.datasets[0].data = theftDetectedData;
-  //     theftChart.data.datasets[1].data = theftPreventedData;
-  //     theftChart.update();
+  //     let labels, theftDetectedData, theftPreventedData;
+
+  //     if ($dateRange === "12 Months") {
+  //       const dataMap = new Map(
+  //         theftD?.data.map((item) => [item.month_name.trim(), item]),
+  //       );
+  //       labels = allMonths.map((month) => month);
+  //       theftDetectedData = labels.map((month) =>
+  //         dataMap.get(month) ? parseInt(dataMap.get(month).theft_detected) : 0,
+  //       );
+  //       theftPreventedData = labels.map((month) =>
+  //         dataMap.get(month) ? parseInt(dataMap.get(month).theft_prevented) : 0,
+  //       );
+  //     } else {
+  //       const dataMap = new Map(
+  //         theftD?.data.map((item) => [item.day_of_week.trim(), item]),
+  //       );
+  //       labels = allDays.map((day) => day);
+  //       theftDetectedData = labels.map((day) =>
+  //         dataMap.get(day) ? parseInt(dataMap.get(day).theft_detected) : 0,
+  //       );
+  //       theftPreventedData = labels.map((day) =>
+  //         dataMap.get(day) ? parseInt(dataMap.get(day).theft_prevented) : 0,
+  //       );
+  //     }
+  //     barChart.data.labels = labels;
+  //     barChart.data.datasets[0].data = theftDetectedData;
+  //     barChart.data.datasets[1].data = theftPreventedData;
+  //     barChart.update();
   //   }
   // }
 
@@ -913,55 +894,19 @@
     if (theftChart) {
       console.log("first");
       console.log(theftD);
-      const allDays = [
-        "Sunday",
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
-      ];
-      const allMonths = [
-        "January",
-        "February",
-        "March",
-        "April",
-        "May",
-        "June",
-        "July",
-        "August",
-        "September",
-        "October",
-        "November",
-        "December",
-      ];
-
-      let labels, theftDetectedData, theftPreventedData;
-
-      if ($dateRange === "12 Months") {
-        const dataMap = new Map(
-          theftD?.data.map((item) => [item.month_name.trim(), item]),
-        );
-        labels = allMonths.map((month) => month);
-        theftDetectedData = labels.map((month) =>
-          dataMap.get(month) ? parseInt(-dataMap.get(month).theft_detected) : 0,
-        );
-        theftPreventedData = labels.map((month) =>
-          dataMap.get(month) ? parseInt(dataMap.get(month).theft_prevented) : 0,
-        );
-      } else {
-        const dataMap = new Map(
-          theftD?.data.map((item) => [item.day_of_week.trim(), item]),
-        );
-        labels = allDays.map((day) => day);
-        theftDetectedData = labels.map((day) =>
-          dataMap.get(day) ? parseInt(-dataMap.get(day).theft_detected) : 0,
-        );
-        theftPreventedData = labels.map((day) =>
-          dataMap.get(day) ? parseInt(dataMap.get(day).theft_prevented) : 0,
-        );
-      }
+      const labels = theftD?.data.map((item) =>
+        $dateRange === "7 Days"
+          ? item.day_of_week.trim()
+          : $dateRange === "12 Months"
+            ? item.month_name.trim()
+            : item.date.trim(),
+      );
+      const theftDetectedData = theftD?.data.map((item) =>
+        parseInt(-item.theft_detected),
+      );
+      const theftPreventedData = theftD?.data.map((item) =>
+        Number(item.theft_prevented),
+      );
 
       theftChart.data.labels = labels;
       theftChart.data.datasets[0].data = theftDetectedData;
@@ -969,6 +914,69 @@
       theftChart.update();
     }
   }
+
+  // function updateTheftChart(theftD) {
+  //   console.log($dateRange);
+  //   console.log("first");
+  //   if (theftChart) {
+  //     console.log("first");
+  //     console.log(theftD);
+  //     const allDays = [
+  //       "Sunday",
+  //       "Monday",
+  //       "Tuesday",
+  //       "Wednesday",
+  //       "Thursday",
+  //       "Friday",
+  //       "Saturday",
+  //     ];
+  //     const allMonths = [
+  //       "January",
+  //       "February",
+  //       "March",
+  //       "April",
+  //       "May",
+  //       "June",
+  //       "July",
+  //       "August",
+  //       "September",
+  //       "October",
+  //       "November",
+  //       "December",
+  //     ];
+
+  //     let labels, theftDetectedData, theftPreventedData;
+
+  //     if ($dateRange === "12 Months") {
+  //       const dataMap = new Map(
+  //         theftD?.data.map((item) => [item.month_name.trim(), item]),
+  //       );
+  //       labels = allMonths.map((month) => month);
+  //       theftDetectedData = labels.map((month) =>
+  //         dataMap.get(month) ? parseInt(-dataMap.get(month).theft_detected) : 0,
+  //       );
+  //       theftPreventedData = labels.map((month) =>
+  //         dataMap.get(month) ? parseInt(dataMap.get(month).theft_prevented) : 0,
+  //       );
+  //     } else {
+  //       const dataMap = new Map(
+  //         theftD?.data.map((item) => [item.day_of_week.trim(), item]),
+  //       );
+  //       labels = allDays.map((day) => day);
+  //       theftDetectedData = labels.map((day) =>
+  //         dataMap.get(day) ? parseInt(-dataMap.get(day).theft_detected) : 0,
+  //       );
+  //       theftPreventedData = labels.map((day) =>
+  //         dataMap.get(day) ? parseInt(dataMap.get(day).theft_prevented) : 0,
+  //       );
+  //     }
+
+  //     theftChart.data.labels = labels;
+  //     theftChart.data.datasets[0].data = theftDetectedData;
+  //     theftChart.data.datasets[1].data = theftPreventedData;
+  //     theftChart.update();
+  //   }
+  // }
 
   function updateTrendChart(theftT) {
     if (chart) {
@@ -1014,6 +1022,7 @@
 
     console.log(formatDate(startDate));
     console.log(formatDate(today));
+    console.log("selectedstore", $selectedStore.value);
     try {
       // Call the three APIs
       const [theftD, theftT, theftL, storesTotal] = await Promise.all([
@@ -1498,7 +1507,7 @@
             />
           </div>
           <Select.Group>
-            <Select.Item
+            <!-- <Select.Item
               on:click={() => {
                 selectedStore.set({ value: -1, label: "All Stores" });
                 fetchDataStoreWise();
@@ -1506,7 +1515,7 @@
               class="px-1"
               value="All Stores"
               label="All Stores">All Stores</Select.Item
-            >
+            > -->
             {#if filteredFruits.length > 0}
               {#each filteredFruits as fruit}
                 <Select.Item
@@ -1537,7 +1546,7 @@
   </div>
   <div class="grid grid-cols-8 grid-rows-12 gap-4 my-4 h-[1600px]">
     <div
-      class="col-span-2 border rounded-md bg-gradient-to-r from-[#00FEA3] to-[#007077] p-2 flex items-center gap-3"
+      class="col-span-2 border rounded-md bg-gradient-to-r from-[#FFB156] to-[#FF007A] p-2 flex items-center gap-3 max-h-[100px]"
     >
       <span
         class="size-[60px] grid place-items-center text-white bg-white bg-opacity-20 rounded-full rotate-90"
@@ -1565,7 +1574,7 @@
       </span>
     </div>
     <div
-      class="col-span-2 border rounded-md bg-gradient-to-r from-[#02A7FD] to-[#141C64] p-2 flex items-center gap-3"
+      class="col-span-2 border rounded-md bg-gradient-to-r from-[#00FEA3] to-[#007077] p-2 flex items-center gap-3 max-h-[100px]"
     >
       <span
         class="size-[60px] grid place-items-center text-white bg-white bg-opacity-20 rounded-full rotate-90"
@@ -1593,7 +1602,7 @@
       </span>
     </div>
     <div
-      class="col-span-2 border rounded-md bg-gradient-to-r from-[#FFB156] to-[#FF007A] p-2 flex items-center gap-3"
+      class="col-span-2 border rounded-md bg-gradient-to-r from-[#02A7FD] to-[#141C64] p-2 flex items-center gap-3 max-h-[100px] invisible"
     >
       <span
         class="size-[60px] grid place-items-center text-white bg-white bg-opacity-20 rounded-full rotate-90"
@@ -1623,7 +1632,7 @@
       </span>
     </div>
     <div
-      class="col-span-2 border rounded-md bg-gradient-to-r from-[#C8C303] to-[#597802] p-2 flex items-center gap-3"
+      class="col-span-2 border rounded-md bg-gradient-to-r from-[#C8C303] to-[#597802] p-2 flex items-center gap-3 max-h-[100px] invisible"
     >
       <span
         class="size-[60px] grid place-items-center text-white bg-white bg-opacity-20 rounded-full rotate-90"
@@ -1685,7 +1694,7 @@
             class="text-xs text-white bg-pink-500 rounded-md p-1">Live</span
           > -->
         </p>
-        <Select.Root portal={null}>
+        <!-- <Select.Root portal={null}>
           <Select.Trigger
             class="w-[150px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg dark:bg-transparent"
           >
@@ -1712,14 +1721,7 @@
                   label="All Stores">All Stores</Select.Item
                 >
               {/if}
-              <!-- {#each fruits as fruit}
-                <Select.Item
-                  on:click={() => selectedStore.set(fruit)}
-                  class="px-1"
-                  value={fruit.value}
-                  label={fruit.label}>{fruit.label}</Select.Item
-                >
-              {/each} -->
+        
               {#if filteredFruits.length > 0}
                 {#each filteredFruits as fruit}
                   <Select.Item
@@ -1734,7 +1736,7 @@
               {/if}
             </Select.Group>
           </Select.Content>
-        </Select.Root>
+        </Select.Root> -->
       </span>
       <div class="flex w-full h-full">
         <span class="flex flex-col w-1/4 gap-2 mt-4">

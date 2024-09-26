@@ -39,17 +39,19 @@
   let customDateLabel = "Custom";
   let close = false;
   const userID = 8;
-  const fruits = allStores?.map((store: any) => ({
-    value: store.id,
-    label: store.name,
-  }));
+  const fruits = allStores
+    ?.filter((store: any) => store.id !== -1)
+    ?.map((store: any) => ({
+      value: store.id,
+      label: store.name,
+    }));
 
   let selectedStore = writable({
-    value: allStores?.[0]?.id,
-    label: allStores?.[0]?.name,
+    value: fruits?.[0]?.value,
+    label: fruits?.[0]?.label,
   });
 
-  let allS = writable(fruits);
+  // let allS = writable(fruits);
 
   let socket: any;
 
@@ -488,7 +490,7 @@
   </div>
   <div class="grid grid-cols-8 grid-rows-9 gap-4 mt-4">
     <div
-      class="col-span-2 border rounded-md bg-gradient-to-r from-[#00FEA3] to-[#007077] p-2 flex items-center gap-3"
+      class="col-span-2 border rounded-md bg-gradient-to-r from-[#00FEA3] to-[#007077] p-2 flex items-center gap-3 max-h-[80px]"
     >
       <span
         class="size-[60px] grid place-items-center text-white bg-white bg-opacity-20 rounded-full"
@@ -501,7 +503,7 @@
       </span>
     </div>
     <div
-      class="col-span-2 border rounded-md bg-gradient-to-r from-[#02A7FD] to-[#141C64] p-2 flex items-center gap-3"
+      class="col-span-2 border rounded-md bg-gradient-to-r from-[#02A7FD] to-[#141C64] p-2 flex items-center gap-3 max-h-[80px]"
     >
       <span
         class="size-[60px] grid place-items-center text-white bg-white bg-opacity-20 rounded-full"
@@ -519,7 +521,7 @@
       </span>
     </div>
     <div
-      class="col-span-2 border rounded-md bg-gradient-to-r from-[#FFB156] to-[#FF007A] p-2 flex items-center gap-3 invisible"
+      class="col-span-2 border rounded-md bg-gradient-to-r from-[#FFB156] to-[#FF007A] p-2 flex items-center gap-3 invisible max-h-[80px]"
     >
       <span
         class="size-[60px] grid place-items-center text-white bg-white bg-opacity-20 rounded-full"
@@ -534,7 +536,7 @@
       </span>
     </div>
     <div
-      class="col-span-2 border rounded-md bg-gradient-to-r from-[#C8C303] to-[#597802] p-2 flex items-center gap-3 invisible"
+      class="col-span-2 border rounded-md bg-gradient-to-r from-[#C8C303] to-[#597802] p-2 flex items-center gap-3 invisible max-h-[80px]"
     >
       <span
         class="size-[60px] grid place-items-center text-white bg-white bg-opacity-20 rounded-full"
@@ -546,9 +548,8 @@
         <p class="text-sm font-semibold text-white">total thefts detected</p>
       </span>
     </div>
-
     <div
-      class="col-span-8 row-span-4 border rounded-md flex flex-col rounded-t-xl dark:border-white/[.7]"
+      class="col-span-8 row-span-4 border rounded-md flex flex-col rounded-t-xl dark:border-white/[.7] max-h-[400px]"
     >
       <span
         class="rounded-t-xl w-full h-[50px] bg-[#050F40] flex items-center justify-between px-4"

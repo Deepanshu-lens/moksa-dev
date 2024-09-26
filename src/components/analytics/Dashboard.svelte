@@ -11,15 +11,22 @@
   export let theftData;
   export let user;
   import * as Popover from "../ui/popover";
-  let selectedStore = writable({ value: -1, label: "All Stores" });
 
   // console.log('busyness',busyness)
+
+  $: console.log("allStores", allStores);
 
   const fruits = allStores?.map((store: any) => ({
     value: store.id,
     label: store.name,
   }));
 
+  let selectedStore = writable({
+    value: fruits[0].value,
+    label: fruits[0].label,
+  });
+
+  // onMount(() => {
   // onMount(() => {
   //     if(allStores?.length > 0) {
   // selectedStore.set(fruits[0])
@@ -750,7 +757,7 @@
       <img src="/images/card1.png" alt="" class="absolute top-0 right-0" />
     </div>
     <div
-      class="col-span-2 border rounded-lg h-[85px] bg-gradient-to-r from-[#02A7FD] to-[#141C64] py-3 px-4 relative"
+      class="col-span-2 border rounded-lg h-[85px] bg-gradient-to-r from-[#C8C303] to-[#597802] py-3 px-4 relative"
     >
       <p class="text-white font-semibold">No. of cameras assigned</p>
 
@@ -760,7 +767,7 @@
       <img src="/images/card2.png" alt="" class="absolute top-0 right-0" />
     </div>
     <div
-      class="col-span-2 border rounded-lg bg-gradient-to-r from-[#FFB156] to-[#FF007A] px-4 py-3 relative h-[85px]"
+      class="col-span-2 border rounded-lg bg-gradient-to-r from-[#02A7FD] to-[#141C64] px-4 py-3 relative h-[85px]"
     >
       <p class="text-white font-semibold">Total theft detected</p>
       <p class="text-xl font-semibold text-white">
@@ -769,7 +776,7 @@
       <img src="/images/card3.png" alt="" class="absolute top-0 right-0" />
     </div>
     <div
-      class="col-span-2 border rounded-lg bg-gradient-to-r from-[#C8C303] to-[#597802] px-4 py-3 relative h-[85px]"
+      class="col-span-2 border rounded-lg bg-gradient-to-r from-[#FFB156] to-[#FF007A] px-4 py-3 relative h-[85px]"
     >
       <p class="text-white font-semibold">No. of thefts prevented</p>
       <p class="text-xl font-semibold text-white">
@@ -828,7 +835,7 @@
                   {/each}
                 {/if} -->
                 {#if filteredFruits.length > 0}
-                  {#if user.role === "superAdmin"}
+                  <!-- {#if user.role === "superAdmin"}
                     <Select.Item
                       on:click={() => {
                         selectedStore.set({ value: -1, label: "All Stores" });
@@ -838,7 +845,7 @@
                       value="All Stores"
                       label="All Stores">All Stores</Select.Item
                     >
-                  {/if}
+                  {/if} -->
                   {#each filteredFruits as fruit}
                     <Select.Item
                       on:click={() => handleSelect(fruit)}

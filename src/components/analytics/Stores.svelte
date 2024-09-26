@@ -29,7 +29,7 @@
     const res = await fetch("/api/store/getStoreDetails", {
       method: "POST",
       body: JSON.stringify({
-        storeId: allStores,
+        storeId: allStores.filter((store) => store.id !== -1),
       }),
     });
     const data = await res.json();
@@ -37,11 +37,18 @@
     cardData.set(data);
   });
 
-  $: combinedStores = allStores?.map((store) => {
-    const theftData = theftandcamera.find((t) => t.name === store.name) || {};
-    const nodeData = nodes.find((n: any) => n.moksaId === store.id) || {};
-    return { ...store, ...theftData, lensId: nodeData ? nodeData.id : null };
-  });
+  // $: combinedStores = allStores?.map((store) => {
+  //   const theftData = theftandcamera.find((t) => t.name === store.name) || {};
+  //   const nodeData = nodes.find((n: any) => n.moksaId === store.id) || {};
+  //   return { ...store, ...theftData, lensId: nodeData ? nodeData.id : null };
+  // });
+  $: combinedStores = allStores
+    ?.filter((store) => store.id !== -1)
+    .map((store) => {
+      const theftData = theftandcamera.find((t) => t.name === store.name) || {};
+      const nodeData = nodes.find((n: any) => n.moksaId === store.id) || {};
+      return { ...store, ...theftData, lensId: nodeData ? nodeData.id : null };
+    });
 
   $: uniqueLocations = [
     ...new Set(combinedStores.map((store) => store.country)),
@@ -50,10 +57,15 @@
     ...new Set(combinedStores.map((store) => store.manager)),
   ].filter(Boolean);
 
-  const fruits = allStores.map((store: any) => ({
-    value: store.id,
-    label: store.name,
-  }));
+  const fruits = allStores
+    .filter((store) => store.id !== -1)
+    .map((store: any) => ({
+      value: store.id,
+      label: store.name,
+    }));
+
+  $: console.log(fruits);
+  $: console.log("combinedStores", combinedStores);
 
   // $: console.log('uniqueLocations',uniqueLocations)
   // $: console.log('uniquemanager',uniqueManagers)
@@ -168,7 +180,7 @@
       >
         <Select.Value
           placeholder={allStores.length > 0
-            ? allStores?.[selectedStore]?.name
+            ? fruits?.[selectedStore]?.label
             : "No Stores"}
         />
       </Select.Trigger>

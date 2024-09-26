@@ -55,7 +55,8 @@ export const load: PageServerLoad = async ({ fetch, cookies, locals }) => {
         const response = await fetch('https://api.moksa.ai/store/getAllStoresForDropdown', {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${cookies.get('moksa-token')}`
+                'Authorization': `Bearer ${cookies.get('moksa-token')}`,
+                'enableallstores': 'true'
             }
         });
         return response.json();
@@ -65,7 +66,8 @@ export const load: PageServerLoad = async ({ fetch, cookies, locals }) => {
         const allstoreData = await fetch(`https://api.moksa.ai/store/getAllStoresTotals/${formatDate(oneWeekAgo)}/${formatDate(today)}`, {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${cookies.get('moksa-token')}`
+                'Authorization': `Bearer ${cookies.get('moksa-token')}`,
+
             }
         });
         return allstoreData.json();

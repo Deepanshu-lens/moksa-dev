@@ -55,20 +55,22 @@
   }
 
   async function getList(item) {
+    console.log($selectedNode.name);
     console.log("calling camera pocketbase collection placubacl");
     const list = await PB.collection("camera").getList(0, 100, {
       filter: `node~"${$selectedNode.id}" && save = true`,
       sort: "-created",
     });
     console.log("camera status list", list);
-    list.items.forEach((item) => {
-      if (!$uniqueUrlList.some((uniqueItem) => uniqueItem.url === item.url)) {
-        uniqueUrlList.update((currentList) => {
-          currentList.push(item);
-          return currentList;
-        });
-      }
-    });
+    // list.items.forEach((item) => {
+    // if (!$uniqueUrlList.some((uniqueItem) => uniqueItem.url === item.url)) {
+    //   uniqueUrlList.update((currentList) => {
+    //     currentList.push(item);
+    //     return currentList;
+    //   });
+    // }
+    // });
+    uniqueUrlList.set(list.items);
   }
 
   async function handleCameraChange(cam) {
@@ -302,11 +304,17 @@
       chosenNode.value === video.cameraNode,
   );
 
-  onMount(() => {
-    getList();
-    // playbackurl.set('/videos/output.m3u8')
-    // isLoading= false
-  });
+  // onMount(() => {
+  //   getList();
+  //   // playbackurl.set('/videos/output.m3u8')
+  //   // isLoading= false
+  // });
+
+  $: {
+    if ($selectedNode) {
+      getList();
+    }
+  }
   // console.log('playbacklist',features)
 
   // $: console.log($playbackurl)

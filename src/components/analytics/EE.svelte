@@ -42,10 +42,12 @@
   export let allStores;
   export let token;
 
-  const stores = allStores?.map((store: any) => ({
-    value: store.id,
-    label: store.name,
-  }));
+  const stores = allStores
+    ?.filter((store: any) => store.id !== -1)
+    ?.map((store: any) => ({
+      value: store.id,
+      label: store.name,
+    }));
 
   let filterText = "";
   $: filteredFruits = stores.filter((fruit) =>
@@ -324,7 +326,7 @@
   }
 
   $: {
-    if ($dateRange !== "custom" && $dateRange !== "7 Days") {
+    if ($dateRange !== "custom") {
       console.log("getting efficiency data by time", $dateRange);
       getEfficiencyDataByTime();
     }

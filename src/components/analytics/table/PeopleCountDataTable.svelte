@@ -2,7 +2,16 @@
   import { createTable, Render, Subscribe } from "svelte-headless-table";
   import * as Table from "@/components/ui/table";
   import { Button } from "@/components/ui/button";
-  import { ArrowUpDown, ChevronRight, Edit, Store, StoreIcon, Trash2, TrendingDown, TrendingUp } from "lucide-svelte";
+  import {
+    ArrowUpDown,
+    ChevronRight,
+    Edit,
+    Store,
+    StoreIcon,
+    Trash2,
+    TrendingDown,
+    TrendingUp,
+  } from "lucide-svelte";
   import { createEventDispatcher } from "svelte";
   import {
     addPagination,
@@ -11,7 +20,7 @@
     addSortBy,
   } from "svelte-headless-table/plugins";
   import * as Select from "@/components/ui/select";
-  import { User,ChevronLeft } from "lucide-svelte";
+  import { User, ChevronLeft } from "lucide-svelte";
   import { readable, writable } from "svelte/store";
 
   const dispatch = createEventDispatcher();
@@ -71,13 +80,12 @@
 
   // console.log($storeData);
 
-
-  $: dbData = $storeData.map((item:any) => {
+  $: dbData = $storeData.map((item: any) => {
     return {
       storeName: item.store,
       customerCount: item.noofcustomers,
-      busyHourProjections: 'Coming Soon',
-      date: item.date
+      busyHourProjections: "Coming Soon",
+      date: item.date,
     };
   });
 
@@ -92,7 +100,7 @@
     page: addPagination({ initialPageSize: 5 }),
     sort: addSortBy(),
     filter: addTableFilter({
-      fn: ({ filterValue, value }: { filterValue: string, value: string }) =>
+      fn: ({ filterValue, value }: { filterValue: string; value: string }) =>
         value.toLowerCase().includes(filterValue.toLowerCase()),
     }),
     select: addSelectedRows(),
@@ -124,36 +132,38 @@
     //   header: '',
     //   cell: () => '',
     // }),
-
   ]);
 
+  const pageSizeOptions = [5, 10, 20, 50];
 
-    const pageSizeOptions = [5, 10, 20, 50];
+  $: ({ headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } =
+    table.createViewModel(columns));
 
-  $: ({ headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } = table.createViewModel(columns));
+  $: ({ pageIndex, hasNextPage, hasPreviousPage, pageSize } =
+    pluginStates.page);
 
-  $: ({ pageIndex, hasNextPage, hasPreviousPage, pageSize} = pluginStates.page);
-
-function goToNextPage() {
-  $pageIndex = $pageIndex + 1
+  function goToNextPage() {
+    $pageIndex = $pageIndex + 1;
   }
 
   function goToPreviousPage() {
- $pageIndex = $pageIndex - 1
+    $pageIndex = $pageIndex - 1;
   }
 
   function changePageSize(newSize: number) {
-    $pageSize = newSize
+    $pageSize = newSize;
   }
 </script>
 
 <div class="m-0 flex flex-col">
-      <span
-        class="rounded-t-xl w-full h-[50px] bg-transparent flex items-center justify-between px-4"
-      >
-        <p class=" text-xl font-semibold flex items-center gap-2">{$storeData[0].store}</p>
-        <div class='flex items-center gap-4'>
-<div class="flex items-center space-x-2">
+  <span
+    class="rounded-t-xl w-full h-[50px] bg-transparent flex items-center justify-between px-4"
+  >
+    <p class=" text-xl font-semibold flex items-center gap-2">
+      {$storeData[0].store}
+    </p>
+    <div class="flex items-center gap-4">
+      <!-- <div class="flex items-center space-x-2">
       <span class="text-sm text-gray-700 font-medium">Rows per page:</span>
        <Select.Root portal={null}>
           <Select.Trigger
@@ -174,48 +184,66 @@ function goToNextPage() {
           </Select.Content>
           <Select.Input name="favoriteFruit" />
         </Select.Root>
-    </div>
+    </div> -->
 
-    <div class="flex items-center space-x-2">
-      <span class="text-sm text-gray-700">{$pageIndex + 1}-{Math.min(($pageIndex + 1) * $pageSize, $data.length)} of {$data.length}</span>
       <div class="flex items-center space-x-2">
-        <Button
-          variant="ghost"
-          size="icon"
-          on:click={goToPreviousPage}
-          disabled={!$hasPreviousPage}
+        <span class="text-sm text-gray-700"
+          >{$pageIndex + 1}-{Math.min(
+            ($pageIndex + 1) * $pageSize,
+            $data.length,
+          )} of {$data.length}</span
         >
-          <ChevronLeft class="h-4 w-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-        on:click={goToNextPage}
-          disabled={!$hasNextPage}
-        >
-          <ChevronRight class="h-4 w-4" />
-        </Button>
+        <div class="flex items-center space-x-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            on:click={goToPreviousPage}
+            disabled={!$hasPreviousPage}
+          >
+            <ChevronLeft class="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            on:click={goToNextPage}
+            disabled={!$hasNextPage}
+          >
+            <ChevronRight class="h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </div>
-        </div>
-
-      </span>
+  </span>
   <Table.Root {...$tableAttrs} class="w-full">
     <Table.Header>
       {#each $headerRows as headerRow}
         <Subscribe rowAttrs={headerRow.attrs()}>
-          <Table.Row class="bg-transparent flex flex-row border-b items-center justify-between">
+          <Table.Row
+            class="bg-transparent flex flex-row border-b items-center justify-between"
+          >
             {#each headerRow.cells as cell (cell.id)}
-              <Subscribe attrs={cell.attrs()} let:attrs props={cell.props()} let:props>
-                {#if cell.id === 'chevron'}
-                <p class='w-1/5'></p>
+              <Subscribe
+                attrs={cell.attrs()}
+                let:attrs
+                props={cell.props()}
+                let:props
+              >
+                {#if cell.id === "chevron"}
+                  <p class="w-1/5"></p>
                 {:else}
-                <Table.Head {...attrs} class="text-[#727272] whitespace-nowrap text-sm h-full flex items-center text-center justify-center py-2 w-1/4">
-                  <Button variant="ghost" on:click={props.sort.toggle} class="hover:bg-transparent text-[#727272] opacity-60 text-xs">
-                    <Render of={cell.render()} />
-                    <ArrowUpDown class="ml-2 h-4 w-4" />
-                  </Button>
-                </Table.Head>
+                  <Table.Head
+                    {...attrs}
+                    class="text-[#727272] whitespace-nowrap text-sm h-full flex items-center text-center justify-center py-2 w-1/4"
+                  >
+                    <Button
+                      variant="ghost"
+                      on:click={props.sort.toggle}
+                      class="hover:bg-transparent text-[#727272] opacity-60 text-xs"
+                    >
+                      <Render of={cell.render()} />
+                      <ArrowUpDown class="ml-2 h-4 w-4" />
+                    </Button>
+                  </Table.Head>
                 {/if}
               </Subscribe>
             {/each}
@@ -226,22 +254,34 @@ function goToNextPage() {
     <Table.Body {...$tableBodyAttrs}>
       {#each $pageRows as row (row.id)}
         <Subscribe rowAttrs={row.attrs()} let:rowAttrs>
-          <Table.Row {...rowAttrs} class="border-b flex items-center w-full justify-between">
+          <Table.Row
+            {...rowAttrs}
+            class="border-b flex items-center w-full justify-between"
+          >
             {#each row.cells as cell (cell.id)}
               <Subscribe attrs={cell.attrs()} let:attrs>
-                <Table.Cell {...attrs} class='flex items-center justify-center whitespace-nowrap flex-1 py-2 w-1/4'>
-                  {#if cell.id === 'storeName'}
+                <Table.Cell
+                  {...attrs}
+                  class="flex items-center justify-center whitespace-nowrap flex-1 py-2 w-1/4"
+                >
+                  {#if cell.id === "storeName"}
                     <div class="flex items-center gap-2">
-                      <div class="w-8 h-8 rounded text-start bg-blue-900 flex items-center justify-center">
+                      <div
+                        class="w-8 h-8 rounded text-start bg-blue-900 flex items-center justify-center"
+                      >
                         <Store class="w-4 h-4 text-white" />
                       </div>
                       <span>{row.original.storeName}</span>
                     </div>
-                  {:else if cell.id === 'customerProjection'}
+                  {:else if cell.id === "customerProjection"}
                     <div class="flex items-center gap-2">
-                      <span class="text-gray-600">{row.original.customerProjection.value}</span>
-                      <div class={`px-2 py-1 rounded ${row.original.customerProjection.trend === 'up' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
-                        {#if row.original.customerProjection.trend === 'up'}
+                      <span class="text-gray-600"
+                        >{row.original.customerProjection.value}</span
+                      >
+                      <div
+                        class={`px-2 py-1 rounded ${row.original.customerProjection.trend === "up" ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"}`}
+                      >
+                        {#if row.original.customerProjection.trend === "up"}
                           <TrendingUp class="w-4 h-4 inline mr-1" />
                         {:else}
                           <TrendingDown class="w-4 h-4 inline mr-1" />
@@ -249,9 +289,9 @@ function goToNextPage() {
                         {row.original.customerProjection.percentage}%
                       </div>
                     </div>
-                  {:else if cell.id === 'chevron'}
-              <ChevronRight class="w-5 h-5 text-gray-400" />
-{:else}
+                  {:else if cell.id === "chevron"}
+                    <ChevronRight class="w-5 h-5 text-gray-400" />
+                  {:else}
                     <Render of={cell.render()} />
                   {/if}
                 </Table.Cell>

@@ -2,7 +2,15 @@
   import { createTable, Render, Subscribe } from "svelte-headless-table";
   import * as Table from "@/components/ui/table";
   import { Button } from "@/components/ui/button";
-  import { ArrowUpDown, Edit, Store, StoreIcon, Trash2, TrendingDown, TrendingUp } from "lucide-svelte";
+  import {
+    ArrowUpDown,
+    Edit,
+    Store,
+    StoreIcon,
+    Trash2,
+    TrendingDown,
+    TrendingUp,
+  } from "lucide-svelte";
   import { createEventDispatcher } from "svelte";
   import {
     addPagination,
@@ -17,36 +25,20 @@
   export let efficiencyData;
   export let selectedStore;
 
-  function generateRandomMinutes() {
-  // Generate random time between 30 and 240 minutes (4 hours)
-  return Math.floor(Math.random() * (240 - 30 + 1) + 30);
-}
+  $: console.log("emp table", $efficiencyData.data.data);
 
-function formatMinutes(minutes: number): string {
-  const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
-  return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:00`;
-}
-
-function generateRandomEfficiency() {
-  // Generate random efficiency score between 50 and 100
-  return Math.floor(Math.random() * (100 - 50 + 1) + 50);
-}
-
-$: console.log('emp table',$efficiencyData.data.data)
-
-$: dbData = $efficiencyData.data.data.map((item: any) => {
-return {
-  employee: `${item.first_name} ${item.last_name}`,
+  $: dbData = $efficiencyData.data.data.map((item: any) => {
+    return {
+      employee: `${item.first_name} ${item.last_name}`,
       storeName: item.storeName === undefined ? $selectedStore : item.storeName,
-    role: item.role,
-    withCustomers: item.customer,
-    onMobile: item.mobile,
-    sittingIdle: item.idle,
-    fillingShelf: 'Coming Soon',
-    efficiencyScore: 'Coming Soon',
-  }
-})
+      role: item.role,
+      withCustomers: item.customer,
+      onMobile: item.mobile,
+      sittingIdle: item.idle,
+      fillingShelf: item.fillingShelves,
+      efficiencyScore: "Coming Soon",
+    };
+  });
 
   $: data = writable(dbData);
 
@@ -59,7 +51,7 @@ return {
     page: addPagination({ initialPageSize: 3 }),
     sort: addSortBy(),
     filter: addTableFilter({
-      fn: ({ filterValue, value }: { filterValue: string, value: string }) =>
+      fn: ({ filterValue, value }: { filterValue: string; value: string }) =>
         value.toLowerCase().includes(filterValue.toLowerCase()),
     }),
     select: addSelectedRows(),
@@ -107,9 +99,8 @@ return {
 
   $: ({ headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } =
     table.createViewModel(columns));
-$: ({ hasNextPage, hasPreviousPage, pageIndex, pageCount } =
-    pluginStates.page)
-
+  $: ({ hasNextPage, hasPreviousPage, pageIndex, pageCount } =
+    pluginStates.page);
 </script>
 
 <div class="m-0">
@@ -149,25 +140,36 @@ $: ({ hasNextPage, hasPreviousPage, pageIndex, pageCount } =
     <Table.Body {...$tableBodyAttrs}>
       {#each $pageRows as row (row.id)}
         <Subscribe rowAttrs={row.attrs()} let:rowAttrs>
-          <Table.Row {...rowAttrs} class="border-b flex items-center w-full justify-between">
+          <Table.Row
+            {...rowAttrs}
+            class="border-b flex items-center w-full justify-between"
+          >
             {#each row.cells as cell (cell.id)}
               <Subscribe attrs={cell.attrs()} let:attrs>
-                <Table.Cell {...attrs} class='flex items-center justify-center whitespace-nowrap w-full'>
-                  {#if cell.id === 'select'}
-                    <input type="checkbox" class="form-checkbox h-4 w-4 text-blue-600" />
-                  {:else if cell.id === 'employee'}
+                <Table.Cell
+                  {...attrs}
+                  class="flex items-center justify-center whitespace-nowrap w-full"
+                >
+                  {#if cell.id === "select"}
+                    <input
+                      type="checkbox"
+                      class="form-checkbox h-4 w-4 text-blue-600"
+                    />
+                  {:else if cell.id === "employee"}
                     <div class="flex items-center gap-2">
-                      <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                      <div
+                        class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center"
+                      >
                         <User class="w-4 h-4 text-gray-500" />
                       </div>
                       <span>{row.original.employee}</span>
                     </div>
-                  {:else if cell.id === 'storeName'}
+                  {:else if cell.id === "storeName"}
                     <div class="flex items-center justify-center gap-2">
                       <Store class="w-4 h-4" />
                       <span>{row.original.storeName}</span>
                     </div>
-                  <!-- {:else if cell.id === 'efficiencyScore'} -->
+                    <!-- {:else if cell.id === 'efficiencyScore'} -->
                     <!-- <div class="relative w-10 h-10">
                       <svg class="w-10 h-10" viewBox="0 0 36 36">
                         <path
@@ -200,34 +202,36 @@ $: ({ hasNextPage, hasPreviousPage, pageIndex, pageCount } =
     </Table.Body>
   </Table.Root>
   {#if $pageCount > 1}
-  <div class="flex flex-row items-center justify-center space-x-4 py-4">
-    <Button
-      size="sm"
-      variant="outline"
-      class="bg-transparent hover:bg-[#3D81FC] hover:text-white text-[#727272] gap-2"
-      on:click={() => ($pageIndex = $pageIndex - 1)}
-      disabled={!$hasPreviousPage}
-    >
-      Previous
-    </Button>
-    <div class="flex flex-row gap-2 items-center text-sm text-muted-foreground">
-      <span class="p-2 rounded-md aspect-square bg-[#3D81FC] bg-opacity-10">
-        {$pageIndex + 1 < 10 ? "0" + ($pageIndex + 1) : $pageIndex + 1}
-      </span>
-      of
-      <span class="p-2 rounded-md aspect-square bg-[#3D81FC] bg-opacity-20">
-        {$pageCount < 10 ? "0" + $pageCount : $pageCount}
-      </span> Page.
+    <div class="flex flex-row items-center justify-center space-x-4 py-4">
+      <Button
+        size="sm"
+        variant="outline"
+        class="bg-transparent hover:bg-[#3D81FC] hover:text-white text-[#727272] gap-2"
+        on:click={() => ($pageIndex = $pageIndex - 1)}
+        disabled={!$hasPreviousPage}
+      >
+        Previous
+      </Button>
+      <div
+        class="flex flex-row gap-2 items-center text-sm text-muted-foreground"
+      >
+        <span class="p-2 rounded-md aspect-square bg-[#3D81FC] bg-opacity-10">
+          {$pageIndex + 1 < 10 ? "0" + ($pageIndex + 1) : $pageIndex + 1}
+        </span>
+        of
+        <span class="p-2 rounded-md aspect-square bg-[#3D81FC] bg-opacity-20">
+          {$pageCount < 10 ? "0" + $pageCount : $pageCount}
+        </span> Page.
+      </div>
+      <Button
+        size="sm"
+        variant="outline"
+        disabled={!$hasNextPage}
+        class="bg-transparent hover:bg-[#3D81FC] hover:text-white text-[#727272] gap-2"
+        on:click={() => ($pageIndex = $pageIndex + 1)}
+      >
+        Next
+      </Button>
     </div>
-    <Button
-      size="sm"
-      variant="outline"
-      disabled={!$hasNextPage}
-      class="bg-transparent hover:bg-[#3D81FC] hover:text-white text-[#727272] gap-2"
-      on:click={() => ($pageIndex = $pageIndex + 1)}
-    >
-      Next
-    </Button>
-  </div>
   {/if}
 </div>
