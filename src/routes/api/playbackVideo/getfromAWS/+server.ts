@@ -57,7 +57,9 @@ function isTimeRangeOverlap(startTime, endTime, folderStartTime, folderEndTime) 
     const folderEnd = folderEndHours * 60 + folderEndMinutes;
 
     // Check if the time ranges overlap
-    return !(end <= folderStart || start >= folderEnd);
+    console.log("start =", start, "end =", end, "folderStart =", folderStart, "folderEnd =", folderEnd);
+    // return !(end <= folderStart || start >= folderEnd) || !(start <= folderStart || end >= folderEnd);
+    return (start >= folderStart && end <= folderEnd)
 }
 function createSignedUrl(filePath) {
     const cloudFrontBaseUrl = 'https://d1sve0q22m72ia.cloudfront.net';
@@ -78,19 +80,19 @@ function createSignedUrl(filePath) {
 }
 
 export const POST: RequestHandler = async ({ request }) => {
-    // const { cameraId, date, startTime, endTime } = await request.json();
-    const data = await request.json();
-    console.log(data)
-    const cameraId = '24kt5coxo1didu7';
-    const date = '2024_08_15';
-    const startTime = '06:40';
-    const endTime = '07:05';
+    const { cameraId, date, startTime, endTime } = await request.json();
+    // const data = await request.json();
+    // console.log(data)
+    // const cameraId = '24kt5coxo1didu7';
+    // const date = '2024_08_15';
+    // const startTime = '06:40';
+    // const endTime = '07:05';
     return new Promise((resolve) => {
         findVideoFiles(cameraId, date, startTime, endTime, (matchingFiles) => {
             if (matchingFiles.length > 0) {
                 console.log("Matching video files =", matchingFiles);
                 const signedUrls = matchingFiles.map(file => createSignedUrl(file));
-                console.log("Signed URLs =", signedUrls);
+                // console.log("Signed URLs =", signedUrls);
                 resolve(json({ files: signedUrls }));
             } else {
                 resolve(json({ error: 'No video files found for the given time range.' }, { status: 500 }));

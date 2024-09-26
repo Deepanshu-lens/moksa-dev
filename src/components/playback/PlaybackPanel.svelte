@@ -86,26 +86,22 @@
   };
 
   async function getList(item) {
-    // const list = await PB.collection('camera_ping_status').getList(1,100,{
-    //   filter: `node~"${$selectedNode.id}"`,
-    //   sort: "-created",
-    //   expand: 'camera'
-
-    // });
+    console.log($selectedNode.name);
     console.log("calling camera pocketbase collection placubacl");
     const list = await PB.collection("camera").getList(0, 100, {
-      filter: `node~"${$selectedNode.id}"`,
+      filter: `node~"${$selectedNode.id}" && save = true`,
       sort: "-created",
     });
     console.log("camera status list", list);
-    list.items.forEach((item) => {
-      if (!$uniqueUrlList.some((uniqueItem) => uniqueItem.url === item.url)) {
-        uniqueUrlList.update((currentList) => {
-          currentList.push(item);
-          return currentList;
-        });
-      }
-    });
+    // list.items.forEach((item) => {
+    // if (!$uniqueUrlList.some((uniqueItem) => uniqueItem.url === item.url)) {
+    //   uniqueUrlList.update((currentList) => {
+    //     currentList.push(item);
+    //     return currentList;
+    //   });
+    // }
+    // });
+    uniqueUrlList.set(list.items);
   }
 
   $: if ($convertedVideos.length > 0 && addMode === 1) {
@@ -158,11 +154,16 @@
     await removePlayers();
   });
 
+  $: {
+    if ($selectedNode) {
+      getList();
+    }
+  }
 </script>
 
 <section class="right-playback flex-1 flex w-full h-screen justify-between">
   <div class="h-full w-full">
-   {#if $convertedVideos.length === 0 && addMode === 1}
+    {#if $convertedVideos.length === 0 && addMode === 1}
       <div
         class="bg-[#333] text-white grid place-items-center w-full h-[calc(100vh-75px)]"
       >
