@@ -71,6 +71,8 @@
   let customDateLabel = "Custom";
   let close = false;
 
+  $: console.log("aisle data", aisleData);
+
   $: {
     if (value?.start && value?.end) {
       const start = new Date(
@@ -392,6 +394,8 @@
   }
 
   async function fetchDataForDateRange() {
+    customDateLabel = "Custom";
+
     if (isInitialLoad) {
       isInitialLoad = false;
       return; // Skip the first call

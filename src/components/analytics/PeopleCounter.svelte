@@ -120,6 +120,7 @@
     if ($selectedStore.value !== undefined) {
       if ($dateRange === "7 Days") {
         getWeekData($selectedStore.value);
+        callLiveData();
       } else {
         fetchDataForDateRange();
       }
@@ -133,22 +134,39 @@
     }
   });
 
-  onMount(async () => {
-    if (allStores.length > 0) {
-      const response = await fetch(
-        `https://api.moksa.ai/people/getPeopleCountLive/${$selectedStore.value}/30/1/100`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          method: "GET",
+  // onMount(async () => {
+  //   if (allStores.length > 0) {
+  //     const response = await fetch(
+  //       `https://api.moksa.ai/people/getPeopleCountLive/${$selectedStore.value}/30/1/100`,
+  //       {
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //         method: "GET",
+  //       },
+  //     );
+  //     const data = await response.json();
+  //     console.log(data);
+  //   }
+  // });
+
+  async function callLiveData() {
+    console.log("calling live data", $selectedStore.value);
+    const response = await fetch(
+      `https://api.moksa.ai/people/getPeopleCountLive/${$selectedStore.value}/30/1/100`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-      );
-      const data = await response.json();
-      console.log(data);
-    }
-  });
+        method: "GET",
+      },
+    );
+    const data = await response.json();
+    console.log("live data", data);
+    liveData.set(data.data);
+  }
 
   async function getWeekData(storeId: number) {
     const today = new Date().toISOString().split("T")[0];
@@ -161,6 +179,9 @@
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
+          datetype: 7,
+          pagenumber: 1,
+          pagepersize: 100,
         },
         method: "GET",
       },
@@ -259,6 +280,8 @@
       return; // Skip the first call
     }
 
+    customDateLabel = "Custom";
+
     const today = new Date();
     let startDate = new Date(today);
 
@@ -294,6 +317,9 @@
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
+            datetype: { $dateRange },
+            pagenumber: 1,
+            pagepersize: 100,
           },
         },
       );
@@ -328,6 +354,9 @@
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
+            datetype: { $dateRange },
+            pagenumber: 1,
+            pagepersize: 100,
           },
         },
       );
@@ -498,7 +527,7 @@
         <Store size={40} />
       </span>
       <span>
-        <p class="text-white text-xl font-bold">{allStores.length}</p>
+        <p class="text-white text-xl font-bold">{allStores.length - 1}</p>
         <p class="text-sm font-semibold text-white">stores registered</p>
       </span>
     </div>

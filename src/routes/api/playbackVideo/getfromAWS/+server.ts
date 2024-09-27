@@ -88,7 +88,7 @@ export const POST: RequestHandler = async ({ request }) => {
     // const startTime = '06:40';
     // const endTime = '07:05';
     return new Promise((resolve) => {
-        findVideoFiles(cameraId, date, startTime, endTime, (matchingFiles) => {
+        findVideoFiles(cameraId.id, date, startTime, endTime, (matchingFiles) => {
             if (matchingFiles.length > 0) {
                 console.log("Matching video files =", matchingFiles);
                 const signedUrls = matchingFiles.map(file => createSignedUrl(file));

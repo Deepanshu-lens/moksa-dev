@@ -60,7 +60,7 @@
   let value: DateRange | undefined = undefined;
   let startValue: DateValue | undefined = undefined;
   let customDateLabel = "Custom";
-
+  let close = false;
   let listtheft = writable([]);
   let theftTrend = writable([]);
 
@@ -78,6 +78,9 @@
       );
       console.log(dayDifference);
       dateRange.set("custom");
+      setTimeout(() => {
+        close = false;
+      }, 200);
     } else {
       customDateLabel = "Custom";
     }
@@ -992,6 +995,7 @@
   }
 
   async function fetchDataForDateRange() {
+    customDateLabel = "Custom";
     if (isInitialLoad) {
       isInitialLoad = false;
       return; // Skip the first call
@@ -1470,7 +1474,7 @@
         class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "12 Months" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
         on:click={() => dateRange.set("12 Months")}>12 Months</button
       >
-      <Popover.Root openFocus>
+      <Popover.Root openFocus bind:open={close}>
         <Popover.Trigger asChild let:builder>
           <Button
             builders={[builder]}

@@ -106,6 +106,29 @@
   let value: DateRange | undefined = undefined;
   let startValue: DateValue | undefined = undefined;
   let customDateLabel = "Custom";
+  let close = false;
+
+  $: {
+    if (value?.start && value?.end) {
+      const start = new Date(
+        value.start.year,
+        value.start.month - 1,
+        value.start.day,
+      );
+      const end = new Date(value.end.year, value.end.month - 1, value.end.day);
+      customDateLabel = `${start.toLocaleDateString()} - ${end.toLocaleDateString()}`;
+      const dayDifference = Math.ceil(
+        (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24),
+      );
+      console.log(dayDifference);
+      dateRange.set("custom");
+      setTimeout(() => {
+        close = false;
+      }, 200);
+    } else {
+      customDateLabel = "Custom";
+    }
+  }
 
   function createChart() {
     if (chartCanvas && !chart) {
@@ -255,25 +278,52 @@
       console.error("Error fetching data:", error);
     }
   });
-
-  // async function getEfficiencyData(){
-  //   loading = true;
-  //   const response = await fetch("/api/employee/getEfficiencyByStoreId", {
-  //     method: "POST",
-  //     body: JSON.stringify({ storeId: $selectedStoreId }),
-  //     headers: { "Content-Type": "application/json" },
-  //   });
-  //   const data = await response.json();
-  //   // console.log(data);
-  //   efficiencyData.set(data);
-  //   loading = false;
+  $: if ($dateRange === "custom" && (value?.start || value?.end)) {
+    getCustomEfficiencyData();
+  }
   // }
 
-  async function getCustomEfficiencyData() {}
+  async function getCustomEfficiencyData() {
+    console.log("fetching custom date data");
+    const start = value?.start
+      ? `${value.start.year}-${String(value.start.month).padStart(2, "0")}-${String(value.start.day).padStart(2, "0")}`
+      : "";
+    const end = value?.end
+      ? `${value.end.year}-${String(value.end.month).padStart(2, "0")}-${String(value.end.day).padStart(2, "0")}`
+      : "";
+    console.log(start);
+    console.log(end);
+
+    try {
+      loading = true;
+      const response = await fetch(
+        `https://api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreid/${$selectedStoreId}/${start}/1/100/${end}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+      const data = await response.json();
+      console.log(
+        `recieved efficiency data for ${$selectedStoreId}, ${$dateRange}`,
+        data,
+      );
+      // efficiencyData.set(data?.data?.data === undefined ? [] : data?.data?.data);
+      efficiencyData.set(data?.data?.data === undefined ? [] : data);
+      await getEmployeeDetails(data?.data?.data?.[0]?.employee_id);
+      loading = false;
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   async function getEfficiencyDataByTime() {
     console.log($selectedStoreId);
     console.log("effdatabytunecallera");
+    customDateLabel = "Custom";
     const today = new Date();
     let startDate = new Date(today);
 
@@ -318,7 +368,7 @@
       );
       // efficiencyData.set(data?.data?.data === undefined ? [] : data?.data?.data);
       efficiencyData.set(data?.data?.data === undefined ? [] : data);
-      await getEmployeeDetails(data?.data?.data?.[0]?.id);
+      await getEmployeeDetails(data?.data?.data?.[0]?.employee_id);
       loading = false;
     } catch (error) {
       console.log(error);
@@ -388,6 +438,7 @@
         throw new Error("Failed to fetch employees");
       }
       const data = await response.json();
+      console.log("employee-details", data);
       employeeDetails.set(data);
     } catch (error) {
       console.log(error);
@@ -395,6 +446,8 @@
 
     // }
   }
+
+  $: console.log("emp-dataaaa", $employeeData);
 </script>
 
 <section
@@ -420,7 +473,7 @@
         class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "12 Months" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
         on:click={() => dateRange.set("12 Months")}>12 Months</button
       >
-      <Popover.Root openFocus>
+      <Popover.Root openFocus bind:open={close}>
         <Popover.Trigger asChild let:builder>
           <Button
             builders={[builder]}
@@ -659,7 +712,7 @@
       </span>
       {#if $employeeDetails?.data?.length > 0 && $employeeData !== null}
         <span class="flex flex-col gap-3 mt-2">
-          {#each [{ label: "Total Hours With Customers", hours: $employeeDetails?.data?.[0]?.customer, color1: "#02A7FD", color2: "#141C64" }, { label: "Total Hours on Mobile", hours: $employeeDetails?.data?.[0]?.mobile, color1: "#00FEA3", color2: "#007077" }, { label: "Total Hours Sitting Idle", hours: $employeeDetails?.data?.[0]?.idle, color1: "#FFB156", color2: "#FF007A" }] as activity}
+          {#each [{ label: "Total Hours With Customers", hours: $employeeDetails?.data?.[0]?.total_customer, color1: "#02A7FD", color2: "#141C64" }, { label: "Total Hours on Mobile", hours: $employeeDetails?.data?.[0]?.total_mobile, color1: "#00FEA3", color2: "#007077" }, { label: "Total Hours Sitting Idle", hours: $employeeDetails?.data?.[0]?.total_idle, color1: "#FFB156", color2: "#FF007A" }, { label: "Total Hours With Filling Shelves", hours: $employeeDetails?.data?.[0]?.total_filling_shelves, color1: "#C8C303", color2: "#597802" }] as activity}
             <div class="my-2">
               <div class="flex justify-between text-sm mb-2">
                 <span class="text-[#323232]">{activity.label}</span>
@@ -707,7 +760,12 @@
         <p
           class="flex items-center gap-3 mt-4 mb-2 text-[#4D6674] dark:text-white/[.8]"
         >
-          Based on Factor 1 <span class="text-[#0D2846] font-medium">-</span>
+          Based on Time with Customers <span class="text-[#0D2846] font-medium"
+            >{$employeeDetails?.data?.[0]?.total_customer === undefined ||
+            $employeeDetails?.data?.[0]?.total_customer === null
+              ? 0
+              : $employeeDetails?.data?.[0]?.total_customer}</span
+          >
           <svg
             width="37"
             height="21"
@@ -739,7 +797,12 @@
           </svg>
         </p>
         <p class="flex items-center gap-3 mt-4 mb-2 text-[#4D6674]">
-          Based on Factor 2 <span class="text-[#0D2846] font-medium">-</span>
+          Based on Mobile <span class="text-[#0D2846] font-medium"
+            >{$employeeDetails?.data?.[0]?.total_mobile === undefined ||
+            $employeeDetails?.data?.[0]?.total_mobile === null
+              ? 0
+              : $employeeDetails?.data?.[0]?.total_mobile}</span
+          >
           <svg
             width="37"
             height="21"
@@ -771,7 +834,12 @@
           </svg>
         </p>
         <p class="flex items-center gap-3 mt-4 mb-2 text-[#4D6674]">
-          Based on Factor 3 <span class="text-[#0D2846] font-medium">-</span>
+          Based on Sitting Idle <span class="text-[#0D2846] font-medium"
+            >{$employeeDetails?.data?.[0]?.total_idle === undefined ||
+            $employeeDetails?.data?.[0]?.total_idle === null
+              ? 0
+              : $employeeDetails?.data?.[0]?.total_idle}</span
+          >
           <svg
             width="37"
             height="21"
@@ -842,8 +910,13 @@
           <div
             class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center"
           >
-            <span class="text-3xl font-bold">%</span>
-            <p class="text-sm text-gray-500">Coming Soon</p>
+            <span class="text-3xl font-bold"
+              >{$employeeDetails?.data?.[0]?.efficiency_score === undefined ||
+              $employeeDetails?.data?.[0]?.efficiency_score === null
+                ? 0
+                : $employeeDetails?.data?.[0]?.efficiency_score}%</span
+            >
+            <p class="text-sm text-gray-500">Efficiency</p>
           </div>
         </div>
       </span>

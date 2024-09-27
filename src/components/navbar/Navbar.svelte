@@ -26,42 +26,43 @@
 
   const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
   const menuList =
-  user.role === 'Operators' || user.role === 'adminNonPaid' ? [
-    {
-      text: "Live",
-      href: `/session/${sessionId}`,
-    },
-    {
-      text: "Playback",
-      href: `/playback/${sessionId}`,
-    },
-    {
-      text: "Settings",
-      href: `/settings/${sessionId}`,
-    },
-  ] :
-   [
-    {
-      text: "Live",
-      href: `/session/${sessionId}`,
-    },
-    {
-      text: "Playback",
-      href: `/playback/${sessionId}`,
-    },
-    {
-      text: "Analytics",
-      href: `/analytics/${sessionId}`,
-    },
-    {
-      text: "Users",
-      href: `/users/${sessionId}`,
-    },
-    {
-      text: "Settings",
-      href: `/settings/${sessionId}`,
-    },
-  ];
+    user.role === "Operators" || user.role === "adminNonPaid"
+      ? [
+          {
+            text: "Live",
+            href: `/session/${sessionId}`,
+          },
+          {
+            text: "Playback",
+            href: `/playback/${sessionId}`,
+          },
+          {
+            text: "Settings",
+            href: `/settings/${sessionId}`,
+          },
+        ]
+      : [
+          {
+            text: "Live",
+            href: `/session/${sessionId}`,
+          },
+          {
+            text: "Playback",
+            href: `/playback/${sessionId}`,
+          },
+          {
+            text: "Analytics",
+            href: `/analytics/${sessionId}`,
+          },
+          {
+            text: "Users",
+            href: `/users/${sessionId}`,
+          },
+          {
+            text: "Settings",
+            href: `/settings/${sessionId}`,
+          },
+        ];
 
   const menuListMob = [
     {
@@ -117,19 +118,23 @@
   // $: console.log('user navbar',user)
 
   function handleClickOutside(event: MouseEvent) {
-    if (showNotifications && notificationDropdownRef && !notificationDropdownRef.contains(event.target as Node)) {
+    if (
+      showNotifications &&
+      notificationDropdownRef &&
+      !notificationDropdownRef.contains(event.target as Node)
+    ) {
       showNotifications = false;
     }
   }
 
   onMount(() => {
     setTimeout(() => {
-    document?.addEventListener('click', handleClickOutside);
-  }, 2000);
+      document && document?.addEventListener("click", handleClickOutside);
+    }, 2000);
   });
 
   onDestroy(() => {
-    document?.removeEventListener('click', handleClickOutside);
+    document?.removeEventListener("click", handleClickOutside);
   });
 
   // $: console.log(data)
@@ -181,15 +186,16 @@
         >
           <DarkModeSwitch />
           <!-- <AddUserDialog> -->
-          <a href="/tickets/{sessionId}"
+          <a
+            href="/tickets/{sessionId}"
             class="bg-[#061149] size-[40px] grid place-items-center rounded-md p-1 border border-white/[.08] text-white hover:bg-white hover:text-black hover:dark:text-white hover:dark:bg-[#272727]"
             ><MessageCircleQuestion size={22} /></a
           >
           <!-- </AddUserDialog> -->
           <!-- on:click={() => (showNotifications = !showNotifications)} -->
           <button
-          on:click|stopPropagation={() => (showNotifications = !showNotifications)}
-    
+            on:click|stopPropagation={() =>
+              (showNotifications = !showNotifications)}
             class="bg-[#061149] size-[40px] grid place-items-center rounded-md p-1 border border-white/[.08] text-white hover:bg-white hover:text-black hover:dark:text-white hover:dark:bg-[#272727]"
             ><BellDot size={22} /></button
           >
@@ -197,10 +203,10 @@
             <NotificationDropdown />
           {/if} -->
           {#if showNotifications}
-    <div bind:this={notificationDropdownRef}>
-      <NotificationDropdown />
-    </div>
-  {/if}
+            <div bind:this={notificationDropdownRef}>
+              <NotificationDropdown />
+            </div>
+          {/if}
         </span>
         {#if user}
           <span class="flex items-center gap-2">
@@ -242,7 +248,10 @@
                 <span class="mt-0.5 text-sm text-[#32323299]"
                   >{user?.email}</span
                 >
-                <a href="/account/{sessionId}" class="flex gap-1 items-center text-[#3D81FC] text-sm" >
+                <a
+                  href="/account/{sessionId}"
+                  class="flex gap-1 items-center text-[#3D81FC] text-sm"
+                >
                   <Settings size={16} />
                   Manage Account
                 </a>

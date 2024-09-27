@@ -25,7 +25,7 @@
 
   export let efficiency;
 
-  // console.log('dashboard efficiency',efficiency)
+  console.log("dashboard efficiency", efficiency);
 
   function generateRandomMinutes() {
     // Generate random time between 30 and 240 minutes (4 hours)

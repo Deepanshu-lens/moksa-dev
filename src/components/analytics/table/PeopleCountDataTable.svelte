@@ -78,14 +78,14 @@
 
   export let storeData;
 
-  // console.log($storeData);
+  console.log("people count data", $storeData);
 
   $: dbData = $storeData.map((item: any) => {
     return {
       storeName: item.store,
       customerCount: item.noofcustomers,
       busyHourProjections: "Coming Soon",
-      date: item.date,
+      date: item.date && item.hour ? `${item.date}, ${item.hour}` : "N/A",
     };
   });
 
@@ -113,7 +113,7 @@
     }),
     table.column({
       accessor: "date",
-      header: "Date",
+      header: "Date, Hours",
     }),
     table.column({
       accessor: "customerCount",
