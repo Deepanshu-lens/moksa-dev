@@ -287,7 +287,7 @@
       {user}
     />
   {:else if view === 4}
-    <EE {allStores} token={data.moksaToken} />
+    <EE {allStores} token={data.moksaToken} {moksaUserId} />
   {:else if view === 5}
     <PeopleCounter
       {allStores}

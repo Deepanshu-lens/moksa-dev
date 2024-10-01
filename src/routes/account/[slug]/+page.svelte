@@ -1,18 +1,25 @@
 <script>
-    import { MessageCircleMore } from "lucide-svelte";
+  import { MessageCircleMore } from "lucide-svelte";
+  export let data;
+
+  console.log(data);
+  const { user } = data;
+  const { account } = data;
+
+  console.log(account);
 
   let profile = {
-    name: "Nikhil Teja Kolli",
-    email: "nikhil@sadmin.com",
-    role: "Super Admin",
-    phone: "9810123456",
-    userId: 28,
+    name: account[0].firstName + " " + account[0].lastName,
+    email: account[0].email,
+    role: user.role,
+    phone: data.account[0].phoneNumber,
+    userId: data.account[0].moksaId,
   };
 
-  let accountEmail = "balaram.barik@lenscorp.ai";
+  let accountEmail = account[0].email;
   let password = "";
   let confirmPassword = "";
-  let phoneNumber = "9810123456";
+  let phoneNumber = account[0].phoneNumber;
 </script>
 
 <div class="p-4 max-w-7xl mx-auto">
@@ -30,7 +37,7 @@
         <img
           src="https://via.placeholder.com/150"
           alt="Profile Picture"
-          class="rounded-full w-[215px] h-[215px]"
+          class="rounded-full size-[215px]"
         />
         <button
           class="absolute bottom-0 right-0 bg-black text-white p-2 rounded-full"
@@ -71,7 +78,7 @@
       </div>
       <div class="text-center mt-4">
         <span class="bg-blue-500 text-white text-sm px-3 py-1 rounded-full"
-          >Super Admin</span
+          >{profile.role}</span
         >
         <h2 class="mt-4 text-xl font-semibold">{profile.name}</h2>
         <p class="text-gray-500">{profile.email}</p>
@@ -113,7 +120,7 @@
               type="password"
               class="border border-gray-300 min-w-[448px] p-2 rounded-md"
             />
-            <a href="#" class="text-blue-500 text-sm">Change password</a>
+            <button class="text-blue-500">Change password</button>
           </div>
         </div>
 
@@ -159,7 +166,7 @@
               value={phoneNumber}
               class="border border-gray-300 min-w-[448px] p-2 rounded-md"
             />
-            <button class="text-blue-500"> edit svg </button>
+            <!-- <button class="text-blue-500"> edit svg </button> -->
           </div>
         </div>
       </form>
@@ -172,7 +179,7 @@
       <div class="grid grid-cols-4">
         <!-- Help Section -->
         <div class="col-span-1 text-center pt-5 ml-8">
-          <div class="flex justify-center"><MessageCircleMore size={32}/></div>
+          <div class="flex justify-center"><MessageCircleMore size={32} /></div>
           <h3 class="text-lg font-semibold mt-4">Need help?</h3>
           <p class="text-gray-500">
             Have questions or concerns regarding your "account settings"? Our

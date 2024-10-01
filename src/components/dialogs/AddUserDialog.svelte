@@ -98,6 +98,8 @@
   //   }
   //   return true;
   // };
+
+  // $: console.log(userType);
 </script>
 
 <Dialog.Root bind:open={dialogOpen}>

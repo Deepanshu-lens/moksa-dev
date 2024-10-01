@@ -14,6 +14,8 @@
   import type { ITickets } from "@/types.d.ts";
   import Input from "@/components/ui/input/input.svelte";
   import Button from "@/components/ui/button/button.svelte";
+  // import RaiseTicketDialog from "@/components/dialogs/RaiseTicketDialog.svelte";
+  import TicketDialog from "@/components/dialogs/TicketDialog.svelte";
 
   let showRightPanel: boolean = true;
 
@@ -58,9 +60,15 @@
       comments: "Temporary spike in usage due to updates",
     },
   ];
+
+  export let data;
+
+  const { tickets } = data;
+  const { nodes } = data;
+  const { token } = data;
+
+  $: console.log(nodes);
 </script>
-
-
 
 <section class="flex flex-1 w-full h-screen justify-between relative">
   <!-- left section -->
@@ -244,13 +252,13 @@
     </div>
   </div>
 
-  <div class="absolute h-34 left-0 bottom-16 w-auto px-14 py-8 flex flex-col gap-5">
+  <!-- <div class="absolute h-34 left-0 bottom-16 w-auto px-14 py-8 flex flex-col gap-5">
     <div>
         <p class="text-md font-semibold">Log out all devices</p>
         <p class="text-sm text-gray-500">Log out all other active sessions on other devices besides this one</p>
     </div>
     <p class="text-sm text-red-500">Delete my Account</p>
-  </div>
+  </div> -->
 
   <!-- right section -->
   <div
@@ -269,15 +277,17 @@
       class={`${showRightPanel ? "opacity-100" : "opacity-0"} flex justify-between items-center pb-5  transtion-opacity ease-in-out duration-500 `}
     >
       <h1 class="text-2xl font-semibold">My Ticket</h1>
-      <button
-        class="p-2 grid place-items-center rounded-full text-[#3D81FC] cursor-pointer hover:underline hover:underline-offset-2"
-      >
-        Raise a Ticket
-      </button>
+      <TicketDialog {nodes} {token}>
+        <button
+          class="p-2 grid place-items-center rounded-full text-[#3D81FC] cursor-pointer hover:underline hover:underline-offset-2"
+        >
+          Raise a Ticket
+        </button>
+      </TicketDialog>
     </div>
     <Separator class="mb-2" />
 
     <!-- ticket list -->
-    <TicketList tickets={dummyTickets} />
+    <TicketList tickets={tickets.data.data} />
   </div>
 </section>

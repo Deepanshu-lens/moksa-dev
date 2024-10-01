@@ -11,6 +11,7 @@
   } from "lucide-svelte";
   import { Button } from "../ui/button";
   import EmployeeTrackingDataTable from "./table/EmployeeTrackingDataTable.svelte";
+  import { io } from "socket.io-client";
   import * as Select from "../../components/ui/select";
   import {
     Chart,
@@ -41,6 +42,7 @@
   let chartLoading = true;
   export let allStores;
   export let token;
+  export let moksaUserId;
 
   const stores = allStores
     ?.filter((store: any) => store.id !== -1)
@@ -242,6 +244,48 @@
 
   async function deleteEmployee() {}
 
+  let socket: any;
+
+  function setupSocket(storeId) {
+    const userID = moksaUserId;
+    if (socket) {
+      socket.disconnect();
+    }
+
+    socket = io("https://api.moksa.ai", {
+      withCredentials: true,
+      extraHeaders: {
+        Authorization: `Bearer ${token}`,
+      },
+      transports: ["websocket", "polling"],
+    });
+
+    socket.on("error", (err) => {
+      console.log("error", err);
+    });
+
+    socket.on("connect", () => {
+      console.log(`connected for ${storeId}`);
+      socket.emit("joinUser", userID);
+      socket.emit("joinStore", storeId);
+    });
+
+    socket.on(`employee_efficiency_store_${storeId}`, (data) => {
+      console.log(
+        `Received live employee efficiency data for store ${storeId}:`,
+        data,
+      );
+      // liveData.update((currentData) => {
+      //   return [data, ...currentData].slice(0, 100);
+      // });
+    });
+
+    socket.on("disconnect", () => {
+      console.log("disconnected");
+      // liveData.set([]);
+    });
+  }
+
   let loading = false;
 
   onMount(async () => {
@@ -278,6 +322,7 @@
       console.error("Error fetching data:", error);
     }
   });
+
   $: if ($dateRange === "custom" && (value?.start || value?.end)) {
     getCustomEfficiencyData();
   }
@@ -447,7 +492,16 @@
     // }
   }
 
-  $: console.log("emp-dataaaa", $employeeData);
+  // $: console.log("emp-dataaaa", $employeeData);
+  // $: console.log("selectedstoreid", $selectedStoreId);
+
+  // $: console.log($employeeDetails);
+
+  $: {
+    if ($selectedStoreId !== undefined) {
+      setupSocket($selectedStoreId);
+    }
+  }
 </script>
 
 <section
@@ -743,7 +797,7 @@
         <p
           class="text-[#323232] text-lg flex items-center gap-2 font-semibold dark:text-white"
         >
-          No employee selected
+          No employee Data
         </p>
       {/if}
     </div>

@@ -102,6 +102,12 @@
     return true;
   };
 
+  // $: console.log(userID);
+
+  // userID = await PB.collection("roles").getFullList({
+  //   filter: `roleName = "admin"`,
+  // });
+
   const handleSubmit = async (
     userType,
     firstName,
@@ -150,13 +156,17 @@
 
       let user;
 
+      const roleDetails = await PB.collection("roles").getFullList({
+        filter: `roleName = "${userType}"`,
+      });
+
       const createUser = async () => {
         try {
           user = await PB.collection("users").create({
             firstName,
             lastName,
             email: mailId,
-            role: userID,
+            role: roleDetails[0].id,
             session: session.id,
             password,
             passwordConfirm: cPassword,
@@ -253,7 +263,7 @@
 
   // $: console.log(roles)
 
-  $: console.log(selectedRole);
+  // $: console.log(selectedRole);
 
   const { user } = data;
   const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
