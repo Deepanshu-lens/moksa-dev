@@ -78,7 +78,7 @@
   });
 
   const table = createTable(readableData, {
-    page: addPagination({ initialPageSize: 5 }),
+    page: addPagination({ initialPageSize: 4 }),
     sort: addSortBy(),
     filter: addTableFilter({
       fn: ({ filterValue, value }: { filterValue: string; value: string }) =>
@@ -164,7 +164,7 @@
                   {#if cell.id === "employee"}
                     <div class="flex items-center gap-2 whitespace-nowrap">
                       <!-- <img src="/path/to/avatar.png" alt="Avatar" class="w-8 h-8 rounded-full" /> -->
-                      <User class="size-5" />
+                      <!-- <User class="size-5" /> -->
                       <span class="text-sm font-medium"
                         >{row.original.employee}</span
                       >
@@ -197,7 +197,7 @@
     </Table.Body>
   </Table.Root>
   {#if $pageCount > 1}
-    <div class="flex flex-row items-center justify-center space-x-4 py-4">
+    <div class="flex flex-row items-center justify-center space-x-4 py-2">
       <Button
         size="sm"
         variant="outline"

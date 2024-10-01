@@ -1,38 +1,4 @@
 <script lang="ts">
-  import { Plus, Upload } from "lucide-svelte";
-  import { Button } from "../ui/button";
-  export let allStores;
-  export let allStoresData;
-  export let aisleData;
-  export let theftandcamera;
-  export let busyness;
-  export let efficiency;
-  export let safetyDetails;
-  export let theftData;
-  export let user;
-  import * as Popover from "../ui/popover";
-
-  // console.log('busyness',busyness)
-
-  $: console.log("allStores", allStores);
-
-  const fruits = allStores?.map((store: any) => ({
-    value: store.id,
-    label: store.name,
-  }));
-
-  let selectedStore = writable({
-    value: fruits[0].value,
-    label: fruits[0].label,
-  });
-
-  // onMount(() => {
-  // onMount(() => {
-  //     if(allStores?.length > 0) {
-  // selectedStore.set(fruits[0])
-  //     }
-  //   })
-
   import * as Select from "../ui/select";
   import { BarController, BarElement } from "chart.js";
   import {
@@ -50,7 +16,24 @@
   import DashboardSaftetyDataTable from "./table/DashboardSaftetyDataTable.svelte";
   import { writable } from "svelte/store";
   import AddStoreDialog from "../dialogs/AddStoreDialog.svelte";
+  import { Plus, Upload } from "lucide-svelte";
+  import { Button } from "../ui/button";
+  import type { DateRange } from "bits-ui";
+  import { DateFormatter, type DateValue } from "@internationalized/date";
+  import { RangeCalendar } from "@/components/ui/range-calendar";
+  import { toast } from "svelte-sonner";
+  import * as Popover from "../ui/popover";
 
+  export let token: string;
+  export let allStores;
+  export let allStoresData;
+  export let aisleData;
+  export let theftandcamera;
+  export let busyness;
+  export let efficiency;
+  export let safetyDetails;
+  export let theftData;
+  export let user;
   let chartLoading = true;
   let chartCanvas: HTMLCanvasElement;
   let chart: Chart | null = null;
@@ -59,19 +42,48 @@
   let dateRange = writable("7 Days");
   let isInitialLoad = true;
   let isLoading = writable(false);
-  export let token: string;
-  import type { DateRange } from "bits-ui";
-
-  import { DateFormatter, type DateValue } from "@internationalized/date";
-  import { RangeCalendar } from "@/components/ui/range-calendar";
-  import { toast } from "svelte-sonner";
-
   let value: DateRange | undefined = undefined;
   let startValue: DateValue | undefined = undefined;
   let customDateLabel = "Custom";
   let close = false;
+  let busynessStoresData = writable([]);
+
+  // console.log('busyness',busyness)
+
+  $: console.log("allStores", allStores);
+
+  const fruits = allStores?.map((store: any) => ({
+    value: store.id,
+    label: store.name,
+  }));
+
+  let selectedStore = writable({
+    value: fruits[0].value,
+    label: fruits[0].label,
+  });
+
+  // onMount(async () => {
+  //   if (allStores?.length > 0) {
+  //     let busyData = [];
+  //     for (let i = 0; i < allStores.length; i++) {
+  //       const busy = await fetch(
+  //         `https://api.moksa.ai/customerPrediction/storeBusyHourBystoreId/${allStores[i].id}`,
+  //         {
+  //           headers: {
+  //             Authorization: `Bearer ${token}`,
+  //             "Content-Type": "application/json",
+  //           },
+  //         },
+  //       ).then((res) => res.json());
+  //       busyData.push({ id: allStores[i].id, ...busy });
+  //     }
+  //     busynessStoresData.set(busyData);
+  //     console.log("busynessStoresData", busyData);
+  //   }
+  // });
 
   $: console.log("aisle data", aisleData);
+  $: console.log("aisle data", $busynessStoresData);
 
   $: {
     if (value?.start && value?.end) {
@@ -332,31 +344,43 @@
     const formatDate = (date: Date) => date.toISOString().split("T")[0];
     console.log($selectedStore.label, $selectedStore.value);
     try {
-      const theftD = await fetch(
-        `https://api.moksa.ai/theft/theftDetectionDetailsByStoreid/${$selectedStore.value}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-            datetype:
-              $dateRange === "7 Days"
-                ? "7"
-                : $dateRange === "15 Days"
-                  ? "15"
-                  : $dateRange === "30 Days"
-                    ? "30"
-                    : $dateRange === "12 Months"
-                      ? "year"
-                      : "7",
-            startDate: formatDate(startDate),
-            endDate: formatDate(today),
+      const [theftD, busy] = await Promise.all([
+        fetch(
+          `https://api.moksa.ai/theft/theftDetectionDetailsByStoreid/${$selectedStore.value}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+              datetype:
+                $dateRange === "7 Days"
+                  ? "7"
+                  : $dateRange === "15 Days"
+                    ? "15"
+                    : $dateRange === "30 Days"
+                      ? "30"
+                      : $dateRange === "12 Months"
+                        ? "year"
+                        : "7",
+              startDate: formatDate(startDate),
+              endDate: formatDate(today),
+            },
           },
-        },
-      ).then((res) => res.json());
+        ).then((res) => res.json()),
+        fetch(
+          `https://api.moksa.ai/customerPrediction/storeBusyHourBystoreId/${$selectedStore.value}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          },
+        ).then((res) => res.json()),
+      ]);
 
       console.log("theftD", theftD);
+      console.log("busy", busy);
       theftDataa.set(theftD);
-
+      busynessStoresData.set(busy.data);
       // Update the bar chart with new data
       updateBarChart(theftD);
     } catch (error) {
@@ -923,7 +947,7 @@
       </div>
     {/if}
     <div
-      class="col-span-5 row-span-3 border rounded-md p-4 flex flex-col gap-4 h-[375px] dark:border-white/[.7]"
+      class={`col-span-5 row-span-3 border rounded-md p-4 flex flex-col gap-4 h-[375px] dark:border-white/[.7]`}
     >
       <span class="flex items-center justify-between font-semibold">
         <p class="text-[#323232] dark:text-white">Stores Overview</p>

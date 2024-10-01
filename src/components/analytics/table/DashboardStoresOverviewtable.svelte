@@ -1,10 +1,18 @@
 <script lang="ts">
   export let aisleData;
-  console.log('aisledata',aisleData)
+  console.log("aisledata", aisleData);
   import { createTable, Render, Subscribe } from "svelte-headless-table";
   import * as Table from "@/components/ui/table";
   import { Button } from "@/components/ui/button";
-  import { ArrowUpDown, Edit, Store, StoreIcon, Trash2, TrendingDown, TrendingUp } from "lucide-svelte";
+  import {
+    ArrowUpDown,
+    Edit,
+    Store,
+    StoreIcon,
+    Trash2,
+    TrendingDown,
+    TrendingUp,
+  } from "lucide-svelte";
   import { createEventDispatcher } from "svelte";
   import {
     addPagination,
@@ -16,26 +24,24 @@
 
   const dispatch = createEventDispatcher();
 
-
   const dbdata = aisleData.map((item: any) => {
     return {
       storeName: item.name,
-      customers: item.count ,
-      busyHours: item.busy_hours ,
-      mostVisitedAisle: item.aisle_name ,
-    }
-  })
-
+      customers: item.count,
+      busyHours: item.busy_hours,
+      mostVisitedAisle: item.aisle_name,
+    };
+  });
 
   function getAisleColor(aisle: string): string {
     const colors: { [key: string]: string } = {
-      'Liqour': '#e6f7f5',
-      'Grocery': '#e6f0ff',
-      'Clothing': '#fff9e6',
-      'Electronics': '#ffe6f0',
-      'null': '#95ffe1',
+      Liqour: "#e6f7f5",
+      Grocery: "#e6f0ff",
+      Clothing: "#fff9e6",
+      Electronics: "#ffe6f0",
+      null: "#95ffe1",
     };
-    return colors[aisle] || '#e6e6e6';
+    return colors[aisle] || "#e6e6e6";
   }
 
   const data = writable(dbdata);
@@ -48,7 +54,7 @@
   const table = createTable(readableData, {
     sort: addSortBy(),
     filter: addTableFilter({
-      fn: ({ filterValue, value }: { filterValue: string, value: string }) =>
+      fn: ({ filterValue, value }: { filterValue: string; value: string }) =>
         value.toLowerCase().includes(filterValue.toLowerCase()),
     }),
     select: addSelectedRows(),
@@ -98,7 +104,7 @@
               >
                 <Table.Head
                   {...attrs}
-                  class="text-[#727272] whitespace-nowrap h-full flex items-center justify-center flex-1 w-1/4"
+                  class="text-[#727272] whitespace-nowrap h-full flex items-center justify-center flex-1 w-full"
                 >
                   <Button
                     variant="ghost"
@@ -118,20 +124,28 @@
     <Table.Body {...$tableBodyAttrs}>
       {#each $pageRows as row (row.id)}
         <Subscribe rowAttrs={row.attrs()} let:rowAttrs>
-          <Table.Row {...rowAttrs} class="border-b flex items-center w-full justify-between">
+          <Table.Row
+            {...rowAttrs}
+            class="border-b flex items-center w-full justify-between"
+          >
             {#each row.cells as cell (cell.id)}
               <Subscribe attrs={cell.attrs()} let:attrs>
-                <Table.Cell {...attrs} class='w-1/4 flex items-center justify-center whitespace-nowrap'>
-                  {#if cell.id === 'storeName'}
-                    <div class="flex items-center justify-center gap-2 text-sm text-center ">
-                        <Store size={16} class='flex-shrink-0'/>
-                        <span class='text-sm'>{row.original.storeName}</span>
+                <Table.Cell
+                  {...attrs}
+                  class="w-full flex items-center justify-center whitespace-nowrap"
+                >
+                  {#if cell.id === "storeName"}
+                    <div
+                      class="flex items-center justify-center gap-2 text-sm text-center"
+                    >
+                      <Store size={16} class="flex-shrink-0" />
+                      <span class="text-sm">{row.original.storeName}</span>
                     </div>
-                  <!-- {:else if cell.id === 'mostVisitedAisle'}
+                    <!-- {:else if cell.id === 'mostVisitedAisle'}
                     <span class="px-2 py-1 rounded-full text-xs dark:text-black" style="background-color: {getAisleColor(row.original.mostVisitedAisle)};">
                       {row.original.mostVisitedAisle}
                     </span> -->
-                  {:else if cell.id === 'futurePrediction'}
+                  {:else if cell.id === "futurePrediction"}
                     <span class="flex items-center justify-center text-center">
                       {#if row.original.futurePrediction === "uptrend"}
                         <TrendingUp />

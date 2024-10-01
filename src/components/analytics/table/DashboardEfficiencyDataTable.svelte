@@ -47,6 +47,7 @@
       hoursWithCustomers: item.customer,
       sittingIdle: item.idle,
       onMobile: item.mobile,
+      fillingShelf: item.fillingShelves,
     };
   });
 
@@ -83,6 +84,10 @@
     table.column({
       accessor: "onMobile",
       header: "On Mobile",
+    }),
+    table.column({
+      accessor: "fillingShelf",
+      header: "Filling Shelf",
     }),
   ]);
 
@@ -153,6 +158,10 @@
                   {:else if cell.id === "onMobile"}
                     <span class="text-sm text-pink-500"
                       >{row.original.onMobile}</span
+                    >
+                  {:else if cell.id === "fillingShelf"}
+                    <span class="text-sm text-orange-500"
+                      >{row.original.fillingShelf}</span
                     >
                   {:else}
                     <Render of={cell.render()} />

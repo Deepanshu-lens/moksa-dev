@@ -35,7 +35,7 @@
       withCustomers: item.customer,
       onMobile: item.mobile,
       sittingIdle: item.idle,
-      fillingShelf: item.fillingshelves,
+      fillingShelf: item.fillingShelves,
       efficiencyScore: item.efficiency_score + "%",
     };
   });

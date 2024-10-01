@@ -18,6 +18,7 @@
   export let allStores;
   export let aisleStoreData;
   export let token;
+  let close = false;
 
   const fruits = allStores
     ?.filter((store: any) => store.id !== -1)
@@ -27,6 +28,7 @@
     }));
 
   $: console.log("fruits", fruits);
+  $: console.log("daterange", $dateRange);
 
   import { Input } from "../ui/input";
   import { createEventDispatcher } from "svelte";
@@ -64,7 +66,7 @@
       }
 
       const data = await res.json();
-      // console.log(`Floor map for store ${storeId}:`, data);
+      console.log(`Floor map for store ${storeId}:`, data);
       floorMaps.update((maps) => [
         ...maps,
         { storeId: storeId, img: data.data },
@@ -134,48 +136,10 @@
     }
   }
 
-  // Modify the updateSelectedFloorMap function
-  // async function updateSelectedFloorMap() {
-  //   loadingFloor = true;
-  //   // ... existing code ...
-
-  //   if (selectedFloorMap !== "" && selectedFloorMap !== null) {
-  //     // ... existing code ...
-
-  //     const mapData = await fetch(`https://api.moksa.ai/heatmap/getHeatMapByTimeAndStoreId/1hr/${$selectedStore.value}`, {
-  //       method: "GET",
-  //       headers: {
-  //         Authorization: `Bearer ${token}`,
-  //         "Content-Type": "application/json",
-  //       },
-  //     });
-  //     const data = await mapData.json();
-  //     console.log('mapData', data);
-  //     heatMapData.set(data);
-
-  //     // ... existing code to set storeFloorImg ...
-
-  //     loadingFloor = false;
-
-  //     // Draw heatmap after the image has loaded
-  //     setTimeout(() => {
-  //       drawHeatmap($heatMapData);
-  //     }, 100);
-  //   } else {
-  //     storeFloorImg = null;
-  //     loadingFloor = false;
-  //   }
-  // }
-
-  // Add this to ensure the heatmap is redrawn when the component updates
-  // $: if ($heatMapData && storeFloorImg) {
-  //   setTimeout(() => {
-  //     drawHeatmap($heatMapData);
-  //   }, 100);
-  // }
-
-  // Add this function to update the selected floor map
   async function updateSelectedFloorMap() {
+    console.log("updateSelectedFloorMap called", $dateRange);
+    customDateLabel = "custom";
+
     loadingFloor = true;
     const selectedMap = $floorMaps.find(
       (map) => map.storeId === $selectedStore.value,
@@ -223,9 +187,72 @@
     }
   }
 
+  async function updateSelectedFloorMapCustom() {
+    console.log("updateSelectedFloorMap  custom called", $dateRange);
+    loadingFloor = true;
+    const start = value?.start
+      ? `${value.start.year}-${String(value.start.month).padStart(2, "0")}-${String(value.start.day).padStart(2, "0")}`
+      : "";
+    const end = value?.end
+      ? `${value.end.year}-${String(value.end.month).padStart(2, "0")}-${String(value.end.day).padStart(2, "0")}`
+      : "";
+    console.log(start);
+    console.log(end);
+    const selectedMap = $floorMaps.find(
+      (map) => map.storeId === $selectedStore.value,
+    );
+    selectedFloorMap = selectedMap ? selectedMap.img : null;
+    // console.log('Selected floor map:', selectedFloorMap);
+
+    if (selectedFloorMap !== "" && selectedFloorMap !== null) {
+      // console.log('selectedFloorMap',selectedFloorMap)
+      const mapData = await fetch(
+        `https://api.moksa.ai/heatmap/getHeatMapByTimeAndStoreId/custom/${$selectedStore.value}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+            startdate: start,
+            enddate: end,
+          },
+        },
+      );
+      const data = await mapData.json();
+      console.log("mapData", data);
+      heatMapData.set(data);
+      const res = await fetch("https://api.moksa.ai/stream", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          key: selectedFloorMap,
+        }),
+      });
+      const blob = await res.blob();
+      const imageUrl = URL.createObjectURL(blob);
+      // selectedImage = imageUrl;
+      // console.log('data',data)
+      storeFloorImg = imageUrl;
+      loadingFloor = false;
+      setTimeout(() => {
+        drawHeatmap($heatMapData);
+      }, 100);
+    } else {
+      storeFloorImg = null;
+      loadingFloor = false;
+    }
+  }
+
   // Update selectedFloorMap whenever selectedStore changes
   $: if ($selectedStore || $dateRange) {
-    updateSelectedFloorMap();
+    if (value?.start || value?.end) {
+      updateSelectedFloorMapCustom();
+    } else {
+      updateSelectedFloorMap();
+    }
   }
 
   let fusiondevicedata = [];
@@ -259,309 +286,13 @@
       );
       console.log(dayDifference);
       dateRange.set("custom");
+      setTimeout(() => {
+        close = false;
+      }, 200);
     } else {
       customDateLabel = "Custom";
     }
   }
-
-  // function createChart() {
-  //   if (chartCanvas) {
-  //     if (chart) {
-  //       chart.destroy();
-  //     }
-  //     const ctx = chartCanvas.getContext("2d");
-
-  //     if (ctx) {
-  //       Chart.register(PieController, ArcElement, Tooltip, Legend);
-
-  //       const data = chartData.map((item) => item.value);
-  //       const labels = chartData.map((item) => item.label);
-  //       const colors = [
-  //         "#1E40AF",
-  //         "#1D4ED8",
-  //         "#2563EB",
-  //         "#3B82F6",
-  //         "#60A5FA",
-  //         "#93C5FD",
-  //         "#BFDBFE",
-  //       ];
-
-  //       chart = new Chart(ctx, {
-  //         type: "pie",
-  //         data: {
-  //           labels: labels,
-  //           datasets: [
-  //             {
-  //               data: data,
-  //               backgroundColor: colors.slice(0, data.length),
-  //               borderWidth: 1,
-  //             },
-  //           ],
-  //         },
-  //         options: {
-  //           responsive: true,
-  //           maintainAspectRatio: false,
-  //           plugins: {
-  //             legend: {
-  //               display: false,
-  //             },
-  //             tooltip: {
-  //               callbacks: {
-  //                 label: function (context) {
-  //                   return `${context.label}: ${context.parsed}%`;
-  //                 },
-  //               },
-  //             },
-  //           },
-  //         },
-  //       });
-  //     }
-  //   }
-  // }
-
-  // $: {
-  //   if ($selectedStore && $aisleStoreData) {
-  //     selectedStoreData = $aisleStoreData.find(
-  //       (store) => store.storeId === $selectedStore.value,
-  //     )?.data;
-  //     console.log("Selected store data:", selectedStoreData);
-  //     // createChart();
-  //   }
-  // }
-
-  // $: {
-  //   if (selectedStoreData) {
-  //     chartData = Object.entries(selectedStoreData.data.aisle_details).map(
-  //       ([key, value]) => ({
-  //         label: key,
-  //         value: value.percentage,
-  //         count: value.count,
-  //       }),
-  //     );
-  //     setTimeout(() => {
-  //       createChart();
-  //       updateFusionChartData();
-  //     }, 500);
-  //   }
-  // }
-
-  // function updateFusionChartData() {
-  //   if (selectedStoreData && chartData) {
-  //     fusiondevicedata = [
-  //       {
-  //         seriesname: "AisleData",
-  //         data: chartData.map((item) => ({
-  //           value: item.value,
-  //           color: "#07E1A4",
-  //         })),
-  //       },
-  //       {
-  //         seriesname: "RemainingData",
-  //         data: chartData.map((item) => ({
-  //           value: 100 - item.value,
-  //           color: "#9DFFFF",
-  //         })),
-  //       },
-  //     ];
-
-  //     fusiondevicecategories = [
-  //       {
-  //         category: chartData.map((item) => ({ label: item.label })),
-  //       },
-  //     ];
-  //   }
-  // }
-
-  // async function fetchDataForDateRange() {
-  //   if (isInitialLoad) {
-  //     isInitialLoad = false;
-  //     return; // Skip the first call
-  //   }
-  //   isLoading.set(true);
-
-  //   const today = new Date();
-  //   let startDate = new Date(today);
-
-  //   switch ($dateRange) {
-  //     case "7 Days":
-  //       startDate.setDate(today.getDate() - 7);
-  //       break;
-  //     case "15 Days":
-  //       startDate.setDate(today.getDate() - 15);
-  //       break;
-  //     case "30 Days":
-  //       startDate.setDate(today.getDate() - 30);
-  //       break;
-  //     case "12 Months":
-  //       startDate.setFullYear(today.getFullYear() - 1);
-  //       break;
-  //     default:
-  //       startDate.setDate(today.getDate() - 7);
-  //   }
-
-  //   const formatDate = (date: Date) => date.toISOString().split("T")[0];
-
-  //   console.log(formatDate(startDate));
-  //   console.log(formatDate(today));
-  //   try {
-  //     const responses = await Promise.all(
-  //       allStores.map(async (store: any) => {
-  //         const response = await fetch(
-  //           `https://api.moksa.ai/people/aisleCount/getAisleCountbyStoreid/${store.id}/${formatDate(startDate)}/${formatDate(today)}`,
-  //           {
-  //             method: "GET",
-  //             headers: {
-  //               Authorization: `Bearer ${token}`,
-  //               "Content-Type": "application/json",
-  //             },
-  //           },
-  //         );
-  //         if (!response.ok) {
-  //           console.error(
-  //             `Failed to fetch aisle count for store ${store.id}: ${response.status} ${response.statusText}`,
-  //           );
-  //           throw new Error(
-  //             `Failed to fetch aisle count for store ${store.id}`,
-  //           );
-  //         }
-  //         const data = await response.json();
-  //         return { storeId: store.id, data };
-  //       }),
-  //     );
-
-  //     const combinedResponse = responses.flat();
-  //     console.log(combinedResponse);
-  //     aisleStoreData.set(combinedResponse);
-  //   } catch (error) {
-  //     console.error("Error fetching data:", error);
-  //   } finally {
-  //     isLoading.set(false);
-  //   }
-  // }
-
-  // async function fetchCustomDateData() {
-  //   console.log("fetching custom date data");
-  //   const start = value?.start
-  //     ? `${value.start.year}-${String(value.start.month).padStart(2, "0")}-${String(value.start.day).padStart(2, "0")}`
-  //     : "";
-  //   const end = value?.end
-  //     ? `${value.end.year}-${String(value.end.month).padStart(2, "0")}-${String(value.end.day).padStart(2, "0")}`
-  //     : "";
-  //   console.log(start);
-  //   console.log(end);
-  //   try {
-  //     // Call the three APIs
-  //     const responses = await Promise.all(
-  //       allStores.map(async (store: any) => {
-  //         // console.log(`Fetching aisle count for store ${store.id}`);
-  //         const response = await fetch(
-  //           `https://api.moksa.ai/people/aisleCount/getAisleCountbyStoreid/${store.id}/${start}/${end}`,
-  //           {
-  //             method: "GET",
-  //             headers: {
-  //               Authorization: `Bearer ${token}`,
-  //               "Content-Type": "application/json",
-  //             },
-  //           },
-  //         );
-  //         if (!response.ok) {
-  //           console.error(
-  //             `Failed to fetch aisle count for store ${store.id}: ${response.status} ${response.statusText}`,
-  //           );
-  //           throw new Error(
-  //             `Failed to fetch aisle count for store ${store.id}`,
-  //           );
-  //         }
-  //         const data = await response.json();
-  //         return { storeId: store.id, data };
-  //       }),
-  //     );
-
-  //     const combinedResponse = responses.flat();
-  //     console.log(combinedResponse);
-  //     aisleStoreData.set(combinedResponse);
-  //   } catch (error) {
-  //     console.error("Error fetching data:", error);
-  //   } finally {
-  //     isLoading.set(false);
-  //   }
-  // }
-
-  // $: {
-  //   if ($dateRange !== "custom") {
-  //     fetchDataForDateRange();
-  //   }
-  // }
-  // $: if ($dateRange === "custom" && (value?.start || value?.end)) {
-  //   fetchCustomDateData();
-  // }
-
-  // let sockets: { [key: number]: any } = {};
-  // let liveData = writable([]);
-
-  // function setupSocketForAllStores() {
-  //   allStores?.forEach((store: any) => {
-  //     setupSocket(store.id);
-  //   });
-  // }
-
-  // function setupSocket(storeId: number) {
-  //   const userID = 8
-  //   if (sockets[storeId]) {
-  //     sockets[storeId].disconnect();
-  //   }
-
-  //   sockets[storeId] = io("https://api.moksa.ai", {
-  //     withCredentials: true,
-  //     extraHeaders: {
-  //       Authorization: `Bearer ${token}`,
-  //     },
-  //     transports: ["websocket", "polling"],
-  //   });
-
-  //   const socket = sockets[storeId];
-
-  //   socket.on("error", (err) => {
-  //     console.log(`error for store ${storeId}:`, err);
-  //   });
-
-  //   socket.on("connect", () => {
-  //     console.log(`connected for store ${storeId}`);
-  //     socket.emit("joinUser", userID);
-  //     socket.emit("joinStore", storeId);
-  //   });
-
-  //   socket.on(`heatmap_2d_store_${storeId}`, (data) => {
-  //     console.log(`Received heatmap data for store ${storeId}:`, data);
-  //     toast(`Received heatmap data for store ${storeId}:`, {
-  //       description: `Store: ${storeId}, Heatmap Data: ${data}`
-  //     });
-  //     liveData.update((currentData) => {
-  //       return [{ storeId, ...data }, ...currentData].slice(0, 100);
-  //     });
-  //   });
-
-  //   socket.on("disconnect", () => {
-  //     console.log(`disconnected for store ${storeId}`);
-  //   });
-  // }
-
-  // onMount(() => {
-  //   // setTimeout(() => {
-  //   //   setupSocketForAllStores();
-  //   //     // getAllFloorMaps();
-  //   // }, 500);
-  // });
-
-  // // $: console.log($liveData)
-
-  // onDestroy(() => {
-  //   Object.values(sockets)?.forEach((socket) => {
-  //     console.log('disconnecting socket')
-  //     socket.disconnect();
-  //   });
-  // });
-  // $: console.log("loadingFloor", storeFloorImg);
 </script>
 
 <section
@@ -588,11 +319,23 @@
           class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "7hr" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
           on:click={() => dateRange.set("7hr")}>7hr</button
         >
+        <button
+          class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "1" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
+          on:click={() => dateRange.set("1")}>1 Day</button
+        >
+        <button
+          class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "3" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
+          on:click={() => dateRange.set("3")}>3 Day</button
+        >
+        <button
+          class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "7" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
+          on:click={() => dateRange.set("7")}>7 Day</button
+        >
         <!-- <button
           class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "live" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
           on:click={() => dateRange.set("live")}>live</button
         > -->
-        <!-- <Popover.Root openFocus>
+        <Popover.Root openFocus bind:open={close}>
           <Popover.Trigger asChild let:builder>
             <Button
               builders={[builder]}
@@ -610,7 +353,7 @@
               placeholder={value?.start}
             />
           </Popover.Content>
-        </Popover.Root> -->
+        </Popover.Root>
       </span>
       <Select.Root portal={null}>
         <Select.Trigger

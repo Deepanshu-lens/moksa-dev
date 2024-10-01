@@ -96,18 +96,24 @@
           nodes.push(storeNodes[0].id);
         }
       }
+      console.log("user session", U[0].session);
+      console.log("user session", U[0].session[0]);
+      const sessupdate = await PB.collection("session").update(
+        U[0].session[0],
+        {
+          node: nodes,
+        },
+      );
 
-      await PB.collection("session").update(U[0].session[0], {
-        node: nodes,
-      });
+      console.log(sessupdate);
 
-      await PB.collection("users").update(data.lensId, {
-        first_name: firstName,
-        last_name: lastName,
-        email: mailId,
-        role: userID,
-        phoneNumber: phoneNumber,
-      });
+      // await PB.collection("users").update(data.lensId, {
+      //   first_name: firstName,
+      //   last_name: lastName,
+      //   email: mailId,
+      //   role: userID,
+      //   phoneNumber: phoneNumber,
+      // });
 
       const updateMoksaUser = await fetch(
         `https://api.moksa.ai/auth/updateUser`,
@@ -127,6 +133,8 @@
           }),
         },
       );
+
+      console.log(updateMoksaUser);
 
       if (!updateMoksaUser.ok) {
         throw new Error("Failed to update Moksa user");

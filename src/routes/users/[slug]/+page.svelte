@@ -148,9 +148,11 @@
 
       // console.log("RESP: ", user.data);
 
+      let user;
+
       const createUser = async () => {
         try {
-          const user = await PB.collection("users").create({
+          user = await PB.collection("users").create({
             firstName,
             lastName,
             email: mailId,
@@ -171,6 +173,7 @@
       if (userMessage && userMessage.message === "error") {
         return;
       }
+      console.log("user,user", user);
 
       const moksa = await fetch("/api/user/create", {
         method: "POST",
@@ -247,7 +250,6 @@
       return { message: "error" };
     }
   };
-  ``;
 
   // $: console.log(roles)
 
