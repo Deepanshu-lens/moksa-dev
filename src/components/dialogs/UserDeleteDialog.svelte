@@ -41,9 +41,7 @@
       <Dialog.Title>Delete user : {data?.username}</Dialog.Title>
     </Dialog.Header>
     <div class="grid grid-cols-2">
-      <div class="col-span-2 dark:text-white text-black">
-        Are you sure ?
-      </div>
+      <div class="col-span-2 dark:text-white text-black">Are you sure ?</div>
     </div>
     <Dialog.Footer>
       <span class="flex items-center gap-4">

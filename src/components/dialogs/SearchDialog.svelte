@@ -272,7 +272,14 @@
     </div>
 
     <Dialog.Footer>
-      <Button type="button" on:click={() => {if(captureMode === 2){handleDateSearch()}}}>Search</Button>
+      <Button
+        type="button"
+        on:click={() => {
+          if (captureMode === 2) {
+            handleDateSearch();
+          }
+        }}>Search</Button
+      >
     </Dialog.Footer></Dialog.Content
   >
 </Dialog.Root>

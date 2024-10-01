@@ -38,7 +38,7 @@ export const POST: RequestHandler = async ({
         "Content-Type": "application/json",
         'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify({ name: data.name, address: data.address, pincode: data.pin, country: data.country, manager: data.manager, timezone: data.timezone, openingTime: ot, closingTime: ct, is24HrStore: data.isStore24hr }),
+      body: JSON.stringify({ name: data.name, address: data.address, pincode: data.pin, country: data.country, manager: data.manager, timezone: data.timezone, openingTime: ot, closingTime: ct, is24HrStore: data.isStore24hr, hasKitchen: data.hasKitchen }),
     }).then(async (res) => {
       // console.log(res);
       const newS = await res.json();

@@ -31,8 +31,6 @@
 
   let roles: any[] = [];
 
-  
-
   const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
 
   async function initiate() {
@@ -60,7 +58,7 @@
     const currentStoresData = await currentStores.json();
     // console.log(allStoresData.data)
     // console.log(currentStoresData)
-    allStores = allStoresData.data.data
+    allStores = allStoresData.data.data;
     // console.log(allStores)
     // curStores = currentStoresData.data[0].stores
     curStores = currentStoresData.data[0].stores.map((store) => store.storeId);
@@ -79,94 +77,97 @@
   }
 
   const handleSubmit = async () => {
-  try {
-    PB.autoCancellation(false);
-    const U = await PB.collection("users").getFullList({
-      filter: `id="${data.lensId}"`,
-    });
-
-    if (!U || U.length === 0) {
-      throw new Error("User not found");
-    }
-
-    const nodes = [];
-    for (const store of curStores) {
-      const storeNodes = await PB.collection("node").getFullList({
-        filter: `moksaId="${store}"`,
+    try {
+      PB.autoCancellation(false);
+      const U = await PB.collection("users").getFullList({
+        filter: `id="${data.lensId}"`,
       });
-      if (storeNodes.length > 0) {
-        nodes.push(storeNodes[0].id);
+
+      if (!U || U.length === 0) {
+        throw new Error("User not found");
       }
-    }
 
-    await PB.collection("session").update(U[0].session[0], {
-      node: nodes,
-    });
+      const nodes = [];
+      for (const store of curStores) {
+        const storeNodes = await PB.collection("node").getFullList({
+          filter: `moksaId="${store}"`,
+        });
+        if (storeNodes.length > 0) {
+          nodes.push(storeNodes[0].id);
+        }
+      }
 
-    await PB.collection('users').update(data.lensId, {
-      first_name: firstName,
-      last_name: lastName,
-      email: mailId,
-      role: userID,
-      phoneNumber: phoneNumber
-    });
+      await PB.collection("session").update(U[0].session[0], {
+        node: nodes,
+      });
 
-    const updateMoksaUser = await fetch(`https://api.moksa.ai/auth/updateUser`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify({
+      await PB.collection("users").update(data.lensId, {
         first_name: firstName,
         last_name: lastName,
         email: mailId,
-        role: userType,
-        mobile_number: phoneNumber,
-        id: data.moksaId
-      })
-    });
-
-    if (!updateMoksaUser.ok) {
-      throw new Error("Failed to update Moksa user");
-    }
-
-    for (const node of nodes) {
-      await PB.collection("node").update(node, {
-        "session+": U[0].session,
+        role: userID,
+        phoneNumber: phoneNumber,
       });
-    }
 
-    const filteredCurStores = curStores.filter((id) => id !== 0);
-    const updateMoksaUserStores = await fetch(
-      `https://api.moksa.ai/store/userStore/updateUserByUserId`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+      const updateMoksaUser = await fetch(
+        `https://api.moksa.ai/auth/updateUser`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            first_name: firstName,
+            last_name: lastName,
+            email: mailId,
+            role: userType,
+            mobile_number: phoneNumber,
+            id: data.moksaId,
+          }),
         },
-        body: JSON.stringify({
-          userId: data.moksaId,
-          storeIds: filteredCurStores,
-        }),
+      );
+
+      if (!updateMoksaUser.ok) {
+        throw new Error("Failed to update Moksa user");
       }
-    );
 
-    if (!updateMoksaUserStores.ok) {
-      throw new Error("Failed to update Moksa user stores");
+      for (const node of nodes) {
+        await PB.collection("node").update(node, {
+          "session+": U[0].session,
+        });
+      }
+
+      const filteredCurStores = curStores.filter((id) => id !== 0);
+      const updateMoksaUserStores = await fetch(
+        `https://api.moksa.ai/store/userStore/updateUserByUserId`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            userId: data.moksaId,
+            storeIds: filteredCurStores,
+          }),
+        },
+      );
+
+      if (!updateMoksaUserStores.ok) {
+        throw new Error("Failed to update Moksa user stores");
+      }
+
+      toast.success("User updated successfully");
+      dialogOpen = false;
+      return true;
+    } catch (error) {
+      console.error("Error updating user:", error);
+      dialogOpen = false;
+      toast.error("Failed to update user. Please try again.");
+      return false;
     }
-
-    toast.success("User updated successfully");
-    dialogOpen = false;
-    return true;
-  } catch (error) {
-    console.error("Error updating user:", error);
-    dialogOpen = false
-    toast.error("Failed to update user. Please try again.");
-    return false;
-  }
-};
+  };
 
   // $: console.log(typeof curStores);
   // $: console.log(curStores);

@@ -13,17 +13,14 @@
   let pincode = "";
   let country = "";
   let manager = "";
-  let selectedTimezone = ''
-  let storeOpenTime = ''
-  let storeCloseTime = ''
-  let isStore24hr = false
-  selectedTimezone
-  const timezones = [
-    'EST',
-    'PST',
-    'MST',
-    "CST",]
-    
+  let selectedTimezone = "";
+  let storeOpenTime = "";
+  let storeCloseTime = "";
+  let isStore24hr = false;
+  let hasKitchen = false;
+  selectedTimezone;
+  const timezones = ["EST", "PST", "MST", "CST"];
+
   export let showAddNode: boolean;
   const onSubmit = () =>
     fetch("/api/node/create", {
@@ -42,6 +39,7 @@
         storeOpenTime: storeOpenTime,
         storeCloseTime: storeCloseTime,
         isStore24hr: isStore24hr,
+        hasKitchen: hasKitchen,
       }),
     }).then((response) => {
       if (response.ok) {
@@ -52,7 +50,7 @@
     });
   function handleClose() {
     console.log("close");
-    showAddNode.set(false)
+    showAddNode.set(false);
   }
 </script>
 
@@ -124,48 +122,54 @@
           on:change={(e) => (manager = e.target.value)}
         />
       </div>
+      <div class="grid grid-cols-4 items-center gap-4">
+        <Label for="has-kitchen">Has Kitchen</Label>
+        <div class="col-span-3">
+          <Switch id="has-kitchen" bind:checked={hasKitchen} />
+        </div>
+      </div>
       <div class="grid grid-cols-4 items-center gap-4 py-2">
-            <Label for={`store-timezone`}>Timezone</Label>
-            <Select.Root >
-              <Select.Trigger class="col-span-3">
-                <Select.Value placeholder="Select timezone" />
-              </Select.Trigger>
-              <Select.Content>
-                {#each timezones as timezone}
-                  <Select.Item on:click={() => (selectedTimezone = timezone)} value={timezone}>{timezone}</Select.Item>
-                {/each}
-              </Select.Content>
-            </Select.Root>
-          </div>
-          <div class="grid grid-cols-4 items-center gap-4 py-2">
-            <Label for={`store-24hr`}>24-Hour Operation</Label>
-            <div class="col-span-3">
-              <Switch
-                id={`store-24hr`}
-                bind:checked={isStore24hr}
-              />
-            </div>
-          </div>
-           <div class="grid grid-cols-4 items-center gap-4 py-2">
-            <Label for={`store-open-time`}>Open Time</Label>
-            <Input
-              id={`store-open-time`}
-              type="time"
-              class="col-span-3"
-              bind:value={storeOpenTime}
-              disabled={isStore24hr}
-            />
-          </div>
-          <div class="grid grid-cols-4 items-center gap-4 py-2">
-            <Label for={`store-close-time`}>Close Time</Label>
-            <Input
-              id={`store-close-time`}
-              type="time"
-              class="col-span-3"
-              bind:value={storeCloseTime}
-              disabled={isStore24hr}
-            />
-          </div>
+        <Label for={`store-timezone`}>Timezone</Label>
+        <Select.Root>
+          <Select.Trigger class="col-span-3">
+            <Select.Value placeholder="Select timezone" />
+          </Select.Trigger>
+          <Select.Content>
+            {#each timezones as timezone}
+              <Select.Item
+                on:click={() => (selectedTimezone = timezone)}
+                value={timezone}>{timezone}</Select.Item
+              >
+            {/each}
+          </Select.Content>
+        </Select.Root>
+      </div>
+      <div class="grid grid-cols-4 items-center gap-4 py-2">
+        <Label for={`store-24hr`}>24-Hour Operation</Label>
+        <div class="col-span-3">
+          <Switch id={`store-24hr`} bind:checked={isStore24hr} />
+        </div>
+      </div>
+      <div class="grid grid-cols-4 items-center gap-4 py-2">
+        <Label for={`store-open-time`}>Open Time</Label>
+        <Input
+          id={`store-open-time`}
+          type="time"
+          class="col-span-3"
+          bind:value={storeOpenTime}
+          disabled={isStore24hr}
+        />
+      </div>
+      <div class="grid grid-cols-4 items-center gap-4 py-2">
+        <Label for={`store-close-time`}>Close Time</Label>
+        <Input
+          id={`store-close-time`}
+          type="time"
+          class="col-span-3"
+          bind:value={storeCloseTime}
+          disabled={isStore24hr}
+        />
+      </div>
     </div>
 
     <Dialog.Footer>

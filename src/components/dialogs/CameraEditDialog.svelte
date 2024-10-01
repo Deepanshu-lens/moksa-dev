@@ -5,7 +5,7 @@
   export let role: string;
   export let subUrl: string;
   export let showOptions;
-  export let isEditDialogOpen
+  export let isEditDialogOpen;
 
   let dialogOpen: boolean = false;
 
@@ -16,74 +16,77 @@
   import { Button } from "@/components/ui/button";
   import { selectedNode } from "@/lib/stores";
 
+  let main = url.split(":")[0] + url.split(":")[1] + url.split(":")[2];
+  let sub = subUrl.split(":")[0] + subUrl.split(":")[1] + subUrl.split(":")[2];
+  // let sub = subUrl.split(":")[0];
+
   const editCamera = () => {
-    if(role === 'superAdmin'){
-      console.log(showOptions.set(''))
-    fetch("/api/camera/editCamera", {
-      method: "put",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        cameraId,
-        nodeId: $selectedNode.id,
-        name,
-        url,
-        subUrl
-      }),
-    }).then(() => {
-      toast("Camera edited");
-      dialogOpen = false
-    });  
-    } else {
-      console.log(showOptions.set(''))
+    if (role === "superAdmin") {
+      console.log(showOptions.set(""));
       fetch("/api/camera/editCamera", {
-      method: "put",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        cameraId,
-        nodeId: $selectedNode.id,
-        name,
-        url,
-      }),
-    }).then(() => {
-      toast("Camera edited");
-      dialogOpen = false
-    });
+        method: "put",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          cameraId,
+          nodeId: $selectedNode.id,
+          name,
+          url,
+          subUrl,
+        }),
+      }).then(() => {
+        toast("Camera edited");
+        dialogOpen = false;
+      });
+    } else {
+      console.log(showOptions.set(""));
+      fetch("/api/camera/editCamera", {
+        method: "put",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          cameraId,
+          nodeId: $selectedNode.id,
+          name,
+          url,
+        }),
+      }).then(() => {
+        toast("Camera edited");
+        dialogOpen = false;
+      });
     }
-    
   };
   $: {
-    if(dialogOpen) {
-      isEditDialogOpen.set(true)
+    if (dialogOpen) {
+      isEditDialogOpen.set(true);
     } else {
-      isEditDialogOpen.set(false)
+      isEditDialogOpen.set(false);
     }
   }
 </script>
 
 <Dialog.Root bind:open={dialogOpen}>
-  <Dialog.Trigger class='flex items-center gap-2'><slot /></Dialog.Trigger>
+  <Dialog.Trigger class="flex items-center gap-2"><slot /></Dialog.Trigger>
   <Dialog.Content class="sm:max-w-[720px] z-[70] scale-90 sm:scale-100">
     <Dialog.Header>
       <Dialog.Title>Edit Camera</Dialog.Title>
     </Dialog.Header>
-    <div class="grid grid-cols-2 gap-4 py-4 ">
+    <div class="grid grid-cols-2 gap-4 py-4">
       <div class=" col-span-2 flex items-center gap-4">
         <Label class="w-24" for="node-name">Name</Label>
-        <Input type="text" bind:value={name} class="text-base"/>
+        <Input type="text" bind:value={name} class="text-base" />
       </div>
-      {#if role === 'superAdmin'}
-      <div class=" col-span-2 flex items-center gap-4">
-        <Label class="w-24" for="node-name">Url</Label>
-        <Input type="text" bind:value={url} class="text-base"/>
-      </div>
-      <div class=" col-span-2 flex items-center gap-4">
-        <Label class="w-24" for="node-name">Sub Url</Label>
-        <Input type="text" bind:value={subUrl} class="text-base"/>
-      </div>
+      {#if role === "superAdmin"}
+        <div class=" col-span-2 flex items-center gap-4">
+          <Label class="w-24" for="node-name">Url</Label>
+          <Input type="text" bind:value={main} class="text-base" />
+        </div>
+        <div class=" col-span-2 flex items-center gap-4">
+          <Label class="w-24" for="node-name">Sub Url</Label>
+          <Input type="text" bind:value={sub} class="text-base" />
+        </div>
       {/if}
     </div>
 

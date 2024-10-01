@@ -1,12 +1,16 @@
 <script lang="ts">
-	import CameraMoksaCard from './../cards/CameraMoksaCard.svelte';
+  import CameraMoksaCard from "./../cards/CameraMoksaCard.svelte";
   import type { Camera } from "@/types";
   import { Cctv, Command, Search } from "lucide-svelte";
   import AddCameraDialog from "../dialogs/AddCameraDialog.svelte";
   import Sortable from "sortablejs";
   import { Input } from "../ui/input";
   import { onMount } from "svelte";
-  import { selectedNode,filteredNodeCameras, cameraCounts } from "@/lib/stores";
+  import {
+    selectedNode,
+    filteredNodeCameras,
+    cameraCounts,
+  } from "@/lib/stores";
   import Button from "../ui/button/button.svelte";
   export let showItems: boolean;
   import { addUserLog } from "@/lib/addUserLog";
@@ -14,7 +18,7 @@
   import PocketBase from "pocketbase";
   import { writable } from "svelte/store";
 
-   let showOptions = writable('');
+  let showOptions = writable("");
   export let isAllFullScreen: boolean;
   export let user;
   export let data;
@@ -42,8 +46,6 @@
       });
     }
 
-
-
     const handleKeyDown = (event: KeyboardEvent) => {
       // Check if Command + / or Ctrl + / is pressed
       if ((event.metaKey || event.ctrlKey) && event.key === "/") {
@@ -62,47 +64,44 @@
     };
   });
 
-
   onMount(async () => {
-    PB.autoCancellation(false)
+    PB.autoCancellation(false);
     PB.collection("personCounter").subscribe("*", async (e: any) => {
-    const cameraId = e.record.camera;
-    const updatedCount = e.record.count;
+      const cameraId = e.record.camera;
+      const updatedCount = e.record.count;
 
-    // console.log("cameraId", cameraId);
-    // console.log("updatedCount", updatedCount);
-cameraCounts.update(counts => {
-      counts[cameraId] = updatedCount;
-      return counts;
+      // console.log("cameraId", cameraId);
+      // console.log("updatedCount", updatedCount);
+      cameraCounts.update((counts) => {
+        counts[cameraId] = updatedCount;
+        return counts;
+      });
     });
-
-    });
-
   });
 
   $: if ($selectedNode?.camera) {
-      if (filterText) {
-        const exactMatches = $selectedNode.camera.filter((camera: Camera) =>
-          camera.name.toLowerCase() === filterText.toLowerCase()
-        );
-        filteredNodeCameras.set(exactMatches.length > 0 ? exactMatches : 
-          $selectedNode.camera.filter((camera: Camera) =>
-            camera.name.toLowerCase().includes(filterText.toLowerCase())
-          )
-        );
-      } else {
-        filteredNodeCameras.set($selectedNode.camera);
-      }
-   
+    if (filterText) {
+      const exactMatches = $selectedNode.camera.filter(
+        (camera: Camera) =>
+          camera.name.toLowerCase() === filterText.toLowerCase(),
+      );
+      filteredNodeCameras.set(
+        exactMatches.length > 0
+          ? exactMatches
+          : $selectedNode.camera.filter((camera: Camera) =>
+              camera.name.toLowerCase().includes(filterText.toLowerCase()),
+            ),
+      );
+    } else {
+      filteredNodeCameras.set($selectedNode.camera);
+    }
   }
-
 
   function filterItems(e: Event) {
     filterText = (e.target as HTMLInputElement).value;
   }
 
   // $: console.log($filteredNodeCameras)
-
 </script>
 
 {#if $selectedNode?.camera?.length === 0}
@@ -110,7 +109,9 @@ cameraCounts.update(counts => {
     <div class="flex flex-col space-y-6 mx-auto items-center">
       <Cctv size={64} />
       <AddCameraDialog nodes={data.nodes} sNode={""} {user}>
-        <Button class="mx-auto text-center disabled:cursor-not-allowed" >Add Camera</Button>
+        <Button class="mx-auto text-center disabled:cursor-not-allowed"
+          >Add Camera</Button
+        >
       </AddCameraDialog>
     </div>
   </div>
@@ -210,8 +211,10 @@ cameraCounts.update(counts => {
             lineVehicle={camera?.expand?.inference?.lineVehicle}
             linePersonThresh={camera.linePersonThresh}
             lineVehicleThresh={camera?.expand?.inference?.lineVehicleThresh}
-            intrusionPersonThresh={camera?.expand?.inference?.intrusionPersonThresh}
-            intrusionVehicleThresh={camera?.expand?.inference?.intrusionVehicleThresh}
+            intrusionPersonThresh={camera?.expand?.inference
+              ?.intrusionPersonThresh}
+            intrusionVehicleThresh={camera?.expand?.inference
+              ?.intrusionVehicleThresh}
             sparshID={camera?.sparshID}
             personCount={camera.personCount}
             {isAllFullScreen}

@@ -82,10 +82,13 @@
   //   setTimeout(updateEvents, 1000);
   // }
 
-    function updateEvents() {
-    events.update(currentEvents => {
+  function updateEvents() {
+    events.update((currentEvents) => {
       if (batchedEvents.length !== currentEvents.length) {
-        const updatedEvents = [...batchedEvents, ...currentEvents].slice(0, 200);
+        const updatedEvents = [...batchedEvents, ...currentEvents].slice(
+          0,
+          200,
+        );
         batchedEvents = [];
         return updatedEvents;
       }
@@ -95,22 +98,20 @@
   }
 
   onMount(async () => {
-       events.set([])
-    batchedEvents=[]
+    events.set([]);
+    batchedEvents = [];
     nodes = await getNodes();
     const s = nodes.find((n) => n.id === session.activeNode);
     selectedNode.set(s || nodes[0]);
     events.set(data.events);
 
-
-      PB.collection("events").subscribe("*", async (e) => {
-        console.log(e.record)
-        batchedEvents.push({
-          ...e.record,
-          created: new Date(e.record.created),
-        } as unknown as Event);
-      });
-
+    PB.collection("events").subscribe("*", async (e) => {
+      console.log(e.record);
+      batchedEvents.push({
+        ...e.record,
+        created: new Date(e.record.created),
+      } as unknown as Event);
+    });
 
     setTimeout(updateEvents, 1000);
   });
@@ -150,7 +151,7 @@
   }
 
   $: filteredEvents.set(filterEvents($events));
-  $: console.log($events.length)
+  $: console.log($events.length);
 </script>
 
 <section class="h-full w-full flex items-center justify-center">
@@ -160,21 +161,16 @@
         FRS {!eventType ? "Detected" : "Matched"}
       </h1>
       <span class="flex items-center gap-4">
-        <p class="text-sm font-bold"> Event Type: </p>
+        <p class="text-sm font-bold">Event Type:</p>
         <span class="flex items-center gap-2">
-
           <p class="font-medium text-sm">Line Crossed</p>
           <input type="checkbox" bind:checked={showLC} />
         </span>
         <span class="flex items-center gap-2">
-
-
           <p class="font-medium text-sm">Detected</p>
           <input type="checkbox" bind:checked={showD} />
         </span>
         <span class="flex items-center gap-2">
-
-
           <p class="font-medium text-sm">Matched</p>
           <input type="checkbox" bind:checked={showM} />
         </span>
@@ -241,101 +237,107 @@
       </Table.Header>
       <Table.Body class="overflow-y-scroll max-h-[calc(100vh-205px)]">
         {#if $events.length > 0}
-        {#if $filteredEvents.length > 0}
-        {#each $filteredEvents as event}
-          {@const date = new Date(event.created)}
-          <Table.Row
-            on:click={() => {
-              openEventDialog(event);
-            }}
-            class="bg-transparent cursor-pointer flex items-center justify-between gap-4 mt-4 px-2 rounded-lg  border-2 border-solid border-[#e4e4e4] dark:border-[#727272]"
-          >
-            <Table.Cell class="text-black dark:text-slate-100 w-full h-full"
-              ><span class="flex items-center gap-2 capitalize">
-                {event.title}
-              </span>
-            </Table.Cell>
-            <Table.Cell class="text-[#727272] w-full h-full text-sm ml-2">
-              <img
-                src={"data:image/jpeg;base64," + event.frameImage}
-                alt="alert-img"
-                class="aspect-square"
-                width="40"
-                height="40"
-              /></Table.Cell
-            >
-            <Table.Cell
-              class="text-[#727272] w-full h-full text-sm whitespace-nowrap"
-              ><span>
-                Camera {$selectedNode.camera.filter(
-                  (c) => c.id === event.camera,
-                )[0] &&
-                  $selectedNode.camera.filter((c) => c.id === event.camera)[0]
-                    .name}</span
-              ></Table.Cell
-            >
-            <Table.Cell class="text-[#727272] w-full h-full text-sm"
-              ><span>
-                {date.toLocaleDateString("en-US", {
-                  year: "numeric",
-                  month: "short",
-                  day: "numeric",
-                })}</span
-              ></Table.Cell
-            >
-            <Table.Cell class="text-[#727272] w-full h-full text-sm"
-              ><span
-                >{date.toLocaleTimeString("en-US", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  second: "2-digit",
-                })}</span
-              ></Table.Cell
-            >
-            <Table.Cell
-              class="text-[#727272] w-full h-full text-sm whitespace-nowrap"
-              ><span>
-                {timeAgo?.format(new Date(event?.updated))}</span
-              ></Table.Cell
-            >
-            <Table.Cell class="text-[#727272] w-full h-full text-sm"
-              ><span class="ml-8">{event?.score?.toFixed(3)}</span></Table.Cell
-            >
-            <Table.Cell class="text-[#727272] w-full h-full text-sm"
-              ><span class="ml-8">{event?.matchScore?.toFixed(3)}</span
-              ></Table.Cell
-            >
-
-            <Table.Cell
-              on:click={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-              }}
-              class="text-[#727272] w-full h-full text-sm flex gap-2 items-center whitespace-nowrap"
-            >
-              <button
-                disabled
-                class="px-2 py-1 rounded-xl bg-[#E9EFFE] text-[#4976F4] text-sm font-medium flex items-center gap-1 disabled:cursor-not-allowed"
-                ><EditIcon size={16} />
-                Edit</button
+          {#if $filteredEvents.length > 0}
+            {#each $filteredEvents as event}
+              {@const date = new Date(event.created)}
+              <Table.Row
+                on:click={() => {
+                  openEventDialog(event);
+                }}
+                class="bg-transparent cursor-pointer flex items-center justify-between gap-4 mt-4 px-2 rounded-lg  border-2 border-solid border-[#e4e4e4] dark:border-[#727272]"
               >
-              <RegisterEventDialog
-                data={event}
-                registrationImages={event.frameImage}
-              >
-                <button
-                  class="px-2 py-1 rounded-xl bg-[#FBF4EC] text-[#D28E3D] text-sm font-medium flex items-center gap-1"
-                  ><ScanFace size={16} />Add face</button
+                <Table.Cell class="text-black dark:text-slate-100 w-full h-full"
+                  ><span class="flex items-center gap-2 capitalize">
+                    {event.title}
+                  </span>
+                </Table.Cell>
+                <Table.Cell class="text-[#727272] w-full h-full text-sm ml-2">
+                  <img
+                    src={"data:image/jpeg;base64," + event.frameImage}
+                    alt="alert-img"
+                    class="aspect-square"
+                    width="40"
+                    height="40"
+                  /></Table.Cell
                 >
-              </RegisterEventDialog>
-            </Table.Cell>
-          </Table.Row>
-        {/each}
+                <Table.Cell
+                  class="text-[#727272] w-full h-full text-sm whitespace-nowrap"
+                  ><span>
+                    Camera {$selectedNode.camera.filter(
+                      (c) => c.id === event.camera,
+                    )[0] &&
+                      $selectedNode.camera.filter(
+                        (c) => c.id === event.camera,
+                      )[0].name}</span
+                  ></Table.Cell
+                >
+                <Table.Cell class="text-[#727272] w-full h-full text-sm"
+                  ><span>
+                    {date.toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}</span
+                  ></Table.Cell
+                >
+                <Table.Cell class="text-[#727272] w-full h-full text-sm"
+                  ><span
+                    >{date.toLocaleTimeString("en-US", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      second: "2-digit",
+                    })}</span
+                  ></Table.Cell
+                >
+                <Table.Cell
+                  class="text-[#727272] w-full h-full text-sm whitespace-nowrap"
+                  ><span>
+                    {timeAgo?.format(new Date(event?.updated))}</span
+                  ></Table.Cell
+                >
+                <Table.Cell class="text-[#727272] w-full h-full text-sm"
+                  ><span class="ml-8">{event?.score?.toFixed(3)}</span
+                  ></Table.Cell
+                >
+                <Table.Cell class="text-[#727272] w-full h-full text-sm"
+                  ><span class="ml-8">{event?.matchScore?.toFixed(3)}</span
+                  ></Table.Cell
+                >
+
+                <Table.Cell
+                  on:click={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                  }}
+                  class="text-[#727272] w-full h-full text-sm flex gap-2 items-center whitespace-nowrap"
+                >
+                  <button
+                    disabled
+                    class="px-2 py-1 rounded-xl bg-[#E9EFFE] text-[#4976F4] text-sm font-medium flex items-center gap-1 disabled:cursor-not-allowed"
+                    ><EditIcon size={16} />
+                    Edit</button
+                  >
+                  <RegisterEventDialog
+                    data={event}
+                    registrationImages={event.frameImage}
+                  >
+                    <button
+                      class="px-2 py-1 rounded-xl bg-[#FBF4EC] text-[#D28E3D] text-sm font-medium flex items-center gap-1"
+                      ><ScanFace size={16} />Add face</button
+                    >
+                  </RegisterEventDialog>
+                </Table.Cell>
+              </Table.Row>
+            {/each}
+          {:else}
+            <p class="text-[#727272] w-full h-full text-sm p-4">
+              No events found with current filters, select filters to see events
+            </p>
+          {/if}
         {:else}
-          <p class="text-[#727272] w-full h-full text-sm p-4">No events found with current filters, select filters to see events</p>
-        {/if}
-        {:else}
-          <p class="text-[#727272] w-full h-full text-sm p-4">No events found</p>
+          <p class="text-[#727272] w-full h-full text-sm p-4">
+            No events found
+          </p>
         {/if}
       </Table.Body>
     </Table.Root>

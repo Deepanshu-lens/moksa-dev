@@ -58,8 +58,8 @@
   export let data;
   export let url;
   // console.log('streamviwe',data);
-  const {user} = data;
-  const {token} = data;
+  const { user } = data;
+  const { token } = data;
   const { nodes } = data;
   const selectedDetections = writable([]);
   let ptzControl = writable("");
@@ -751,7 +751,13 @@
           ? "w-full h-screen flex items-center justify-center"
           : "w-full h-full flex items-center justify-center"}
       >
-        <StreamLayout {handleSingleSS} {isAllFullScreen} {data} {currpanel} {user}/>
+        <StreamLayout
+          {handleSingleSS}
+          {isAllFullScreen}
+          {data}
+          {currpanel}
+          {user}
+        />
         <!-- <Player {videos} /> -->
       </div>
 
@@ -768,11 +774,6 @@
             }
           }}
         >
-
-
-
-
-
           <Minimize />
           Exit Fullscreen
         </button>
@@ -1116,7 +1117,7 @@
                               class="flex items-start gap-2 border-b pb-2 w-full relative"
                             >
                               <span
-                                class="rounded-full bg-white size-[40px] grid place-items-center text-[#000065] "
+                                class="rounded-full bg-white size-[40px] grid place-items-center text-[#000065]"
                               >
                                 <Users size={20} />
                               </span>
@@ -1148,26 +1149,28 @@
                             </span>
                           </div>
                         {:else if event.title === "Heat Map"}
-                                                   <div class="flex flex-col items-start w-full">
-                                            <span class="flex items-start gap-4 w-full">
-  <span
-                                class="rounded-full bg-white size-[40px] grid place-items-center text-[#000065] "
+                          <div class="flex flex-col items-start w-full">
+                            <span class="flex items-start gap-4 w-full">
+                              <span
+                                class="rounded-full bg-white size-[40px] grid place-items-center text-[#000065]"
                               >
                                 <Heater size={20} />
                               </span>
-                                              <h3 class={"font-medium text-base leading-5"}>
-                                                {event.title} Data Updated for
-                                                Store ID: <span class='text-semibold text-[#186AFD]'>{event.storeId}</span>
-                                              </h3>
-                                            </span>
-</div>
+                              <h3 class={"font-medium text-base leading-5"}>
+                                {event.title} Data Updated for Store ID:
+                                <span class="text-semibold text-[#186AFD]"
+                                  >{event.storeId}</span
+                                >
+                              </h3>
+                            </span>
+                          </div>
                         {:else if event.title === "Employee Efficiency"}
                           <div class="flex flex-col items-start w-full">
-                              <span
+                            <span
                               class="flex items-start gap-2 border-b pb-2 w-full relative"
                             >
                               <span
-                                class="rounded-full bg-white size-[40px] grid place-items-center text-[#000065] "
+                                class="rounded-full bg-white size-[40px] grid place-items-center text-[#000065]"
                               >
                                 <Users size={20} />
                               </span>
@@ -1187,7 +1190,7 @@
                                 Store ID: {event.store_id}
                               </p>
                             </span>
-  <span class="flex items-center gap-4 w-full">
+                            <span class="flex items-center gap-4 w-full">
                               <span class="flex gap-1 flex-col">
                                 <p class="text-xs font-medium">
                                   Mobile: <span
@@ -1226,7 +1229,7 @@
                                     {event.customer}
                                   </span>
                                 </p>
-                                 <p class="text-xs font-medium">
+                                <p class="text-xs font-medium">
                                   Idle: <span
                                     class="font-normal text-black/[.6]"
                                   >
@@ -1242,7 +1245,6 @@
                                 </p>
                               </span>
                               <span class="flex gap-1 flex-col">
-                               
                                 <p class="text-xs font-medium">
                                   Follow safety: <span
                                     class="font-normal text-black/[.6]"
@@ -1257,7 +1259,7 @@
                                     {event.present_in_store}
                                   </span>
                                 </p>
-                                 <p class="text-xs font-medium">
+                                <p class="text-xs font-medium">
                                   Log Out: <span
                                     class="font-normal text-black/[.6]"
                                   >
@@ -1265,7 +1267,6 @@
                                   </span>
                                 </p>
                               </span>
-                            
                             </span>
                           </div>
                         {/if}

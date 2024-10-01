@@ -14,7 +14,6 @@
   const session = data.session;
   let nodes: Node[] = [];
 
-
   async function getNodes(): Promise<Node[]> {
     if (session.node.length > 0) {
       const nodes = await PB.collection("node").getFullList(200, {
@@ -44,20 +43,19 @@
   onMount(async () => {
     PB.autoCancellation(false);
     nodes = await getNodes();
-   const s = nodes.find((n) => n.id === session.activeNode);
-          if(s) {
-        selectedNode.set(s)
-      } else {
-        selectedNode.set(nodes[0])
-      }
-
+    const s = nodes.find((n) => n.id === session.activeNode);
+    if (s) {
+      selectedNode.set(s);
+    } else {
+      selectedNode.set(nodes[0]);
+    }
   });
 </script>
 
 <!-- desk -->
 <main class="hidden sm:block w-full h-screen">
   {#if $selectedNode}
-  <PlaybackPanel {data}/>
+    <PlaybackPanel {data} />
   {/if}
 </main>
 

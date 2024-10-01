@@ -17,8 +17,8 @@
   import { page } from "$app/stores";
   const user: User = getContext("user");
   export let data: PageServerData;
-  const {session} = data;
-  const {features} = data.user
+  const { session } = data;
+  const { features } = data.user;
   let nodes: Node[] = [];
 
   let activeSec = writable<null | number>(null);
@@ -27,26 +27,29 @@
   async function getNodes(): Promise<Node[]> {
     if (session?.node.length > 0) {
       PB.autoCancellation(false);
-    const nodes = await PB.collection("node").getFullList(200, {
-      sort: "created",
-      filter: `session~"${session.id}"`,
-    });
-
-    for (const node of nodes) {
-      const cameras = await PB.collection("camera").getFullList({
-        filter: `node~"${node.id}"`,
-        sort: "-created",
+      const nodes = await PB.collection("node").getFullList(200, {
+        sort: "created",
+        filter: `session~"${session.id}"`,
       });
-      node.camera = cameras.map((cam: Camera) => ({
-        ...cam,
-      }));
-    }
 
-    return nodes.map((node) => ({
-      ...node,
-      session: session.id,
-    }) as Node);
-  }
+      for (const node of nodes) {
+        const cameras = await PB.collection("camera").getFullList({
+          filter: `node~"${node.id}"`,
+          sort: "-created",
+        });
+        node.camera = cameras.map((cam: Camera) => ({
+          ...cam,
+        }));
+      }
+
+      return nodes.map(
+        (node) =>
+          ({
+            ...node,
+            session: session.id,
+          }) as Node,
+      );
+    }
     return [];
   }
 
@@ -130,7 +133,8 @@
       </span>
       <span class="flex flex-col">
         <p class="text-lg font-medium text-[#212836] capitalize">
-          {data?.user && data.user.firstName} {data?.user && data.user.lastName}
+          {data?.user && data.user.firstName}
+          {data?.user && data.user.lastName}
         </p>
         <p class="text-xs text-[#919eab] leading-[16px] flex gap-1">
           Logged in via:

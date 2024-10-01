@@ -52,7 +52,7 @@
       const result = await data.json();
 
       // nodeData.set([...result?.nodeData]);
-        nodeData.set(
+      nodeData.set(
         result?.nodeData.map((node) => ({ ...node, session: user.session })),
       );
     } else {

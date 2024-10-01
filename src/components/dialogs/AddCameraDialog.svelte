@@ -11,7 +11,7 @@
   import * as Select from "@/components/ui/select/index";
   import { page } from "$app/stores";
   import { onMount } from "svelte";
-  export let user
+  export let user;
   let cameraName = "";
   let cameraNumber: number | null = null;
   let cameraURL = "";
@@ -54,15 +54,12 @@
   let camCount = 0;
   let nvrSaving: boolean = false;
   let nvrFace: boolean = false;
-  let storeOpenTime
-  let storeCloseTime
-  let isStore24hr
-  let selectedTimezone
-  const timezones = [
-    'EST',
-    'PST',
-    'MST',
-    "CST",]
+  let storeOpenTime;
+  let storeCloseTime;
+  let isStore24hr;
+  let selectedTimezone;
+  let hasKitchen = false;
+  const timezones = ["EST", "PST", "MST", "CST"];
 
   export let sNode;
   export let nodes;
@@ -291,20 +288,21 @@
           storeOpenTime: storeOpenTime,
           storeCloseTime: storeCloseTime,
           isStore24hr: isStore24hr,
+          hasKitchen: hasKitchen,
         }),
       }).catch((err) => console.log(err));
     }
-    nodeName = []
-    nodeAddress = []
-    nodePin = []
-    nodeCountry = []
-    nodeManager = []
-    toast.success('Store Added')
+    nodeName = [];
+    nodeAddress = [];
+    nodePin = [];
+    nodeCountry = [];
+    nodeManager = [];
+    toast.success("Store Added");
     dialogOpen = false;
-    selectedTimezone = ''
-    storeOpenTime = ''
-    storeCloseTime = ''
-    isStore24hr = false
+    selectedTimezone = "";
+    storeOpenTime = "";
+    storeCloseTime = "";
+    isStore24hr = false;
   }
 
   async function handleAddSubNodes() {
@@ -362,28 +360,27 @@
     <Dialog.Header>
       <Dialog.Title>Add Network</Dialog.Title>
     </Dialog.Header>
-    {#if user.role !== 'Operators' && user.role !== 'admin' && user.role !== 'storeManager' && user.role !== 'storeEmployee'}
-
-    <div class="flex items-center justify-between w-full">
-      <!-- disabled={$page.url.pathname.includes("frs")} -->
-      <button
-        on:click={() => (modeAdd = 1)}
-        class={`${modeAdd === 1 ? "bg-white dark:bg-slate-700" : "bg-[#f5f5f5] dark:bg-slate-800"} w-full text-[#4f4f4f] dark:text-slate-200 font-medium text-lg border-r border-black/.13 disabled:cursor-not-allowed`}
-        >Add Store</button
-      >
-      <!-- disabled={$page.url.pathname.includes("frs")} -->
-      <!-- <button
+    {#if user.role !== "Operators" && user.role !== "admin" && user.role !== "storeManager" && user.role !== "storeEmployee"}
+      <div class="flex items-center justify-between w-full">
+        <!-- disabled={$page.url.pathname.includes("frs")} -->
+        <button
+          on:click={() => (modeAdd = 1)}
+          class={`${modeAdd === 1 ? "bg-white dark:bg-slate-700" : "bg-[#f5f5f5] dark:bg-slate-800"} w-full text-[#4f4f4f] dark:text-slate-200 font-medium text-lg border-r border-black/.13 disabled:cursor-not-allowed`}
+          >Add Store</button
+        >
+        <!-- disabled={$page.url.pathname.includes("frs")} -->
+        <!-- <button
         on:click={() => (modeAdd = 2)}
         class={`${modeAdd === 2 ? "bg-white dark:bg-slate-700" : "bg-[#f5f5f5] dark:bg-slate-800"} w-full text-[#4f4f4f] dark:text-slate-200 font-medium text-lg border-r border-black/.13 disabled:cursor-not-allowed`}
         >Add SubStore</button
       > -->
 
-      <button
-        on:click={() => (modeAdd = 3)}
-        class={`${modeAdd === 3 ? "bg-white dark:bg-slate-700" : "bg-[#f5f5f5] dark:bg-slate-800"} w-full text-[#4f4f4f] dark:text-slate-200 font-medium text-lg border-r border-black/.13 `}
-        >Add Devices</button
-      >
-    </div>
+        <button
+          on:click={() => (modeAdd = 3)}
+          class={`${modeAdd === 3 ? "bg-white dark:bg-slate-700" : "bg-[#f5f5f5] dark:bg-slate-800"} w-full text-[#4f4f4f] dark:text-slate-200 font-medium text-lg border-r border-black/.13 `}
+          >Add Devices</button
+        >
+      </div>
     {/if}
     {#if modeAdd === 3}
       <div class=" drop-shadow-md px-2">
@@ -750,7 +747,7 @@
         </div>
       </div>
     {/if}
-   
+
     {#if modeAdd === 1}
       <div class="flex flex-col px-2">
         <p class="text-[#212123] dark:text-slate-200 font-medium text-xl mt-2">
@@ -816,14 +813,26 @@
             />
           </div>
           <div class="grid grid-cols-4 items-center gap-4 py-2">
+            <Label for={`node-has-kitchen-${index}`}>Has Kitchen</Label>
+            <div class="col-span-3">
+              <Switch
+                id={`node-has-kitchen-${index}`}
+                bind:checked={hasKitchen}
+              />
+            </div>
+          </div>
+          <div class="grid grid-cols-4 items-center gap-4 py-2">
             <Label for={`store-timezone-${index}`}>Timezone</Label>
-            <Select.Root >
+            <Select.Root>
               <Select.Trigger class="col-span-3">
                 <Select.Value placeholder="Select timezone" />
               </Select.Trigger>
               <Select.Content>
                 {#each timezones as timezone}
-                  <Select.Item on:click={() => (selectedTimezone = timezone)} value={timezone}>{timezone}</Select.Item>
+                  <Select.Item
+                    on:click={() => (selectedTimezone = timezone)}
+                    value={timezone}>{timezone}</Select.Item
+                  >
                 {/each}
               </Select.Content>
             </Select.Root>
@@ -831,13 +840,10 @@
           <div class="grid grid-cols-4 items-center gap-4 py-2">
             <Label for={`store-24hr-${index}`}>24-Hour Operation</Label>
             <div class="col-span-3">
-              <Switch
-                id={`store-24hr-${index}`}
-                bind:checked={isStore24hr}
-              />
+              <Switch id={`store-24hr-${index}`} bind:checked={isStore24hr} />
             </div>
           </div>
-           <div class="grid grid-cols-4 items-center gap-4 py-2">
+          <div class="grid grid-cols-4 items-center gap-4 py-2">
             <Label for={`store-open-time-${index}`}>Open Time</Label>
             <Input
               id={`store-open-time-${index}`}
@@ -857,8 +863,6 @@
               disabled={isStore24hr}
             />
           </div>
-          
-          
         {/each}
       </div>
       <!-- <Button
