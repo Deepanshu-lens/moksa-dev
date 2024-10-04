@@ -25,57 +25,7 @@
 
   const dispatch = createEventDispatcher();
 
-  // const staticData = [
-  //   {
-  //     storeName: "Store 01",
-  //     customerCount: 20,
-  //     busyHourProjections: "8:00 am - 9:00 pm",
-  //     customerProjection: { value: 422, percentage: 25, trend: "up" },
-  //   },
-  //   {
-  //     storeName: "Store 02",
-  //     customerCount: 20,
-  //     busyHourProjections: "8:00 am - 9:00 pm",
-  //     customerProjection: { value: 422, percentage: 25, trend: "up" },
-  //   },
-  //   {
-  //     storeName: "Store 03",
-  //     customerCount: 20,
-  //     busyHourProjections: "8:00 am - 9:00 pm",
-  //     customerProjection: { value: 422, percentage: 15, trend: "down" },
-  //   },
-  //   {
-  //     storeName: "Store 04",
-  //     customerCount: 20,
-  //     busyHourProjections: "8:00 am - 9:00 pm",
-  //     customerProjection: { value: 422, percentage: 25, trend: "up" },
-  //   },
-  //   {
-  //     storeName: "Store 05",
-  //     customerCount: 20,
-  //     busyHourProjections: "8:00 am - 9:00 pm",
-  //     customerProjection: { value: 422, percentage: 15, trend: "down" },
-  //   },
-  //   {
-  //     storeName: "Store 06",
-  //     customerCount: 20,
-  //     busyHourProjections: "8:00 am - 9:00 pm",
-  //     customerProjection: { value: 422, percentage: 25, trend: "up" },
-  //   },
-  //   {
-  //     storeName: "Store 07",
-  //     customerCount: 20,
-  //     busyHourProjections: "8:00 am - 9:00 pm",
-  //     customerProjection: { value: 422, percentage: 25, trend: "up" },
-  //   },
-  //   {
-  //     storeName: "Store 08",
-  //     customerCount: 20,
-  //     busyHourProjections: "8:00 am - 9:00 pm",
-  //     customerProjection: { value: 422, percentage: 15, trend: "down" },
-  //   },
-  // ];
-
+  export let selectedStore;
   export let storeData;
 
   console.log("people count data", $storeData);
@@ -160,7 +110,7 @@
     class="rounded-t-xl w-full h-[50px] bg-transparent flex items-center justify-between px-4"
   >
     <p class=" text-xl font-semibold flex items-center gap-2">
-      {$storeData[0].store}
+      {$storeData.length > 0 ? $storeData[0].store : $selectedStore.label}
     </p>
     <div class="flex items-center gap-4">
       <!-- <div class="flex items-center space-x-2">
@@ -251,56 +201,80 @@
         </Subscribe>
       {/each}
     </Table.Header>
-    <Table.Body {...$tableBodyAttrs}>
-      {#each $pageRows as row (row.id)}
-        <Subscribe rowAttrs={row.attrs()} let:rowAttrs>
-          <Table.Row
-            {...rowAttrs}
-            class="border-b flex items-center w-full justify-between"
-          >
-            {#each row.cells as cell (cell.id)}
-              <Subscribe attrs={cell.attrs()} let:attrs>
-                <Table.Cell
-                  {...attrs}
-                  class="flex items-center justify-center whitespace-nowrap flex-1 py-2 w-1/4"
-                >
-                  {#if cell.id === "storeName"}
-                    <div class="flex items-center gap-2">
-                      <div
-                        class="w-8 h-8 rounded text-start bg-blue-900 flex items-center justify-center"
-                      >
-                        <Store class="w-4 h-4 text-white" />
+    {#if $storeData.length > 0}
+      <Table.Body {...$tableBodyAttrs}>
+        {#each $pageRows as row (row.id)}
+          <Subscribe rowAttrs={row.attrs()} let:rowAttrs>
+            <Table.Row
+              {...rowAttrs}
+              class="border-b flex items-center w-full justify-between"
+            >
+              {#each row.cells as cell (cell.id)}
+                <Subscribe attrs={cell.attrs()} let:attrs>
+                  <Table.Cell
+                    {...attrs}
+                    class="flex items-center justify-center whitespace-nowrap flex-1 py-2 w-1/4"
+                  >
+                    {#if cell.id === "storeName"}
+                      <div class="flex items-center gap-2">
+                        <div
+                          class="w-8 h-8 rounded text-start bg-blue-900 flex items-center justify-center"
+                        >
+                          <Store class="w-4 h-4 text-white" />
+                        </div>
+                        <span>{row.original.storeName}</span>
                       </div>
-                      <span>{row.original.storeName}</span>
-                    </div>
-                  {:else if cell.id === "customerProjection"}
-                    <div class="flex items-center gap-2">
-                      <span class="text-gray-600"
-                        >{row.original.customerProjection.value}</span
-                      >
-                      <div
-                        class={`px-2 py-1 rounded ${row.original.customerProjection.trend === "up" ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"}`}
-                      >
-                        {#if row.original.customerProjection.trend === "up"}
-                          <TrendingUp class="w-4 h-4 inline mr-1" />
-                        {:else}
-                          <TrendingDown class="w-4 h-4 inline mr-1" />
-                        {/if}
-                        {row.original.customerProjection.percentage}%
+                    {:else if cell.id === "customerProjection"}
+                      <div class="flex items-center gap-2">
+                        <span class="text-gray-600"
+                          >{row.original.customerProjection.value}</span
+                        >
+                        <div
+                          class={`px-2 py-1 rounded ${row.original.customerProjection.trend === "up" ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"}`}
+                        >
+                          {#if row.original.customerProjection.trend === "up"}
+                            <TrendingUp class="w-4 h-4 inline mr-1" />
+                          {:else}
+                            <TrendingDown class="w-4 h-4 inline mr-1" />
+                          {/if}
+                          {row.original.customerProjection.percentage}%
+                        </div>
                       </div>
-                    </div>
-                  {:else if cell.id === "chevron"}
-                    <ChevronRight class="w-5 h-5 text-gray-400" />
-                  {:else}
-                    <Render of={cell.render()} />
-                  {/if}
-                </Table.Cell>
-              </Subscribe>
-            {/each}
-          </Table.Row>
-        </Subscribe>
+                    {:else if cell.id === "chevron"}
+                      <ChevronRight class="w-5 h-5 text-gray-400" />
+                    {:else}
+                      <Render of={cell.render()} />
+                    {/if}
+                  </Table.Cell>
+                </Subscribe>
+              {/each}
+            </Table.Row>
+          </Subscribe>
+        {/each}
+      </Table.Body>
+    {:else}
+      <!-- <span
+        class="rounded-t-xl w-full h-[50px] bg-transparent flex items-center justify-between px-4"
+      >
+        <p class=" text-xl font-semibold flex items-center gap-2">
+          {$selectedStore.label}
+        </p>
+      </span> -->
+      <!-- <p class="flex items-center justify-center h-[100px]">No data</p> -->
+      {#each $headerRows as headerRow}
+        <Table.Row
+          class="bg-transparent flex flex-row border-b items-center justify-between"
+        >
+          {#each headerRow.cells as cell (cell.id)}
+            <p
+              class="flex items-center justify-center whitespace-nowrap flex-1 py-2 w-1/4"
+            >
+              No data
+            </p>
+          {/each}
+        </Table.Row>
       {/each}
-    </Table.Body>
+    {/if}
   </Table.Root>
 </div>
 

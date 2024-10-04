@@ -23,6 +23,7 @@
   let storeCloseTime;
   let isStore24hr;
   let selectedTimezone;
+  let hasKitchen;
 
   const timezones = ["EST", "PST", "MST", "UTC", "CST"];
 
@@ -55,6 +56,7 @@
           storeCloseTime = storeData.closingTime;
           isStore24hr = storeData.is24HrStore;
           selectedTimezone = storeData.timezone;
+          hasKitchen = storeData.hasKitchen;
         }
       })
       .catch((err) => {
@@ -77,6 +79,11 @@
         country: country,
         manager: manager,
         moksaId: store.moksaId,
+        hasKitchen: hasKitchen,
+        openingTime: storeOpenTime,
+        closingTime: storeCloseTime,
+        is24HrStore: isStore24hr,
+        timezone: selectedTimezone,
       }),
     }).then(() => {
       toast("Store updated");
@@ -183,70 +190,53 @@
             />
           </div>
         </div>
-          <div class="space-y-2 ">
+        <div class="space-y-2">
           <Label for={`store-timezone`}>Timezone</Label>
           <span class="relative w-full col-span-3">
             <select
-            id="store-timezone"
-            bind:value={selectedTimezone}
-            class=" w-full border border-[#F2F4F7] rounded-md px-3 py-2"
+              id="store-timezone"
+              bind:value={selectedTimezone}
+              class=" w-full border border-[#F2F4F7] rounded-md px-3 py-2"
             >
-            <option value="" disabled selected>Select timezone</option>
-            {#each timezones as timezone}
-            <option value={timezone}>{timezone}</option>
-            {/each}
-          </select>
-          <ChevronDown
-          class="absolute pointer-events-none right-3 top-1/2 transform -translate-y-1/2 z-20"
-          />
-        </span>
+              <option value="" disabled selected>Select timezone</option>
+              {#each timezones as timezone}
+                <option value={timezone}>{timezone}</option>
+              {/each}
+            </select>
+            <ChevronDown
+              class="absolute pointer-events-none right-3 top-1/2 transform -translate-y-1/2 z-20"
+            />
+          </span>
         </div>
 
         <div class="grid grid-cols-4 items-center gap-4 py-2">
-            <Label for={`store-24hr`}>24-Hour</Label>
-            <div class="col-span-3">
-              <Switch
-                id={`store-24hr`}
-                bind:checked={isStore24hr}
-              />
-            </div>
+          <Label for={`store-24hr`}>24-Hour</Label>
+          <div class="col-span-3">
+            <Switch id={`store-24hr`} bind:checked={isStore24hr} />
           </div>
-           <div class="grid grid-cols-4 items-center gap-4 py-2">
-            <Label for={`store-open-time`}>Open Time</Label>
-            <Input
-              id={`store-open-time`}
-              type="time"
-              class="col-span-3"
-              bind:value={storeOpenTime}
-              disabled={isStore24hr}
-            />
-          </div>
-          <div class="grid grid-cols-4 items-center gap-4 py-2">
-            <Label for={`store-close-time`}>Close Time</Label>
-            <Input
-              id={`store-close-time`}
-              type="time"
-              class="col-span-3"
-              bind:value={storeCloseTime}
-              disabled={isStore24hr}
-            />
-          </div>
+        </div>
+        <div class="grid grid-cols-4 items-center gap-4 py-2">
+          <Label for={`store-open-time`}>Open Time</Label>
+          <Input
+            id={`store-open-time`}
+            type="time"
+            class="col-span-3"
+            bind:value={storeOpenTime}
+            disabled={isStore24hr}
+          />
+        </div>
+        <div class="grid grid-cols-4 items-center gap-4 py-2">
+          <Label for={`store-close-time`}>Close Time</Label>
+          <Input
+            id={`store-close-time`}
+            type="time"
+            class="col-span-3"
+            bind:value={storeCloseTime}
+            disabled={isStore24hr}
+          />
+        </div>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-          <div class="mt-6 flex justify-end space-x-3">
+        <div class="mt-6 flex justify-end space-x-3">
           <Button
             type="button"
             variant="outline"

@@ -48,10 +48,6 @@
   let close = false;
   let busynessStoresData = writable([]);
 
-  // console.log('busyness',busyness)
-
-  $: console.log("allStores", allStores);
-
   const fruits = allStores?.map((store: any) => ({
     value: store.id,
     label: store.name,
@@ -61,29 +57,6 @@
     value: fruits[0].value,
     label: fruits[0].label,
   });
-
-  // onMount(async () => {
-  //   if (allStores?.length > 0) {
-  //     let busyData = [];
-  //     for (let i = 0; i < allStores.length; i++) {
-  //       const busy = await fetch(
-  //         `https://api.moksa.ai/customerPrediction/storeBusyHourBystoreId/${allStores[i].id}`,
-  //         {
-  //           headers: {
-  //             Authorization: `Bearer ${token}`,
-  //             "Content-Type": "application/json",
-  //           },
-  //         },
-  //       ).then((res) => res.json());
-  //       busyData.push({ id: allStores[i].id, ...busy });
-  //     }
-  //     busynessStoresData.set(busyData);
-  //     console.log("busynessStoresData", busyData);
-  //   }
-  // });
-
-  $: console.log("aisle data", aisleData);
-  $: console.log("aisle data", $busynessStoresData);
 
   $: {
     if (value?.start && value?.end) {
@@ -200,9 +173,11 @@
   }
 
   function createChart() {
+    console.log("called");
     if (chartCanvas && !chart) {
+      console.log("here");
       const ctx = chartCanvas.getContext("2d");
-      const gradient = ctx.createLinearGradient(400, 0, 0, 0);
+      const gradient = ctx.createLinearGradient(400, 0, 0, chartCanvas.height);
       gradient.addColorStop(0, "rgba(235, 230, 11, 1)");
       gradient.addColorStop(1, "rgba(7, 225, 164, 1)");
 
@@ -216,7 +191,8 @@
         );
 
         // Process the data
-        const processedData = processChartData(busyness);
+        console.log("busyness", $busynessStoresData);
+        const processedData = processChartData($busynessStoresData);
 
         chart = new Chart(ctx, {
           type: "line",
@@ -224,7 +200,7 @@
             labels: processedData.labels,
             datasets: [
               {
-                label: "Busy Hours",
+                label: "Predicted Mean",
                 borderColor: gradient,
                 backgroundColor: gradient,
                 borderWidth: 2,
@@ -248,25 +224,25 @@
                   color: "rgba(0,0,0,.05)",
                 },
                 ticks: {
-                  maxRotation: 0,
+                  autoSkip: false,
+                  font: {
+                    size: 14,
+                  },
                 },
               },
               y: {
                 display: true,
                 title: {
                   display: false,
-                  text: "Busy Hour",
+                  text: "Predicted Mean",
                 },
                 grid: {
                   display: false,
                 },
                 beginAtZero: true,
-                suggestedMax: 24,
+                suggestedMax: Math.max(...processedData.data) + 1,
                 ticks: {
-                  stepSize: 2,
-                  callback: function (value) {
-                    return value.toString().padStart(2, "0") + ":00";
-                  },
+                  stepSize: 1,
                 },
               },
             },
@@ -278,7 +254,7 @@
               tooltip: {
                 callbacks: {
                   label: function (context) {
-                    return `${context.dataset.label}: ${context.parsed.y.toString().padStart(2, "0")}:00`;
+                    return `${context.dataset.label}: ${context.parsed.y}`;
                   },
                 },
               },
@@ -290,14 +266,10 @@
   }
 
   function processChartData(data) {
-    const processedData = data.map((item) => {
-      const busyHour = parseInt(item.busy_hours.split("-")[0]);
-      return { day: item.day, value: busyHour };
-    });
-
+    console.log(data);
     return {
-      labels: processedData.map((item) => item.day),
-      data: processedData.map((item) => item.value),
+      labels: data.map((item) => `${item.dayName} (${item.hour.slice(0, 5)})`),
+      data: data.map((item) => item.predictedMean),
     };
   }
 
@@ -305,7 +277,7 @@
     chartLoading = false;
     setTimeout(() => {
       createBarChart();
-      createChart();
+      // createChart();
     }, 100);
   });
 
@@ -377,16 +349,38 @@
         ).then((res) => res.json()),
       ]);
 
-      console.log("theftD", theftD);
-      console.log("busy", busy);
+      // console.log("theftD", theftD);
+      // console.log("busy", busy);
       theftDataa.set(theftD);
       busynessStoresData.set(busy.data);
       // Update the bar chart with new data
       updateBarChart(theftD);
+      if ($selectedStore.value !== -1) {
+        setTimeout(() => {
+          if (chart === null) {
+            createChart();
+          } else {
+            updateBusynessChart(busy.data);
+          }
+        }, 1000);
+      }
     } catch (error) {
       console.error("Error fetching store-wise data:", error);
     } finally {
       isLoading.set(false);
+    }
+  }
+
+  function updateBusynessChart(busyData) {
+    console.log("Updating busyness chart");
+    if (chart) {
+      console.log("Busyness data:", busyData);
+      const processedData = processChartData(busyData);
+
+      chart.data.labels = processedData.labels;
+      chart.data.datasets[0].data = processedData.data;
+      chart.options.scales.y.suggestedMax = Math.max(...processedData.data) + 1;
+      chart.update();
     }
   }
 
@@ -605,7 +599,7 @@
   }
 
   $: {
-    if ($selectedStore.value !== -1) {
+    if ($selectedStore.value) {
       fetchDataStoreWise();
     }
   }
@@ -710,9 +704,12 @@
   const dispatch = createEventDispatcher();
 
   function handleSelect(fruit) {
+    console.log("selected", fruit);
     selectedStore.set(fruit);
     dispatch("select", fruit);
   }
+
+  // $: console.log(aisleData);
 </script>
 
 <section
@@ -925,7 +922,7 @@
         {/if}
       </div>
     </div>
-    {#if $selectedStore.label === "All Stores"}
+    {#if $selectedStore.label !== "All Stores"}
       <div
         class="col-span-3 row-span-3 border rounded-md p-4 flex flex-col gap-4 h-[375px] dark:border-white/[.7]"
       >
@@ -938,16 +935,16 @@
           </span>
         </span>
         <div class="h-full w-full">
-          {#if busyness.length === 0}
+          <!-- {#if $busynessStoresData.length === 0}
             <p class="text-center text-gray-500 mt-8">No data available</p>
-          {:else}
-            <canvas bind:this={chartCanvas}></canvas>
-          {/if}
+          {:else} -->
+          <canvas bind:this={chartCanvas}></canvas>
+          <!-- {/if} -->
         </div>
       </div>
     {/if}
     <div
-      class={`col-span-5 row-span-3 border rounded-md p-4 flex flex-col gap-4 h-[375px] dark:border-white/[.7]`}
+      class={`${$selectedStore.label === "All Stores" ? "col-span-8 row-span-3" : "col-span-5 row-span-3"} border rounded-md p-4 flex flex-col gap-4 h-[375px] dark:border-white/[.7]`}
     >
       <span class="flex items-center justify-between font-semibold">
         <p class="text-[#323232] dark:text-white">Stores Overview</p>

@@ -120,7 +120,6 @@
     if ($selectedStore.value !== undefined) {
       if ($dateRange === "7 Days") {
         getWeekData($selectedStore.value);
-        callLiveData();
       } else {
         fetchDataForDateRange();
       }
@@ -134,39 +133,22 @@
     }
   });
 
-  // onMount(async () => {
-  //   if (allStores.length > 0) {
-  //     const response = await fetch(
-  //       `https://api.moksa.ai/people/getPeopleCountLive/${$selectedStore.value}/30/1/100`,
-  //       {
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //         method: "GET",
-  //       },
-  //     );
-  //     const data = await response.json();
-  //     console.log(data);
-  //   }
-  // });
-
-  async function callLiveData() {
-    console.log("calling live data", $selectedStore.value);
-    const response = await fetch(
-      `https://api.moksa.ai/people/getPeopleCountLive/${$selectedStore.value}/30/1/100`,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+  onMount(async () => {
+    if (allStores.length > 0) {
+      const response = await fetch(
+        `https://api.moksa.ai/people/getPeopleCountLive/${$selectedStore.value}/30/1/100`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          method: "GET",
         },
-        method: "GET",
-      },
-    );
-    const data = await response.json();
-    console.log("live data", data);
-    liveData.set(data.data);
-  }
+      );
+      const data = await response.json();
+      console.log(data);
+    }
+  });
 
   async function getWeekData(storeId: number) {
     const today = new Date().toISOString().split("T")[0];
@@ -280,8 +262,6 @@
       return; // Skip the first call
     }
 
-    customDateLabel = "Custom";
-
     const today = new Date();
     let startDate = new Date(today);
 
@@ -354,9 +334,6 @@
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
-            datetype: { $dateRange },
-            pagenumber: 1,
-            pagepersize: 100,
           },
         },
       );
@@ -402,6 +379,8 @@
     selectedStore.set(fruit);
     dispatch("select", fruit);
   }
+
+  $: console.log($storeData);
 </script>
 
 <section
@@ -527,7 +506,7 @@
         <Store size={40} />
       </span>
       <span>
-        <p class="text-white text-xl font-bold">{allStores.length - 1}</p>
+        <p class="text-white text-xl font-bold">{allStores.length}</p>
         <p class="text-sm font-semibold text-white">stores registered</p>
       </span>
     </div>
@@ -591,16 +570,16 @@
         </p>
       </span>
       <div class="h-full w-full max-h-[300px] overflow-y-auto">
-        {#if $liveData.length > 0}
-          <LivePeopleCountDataTable
-            liveData={$liveData}
-            selectedStore={$selectedStore}
-          />
-        {:else}
+        <!-- {#if $liveData.length > 0} -->
+        <LivePeopleCountDataTable
+          liveData={$liveData}
+          selectedStore={$selectedStore}
+        />
+        <!-- {:else}
           <p class="flex items-center justify-center py-4">
             No live data available
           </p>
-        {/if}
+        {/if} -->
       </div>
     </div>
     <!-- <div
@@ -620,9 +599,9 @@
       class="col-span-8 row-span-4 border rounded-md p-2 flex flex-col dark:border-white/[.7]"
     >
       <div class="h-full w-full">
-        {#if $storeData.length > 0}
-          <PeopleCountDataTable {storeData} />
-        {:else}
+        <!-- {#if $storeData.length > 0} -->
+        <PeopleCountDataTable {storeData} {selectedStore} />
+        <!-- {:else}
           <span
             class="rounded-t-xl w-full h-[50px] bg-transparent flex items-center justify-between px-4"
           >
@@ -631,7 +610,7 @@
             </p>
           </span>
           <p class="flex items-center justify-center">No data</p>
-        {/if}
+        {/if} -->
       </div>
     </div>
   </div>

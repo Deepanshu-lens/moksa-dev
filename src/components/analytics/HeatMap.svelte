@@ -105,7 +105,7 @@
     ) as HTMLCanvasElement;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-    console.log($heatMapData);
+    // console.log($heatMapData);
     const image = document.querySelector("img") as HTMLImageElement;
     canvas.width = image.width;
     canvas.height = image.height;
@@ -113,17 +113,32 @@
     let hd = $heatMapData.data;
     if (!Array.isArray(hd) || !Array.isArray(hd[0])) {
       console.error("Heatmap data is not a 2D array:", hd);
-      toast.error("Heatmap data empty or not a 2D array");
+      toast.error("Incorrect heatmap data");
       return;
     }
 
     const maxValue = Math.max(...hd.map((row) => Math.max(...row)));
-
+    console.log(maxValue);
     for (let y = 0; y < hd.length; y++) {
       for (let x = 0; x < hd[y].length; x++) {
         const value = hd[y][x];
-        const intensity = value / maxValue;
-        const color = `rgba(255, 0, 0, ${intensity * 1})`;
+        const intensity = (value / maxValue) * 255;
+        let color;
+
+        if (intensity <= 10) {
+          color = `rgb(0, 0, ${Math.floor(255 * (intensity / 10))})`;
+        } else if (intensity <= 50) {
+          const t = (intensity - 10) / 40;
+          color = `rgb(${Math.floor(255 * t)}, ${Math.floor(255 * t)}, ${Math.floor(255 * (1 - t))})`;
+        } else if (intensity <= 100) {
+          const t = (intensity - 50) / 50;
+          color = `rgb(255, ${Math.floor(255 * (1 - t))}, 0)`;
+        } else if (intensity <= 200) {
+          const t = (intensity - 100) / 100;
+          color = `rgb(255, ${Math.floor(165 * (1 - t))}, 0)`;
+        } else {
+          color = `rgb(255, 0, 0)`;
+        }
 
         ctx.fillStyle = color;
         ctx.fillRect(

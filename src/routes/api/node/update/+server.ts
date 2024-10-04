@@ -8,9 +8,11 @@ export const PATCH: RequestHandler = async ({
   console.log("Editing Node");
   const data = await request.json();
 
-  // await locals.pb?.collection("node").update(data.id, {
-  //   name: data.name,
-  // });
+  console.log(data)
+
+  await locals.pb?.collection("node").update(data.id, {
+    name: data.name,
+  });
 
   await fetch(`https://api.moksa.ai/store/update`, {
     headers: {
