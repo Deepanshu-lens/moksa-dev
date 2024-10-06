@@ -35,7 +35,12 @@
       storeName: item.store,
       customerCount: item.noofcustomers,
       busyHourProjections: "Coming Soon",
-      date: item.date && item.hour ? `${item.date}, ${item.hour}` : "N/A",
+      date:
+        item.date && item.hour
+          ? `${item.date}, ${item.hour}`
+          : item.date
+            ? item.date
+            : "N/A",
     };
   });
 

@@ -137,6 +137,20 @@ export const load: PageServerLoad = async ({ fetch, cookies, locals }) => {
         return safetyDetails.json();
     }
 
+    const storePeopleCount = async () => {
+        const spc = await fetch(`https://api.moksa.ai/people/getPeopleCount/-1/${formatDate(oneWeekAgo)}/${formatDate(today)}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${cookies.get('moksa-token')}`,
+                'Content-Type': 'application/json',
+                'datetype': '7',
+                'Pagepersize': '100',
+                'Pagenumber': '1'
+            }
+        });
+        return spc.json();
+    }
+
 
 
     const allUsers = async () => {
@@ -159,6 +173,7 @@ export const load: PageServerLoad = async ({ fetch, cookies, locals }) => {
         efficiency: () => efficiency(),
         safetyDetails: () => safetyDetails(),
         usersData: () => allUsers(),
+        storePeopleCount: () => storePeopleCount(),
         userStoreDetails: async () => {
             const res = await fetch(`https://api.moksa.ai/store/getUserStoreDetailsByUserId/${locals.user.record.moksaId}`, {
                 headers: {

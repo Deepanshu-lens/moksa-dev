@@ -34,6 +34,7 @@
   export let safetyDetails;
   export let theftData;
   export let user;
+  export let storePeopleCount;
   let chartLoading = true;
   let chartCanvas: HTMLCanvasElement;
   let chart: Chart | null = null;
@@ -54,8 +55,8 @@
   }));
 
   let selectedStore = writable({
-    value: fruits[0].value,
-    label: fruits[0].label,
+    value: fruits?.[0]?.value,
+    label: fruits?.[0]?.label,
   });
 
   $: {
@@ -413,6 +414,7 @@
 
   async function fetchDataForDateRange() {
     customDateLabel = "Custom";
+    value = undefined;
 
     if (isInitialLoad) {
       isInitialLoad = false;
@@ -446,53 +448,78 @@
     console.log(formatDate(today));
     try {
       // Call the three APIs
-      const [eeScore, storesTotal, storesAisle, theftD] = await Promise.all([
-        fetch(
-          `https://api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreid/-1/${formatDate(startDate)}/1/20/${formatDate(today)}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
+      const [eeScore, storesTotal, storesAisle, theftD, storePeople] =
+        await Promise.all([
+          fetch(
+            `https://api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreid/-1/${formatDate(startDate)}/1/20/${formatDate(today)}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
             },
-          },
-        ).then((res) => res.json()),
-        fetch(
-          `https://api.moksa.ai/store/getAllStoresTotals/${formatDate(startDate)}/${formatDate(today)}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
+          ).then((res) => res.json()),
+          fetch(
+            `https://api.moksa.ai/store/getAllStoresTotals/${formatDate(startDate)}/${formatDate(today)}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
             },
-          },
-        ).then((res) => res.json()),
-        fetch(
-          `https://api.moksa.ai/store/getAllStoresWithAisleDetails/1/20/${formatDate(startDate)}/${formatDate(today)}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
+          ).then((res) => res.json()),
+          fetch(
+            `https://api.moksa.ai/store/getAllStoresWithAisleDetails/1/20/${formatDate(startDate)}/${formatDate(today)}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
             },
-          },
-        ).then((res) => res.json()),
-        fetch(`https://api.moksa.ai/theft/theftDetectionDetailsByStoreid/-1`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-            datetype:
-              $dateRange === "7 Days"
-                ? "7"
-                : $dateRange === "15 Days"
-                  ? "15"
-                  : $dateRange === "30 Days"
-                    ? "30"
-                    : $dateRange === "12 Months"
-                      ? "year"
-                      : "7",
-            startDate: formatDate(startDate),
-            endDate: formatDate(today),
-          },
-        }).then((res) => res.json()),
-      ]);
+          ).then((res) => res.json()),
+          fetch(
+            `https://api.moksa.ai/theft/theftDetectionDetailsByStoreid/-1`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+                datetype:
+                  $dateRange === "7 Days"
+                    ? "7"
+                    : $dateRange === "15 Days"
+                      ? "15"
+                      : $dateRange === "30 Days"
+                        ? "30"
+                        : $dateRange === "12 Months"
+                          ? "year"
+                          : "7",
+                startDate: formatDate(startDate),
+                endDate: formatDate(today),
+              },
+            },
+          ).then((res) => res.json()),
+          fetch(
+            `https://api.moksa.ai/people/getPeopleCount/-1/${formatDate(startDate)}/${formatDate(today)}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+                datetype:
+                  $dateRange === "7 Days"
+                    ? "7"
+                    : $dateRange === "15 Days"
+                      ? "15"
+                      : $dateRange === "30 Days"
+                        ? "30"
+                        : $dateRange === "12 Months"
+                          ? "year"
+                          : "7",
+                Pagepersize: "100",
+                Pagenumber: "1",
+              },
+            },
+          ).then((res) => res.json()),
+        ]);
 
       console.log(eeScore);
       console.log(storesTotal);
@@ -501,6 +528,7 @@
       // eeScore.set(eeScore)
       // storesTotal.set(storesTotal)
       // storesAisle.set(storesAisle)
+      storePeopleCount = storePeople?.data?.data;
       allStoresData = storesTotal.data;
 
       theftDataa.set(theftD);
@@ -524,52 +552,70 @@
     console.log(end);
     try {
       // Call the three APIs
-      const [eeScore, storesTotal, storesAisle, theftD] = await Promise.all([
-        fetch(
-          `https://api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreid/-1/${start}/1/20/${end}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
+      const [eeScore, storesTotal, storesAisle, theftD, storePeople] =
+        await Promise.all([
+          fetch(
+            `https://api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreid/-1/${start}/1/20/${end}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
             },
-          },
-        ).then((res) => res.json()),
-        fetch(`https://api.moksa.ai/store/getAllStoresTotals/${start}/${end}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }).then((res) => res.json()),
-        fetch(
-          `https://api.moksa.ai/store/getAllStoresWithAisleDetails/1/20/${start}/${end}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
+          ).then((res) => res.json()),
+          fetch(
+            `https://api.moksa.ai/store/getAllStoresTotals/${start}/${end}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
             },
-          },
-        ).then((res) => res.json()),
-        fetch(`https://api.moksa.ai/theft/theftDetectionDetailsByStoreid/-1`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-            datetype:
-              $dateRange === "7 Days"
-                ? "7"
-                : $dateRange === "15 Days"
-                  ? "15"
-                  : $dateRange === "30 Days"
-                    ? "30"
-                    : $dateRange === "12 Months"
-                      ? "year"
-                      : $dateRange === "custom"
-                        ? "custom"
-                        : "7",
-            startDate: start,
-            endDate: end,
-          },
-        }).then((res) => res.json()),
-      ]);
+          ).then((res) => res.json()),
+          fetch(
+            `https://api.moksa.ai/store/getAllStoresWithAisleDetails/1/20/${start}/${end}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            },
+          ).then((res) => res.json()),
+          fetch(
+            `https://api.moksa.ai/theft/theftDetectionDetailsByStoreid/-1`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+                datetype:
+                  $dateRange === "7 Days"
+                    ? "7"
+                    : $dateRange === "15 Days"
+                      ? "15"
+                      : $dateRange === "30 Days"
+                        ? "30"
+                        : $dateRange === "12 Months"
+                          ? "year"
+                          : $dateRange === "custom"
+                            ? "custom"
+                            : "7",
+                startDate: start,
+                endDate: end,
+              },
+            },
+          ).then((res) => res.json()),
+          fetch(
+            `https://api.moksa.ai/people/getPeopleCount/-1/${start}/${end}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+                Pagepersize: "100",
+                Pagenumber: "1",
+              },
+            },
+          ).then((res) => res.json()),
+        ]);
 
       console.log(eeScore);
       console.log(storesTotal);
@@ -578,6 +624,7 @@
       // eeScore.set(eeScore)
       // storesTotal.set(storesTotal)
       // storesAisle.set(storesAisle)
+      storePeopleCount = storePeople?.data?.data;
       allStoresData = storesTotal.data;
       theftDataa.set(theftD);
       updateBarChart(theftD);
@@ -952,10 +999,10 @@
       <div
         class="w-full h-full max-h-[300px] overflow-y-auto hide-scrollbar relative"
       >
-        {#if aisleData.length === 0}
+        {#if storePeopleCount.length === 0}
           <p class="text-center text-gray-500 mt-8">No data available</p>
         {:else}
-          <DashboardStoresOverviewtable {aisleData} />
+          <DashboardStoresOverviewtable aisleData={storePeopleCount} />
         {/if}
       </div>
     </div>

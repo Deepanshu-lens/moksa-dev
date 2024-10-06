@@ -24,11 +24,13 @@
 
   const dispatch = createEventDispatcher();
 
-  const dbdata = aisleData.map((item: any) => {
+  $: console.log("store overview data", aisleData);
+
+  $: dbdata = aisleData.map((item: any) => {
     return {
-      storeName: item.name,
-      customers: item.count,
-      busyHours: item.busy_hours,
+      storeName: item.store,
+      customers: item.noofcustomers,
+      busyHours: item.busyhour,
       mostVisitedAisle: item.aisle_name,
     };
   });
@@ -44,14 +46,14 @@
     return colors[aisle] || "#e6e6e6";
   }
 
-  const data = writable(dbdata);
+  $: data = writable(dbdata);
 
-  const readableData = readable(dbdata, (set) => {
+  $: readableData = readable(dbdata, (set) => {
     const unsubscribe = data.subscribe(set);
     return unsubscribe;
   });
 
-  const table = createTable(readableData, {
+  $: table = createTable(readableData, {
     sort: addSortBy(),
     filter: addTableFilter({
       fn: ({ filterValue, value }: { filterValue: string; value: string }) =>
@@ -60,7 +62,7 @@
     select: addSelectedRows(),
   });
 
-  const columns = table.createColumns([
+  $: columns = table.createColumns([
     table.column({
       accessor: "storeName",
       header: "Store Name",
@@ -83,8 +85,8 @@
     // }),
   ]);
 
-  const { headerRows, pageRows, tableAttrs, tableBodyAttrs } =
-    table.createViewModel(columns);
+  $: ({ headerRows, pageRows, tableAttrs, tableBodyAttrs } =
+    table.createViewModel(columns));
 </script>
 
 <div class="m-0">

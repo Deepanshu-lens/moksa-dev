@@ -25,28 +25,10 @@
 
   const dispatch = createEventDispatcher();
 
-  // const fakeLiveData = [
-  //   { store_id: "store1", going_out: "15", going_in: "10", createdAt: "2023-04-15T09:30:00Z" },
-  //   { store_id: "store2", going_out: "8", going_in: "12", createdAt: "2023-04-15T09:35:00Z" },
-  //   { store_id: "store3", going_out: "20", going_in: "18", createdAt: "2023-04-15T09:40:00Z" },
-  //   { store_id: "store1", going_out: "22", going_in: "25", createdAt: "2023-04-15T09:45:00Z" },
-  //   { store_id: "store2", going_out: "10", going_in: "7", createdAt: "2023-04-15T09:50:00Z" },
-  //   { store_id: "store3", going_out: "30", going_in: "28", createdAt: "2023-04-15T09:55:00Z" },
-  //   { store_id: "store1", going_out: "18", going_in: "20", createdAt: "2023-04-15T10:00:00Z" },
-  //   { store_id: "store2", going_out: "14", going_in: "16", createdAt: "2023-04-15T10:05:00Z" },
-  //   { store_id: "store3", going_out: "25", going_in: "22", createdAt: "2023-04-15T10:10:00Z" },
-  //   { store_id: "store1", going_out: "30", going_in: "28", createdAt: "2023-04-15T10:15:00Z" },
-  // ];
-
-  // const fakeSelectedStore = { value: "store1", label: "Main Street Store" };
-
-  // Replace the existing liveData and selectedStore with the fake data
   export let liveData;
   export let selectedStore;
-  // let liveData = fakeLiveData;
-  // let selectedStore = fakeSelectedStore;
 
-  //  $: console.log("LivePeopleCountDataTable received new data:", liveData);
+  $: console.log("LivePeopleCountDataTable received new data:", liveData);
 
   $: dbData = liveData.map((item: any) => ({
     storeName:

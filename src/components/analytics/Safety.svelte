@@ -85,6 +85,7 @@
     const today = new Date();
     let startDate = new Date(today);
     customDateLabel = "Custom";
+    value = undefined;
 
     switch ($dateRange) {
       case "7 Days":

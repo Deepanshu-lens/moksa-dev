@@ -996,6 +996,8 @@
 
   async function fetchDataForDateRange() {
     customDateLabel = "Custom";
+    value = undefined;
+
     if (isInitialLoad) {
       isInitialLoad = false;
       return; // Skip the first call

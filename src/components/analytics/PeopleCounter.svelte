@@ -119,8 +119,10 @@
   $: {
     if ($selectedStore.value !== undefined) {
       if ($dateRange === "7 Days") {
+        console.log("called week data");
         getWeekData($selectedStore.value);
       } else {
+        console.log("called date range function");
         fetchDataForDateRange();
       }
       setupSocket();
@@ -133,20 +135,24 @@
     }
   });
 
+  async function getLiveData(storeId: number) {
+    const response = await fetch(
+      `https://api.moksa.ai/people/getPeopleCountLive/${storeId}/30/1/100`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    const data = await response.json();
+    console.log("live 30 min data", storeId, data);
+    liveData.set(data?.data);
+  }
+
   onMount(async () => {
     if (allStores.length > 0) {
-      const response = await fetch(
-        `https://api.moksa.ai/people/getPeopleCountLive/${$selectedStore.value}/30/1/100`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          method: "GET",
-        },
-      );
-      const data = await response.json();
-      console.log(data);
+      getLiveData($selectedStore.value);
     }
   });
 
@@ -175,93 +181,11 @@
     }
   }
 
-  // function createChart() {
-  //   if (chartCanvas && !chart) {
-  //     const ctx = chartCanvas.getContext("2d");
-  //     if (!ctx) return;
-
-  //     Chart.register(
-  //       LineController,
-  //       LineElement,
-  //       PointElement,
-  //       LinearScale,
-  //       CategoryScale,
-  //     );
-
-  //     const labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-  //     const onlineData = [65, 59, 80, 81, 56, 55, 40];
-  //     const offlineData = [15, 29, 30, 41, 56, 65, 80];
-
-  //     chart = new Chart(ctx, {
-  //       type: "line",
-  //       data: {
-  //         labels: labels,
-  //         datasets: [
-  //           {
-  //             label: "Online",
-  //             borderColor: "#F86624",
-  //             borderWidth: 2,
-  //             data: onlineData,
-  //             fill: true,
-  //             tension: 0,
-  //             pointBackgroundColor: "white",
-  //             pointBorderColor: "#F86624",
-  //             pointBorderWidth: 2,
-  //             pointRadius: 4,
-  //             pointHoverRadius: 6,
-  //           },
-  //           {
-  //             label: "Offline",
-  //             borderColor: "#883DCF",
-  //             borderWidth: 2,
-  //             data: offlineData,
-  //             fill: true,
-  //             tension: 0,
-  //             pointBackgroundColor: "white",
-  //             pointBorderColor: "#883DCF",
-  //             pointBorderWidth: 2,
-  //             pointRadius: 4,
-  //             pointHoverRadius: 6,
-  //           },
-  //         ],
-  //       },
-  //       options: {
-  //         responsive: true,
-  //         maintainAspectRatio: false,
-  //         scales: {
-  //           x: {
-  //             grid: { color: "rgba(0,0,0,.05)" },
-  //             ticks: { maxRotation: 0 },
-  //           },
-  //           y: {
-  //             display: true,
-  //             title: { display: false, text: "Activity Percentage" },
-  //             grid: { display: false },
-  //             beginAtZero: true,
-  //             suggestedMax: 100,
-  //             ticks: { stepSize: 20, callback: (value) => value + "%" },
-  //           },
-  //         },
-  //         plugins: {
-  //           legend: { display: true, position: "top" },
-  //           tooltip: {
-  //             callbacks: {
-  //               label: (context) =>
-  //                 `${context.dataset.label}: ${context.parsed.y.toFixed(2)}%`,
-  //             },
-  //           },
-  //         },
-  //       },
-  //     });
-  //   }
-  // }
-
   async function fetchDataForDateRange() {
-    if (isInitialLoad) {
-      isInitialLoad = false;
-      return; // Skip the first call
-    }
+    customDateLabel = "Custom";
+    value = undefined;
 
+    // console.log("called date range function");
     const today = new Date();
     let startDate = new Date(today);
 
@@ -286,18 +210,19 @@
 
     console.log(formatDate(startDate));
     console.log(formatDate(today));
+    console.log($dateRange);
     const storeId = $selectedStore.value;
     console.log(storeId);
-    console.log(token);
+    // console.log(token);
     try {
       // Call the three APIs
       const d = await fetch(
-        `https://api.moksa.ai/people/getPeopleCount/${storeId}/${startDate}/${today}`,
+        `https://api.moksa.ai/people/getPeopleCount/${storeId}/${formatDate(startDate)}/${formatDate(today)}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
-            datetype: { $dateRange },
+            datetype: $dateRange,
             pagenumber: 1,
             pagepersize: 100,
           },
@@ -334,6 +259,9 @@
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
+            datetype: $dateRange,
+            pagenumber: 1,
+            pagepersize: 100,
           },
         },
       );
@@ -349,11 +277,11 @@
     }
   }
 
-  $: {
-    if ($dateRange !== "custom") {
-      fetchDataForDateRange();
-    }
-  }
+  // $: {
+  //   if ($dateRange !== "custom") {
+  //     fetchDataForDateRange();
+  //   }
+  // }
 
   $: if ($dateRange === "custom" && (value?.start || value?.end)) {
     fetchCustomDateData();
@@ -375,12 +303,12 @@
 
   const dispatch = createEventDispatcher();
 
-  function handleSelect(fruit) {
-    selectedStore.set(fruit);
-    dispatch("select", fruit);
-  }
+  // function handleSelect(fruit) {
+  //   selectedStore.set(fruit);
+  //   dispatch("select", fruit);
+  // }
 
-  $: console.log($storeData);
+  // $: console.log($storeData);
 </script>
 
 <section
@@ -477,8 +405,13 @@
           <Select.Group>
             {#if filteredFruits.length > 0}
               {#each filteredFruits as fruit}
+                <!-- on:click={() => handleSelect(fruit)}
+                  -->
                 <Select.Item
-                  on:click={() => handleSelect(fruit)}
+                  on:click={() => {
+                    selectedStore.set(fruit);
+                    getLiveData(fruit.value);
+                  }}
                   class="px-1"
                   value={fruit.value}
                   label={fruit.label}>{fruit.label}</Select.Item

@@ -44,10 +44,10 @@
   const dbData = efficiency.data.map((item) => {
     return {
       employee: `${item.first_name} ${item.last_name}`,
-      hoursWithCustomers: item.customer,
-      sittingIdle: item.idle,
+      // hoursWithCustomers: item.customer,
+      // sittingIdle: item.idle,
       onMobile: item.mobile,
-      fillingShelf: item.fillingShelves,
+      // fillingShelf: item.fillingShelves,
     };
   });
 
@@ -73,22 +73,22 @@
       accessor: "employee",
       header: "Employee",
     }),
-    table.column({
-      accessor: "hoursWithCustomers",
-      header: "Hours With Customers",
-    }),
-    table.column({
-      accessor: "sittingIdle",
-      header: "Sitting Idle",
-    }),
+    // table.column({
+    //   accessor: "hoursWithCustomers",
+    //   header: "Hours With Customers",
+    // }),
+    // table.column({
+    //   accessor: "sittingIdle",
+    //   header: "Sitting Idle",
+    // }),
     table.column({
       accessor: "onMobile",
       header: "On Mobile",
     }),
-    table.column({
-      accessor: "fillingShelf",
-      header: "Filling Shelf",
-    }),
+    // table.column({
+    //   accessor: "fillingShelf",
+    //   header: "Filling Shelf",
+    // }),
   ]);
 
   const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } =
@@ -117,7 +117,7 @@
               >
                 <Table.Head
                   {...attrs}
-                  class="text-[#727272] whitespace-nowrap h-full flex items-center justify-center text-start flex-1 py-2 px-4 w-1/4"
+                  class="text-[#727272] whitespace-nowrap h-full flex items-center justify-center text-start flex-1 py-2 px-4 w-full"
                 >
                   <span class="font-semibold text-sm">
                     <Render of={cell.render()} />
@@ -137,7 +137,7 @@
               <Subscribe attrs={cell.attrs()} let:attrs>
                 <Table.Cell
                   {...attrs}
-                  class="flex-1 flex items-center justify-center py-2 px-4 w-1/4 text-center"
+                  class="flex-1 flex items-center justify-center py-2 px-4 w-full text-center"
                 >
                   {#if cell.id === "employee"}
                     <div class="flex items-center gap-2">

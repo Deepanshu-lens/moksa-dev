@@ -369,6 +369,7 @@
     console.log($selectedStoreId);
     console.log("effdatabytunecallera");
     customDateLabel = "Custom";
+    value = undefined;
     const today = new Date();
     let startDate = new Date(today);
 

@@ -27,8 +27,8 @@
       label: store.name,
     }));
 
-  $: console.log("fruits", fruits);
-  $: console.log("daterange", $dateRange);
+  // $: console.log("fruits", fruits);
+  // $: console.log("daterange", $dateRange);
 
   import { Input } from "../ui/input";
   import { createEventDispatcher } from "svelte";
@@ -118,26 +118,26 @@
     }
 
     const maxValue = Math.max(...hd.map((row) => Math.max(...row)));
-    console.log(maxValue);
+    console.log("maxvalue", maxValue);
+
     for (let y = 0; y < hd.length; y++) {
       for (let x = 0; x < hd[y].length; x++) {
         const value = hd[y][x];
+        // const intensity = (value / maxValue) * 10;
         const intensity = (value / maxValue) * 255;
+        // const maxValue = Math.max(...hd.map((row) => Math.max(...row)));
         let color;
 
         if (intensity <= 10) {
-          color = `rgb(0, 0, ${Math.floor(255 * (intensity / 10))})`;
+          color = `rgba(0, 0, 0, 0)`;
         } else if (intensity <= 50) {
-          const t = (intensity - 10) / 40;
-          color = `rgb(${Math.floor(255 * t)}, ${Math.floor(255 * t)}, ${Math.floor(255 * (1 - t))})`;
+          color = `rgba(0,0,255,1)`;
         } else if (intensity <= 100) {
-          const t = (intensity - 50) / 50;
-          color = `rgb(255, ${Math.floor(255 * (1 - t))}, 0)`;
+          color = `rgba(255, 255, 0, 1)`;
+        } else if (intensity <= 150) {
+          color = `rgba(255, 165, 0, 1)`;
         } else if (intensity <= 200) {
-          const t = (intensity - 100) / 100;
-          color = `rgb(255, ${Math.floor(165 * (1 - t))}, 0)`;
-        } else {
-          color = `rgb(255, 0, 0)`;
+          color = `rgba(255, 0, 0,1)`;
         }
 
         ctx.fillStyle = color;
@@ -151,9 +151,29 @@
     }
   }
 
+  //   const maxValue = Math.max(...hd.map((row) => Math.max(...row)));
+
+  //   for (let y = 0; y < hd.length; y++) {
+  //     for (let x = 0; x < hd[y].length; x++) {
+  //       const value = hd[y][x];
+  //       const intensity = value / maxValue;
+  //       const color = `rgba(255, 0, 0, ${intensity * 1})`;
+
+  //       ctx.fillStyle = color;
+  //       ctx.fillRect(
+  //         (x / hd[y].length) * canvas.width,
+  //         (y / hd.length) * canvas.height,
+  //         canvas.width / hd[y].length,
+  //         canvas.height / hd.length,
+  //       );
+  //     }
+  //   }
+  // }
+
   async function updateSelectedFloorMap() {
     console.log("updateSelectedFloorMap called", $dateRange);
     customDateLabel = "custom";
+    value = undefined;
 
     loadingFloor = true;
     const selectedMap = $floorMaps.find(
@@ -378,7 +398,7 @@
             placeholder={fruits.length > 0 ? $selectedStore.label : "No Stores"}
           />
         </Select.Trigger>
-        <Select.Content class="max-h-[300px] overflow-y-auto">
+        <Select.Content class="max-h-[300px] z-[50000000000] overflow-y-auto">
           <div class="p-2">
             <Input
               type="text"
@@ -416,9 +436,31 @@
   </div>
   <div class="grid grid-cols-8 grid-rows-8 gap-4 mt-4">
     <div
-      class="col-span-8 row-span-2 flex items-center justify-center rounded-t-xl dark:border-white/[.7]"
+      class="col-span-8 row-span-2 flex items-center justify-between rounded-t-xl dark:border-white/[.7]"
     >
       <p class="text-lg font-semibold">Heat Map for {$selectedStore.label}</p>
+      <div class="flex flex-col items-end">
+        <div class="w-[200px] h-6 flex">
+          <div
+            class="w-1/3 h-full flex-shrink-0"
+            style="background: linear-gradient(to right, rgb(0, 0, 255), rgb(255, 255, 0))"
+          ></div>
+          <div
+            class="w-1/3 h-full flex-shrink-0"
+            style="background: linear-gradient(to right, rgb(255, 255, 0), rgb(255, 165, 0))"
+          ></div>
+          <div
+            class="w-1/3 h-full flex-shrink-0"
+            style="background: linear-gradient(to right, rgb(255, 165, 0), rgb(255, 0, 0))"
+          ></div>
+        </div>
+        <div class="flex justify-between w-[200px] text-xs mt-1">
+          <span>low</span>
+          <span>medium</span>
+          <span>high</span>
+          <span>very high</span>
+        </div>
+      </div>
     </div>
     {#if storeFloorImg !== null && loadingFloor === false}
       <div
@@ -427,11 +469,11 @@
         <img
           src={storeFloorImg}
           alt="storeFloorImg"
-          class=" w-full h-full max-h-[400px] rounded-md"
+          class=" w-full h-full max-h-[400px] rounded-md opacity-70"
         />
         <canvas
           id="heatmapCanvas"
-          class="absolute top-0 left-0 w-full h-full pointer-events-none z-20"
+          class="absolute top-0 left-0 w-full h-full pointer-events-none z-[20000000]"
         ></canvas>
       </div>
     {:else if loadingFloor === true}

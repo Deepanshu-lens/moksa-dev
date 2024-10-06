@@ -34,6 +34,7 @@
   let safetyDetails: any[] = data?.safetyDetails?.data ?? [];
   let theftData: any[] = data?.theftData ?? [];
   let usersData: any[] = data?.usersData ?? [];
+  let storePeopleCount: any[] = data?.storePeopleCount?.data?.data ?? [];
   let aisleStoreData = writable([]);
 
   const { user } = data;
@@ -264,6 +265,7 @@
       {efficiency}
       {safetyDetails}
       {theftData}
+      {storePeopleCount}
       token={data.moksaToken}
       {user}
     />
