@@ -437,18 +437,18 @@
     }
   }
 
-  // async function getbystoreID() {
-  //   employeeData.set([]);
-  //   const response = await fetch("/api/employee/getByStoreId", {
-  //     method: "POST",
-  //     body: JSON.stringify({ storeId: $selectedStoreId }),
-  //     headers: { "Content-Type": "application/json" },
-  //   });
-  //   const data = await response.json();
-  //   // console.log(data);
-  //   employeeData.set(data);
-  //   return data;
-  // }
+  async function getbystoreID() {
+    employeeData.set([]);
+    const response = await fetch("/api/employee/getByStoreId", {
+      method: "POST",
+      body: JSON.stringify({ storeId: $selectedStoreId }),
+      headers: { "Content-Type": "application/json" },
+    });
+    const data = await response.json();
+    // console.log(data);
+    employeeData.set(data);
+    return data;
+  }
 
   async function getEmployeeDetails(id: number) {
     employeeDetails.set([]);
@@ -646,8 +646,8 @@
                       selectedStore.set(store.label);
                       selectedStoreId.set(store.value);
                       console.log(store.value);
-                      // const emp = await getbystoreID(store.value);
-                      // console.log(emp);
+                      const emp = await getbystoreID(store.value);
+                      console.log(emp);
                       // await getEmployeeDetails(emp.data[0].id);
                       await getEfficiencyDataByTime();
                     }}
