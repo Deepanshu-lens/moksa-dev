@@ -39,17 +39,17 @@
   let customDateLabel = "Custom";
   let close = false;
   const userID = 8;
-  const fruits = allStores
-    ?.filter((store: any) => store.id !== -1)
-    ?.map((store: any) => ({
-      value: store.id,
-      label: store.name,
-    }));
+  const fruits = allStores?.map((store: any) => ({
+    value: store.id,
+    label: store.name,
+  }));
 
   let selectedStore = writable({
     value: fruits?.[0]?.value,
     label: fruits?.[0]?.label,
   });
+
+  $: console.log($selectedStore);
 
   // let allS = writable(fruits);
 
@@ -121,13 +121,23 @@
       if ($dateRange === "7 Days") {
         console.log("called week data");
         getWeekData($selectedStore.value);
-      } else {
+      } else if (value === undefined && $dateRange.toLowerCase() !== "custom") {
         console.log("called date range function");
         fetchDataForDateRange();
+      } else if ($dateRange.toLowerCase() === "custom" && value) {
+        console.log("called custom date data");
+        fetchCustomDateData();
       }
       setupSocket();
     }
   }
+
+  // $: if (
+  //   $dateRange.toLowerCase() === "custom" &&
+  //   (value?.start || value?.end)
+  // ) {
+  //   console.log("called custom date data");
+  // }
 
   onDestroy(() => {
     if (socket) {
@@ -164,13 +174,21 @@
     const weekData = await fetch(
       `https://api.moksa.ai/people/getPeopleCount/${storeId}/${weekAgo}/${today}`,
       {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-          datetype: 7,
-          pagenumber: 1,
-          pagepersize: 100,
-        },
+        headers:
+          $selectedStore.value !== -1
+            ? {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+                datetype: 7,
+                pagenumber: 1,
+                pagepersize: 100,
+              }
+            : {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+                pagenumber: 1,
+                pagepersize: 100,
+              },
         method: "GET",
       },
     );
@@ -183,9 +201,8 @@
 
   async function fetchDataForDateRange() {
     customDateLabel = "Custom";
-    value = undefined;
 
-    // console.log("called date range function");
+    console.log("called date range function");
     const today = new Date();
     let startDate = new Date(today);
 
@@ -219,13 +236,21 @@
       const d = await fetch(
         `https://api.moksa.ai/people/getPeopleCount/${storeId}/${formatDate(startDate)}/${formatDate(today)}`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-            datetype: $dateRange,
-            pagenumber: 1,
-            pagepersize: 100,
-          },
+          headers:
+            $selectedStore.value !== -1
+              ? {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                  datetype: $dateRange.toLowerCase(),
+                  pagenumber: 1,
+                  pagepersize: 100,
+                }
+              : {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                  pagenumber: 1,
+                  pagepersize: 100,
+                },
         },
       );
       console.log(d);
@@ -256,13 +281,21 @@
       const d = await fetch(
         `https://api.moksa.ai/people/getPeopleCount/${storeId}/${start}/${end}`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-            datetype: $dateRange,
-            pagenumber: 1,
-            pagepersize: 100,
-          },
+          headers:
+            $selectedStore.value !== -1
+              ? {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                  datetype: $dateRange,
+                  pagenumber: 1,
+                  pagepersize: 100,
+                }
+              : {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                  pagenumber: 1,
+                  pagepersize: 100,
+                },
         },
       );
       console.log(d);
@@ -282,10 +315,6 @@
   //     fetchDataForDateRange();
   //   }
   // }
-
-  $: if ($dateRange === "custom" && (value?.start || value?.end)) {
-    fetchCustomDateData();
-  }
 
   // onMount(async () => {
   //   setTimeout(() => {
@@ -321,23 +350,39 @@
       >
         <button
           class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "7 Days" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
-          on:click={() => dateRange.set("7 Days")}>7 Days</button
+          on:click={() => {
+            dateRange.set("7 Days");
+            value = undefined;
+          }}>7 Days</button
         >
         <button
           class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "15 Days" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
-          on:click={() => dateRange.set("15 Days")}>15 Days</button
+          on:click={() => {
+            dateRange.set("15 Days");
+            value = undefined;
+          }}>15 Days</button
         >
         <button
           class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "30 Days" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
-          on:click={() => dateRange.set("30 Days")}>30 Days</button
+          on:click={() => {
+            dateRange.set("30 Days");
+            value = undefined;
+          }}>30 Days</button
         >
         <button
           class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "12 Months" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
-          on:click={() => dateRange.set("12 Months")}>12 Months</button
+          on:click={() => {
+            dateRange.set("12 Months");
+            value = undefined;
+          }}>12 Months</button
         >
         <Popover.Root openFocus bind:open={close}>
           <Popover.Trigger asChild let:builder>
             <Button
+              on:click={() => {
+                dateRange.set("Custom");
+                value = undefined;
+              }}
               builders={[builder]}
               class={`2xl:py-2 2xl:px-3 py-1 px-2  text-sm hover:bg-[#0BA5E9] hover:text-white ${$dateRange === "custom" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white bg-transparent dark:border-white"}`}
             >

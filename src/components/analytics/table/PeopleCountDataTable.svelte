@@ -28,21 +28,30 @@
   export let selectedStore;
   export let storeData;
 
-  console.log("people count data", $storeData);
+  $: console.log("people count data", $storeData);
 
-  $: dbData = $storeData.map((item: any) => {
-    return {
-      storeName: item.store,
-      customerCount: item.noofcustomers,
-      busyHourProjections: "Coming Soon",
-      date:
-        item.date && item.hour
-          ? `${item.date}, ${item.hour}`
-          : item.date
-            ? item.date
-            : "N/A",
-    };
-  });
+  $: dbData =
+    $selectedStore.value !== -1
+      ? $storeData.map((item: any) => {
+          return {
+            storeName: item.store,
+            customerCount: item.noofcustomers,
+            date:
+              item.date && item.hour
+                ? `${item.date}, ${item.hour}`
+                : item.date
+                  ? item.date
+                  : "N/A",
+            busyHourProjections: "Coming Soon",
+          };
+        })
+      : $storeData.map((item: any) => {
+          return {
+            storeName: item.store,
+            customerCount: item.noofcustomers,
+            busyHourProjections: item.busyhour,
+          };
+        });
 
   $: data = writable(dbData);
 
@@ -61,33 +70,40 @@
     select: addSelectedRows(),
   });
 
-  $: columns = table.createColumns([
-    table.column({
-      accessor: "storeName",
-      header: "Store Name",
-    }),
-    table.column({
-      accessor: "date",
-      header: "Date, Hours",
-    }),
-    table.column({
-      accessor: "customerCount",
-      header: "Customer Count",
-    }),
-    table.column({
-      accessor: "busyHourProjections",
-      header: "Busy Hour Projections",
-    }),
-    // table.column({
-    //   accessor: "customerProjection",
-    //   header: "Customer Projection",
-    // }),
-    //   table.column({
-    //   id: 'chevron',
-    //   header: '',
-    //   cell: () => '',
-    // }),
-  ]);
+  $: columns =
+    $selectedStore.value !== -1
+      ? table.createColumns([
+          table.column({
+            accessor: "storeName",
+            header: "Store Name",
+          }),
+          table.column({
+            accessor: "date",
+            header: "Date, Hours",
+          }),
+          table.column({
+            accessor: "customerCount",
+            header: "Customer Count",
+          }),
+          table.column({
+            accessor: "busyHourProjections",
+            header: "Busy Hour Projections",
+          }),
+        ])
+      : table.createColumns([
+          table.column({
+            accessor: "storeName",
+            header: "Store Name",
+          }),
+          table.column({
+            accessor: "customerCount",
+            header: "Customer Count",
+          }),
+          table.column({
+            accessor: "busyHourProjections",
+            header: "Busy Hour Projections",
+          }),
+        ]);
 
   const pageSizeOptions = [5, 10, 20, 50];
 
@@ -115,7 +131,7 @@
     class="rounded-t-xl w-full h-[50px] bg-transparent flex items-center justify-between px-4"
   >
     <p class=" text-xl font-semibold flex items-center gap-2">
-      {$storeData.length > 0 ? $storeData[0].store : $selectedStore.label}
+      {$selectedStore.label}
     </p>
     <div class="flex items-center gap-4">
       <!-- <div class="flex items-center space-x-2">
@@ -188,7 +204,7 @@
                 {:else}
                   <Table.Head
                     {...attrs}
-                    class="text-[#727272] whitespace-nowrap text-sm h-full flex items-center text-center justify-center py-2 w-1/4"
+                    class="text-[#727272] whitespace-nowrap text-sm h-full flex items-center text-center justify-center py-2 w-full"
                   >
                     <Button
                       variant="ghost"
@@ -218,7 +234,7 @@
                 <Subscribe attrs={cell.attrs()} let:attrs>
                   <Table.Cell
                     {...attrs}
-                    class="flex items-center justify-center whitespace-nowrap flex-1 py-2 w-1/4"
+                    class="flex items-center justify-center whitespace-nowrap flex-1 py-2 w-full"
                   >
                     {#if cell.id === "storeName"}
                       <div class="flex items-center gap-2">

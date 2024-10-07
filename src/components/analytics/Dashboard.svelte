@@ -636,12 +636,15 @@
   }
 
   $: {
-    if ($dateRange !== "custom") {
+    if ($dateRange.toLowerCase() !== "custom") {
       fetchDataForDateRange();
     }
   }
 
-  $: if ($dateRange === "custom" && (value?.start || value?.end)) {
+  $: if (
+    $dateRange.toLowerCase() === "custom" &&
+    (value?.start || value?.end)
+  ) {
     fetchCustomDateData();
   }
 
@@ -785,6 +788,7 @@
       <Popover.Root openFocus bind:open={close}>
         <Popover.Trigger asChild let:builder>
           <Button
+            on:click={() => (value = undefined)}
             builders={[builder]}
             class={`2xl:py-2 2xl:px-3 py-1 px-2  text-sm hover:bg-[#0BA5E9] hover:text-white ${$dateRange === "custom" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white bg-transparent dark:border-white"}`}
           >
