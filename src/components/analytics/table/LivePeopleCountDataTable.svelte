@@ -27,6 +27,9 @@
 
   export let liveData;
   export let selectedStore;
+  export let allStores;
+
+  // console.log("liveData", allStores);
 
   $: console.log("LivePeopleCountDataTable received new data:", liveData);
 
@@ -34,7 +37,8 @@
     storeName:
       item.store_id === selectedStore.value
         ? selectedStore.label
-        : item.store_id,
+        : allStores.find((store) => store.id === item.store_id)?.name ||
+          item.store_id,
     // customerCount: Number(item.going_out) - Number(item.going_in),
     goingIn: Number(item.going_in),
     goingOut: Number(item.going_out),

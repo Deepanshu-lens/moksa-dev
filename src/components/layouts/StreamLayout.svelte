@@ -83,6 +83,20 @@
     // }
   };
 
+  onMount(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const slideParam = urlParams.get("slide");
+
+    if (slideParam && !isNaN(parseInt(slideParam))) {
+      slideIndex = parseInt(slideParam);
+      if (slideIndex >= totalPages) {
+        slideIndex = totalPages - 1;
+      } else if (slideIndex < 0) {
+        slideIndex = 0;
+      }
+    }
+  });
+
   const initVideo = async (camera: Camera) => {
     // console.log("initvid", camera.mse, camera.name);
     // const index = $selectedNode.camera.findIndex((cam) => cam.id === camera.id);
@@ -191,6 +205,8 @@
   };
 
   function handleSlideChange() {
+    console.log("slideIndex", slideIndex);
+
     const startIndex = slideIndex * $selectedNode.maxStreamsPerPage;
     const endIndex = startIndex + $selectedNode.maxStreamsPerPage;
     const camerasOnSlide = $selectedNode.camera.slice(startIndex, endIndex);
@@ -198,6 +214,12 @@
     cameraIds.forEach((cameraId) => {
       refreshVideoStream(cameraId);
     });
+
+    // Update URL with slide index
+    const url = new URL(window.location);
+    console.log(url);
+    url.searchParams.set("slide", slideIndex.toString());
+    history.pushState({}, "", url);
   }
 
   function handlePrevious() {
@@ -1075,7 +1097,7 @@
   {:else}
     <Carousel.Root
       class="w-full h-full flex justify-center items-center"
-      opts={{ watchDrag: false }}
+      opts={{ watchDrag: false, startIndex: slideIndex }}
     >
       <Carousel.Content class="w-full h-full mx-0 px-0">
         {#each Array(totalPages) as _, pageIndex}

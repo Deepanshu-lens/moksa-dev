@@ -41,24 +41,24 @@
   //   }
   // })
 
-  const dbData = efficiency.data.map((item) => {
+  $: dbData = efficiency.data.map((item) => {
     return {
       employee: `${item.first_name} ${item.last_name}`,
-      // hoursWithCustomers: item.customer,
-      // sittingIdle: item.idle,
-      onMobile: item.mobile,
-      // fillingShelf: item.fillingShelves,
+      customer: item.customer,
+      idle: item.idle,
+      mobile: item.mobile,
+      fillingShelves: item.fillingShelves,
     };
   });
 
-  const data = writable(dbData);
+  $: data = writable(dbData);
 
-  const readableData = readable(dbData, (set) => {
+  $: readableData = readable(dbData, (set) => {
     const unsubscribe = data.subscribe(set);
     return unsubscribe;
   });
 
-  const table = createTable(readableData, {
+  $: table = createTable(readableData, {
     page: addPagination({ initialPageSize: 5 }),
     sort: addSortBy(),
     filter: addTableFilter({
@@ -68,34 +68,54 @@
     select: addSelectedRows(),
   });
 
-  const columns = table.createColumns([
-    table.column({
-      accessor: "employee",
-      header: "Employee",
-    }),
-    // table.column({
-    //   accessor: "hoursWithCustomers",
-    //   header: "Hours With Customers",
-    // }),
-    // table.column({
-    //   accessor: "sittingIdle",
-    //   header: "Sitting Idle",
-    // }),
-    table.column({
-      accessor: "onMobile",
-      header: "On Mobile",
-    }),
-    // table.column({
-    //   accessor: "fillingShelf",
-    //   header: "Filling Shelf",
-    // }),
-  ]);
+  // $: columns = table.createColumns([
+  //   table.column({
+  //     accessor: "employee",
+  //     header: "Employee",
+  //   }),
+  //   // table.column({
+  //   //   accessor: "hoursWithCustomers",
+  //   //   header: "Hours With Customers",
+  //   // }),
+  //   // table.column({
+  //   //   accessor: "sittingIdle",
+  //   //   header: "Sitting Idle",
+  //   // }),
+  //   table.column({
+  //     accessor: "onMobile",
+  //     header: "On Mobile",
+  //   }),
+  //   // table.column({
+  //   //   accessor: "fillingShelf",
+  //   //   header: "Filling Shelf",
+  //   // }),
+  // ]);
 
-  const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } =
-    table.createViewModel(columns);
-  const { hasNextPage, hasPreviousPage, pageIndex, pageCount } =
-    pluginStates.page;
-  const { selectedDataIds } = pluginStates.select;
+  $: columns = table.createColumns(
+    efficiency.column
+      .filter(
+        (col) =>
+          ![
+            "store_id",
+            "first_name",
+            "last_name",
+            "role",
+            "efficiency_score",
+          ].includes(col.key),
+      )
+      .map((col) =>
+        table.column({
+          accessor: col.key === "employee_id" ? "employee" : col.key,
+          header: col.header,
+        }),
+      ),
+  );
+
+  $: ({ headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } =
+    table.createViewModel(columns));
+  $: ({ hasNextPage, hasPreviousPage, pageIndex, pageCount } =
+    pluginStates.page);
+  $: ({ selectedDataIds } = pluginStates.select);
 
   function handleRowClick(rowData) {
     dispatch("rowClick", rowData);
@@ -147,21 +167,21 @@
                         >{row.original.employee}</span
                       >
                     </div>
-                  {:else if cell.id === "hoursWithCustomers"}
+                  {:else if cell.id === "customer"}
                     <span class="text-sm text-green-500"
-                      >{row.original.hoursWithCustomers}</span
+                      >{row.original.customer}</span
                     >
-                  {:else if cell.id === "sittingIdle"}
+                  {:else if cell.id === "idle"}
                     <span class="text-sm text-blue-500"
-                      >{row.original.sittingIdle}</span
+                      >{row.original.idle}</span
                     >
-                  {:else if cell.id === "onMobile"}
+                  {:else if cell.id === "mobile"}
                     <span class="text-sm text-pink-500"
-                      >{row.original.onMobile}</span
+                      >{row.original.mobile}</span
                     >
-                  {:else if cell.id === "fillingShelf"}
+                  {:else if cell.id === "fillingShelves"}
                     <span class="text-sm text-orange-500"
-                      >{row.original.fillingShelf}</span
+                      >{row.original.fillingShelves}</span
                     >
                   {:else}
                     <Render of={cell.render()} />

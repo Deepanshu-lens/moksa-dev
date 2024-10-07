@@ -41,7 +41,7 @@
 
   // console.log("pagedata", data);
 
-  // console.log('allStores:', allStores);
+  console.log("allStores:", allStoresData);
   $: allStoresLackKitchen =
     allStores.length > 0 ? allStores.every((store) => !store.hasKitchen) : true;
 

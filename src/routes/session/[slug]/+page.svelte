@@ -72,6 +72,7 @@
 
     socket.on(`notification_${userId}`, (data) => {
       console.log(`Received notification for user ${userId}:`, data);
+      toast.info(`Recieved notification for user! `);
     });
 
     socket.on("disconnect", () => {
@@ -220,43 +221,43 @@
   //   // });
   // }
 
-  function setupTheftSockets(storeId: number) {
-    const userID = moksaUserId;
-    if (sockets[storeId]) {
-      sockets[storeId].disconnect();
-    }
+  // function setupTheftSockets(storeId: number) {
+  //   const userID = moksaUserId;
+  //   if (sockets[storeId]) {
+  //     sockets[storeId].disconnect();
+  //   }
 
-    sockets[storeId] = io("https://api.moksa.ai", {
-      withCredentials: true,
-      extraHeaders: {
-        Authorization: `Bearer ${token}`,
-      },
-      transports: ["websocket", "polling"],
-    });
+  //   sockets[storeId] = io("https://api.moksa.ai", {
+  //     withCredentials: true,
+  //     extraHeaders: {
+  //       Authorization: `Bearer ${token}`,
+  //     },
+  //     transports: ["websocket", "polling"],
+  //   });
 
-    const socket = sockets[storeId];
+  //   const socket = sockets[storeId];
 
-    socket.on("error", (err) => {
-      console.log(`error for store ${storeId}:`, err);
-    });
+  //   socket.on("error", (err) => {
+  //     console.log(`error for store ${storeId}:`, err);
+  //   });
 
-    socket.on("connect", () => {
-      console.log(`connected for store ${storeId}`);
-      socket.emit("joinUser", userID);
-      socket.emit("joinStore", storeId);
-    });
+  //   socket.on("connect", () => {
+  //     console.log(`connected for store ${storeId}`);
+  //     socket.emit("joinUser", userID);
+  //     socket.emit("joinStore", storeId);
+  //   });
 
-    socket.on(`theft_store_${storeId}`, (data) => {
-      console.log(`Received theft data for store ${storeId}:`, data);
-      toast(`Received theft data for store ${storeId}:`, {
-        description: `Store: ${storeId}, Theft Probability: ${data?.theftProbability}, Camera: ${data?.camera_id}`,
-      });
-    });
+  //   socket.on(`theft_store_${storeId}`, (data) => {
+  //     console.log(`Received theft data for store ${storeId}:`, data);
+  //     toast(`Received theft data for store ${storeId}:`, {
+  //       description: `Store: ${storeId}, Theft Probability: ${data?.theftProbability}, Camera: ${data?.camera_id}`,
+  //     });
+  //   });
 
-    socket.on("disconnect", () => {
-      console.log(`disconnected for store ${storeId}`);
-    });
-  }
+  //   socket.on("disconnect", () => {
+  //     console.log(`disconnected for store ${storeId}`);
+  //   });
+  // }
 
   // onMount(() => {
   //   setTimeout(() => {
@@ -264,22 +265,22 @@
   //   }, 500);
   // });
 
-  $: if ($selectedNode?.moksaId) {
-    setTimeout(() => {
-      setupTheftSockets($selectedNode?.moksaId);
-    }, 500);
-  }
+  // $: if ($selectedNode?.moksaId) {
+  //   setTimeout(() => {
+  //     setupTheftSockets($selectedNode?.moksaId);
+  //   }, 500);
+  // }
 
   // $: console.log($liveData)
 
-  onDestroy(() => {
-    Object.values(sockets).forEach((socket) => {
-      console.log("disconnecting socket");
-      socket.disconnect();
-    });
-  });
+  // onDestroy(() => {
+  //   Object.values(sockets).forEach((socket) => {
+  //     console.log("disconnecting socket");
+  //     socket.disconnect();
+  //   });
+  // });
 
-  $: console.log("strem user", user);
+  // $: console.log("strem user", user);
 </script>
 
 {#if searching}

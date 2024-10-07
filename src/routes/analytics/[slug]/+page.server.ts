@@ -4,18 +4,6 @@ import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch, cookies, locals }) => {
 
-
-    // const safeExecute = async (fn: () => Promise<any>, fallbackValue: any = []) => {
-    //     try {
-    //         const result = await fn();
-    //         console.log(result)
-    //         return result !== null && result !== undefined ? result : fallbackValue;
-    //     } catch (error) {
-    //         console.error(`Error executing function: ${error}`);
-    //         return fallbackValue;
-    //     }
-    // };
-
     const safeExecute = async (fn: () => Promise<any>, fallbackValue: any = []) => {
         try {
             const timeoutPromise = new Promise((_, reject) =>
@@ -30,19 +18,11 @@ export const load: PageServerLoad = async ({ fetch, cookies, locals }) => {
         }
     };
 
-    // await fetch(`https://api.moksa.ai/store/getUserStoreDetailsByUserId/${locals.user.record.moksaId}`, {
-    //     headers: {
-    //         "Content-Type": "application/json",
-    //         'Authorization': `Bearer ${cookies.get('moksa-token')}`
-    //     },
-    // }).then(async (res) => {
-    //     const data = await res.json();
-    //     console.log(data)
-    // })
 
     const today = new Date();
     const oneYearAgo = new Date(today);
     const oneWeekAgo = new Date(today);
+    const mToken = cookies.get('moksa-token');
     oneYearAgo.setFullYear(today.getFullYear() - 1);
     oneWeekAgo.setDate(today.getDate() - 7);
 
@@ -55,7 +35,7 @@ export const load: PageServerLoad = async ({ fetch, cookies, locals }) => {
         const response = await fetch('https://api.moksa.ai/store/getAllStoresForDropdown', {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${cookies.get('moksa-token')}`,
+                'Authorization': `Bearer ${mToken}`,
                 'enableallstores': 'true'
             }
         });
@@ -63,10 +43,10 @@ export const load: PageServerLoad = async ({ fetch, cookies, locals }) => {
     }
 
     const allStoreData = async () => {
-        const allstoreData = await fetch(`https://api.moksa.ai/store/getAllStoresTotals/${formatDate(oneWeekAgo)}/${formatDate(today)}`, {
+        const allstoreData = await fetch(`https://api.moksa.ai/store/getAllStoresTotals/-1/${formatDate(oneWeekAgo)}/${formatDate(today)}`, {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${cookies.get('moksa-token')}`,
+                'Authorization': `Bearer ${mToken}`,
 
             }
         });
@@ -77,7 +57,7 @@ export const load: PageServerLoad = async ({ fetch, cookies, locals }) => {
         const aisleData = await fetch(`https://api.moksa.ai/store/getAllStoresWithAisleDetails/1/100/${formatDate(oneYearAgo)}/${formatDate(today)}`, {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${cookies.get('moksa-token')}`
+                'Authorization': `Bearer ${mToken}`
             }
         });
         return aisleData.json();
@@ -87,7 +67,7 @@ export const load: PageServerLoad = async ({ fetch, cookies, locals }) => {
         const theftandcamera = await fetch(`https://api.moksa.ai/store/getAllStoresWithTheftAndCameraDetails/1/100/${formatDate(oneYearAgo)}/${formatDate(today)}`, {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${cookies.get('moksa-token')}`
+                'Authorization': `Bearer ${mToken}`
             }
         });
         return theftandcamera.json();
@@ -97,7 +77,7 @@ export const load: PageServerLoad = async ({ fetch, cookies, locals }) => {
         const theftDetectionDetails = await fetch(`https://api.moksa.ai/theft/theftDetectionDetailsByStoreid/-1`, {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${cookies.get('moksa-token')}`,
+                'Authorization': `Bearer ${mToken}`,
                 'Content-Type': 'application/json',
                 'datetype': '7',
                 'startDate': formatDate(oneWeekAgo),
@@ -111,17 +91,17 @@ export const load: PageServerLoad = async ({ fetch, cookies, locals }) => {
         const busyness = await fetch(`https://api.moksa.ai/store/storeBusyHour/getStoreBusyHourDataForThisWeek/-1`, {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${cookies.get('moksa-token')}`
+                'Authorization': `Bearer ${mToken}`
             }
         });
         return busyness.json();
     }
 
     const efficiency = async () => {
-        const efficiency = await fetch(`https://api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreid/-1/${formatDate(oneWeekAgo)}/1/100/${formatDate(today)}`, {
+        const efficiency = await fetch(`https://api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/-1/${formatDate(oneWeekAgo)}/1/100/${formatDate(today)}`, {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${cookies.get('moksa-token')}`
+                'Authorization': `Bearer ${mToken}`
             }
         });
         return efficiency.json();
@@ -131,7 +111,7 @@ export const load: PageServerLoad = async ({ fetch, cookies, locals }) => {
         const safetyDetails = await fetch(`https://api.moksa.ai/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/-1/1/100/${formatDate(oneWeekAgo)}/${formatDate(today)}`, {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${cookies.get('moksa-token')}`
+                'Authorization': `Bearer ${mToken}`
             }
         });
         return safetyDetails.json();
@@ -141,7 +121,7 @@ export const load: PageServerLoad = async ({ fetch, cookies, locals }) => {
         const spc = await fetch(`https://api.moksa.ai/people/getPeopleCount/-1/${formatDate(oneWeekAgo)}/${formatDate(today)}`, {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${cookies.get('moksa-token')}`,
+                'Authorization': `Bearer ${mToken}`,
                 'Content-Type': 'application/json',
                 'datetype': '7',
                 'Pagepersize': '100',
@@ -157,7 +137,7 @@ export const load: PageServerLoad = async ({ fetch, cookies, locals }) => {
         const allUsers = await fetch(`https://api.moksa.ai/auth/getAllUsers/1/100`, {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${cookies.get('moksa-token')}`
+                'Authorization': `Bearer ${mToken}`
             }
         });
         return allUsers.json();
@@ -178,7 +158,7 @@ export const load: PageServerLoad = async ({ fetch, cookies, locals }) => {
             const res = await fetch(`https://api.moksa.ai/store/getUserStoreDetailsByUserId/${locals.user.record.moksaId}`, {
                 headers: {
                     "Content-Type": "application/json",
-                    'Authorization': `Bearer ${cookies.get('moksa-token')}`
+                    'Authorization': `Bearer ${mToken}`
                 },
             });
             return res.json();
@@ -192,30 +172,8 @@ export const load: PageServerLoad = async ({ fetch, cookies, locals }) => {
         })
     );
 
-
-    // return {
-    //     theftData: await safeExecute(theftDetectionDetails),
-    //     stores: await safeExecute(dropwdown),
-    //     allstoreData: await safeExecute(allStoreData),
-    //     aisleData: await safeExecute(aisleData),
-    //     theftandcamera: await safeExecute(alltheftandcamera),
-    //     busyness: await safeExecute(busyness),
-    //     efficiency: await safeExecute(efficiency),
-    //     safetyDetails: await safeExecute(safetyDetails),
-    //     moksaToken: cookies.get('moksa-token'),
-    //     usersData: await safeExecute(allUsers),
-    //     userStoreDetails: await safeExecute(async () => {
-    //         const res = await fetch(`https://api.moksa.ai/store/getUserStoreDetailsByUserId/${locals.user.record.moksaId}`, {
-    //             headers: {
-    //                 "Content-Type": "application/json",
-    //                 'Authorization': `Bearer ${cookies.get('moksa-token')}`
-    //             },
-    //         });
-    //         return res.json();
-    //     }, null)
-    // };
     return {
         ...Object.fromEntries(results),
-        moksaToken: cookies.get('moksa-token')
+        moksaToken: mToken
     };
 };

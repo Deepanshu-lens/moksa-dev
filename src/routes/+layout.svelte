@@ -11,48 +11,47 @@
   export let data;
   const user = data.user as User;
   const session = data.session;
-  // $: console.log(data)
+  $: console.log("layout", data);
 
-    setContext("user", user);
+  setContext("user", user);
 
-    onMount(async () => {
-      if (user?.email) {
-        try {
-      await fetch('/api/tabOpened', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: user.email }),
-      });
-    } catch (error) {
-      console.error('Failed to log tab open:', error);
-    }
+  onMount(async () => {
+    if (user?.email) {
+      try {
+        await fetch("/api/tabOpened", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: user.email }),
+        });
+      } catch (error) {
+        console.error("Failed to log tab open:", error);
       }
-    window.addEventListener('beforeunload', async (event) => {
+    }
+    window.addEventListener("beforeunload", async (event) => {
       if (user?.email) {
-    
         try {
-          await fetch('/api/tabClosed', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+          await fetch("/api/tabClosed", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email: user.email }),
-            keepalive: true
+            keepalive: true,
           });
         } catch (error) {
-          console.error('Failed to log tab close:', error);
+          console.error("Failed to log tab close:", error);
         }
       }
     });
   });
 </script>
 
-<ModeWatcher defaultMode='light' />
+<ModeWatcher defaultMode="light" />
 <Toaster richColors />
 
 {#if !user}
   <slot />
 {:else}
   {#if !data.url.includes("login") && !data.url?.includes("register")}
-    <Navbar {user} sessionId={session?.id} {session} />
+    <Navbar {user} sessionId={session?.id} {session} mToken={data.mToken} />
   {/if}
   {#if session && user}
     {#key data.url}

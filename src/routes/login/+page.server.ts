@@ -31,13 +31,13 @@ export const actions = {
           console.log('Token saved in cookie');
         } else {
           console.log('Token not found in response');
-          throw redirect(303, `/login?message=User not found,`);
+          throw redirect(303, `/login?message=Login failed,`);
         }
       }).catch((err) => {
         console.log(err);
-        throw redirect(303, `/login?message=User not found,`);
+        throw redirect(303, `/login?message=Login failed,`);
       });
-      
+
       const user = await locals.pb
         ?.collection("users")
         .authWithPassword(email, password);

@@ -170,7 +170,8 @@
       getSafetyDataByStoreId($dateRange);
     }
   }
-  $: console.log("allStores kitchen", allStores);
+
+  // $: console.log("allStores kitchen", allStores);
 
   let sockets: { [key: number]: any } = {};
   let liveData = writable([]);

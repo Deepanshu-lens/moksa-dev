@@ -37,8 +37,6 @@
   export let user;
   export let allStoresData;
 
-  $: console.log("allstoata", allStoresData);
-
   let chartLoading = true;
   let dateRange = writable("7 Days");
   let selectedStore = writable({ value: -1, label: "All Stores" });
@@ -86,87 +84,6 @@
     }
   }
 
-  // function createBarChart() {
-  //   if (barChartCanvas && !barChart) {
-  //     const ctx = barChartCanvas.getContext("2d");
-
-  //     if (ctx) {
-  //       Chart.register(BarController, BarElement, CategoryScale, LinearScale);
-
-  //       const data = theftData.data;
-  //       console.log(data)
-
-  //       // const labels = [ 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday' ]
-  //         const labels = data.map((item) => item.day_of_week.trim());
-  //       console.log(labels)
-  //       const detectedData = data.map((item) => parseInt(item.theft_detected));
-  //       const preventedData = data.map((item) =>
-  //         parseInt(item.theft_prevented),
-  //       );
-
-  //       barChart = new Chart(ctx, {
-  //         type: "bar",
-  //         data: {
-  //           labels: labels,
-  //           datasets: [
-  //             {
-  //               label: "Theft Detected",
-  //               data: detectedData,
-  //               backgroundColor: "#FF3B30",
-  //               borderRadius: 4,
-  //             },
-  //             {
-  //               label: "Theft Prevented",
-  //               data: preventedData,
-  //               backgroundColor: "#00A86B",
-  //               borderRadius: 4,
-  //             },
-  //           ],
-  //         },
-  //         options: {
-  //           responsive: true,
-  //           maintainAspectRatio: false,
-  //           scales: {
-  //             x: {
-  //               grid: {
-  //                 display: false,
-  //               },
-  //             },
-  //             y: {
-  //               beginAtZero: true,
-  //               ticks: {
-  //                 stepSize: 1,
-  //               },
-  //               grid: {
-  //                 color: "rgba(0, 0, 0, 0.1)",
-  //               },
-  //             },
-  //           },
-  //           plugins: {
-  //             legend: {
-  //               display: true,
-  //             },
-  //             tooltip: {
-  //               callbacks: {
-  //                 label: function (context) {
-  //                   let label = context.dataset.label || "";
-  //                   if (label) {
-  //                     label += ": ";
-  //                   }
-  //                   if (context.parsed.y !== null) {
-  //                     label += context.parsed.y;
-  //                   }
-  //                   return label;
-  //                 },
-  //               },
-  //             },
-  //           },
-  //         },
-  //       });
-  //     }
-  //   }
-  // }
-
   function createBarChart() {
     if (barChartCanvas && !barChart) {
       const ctx = barChartCanvas.getContext("2d");
@@ -174,30 +91,8 @@
       if (ctx) {
         Chart.register(BarController, BarElement, CategoryScale, LinearScale);
 
-        // const allDays = [
-        //   "Sunday",
-        //   "Monday",
-        //   "Tuesday",
-        //   "Wednesday",
-        //   "Thursday",
-        //   "Friday",
-        //   "Saturday",
-        // ];
-        // const dataMap = new Map(
-        //   theftData.data.map((item) => [item.day_of_week.trim(), item]),
-        // );
-
         const data = theftData.data;
-
         const labels = data.map((item) => item.day_of_week.trim());
-
-        // const labels = allDays.map((day) => day);
-        // const detectedData = labels.map((day) =>
-        //   dataMap.get(day) ? parseInt(dataMap.get(day).theft_detected) : 0,
-        // );
-        // const preventedData = labels.map((day) =>
-        //   dataMap.get(day) ? parseInt(dataMap.get(day).theft_prevented) : 0,
-        // );
         const detectedData = data.map((item) => parseInt(item.theft_detected));
         const preventedData = data.map((item) =>
           parseInt(item.theft_prevented),
@@ -361,136 +256,6 @@
     }
   }
 
-  //  function createTheftChart() {
-  //   if (theftChartCanvas && !theftChart) {
-  //     const ctx = theftChartCanvas.getContext("2d");
-  //     if (ctx) {
-  //       // Sort the data by day of week
-  //       const sortedData = theftData.data.sort((a, b) => {
-  //         const days = [
-  //           "Sunday",
-  //           "Monday",
-  //           "Tuesday",
-  //           "Wednesday",
-  //           "Thursday",
-  //           "Friday",
-  //           "Saturday",
-  //         ];
-  //         return (
-  //           days.indexOf(a.day_of_week.trim()) -
-  //           days.indexOf(b.day_of_week.trim())
-  //         );
-  //       });
-
-  //       const data = {
-  //         labels: sortedData.map((item) => item.day_of_week.trim()),
-  //         datasets: [
-  //           {
-  //             label: "Detected",
-  //             data: sortedData.map((item) => -parseInt(item.theft_detected)),
-  //             backgroundColor: (context) => {
-  //               const chart = context.chart;
-  //               const { ctx, chartArea } = chart;
-  //               if (!chartArea) {
-  //                 return null;
-  //               }
-  //               const gradient = ctx.createLinearGradient(0, 0, chart.width, 0);
-  //               gradient.addColorStop(0, "rgba(4, 158, 243, 1)");
-  //               gradient.addColorStop(1, "rgba(21, 29, 100, 1)");
-  //               return gradient;
-  //             },
-  //             borderColor: "rgba(21, 29, 100, 1)",
-  //             borderWidth: 1,
-  //             borderRadius: 4,
-  //             barThickness: 20,
-  //           },
-  //           {
-  //             label: "Prevented",
-  //             data: sortedData.map((item) => parseInt(item.theft_prevented)),
-  //             backgroundColor: (context) => {
-  //               const chart = context.chart;
-  //               const { ctx, chartArea } = chart;
-  //               if (!chartArea) {
-  //                 return null;
-  //               }
-  //               const gradient = ctx.createLinearGradient(0, 0, chart.width, 0);
-  //               gradient.addColorStop(0, "rgba(255, 169, 88, 1)");
-  //               gradient.addColorStop(1, "rgba(255, 1, 120, 1)");
-  //               return gradient;
-  //             },
-  //             borderColor: "rgba(255, 1, 120, 1)",
-  //             borderWidth: 1,
-  //             borderRadius: 4,
-  //             barThickness: 20,
-  //           },
-  //         ],
-  //       };
-
-  //       theftChart = new Chart(ctx, {
-  //         type: "bar",
-  //         data: data,
-  //         options: {
-  //           indexAxis: "y",
-  //           scales: {
-  //             x: {
-  //               position: 'top',
-  //               stacked: false,
-  //               beginAtZero: true,
-  //               grid: {
-  //                 display: false,
-  //               },
-  //               ticks: {
-  //                 callback: function(value) {
-  //                   return Math.abs(value);
-  //                 }
-  //               },
-  //             },
-  //             y: {
-  //               stacked: true,
-  //               grid: {
-  //                 color: "rgba(0, 0, 0, 0.1)",
-  //                 drawBorder: false,
-  //               },
-  //             },
-  //           },
-  //           responsive: true,
-  //           maintainAspectRatio: false,
-  //           plugins: {
-  //             legend: {
-  //               position: "top",
-  //               align: "end",
-  //               labels: {
-  //                 usePointStyle: true,
-  //                 pointStyle: "circle",
-  //               },
-  //             },
-  //             tooltip: {
-  //               callbacks: {
-  //                 label: function (context) {
-  //                   let label = context.dataset.label || "";
-  //                   if (label) {
-  //                     label += ": ";
-  //                   }
-  //                   if (context.parsed.x !== null) {
-  //                     label += Math.abs(context.parsed.x);
-  //                   }
-  //                   return label;
-  //                 },
-  //               },
-  //             },
-  //           },
-  //           layout: {
-  //             padding: {
-  //               left: 30,
-  //               right: 30,
-  //             },
-  //           },
-  //         },
-  //       });
-  //     }
-  //   }
-  // }
-
   function createTheftChart() {
     if (theftChartCanvas && !theftChart) {
       const ctx = theftChartCanvas.getContext("2d");
@@ -633,7 +398,7 @@
     await Promise.all([gettheftList(-1), getTheftTrends(-1)]);
     setTimeout(() => {
       createBarChart();
-      // createChart();
+
       createTheftChart();
     }, 100);
     chartLoading = false;
@@ -742,7 +507,7 @@
     const formatDate = (date: Date) => date.toISOString().split("T")[0];
     console.log($selectedStore.label, $selectedStore.value);
     try {
-      const [theftD, theftT, theftL] = await Promise.all([
+      const [theftD, theftT, theftL, storeTotals] = await Promise.all([
         fetch(
           `https://api.moksa.ai/theft/theftDetectionDetailsByStoreid/${$selectedStore.value}`,
           {
@@ -782,6 +547,15 @@
             },
           },
         ).then((res) => res.json()),
+        fetch(
+          `https://api.moksa.ai/store/getAllStoresTotals/${$selectedStore.value}/${formatDate(startDate)}/${formatDate(today)}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          },
+        ).then((res) => res.json()),
       ]);
 
       console.log(theftD);
@@ -790,7 +564,8 @@
       theftDataa.set(theftD);
       theftTrend.set(theftT);
       listtheft.set(theftL.data);
-
+      totalThefts = storeTotals.data.totaldetectedthefts;
+      totalPreventions = storeTotals.data.totalpreventedthefts;
       updateBarChart(theftD);
       updateTheftChart(theftD);
       updateTrendChart(theftT.data);
@@ -829,68 +604,6 @@
     }
   }
 
-  // function updateBarChart(theftD) {
-  //   console.log($dateRange);
-  //   console.log("first");
-  //   if (barChart) {
-  //     console.log("first");
-  //     console.log(theftD);
-  //     const allDays = [
-  //       "Monday",
-  //       "Tuesday",
-  //       "Wednesday",
-  //       "Thursday",
-  //       "Friday",
-  //       "Saturday",
-  //       "Sunday",
-  //     ];
-  //     const allMonths = [
-  //       "January",
-  //       "February",
-  //       "March",
-  //       "April",
-  //       "May",
-  //       "June",
-  //       "July",
-  //       "August",
-  //       "September",
-  //       "October",
-  //       "November",
-  //       "December",
-  //     ];
-
-  //     let labels, theftDetectedData, theftPreventedData;
-
-  //     if ($dateRange === "12 Months") {
-  //       const dataMap = new Map(
-  //         theftD?.data.map((item) => [item.month_name.trim(), item]),
-  //       );
-  //       labels = allMonths.map((month) => month);
-  //       theftDetectedData = labels.map((month) =>
-  //         dataMap.get(month) ? parseInt(dataMap.get(month).theft_detected) : 0,
-  //       );
-  //       theftPreventedData = labels.map((month) =>
-  //         dataMap.get(month) ? parseInt(dataMap.get(month).theft_prevented) : 0,
-  //       );
-  //     } else {
-  //       const dataMap = new Map(
-  //         theftD?.data.map((item) => [item.day_of_week.trim(), item]),
-  //       );
-  //       labels = allDays.map((day) => day);
-  //       theftDetectedData = labels.map((day) =>
-  //         dataMap.get(day) ? parseInt(dataMap.get(day).theft_detected) : 0,
-  //       );
-  //       theftPreventedData = labels.map((day) =>
-  //         dataMap.get(day) ? parseInt(dataMap.get(day).theft_prevented) : 0,
-  //       );
-  //     }
-  //     barChart.data.labels = labels;
-  //     barChart.data.datasets[0].data = theftDetectedData;
-  //     barChart.data.datasets[1].data = theftPreventedData;
-  //     barChart.update();
-  //   }
-  // }
-
   function updateTheftChart(theftD) {
     console.log($dateRange);
     console.log("first");
@@ -917,69 +630,6 @@
       theftChart.update();
     }
   }
-
-  // function updateTheftChart(theftD) {
-  //   console.log($dateRange);
-  //   console.log("first");
-  //   if (theftChart) {
-  //     console.log("first");
-  //     console.log(theftD);
-  //     const allDays = [
-  //       "Sunday",
-  //       "Monday",
-  //       "Tuesday",
-  //       "Wednesday",
-  //       "Thursday",
-  //       "Friday",
-  //       "Saturday",
-  //     ];
-  //     const allMonths = [
-  //       "January",
-  //       "February",
-  //       "March",
-  //       "April",
-  //       "May",
-  //       "June",
-  //       "July",
-  //       "August",
-  //       "September",
-  //       "October",
-  //       "November",
-  //       "December",
-  //     ];
-
-  //     let labels, theftDetectedData, theftPreventedData;
-
-  //     if ($dateRange === "12 Months") {
-  //       const dataMap = new Map(
-  //         theftD?.data.map((item) => [item.month_name.trim(), item]),
-  //       );
-  //       labels = allMonths.map((month) => month);
-  //       theftDetectedData = labels.map((month) =>
-  //         dataMap.get(month) ? parseInt(-dataMap.get(month).theft_detected) : 0,
-  //       );
-  //       theftPreventedData = labels.map((month) =>
-  //         dataMap.get(month) ? parseInt(dataMap.get(month).theft_prevented) : 0,
-  //       );
-  //     } else {
-  //       const dataMap = new Map(
-  //         theftD?.data.map((item) => [item.day_of_week.trim(), item]),
-  //       );
-  //       labels = allDays.map((day) => day);
-  //       theftDetectedData = labels.map((day) =>
-  //         dataMap.get(day) ? parseInt(-dataMap.get(day).theft_detected) : 0,
-  //       );
-  //       theftPreventedData = labels.map((day) =>
-  //         dataMap.get(day) ? parseInt(dataMap.get(day).theft_prevented) : 0,
-  //       );
-  //     }
-
-  //     theftChart.data.labels = labels;
-  //     theftChart.data.datasets[0].data = theftDetectedData;
-  //     theftChart.data.datasets[1].data = theftPreventedData;
-  //     theftChart.update();
-  //   }
-  // }
 
   function updateTrendChart(theftT) {
     if (chart) {
@@ -1072,7 +722,7 @@
           },
         ).then((res) => res.json()),
         fetch(
-          `https://api.moksa.ai/store/getAllStoresTotals/${formatDate(startDate)}/${formatDate(today)}`,
+          `https://api.moksa.ai/store/getAllStoresTotals/${$selectedStore.value}/${formatDate(startDate)}/${formatDate(today)}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -1159,12 +809,15 @@
             },
           },
         ).then((res) => res.json()),
-        fetch(`https://api.moksa.ai/store/getAllStoresTotals/${start}/${end}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
+        fetch(
+          `https://api.moksa.ai/store/getAllStoresTotals/${$selectedStore.value}/${start}/${end}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
           },
-        }).then((res) => res.json()),
+        ).then((res) => res.json()),
       ]);
 
       console.log(storesTotal);
@@ -1345,11 +998,11 @@
     fetchCustomDateData();
   }
 
-  $: {
-    if ($selectedStore.value !== -1) {
-      fetchDataStoreWise();
-    }
-  }
+  // $: {
+  //   if ($selectedStore.value !== -1) {
+  //     fetchDataStoreWise();
+  //   }
+  // }
 
   // $: console.log($theftTrend)
 
@@ -1357,9 +1010,11 @@
   let liveData = writable([]);
 
   function setupSocketForAllStores() {
-    allStores.forEach((store: any) => {
-      setupSocket(store.id);
-    });
+    allStores
+      .filter((store: any) => store.id !== -1)
+      .forEach((store: any) => {
+        setupSocket(store.id);
+      });
   }
 
   function setupSocket(storeId: number) {
@@ -1447,10 +1102,10 @@
 
   const dispatch = createEventDispatcher();
 
-  function handleSelect(fruit) {
-    selectedStore.set(fruit);
-    dispatch("select", fruit);
-  }
+  // function handleSelect(fruit) {
+  //   selectedStore.set(fruit);
+  //   dispatch("select", fruit);
+  // }
 </script>
 
 <section
@@ -1526,7 +1181,10 @@
             {#if filteredFruits.length > 0}
               {#each filteredFruits as fruit}
                 <Select.Item
-                  on:click={() => handleSelect(fruit)}
+                  on:click={() => {
+                    selectedStore.set(fruit);
+                    fetchDataStoreWise();
+                  }}
                   class="px-1"
                   value={fruit.value}
                   label={fruit.label}>{fruit.label}</Select.Item

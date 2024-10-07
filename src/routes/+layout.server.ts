@@ -9,6 +9,8 @@ export const load: LayoutServerLoad = async ({ locals, url, cookies }) => {
   const allRoles = await locals.pb?.collection("roles").getFullList();
   const userRole = locals.user === undefined ? undefined : allRoles?.find(role => role.id === locals.user.record.role);
 
+  const mToken = cookies.get('moksa-token')
+
   const protectedRoutes = [
     "session",
     "playback",
@@ -41,7 +43,7 @@ export const load: LayoutServerLoad = async ({ locals, url, cookies }) => {
   // console.log(currentUserToken)
   if (currentUserToken) {
     let currentUser = await locals.pb
-      ?.collection("users",{
+      ?.collection("users", {
         expand: "role"
       })
       .getOne(currentUserToken.id);
@@ -55,7 +57,7 @@ export const load: LayoutServerLoad = async ({ locals, url, cookies }) => {
             credits: currentUser.credits + userToken.credits,
           });
           currentUser = await locals.pb
-            ?.collection("users",{
+            ?.collection("users", {
               expand: "role"
             })
             .getOne(currentUserToken.id);
@@ -82,8 +84,8 @@ export const load: LayoutServerLoad = async ({ locals, url, cookies }) => {
           .getFullList();
 
         const matchedFeatures = featureList
-        ?.filter((feature) => currentUser?.features?.includes(feature.id))
-        ?.map((feature) => feature.feature);
+          ?.filter((feature) => currentUser?.features?.includes(feature.id))
+          ?.map((feature) => feature.feature);
 
 
         return {
@@ -92,7 +94,7 @@ export const load: LayoutServerLoad = async ({ locals, url, cookies }) => {
             id: locals.user.record.id,
             name: locals.user.record.name,
             firstName: locals.user.record.firstName,
-            lastName:locals.user.record.lastName,
+            lastName: locals.user.record.lastName,
             email: locals.user.record.email,
             session: locals.user.record.session[0],
             role: role?.[0]?.roleName,
@@ -102,6 +104,7 @@ export const load: LayoutServerLoad = async ({ locals, url, cookies }) => {
           session: { ...session },
           nodes: structuredClone(nodes),
           url: url.pathname,
+          mToken: mToken,
         };
       } else {
         return {

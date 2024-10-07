@@ -31,7 +31,7 @@
 
   console.log("safetyDataTable", safetyData);
 
-  const dbData = safetyData?.data.map((item: any) => ({
+  $: dbData = safetyData?.data.map((item: any) => ({
     employee: `${item.first_name} ${item.last_name}`,
     masks: item.wearing_mask,
     gloves: item.wearing_gloves,
@@ -42,7 +42,7 @@
     videourl: item.img_link,
   }));
 
-  const data = writable(dbData);
+  $: data = writable(dbData);
 
   async function openImageDialog(imageUri) {
     dialogOpen = true;
@@ -72,12 +72,12 @@
     }
   }
 
-  const readableData = readable(dbData, (set) => {
+  $: readableData = readable(dbData, (set) => {
     const unsubscribe = data.subscribe(set);
     return unsubscribe;
   });
 
-  const table = createTable(readableData, {
+  $: table = createTable(readableData, {
     page: addPagination({ initialPageSize: 4 }),
     sort: addSortBy(),
     filter: addTableFilter({
@@ -87,7 +87,7 @@
     select: addSelectedRows(),
   });
 
-  const columns = table.createColumns([
+  $: columns = table.createColumns([
     table.column({
       accessor: "employee",
       header: "Employee",
@@ -118,10 +118,10 @@
     }),
   ]);
 
-  const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } =
-    table.createViewModel(columns);
-  const { hasNextPage, hasPreviousPage, pageIndex, pageCount } =
-    pluginStates.page;
+  $: ({ headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } =
+    table.createViewModel(columns));
+  $: ({ hasNextPage, hasPreviousPage, pageIndex, pageCount } =
+    pluginStates.page);
 </script>
 
 <div class="m-0">

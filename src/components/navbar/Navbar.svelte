@@ -20,11 +20,17 @@
   export let user: User;
   export let session;
   export let sessionId: string | undefined;
+  export let mToken: string | undefined;
   import { addUserLog } from "@/lib/addUserLog";
   import { onDestroy, onMount } from "svelte";
   import NotificationDropdown from "../dropdown/NotificationDropdown.svelte";
+  import { io } from "socket.io-client";
+  import { writable } from "svelte/store";
+  import { toast } from "svelte-sonner";
 
-  const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
+  // $: console.log(user);
+
+  // const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
   const menuList =
     user.role === "Operators" || user.role === "adminNonPaid"
       ? [
@@ -94,23 +100,126 @@
     addUserLog("user clicked on user icon");
   }
 
-  const getSession = async () => {
-    const updatedSession = await PB.collection("session").getFullList({
-      filter: `id="${user.session}"`,
-    });
-    return updatedSession;
-  };
+  let sockets: { [key: number]: any } = {};
+  let liveData = writable([]);
+  let allStores = [];
+  const moksaUserId = user.moksaId;
 
   onMount(async () => {
-    PB.collection("session").subscribe("*", async (e) => {
-      const check = await getSession();
-      session = check[0];
+    // console.log("mToken", mToken);
+    const response = await fetch(
+      "https://api.moksa.ai/store/getAllStoresForDropdown",
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${mToken}`,
+          enableallstores: "true",
+        },
+      },
+    );
+    const res = await response.json();
+    console.log("res", res);
+    allStores = res?.data?.data;
+    if (res?.data?.data?.length > 0) {
+      setupSocketForAllStores();
+    }
+  });
+
+  function setupSocketForAllStores() {
+    allStores
+      .filter((store: any) => store.id !== -1)
+      .forEach((store: any) => {
+        setupSocket(store.id);
+      });
+  }
+
+  function setupSocket(storeId: number) {
+    const userID = moksaUserId;
+    if (sockets[storeId]) {
+      sockets[storeId].disconnect();
+    }
+
+    sockets[storeId] = io("https://api.moksa.ai", {
+      withCredentials: true,
+      extraHeaders: {
+        Authorization: `Bearer ${mToken}`,
+      },
+      transports: ["websocket", "polling"],
+    });
+
+    const socket = sockets[storeId];
+
+    socket.on("error", (err) => {
+      console.log(`error for store ${storeId}:`, err);
+    });
+
+    socket.on("connect", () => {
+      console.log(`connected for store ${storeId}`);
+      socket.emit("joinUser", userID);
+      socket.emit("joinStore", storeId);
+    });
+
+    socket.on(`theft_store_${storeId}`, (data) => {
+      console.log(`Received theft data for store ${storeId}:`, data);
+      // toast(`Received theft data for store ${storeId}:`, {
+      //   description: `Store: ${storeId}, Theft Probability: ${data?.theftProbability}, Camera: ${data?.camera_id}`,
+      // });
+
+      if ($liveData.length > 0) {
+        liveData.update((currentData) => {
+          return [...currentData, { ...data }];
+        });
+      } else {
+        liveData.set(data);
+      }
+
+      // listtheft.update((currentData) => {
+      //   const dataArray = Array.isArray(currentData) ? currentData : [];
+
+      //   if (currentData && Array.isArray(currentData.data)) {
+      //     return {
+      //       ...currentData,
+      //       data: [{ storeId, ...data, live: true }, ...currentData.data].slice(
+      //         0,
+      //         100,
+      //       ),
+      //     };
+      //   }
+
+      //   return [{ storeId, ...data, live: true }, ...dataArray].slice(0, 100);
+      // });
+      // return [storeId, ...dataArray].slice(0, 100);
+    });
+
+    socket.on("disconnect", () => {
+      console.log(`disconnected for store ${storeId}`);
+    });
+  }
+
+  onDestroy(() => {
+    Object.values(sockets).forEach((socket) => {
+      console.log("disconnecting socket");
+      socket.disconnect();
     });
   });
 
-  onDestroy(() => {
-    PB.collection("session").unsubscribe("*");
-  });
+  // const getSession = async () => {
+  //   const updatedSession = await PB.collection("session").getFullList({
+  //     filter: `id="${user.session}"`,
+  //   });
+  //   return updatedSession;
+  // };
+
+  // onMount(async () => {
+  //   PB.collection("session").subscribe("*", async (e) => {
+  //     const check = await getSession();
+  //     session = check[0];
+  //   });
+  // });
+
+  // onDestroy(() => {
+  //   PB.collection("session").unsubscribe("*");
+  // });
 
   let showNotifications: boolean = false;
   let notificationDropdownRef: HTMLElement;
@@ -204,7 +313,7 @@
           {/if} -->
           {#if showNotifications}
             <div bind:this={notificationDropdownRef}>
-              <NotificationDropdown />
+              <NotificationDropdown {liveData} />
             </div>
           {/if}
         </span>

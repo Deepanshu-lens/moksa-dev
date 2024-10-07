@@ -317,45 +317,78 @@
     const formatDate = (date: Date) => date.toISOString().split("T")[0];
     console.log($selectedStore.label, $selectedStore.value);
     try {
-      const [theftD, busy] = await Promise.all([
-        fetch(
-          `https://api.moksa.ai/theft/theftDetectionDetailsByStoreid/${$selectedStore.value}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-              datetype:
-                $dateRange === "7 Days"
-                  ? "7"
-                  : $dateRange === "15 Days"
-                    ? "15"
-                    : $dateRange === "30 Days"
-                      ? "30"
-                      : $dateRange === "12 Months"
-                        ? "year"
-                        : "7",
-              startDate: formatDate(startDate),
-              endDate: formatDate(today),
+      const [theftD, busy, employeeEff, safetyD, storeData] = await Promise.all(
+        [
+          fetch(
+            `https://api.moksa.ai/theft/theftDetectionDetailsByStoreid/${$selectedStore.value}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+                datetype:
+                  $dateRange === "7 Days"
+                    ? "7"
+                    : $dateRange === "15 Days"
+                      ? "15"
+                      : $dateRange === "30 Days"
+                        ? "30"
+                        : $dateRange === "12 Months"
+                          ? "year"
+                          : "7",
+                startDate: formatDate(startDate),
+                endDate: formatDate(today),
+              },
             },
-          },
-        ).then((res) => res.json()),
-        fetch(
-          `https://api.moksa.ai/customerPrediction/storeBusyHourBystoreId/${$selectedStore.value}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
+          ).then((res) => res.json()),
+          fetch(
+            `https://api.moksa.ai/customerPrediction/storeBusyHourBystoreId/${$selectedStore.value}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
             },
-          },
-        ).then((res) => res.json()),
-      ]);
+          ).then((res) => res.json()),
+          fetch(
+            `https://api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/${$selectedStore.value}/${formatDate(startDate)}/1/100/${formatDate(today)}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            },
+          ).then((res) => res.json()),
+          fetch(
+            `https://api.moksa.ai/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${$selectedStore.value}/1/100/${formatDate(startDate)}/${formatDate(today)}`,
+            {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            },
+          ).then((res) => res.json()),
+          fetch(
+            `https://api.moksa.ai/store/getAllStoresTotals/${$selectedStore.value}/${formatDate(startDate)}/${formatDate(today)}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            },
+          ).then((res) => res.json()),
+        ],
+      );
+      console.log(employeeEff);
+      console.log(safetyD);
 
-      // console.log("theftD", theftD);
-      // console.log("busy", busy);
+      efficiency = employeeEff.data;
       theftDataa.set(theftD);
+      allStoresData = storeData.data;
       busynessStoresData.set(busy.data);
-      // Update the bar chart with new data
+      safetyDetails = safetyD?.data === undefined ? [] : safetyD?.data;
       updateBarChart(theftD);
+
       if ($selectedStore.value !== -1) {
         setTimeout(() => {
           if (chart === null) {
@@ -448,88 +481,104 @@
     console.log(formatDate(today));
     try {
       // Call the three APIs
-      const [eeScore, storesTotal, storesAisle, theftD, storePeople] =
-        await Promise.all([
-          fetch(
-            `https://api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreid/-1/${formatDate(startDate)}/1/20/${formatDate(today)}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-              },
+      const [
+        eeScore,
+        storesTotal,
+        storesAisle,
+        theftD,
+        storePeople,
+        safetyData,
+      ] = await Promise.all([
+        fetch(
+          `https://api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/${$selectedStore.value}/${formatDate(startDate)}/1/100/${formatDate(today)}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
             },
-          ).then((res) => res.json()),
-          fetch(
-            `https://api.moksa.ai/store/getAllStoresTotals/${formatDate(startDate)}/${formatDate(today)}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-              },
+          },
+        ).then((res) => res.json()),
+        fetch(
+          `https://api.moksa.ai/store/getAllStoresTotals/${$selectedStore.value}/${formatDate(startDate)}/${formatDate(today)}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
             },
-          ).then((res) => res.json()),
-          fetch(
-            `https://api.moksa.ai/store/getAllStoresWithAisleDetails/1/20/${formatDate(startDate)}/${formatDate(today)}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-              },
+          },
+        ).then((res) => res.json()),
+        fetch(
+          `https://api.moksa.ai/store/getAllStoresWithAisleDetails/1/20/${formatDate(startDate)}/${formatDate(today)}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
             },
-          ).then((res) => res.json()),
-          fetch(
-            `https://api.moksa.ai/theft/theftDetectionDetailsByStoreid/-1`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-                datetype:
-                  $dateRange === "7 Days"
-                    ? "7"
-                    : $dateRange === "15 Days"
-                      ? "15"
-                      : $dateRange === "30 Days"
-                        ? "30"
-                        : $dateRange === "12 Months"
-                          ? "year"
-                          : "7",
-                startDate: formatDate(startDate),
-                endDate: formatDate(today),
-              },
+          },
+        ).then((res) => res.json()),
+        fetch(`https://api.moksa.ai/theft/theftDetectionDetailsByStoreid/-1`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+            datetype:
+              $dateRange === "7 Days"
+                ? "7"
+                : $dateRange === "15 Days"
+                  ? "15"
+                  : $dateRange === "30 Days"
+                    ? "30"
+                    : $dateRange === "12 Months"
+                      ? "year"
+                      : "7",
+            startDate: formatDate(startDate),
+            endDate: formatDate(today),
+          },
+        }).then((res) => res.json()),
+        fetch(
+          `https://api.moksa.ai/people/getPeopleCount/-1/${formatDate(startDate)}/${formatDate(today)}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+              datetype:
+                $dateRange === "7 Days"
+                  ? "7"
+                  : $dateRange === "15 Days"
+                    ? "15"
+                    : $dateRange === "30 Days"
+                      ? "30"
+                      : $dateRange === "12 Months"
+                        ? "year"
+                        : "7",
+              Pagepersize: "100",
+              Pagenumber: "1",
             },
-          ).then((res) => res.json()),
-          fetch(
-            `https://api.moksa.ai/people/getPeopleCount/-1/${formatDate(startDate)}/${formatDate(today)}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-                datetype:
-                  $dateRange === "7 Days"
-                    ? "7"
-                    : $dateRange === "15 Days"
-                      ? "15"
-                      : $dateRange === "30 Days"
-                        ? "30"
-                        : $dateRange === "12 Months"
-                          ? "year"
-                          : "7",
-                Pagepersize: "100",
-                Pagenumber: "1",
-              },
+          },
+        ).then((res) => res.json()),
+        fetch(
+          `https://api.moksa.ai/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${$selectedStore.value}/1/100/${formatDate(startDate)}/${formatDate(today)}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
             },
-          ).then((res) => res.json()),
-        ]);
+          },
+        ).then((res) => res.json()),
+      ]);
 
       console.log(eeScore);
       console.log(storesTotal);
       console.log(storesAisle);
       console.log(theftD);
+      console.log(safetyData);
       // eeScore.set(eeScore)
       // storesTotal.set(storesTotal)
       // storesAisle.set(storesAisle)
       storePeopleCount = storePeople?.data?.data;
       allStoresData = storesTotal.data;
+      efficiency = eeScore.data;
+      safetyDetails = safetyData?.data === undefined ? [] : safetyData?.data;
 
       theftDataa.set(theftD);
       updateBarChart(theftD);
@@ -552,70 +601,80 @@
     console.log(end);
     try {
       // Call the three APIs
-      const [eeScore, storesTotal, storesAisle, theftD, storePeople] =
-        await Promise.all([
-          fetch(
-            `https://api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreid/-1/${start}/1/20/${end}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-              },
+      const [
+        eeScore,
+        storesTotal,
+        storesAisle,
+        theftD,
+        storePeople,
+        safetyData,
+      ] = await Promise.all([
+        fetch(
+          `https://api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/${$selectedStore.value}/${start}/1/100/${end}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
             },
-          ).then((res) => res.json()),
-          fetch(
-            `https://api.moksa.ai/store/getAllStoresTotals/${start}/${end}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-              },
+          },
+        ).then((res) => res.json()),
+        fetch(
+          `https://api.moksa.ai/store/getAllStoresTotals/${$selectedStore.value}/${start}/${end}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
             },
-          ).then((res) => res.json()),
-          fetch(
-            `https://api.moksa.ai/store/getAllStoresWithAisleDetails/1/20/${start}/${end}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-              },
+          },
+        ).then((res) => res.json()),
+        fetch(
+          `https://api.moksa.ai/store/getAllStoresWithAisleDetails/1/20/${start}/${end}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
             },
-          ).then((res) => res.json()),
-          fetch(
-            `https://api.moksa.ai/theft/theftDetectionDetailsByStoreid/-1`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-                datetype:
-                  $dateRange === "7 Days"
-                    ? "7"
-                    : $dateRange === "15 Days"
-                      ? "15"
-                      : $dateRange === "30 Days"
-                        ? "30"
-                        : $dateRange === "12 Months"
-                          ? "year"
-                          : $dateRange === "custom"
-                            ? "custom"
-                            : "7",
-                startDate: start,
-                endDate: end,
-              },
+          },
+        ).then((res) => res.json()),
+        fetch(`https://api.moksa.ai/theft/theftDetectionDetailsByStoreid/-1`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+            datetype:
+              $dateRange === "7 Days"
+                ? "7"
+                : $dateRange === "15 Days"
+                  ? "15"
+                  : $dateRange === "30 Days"
+                    ? "30"
+                    : $dateRange === "12 Months"
+                      ? "year"
+                      : $dateRange === "custom"
+                        ? "custom"
+                        : "7",
+            startDate: start,
+            endDate: end,
+          },
+        }).then((res) => res.json()),
+        fetch(`https://api.moksa.ai/people/getPeopleCount/-1/${start}/${end}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+            Pagepersize: "100",
+            Pagenumber: "1",
+          },
+        }).then((res) => res.json()),
+        fetch(
+          `https://api.moksa.ai/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${$selectedStore.value}/1/100/${start}/${end}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
             },
-          ).then((res) => res.json()),
-          fetch(
-            `https://api.moksa.ai/people/getPeopleCount/-1/${start}/${end}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-                Pagepersize: "100",
-                Pagenumber: "1",
-              },
-            },
-          ).then((res) => res.json()),
-        ]);
+          },
+        ).then((res) => res.json()),
+      ]);
 
       console.log(eeScore);
       console.log(storesTotal);
@@ -626,6 +685,8 @@
       // storesAisle.set(storesAisle)
       storePeopleCount = storePeople?.data?.data;
       allStoresData = storesTotal.data;
+      efficiency = eeScore.data;
+      safetyDetails = safetyData?.data === undefined ? [] : safetyData?.data;
       theftDataa.set(theftD);
       updateBarChart(theftD);
     } catch (error) {
@@ -646,12 +707,6 @@
     (value?.start || value?.end)
   ) {
     fetchCustomDateData();
-  }
-
-  $: {
-    if ($selectedStore.value) {
-      fetchDataStoreWise();
-    }
   }
 
   function cleanValue(value: string | number): string {
@@ -753,11 +808,16 @@
 
   const dispatch = createEventDispatcher();
 
-  function handleSelect(fruit) {
-    console.log("selected", fruit);
-    selectedStore.set(fruit);
-    dispatch("select", fruit);
+  function updateAllSelects(newValue) {
+    selectedStore.set(newValue);
+    fetchDataStoreWise();
   }
+
+  // function handleSelect(fruit) {
+  //   console.log("selected", fruit);
+  //   selectedStore.set(fruit);
+  //   dispatch("select", fruit);
+  // }
 
   // $: console.log(aisleData);
 </script>
@@ -900,31 +960,10 @@
                 />
               </div>
               <Select.Group>
-                <!-- {#if allStores.length > 0}
-                  {#each fruits as fruit}
-                    <Select.Item
-                      on:click={() => selectedStore.set(fruit)}
-                      class="px-1"
-                      value={fruit.value}
-                      label={fruit.label}>{fruit.label}</Select.Item
-                    >
-                  {/each}
-                {/if} -->
                 {#if filteredFruits.length > 0}
-                  <!-- {#if user.role === "superAdmin"}
-                    <Select.Item
-                      on:click={() => {
-                        selectedStore.set({ value: -1, label: "All Stores" });
-                        fetchDataStoreWise();
-                      }}
-                      class="px-1"
-                      value="All Stores"
-                      label="All Stores">All Stores</Select.Item
-                    >
-                  {/if} -->
                   {#each filteredFruits as fruit}
                     <Select.Item
-                      on:click={() => handleSelect(fruit)}
+                      on:click={() => updateAllSelects(fruit)}
                       class="px-1"
                       value={fruit.value}
                       label={fruit.label}>{fruit.label}</Select.Item
@@ -935,7 +974,6 @@
                 {/if}
               </Select.Group>
             </Select.Content>
-            <Select.Input name="favoriteFruit" />
           </Select.Root>
         </span>
       </span>
@@ -999,6 +1037,37 @@
     >
       <span class="flex items-center justify-between font-semibold">
         <p class="text-[#323232] dark:text-white">Stores Overview</p>
+        <!-- <Select.Root portal={null}>
+          <Select.Trigger
+            class="w-[150px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg dark:bg-transparent"
+          >
+            <Select.Value placeholder={$selectedStore?.label} />
+          </Select.Trigger>
+          <Select.Content class="max-h-[200px] overflow-y-auto">
+            <div class="p-2">
+              <Input
+                type="text"
+                placeholder="Search stores..."
+                bind:value={filterText}
+                class="mb-2"
+              />
+            </div>
+            <Select.Group>
+              {#if filteredFruits.length > 0}
+                {#each filteredFruits as fruit}
+                  <Select.Item
+                    on:click={() => updateAllSelects(fruit)}
+                    class="px-1"
+                    value={fruit.value}
+                    label={fruit.label}>{fruit.label}</Select.Item
+                  >
+                {/each}
+              {:else}
+                <Select.Item disabled>N/A</Select.Item>
+              {/if}
+            </Select.Group>
+          </Select.Content>
+        </Select.Root> -->
       </span>
       <div
         class="w-full h-full max-h-[300px] overflow-y-auto hide-scrollbar relative"
@@ -1010,15 +1079,15 @@
         {/if}
       </div>
     </div>
-    {#if $selectedStore.label === "All Stores"}
-      <div
-        class="col-span-4 row-span-3 border rounded-md p-4 flex flex-col gap-4 h-[375px] dark:border-white/[.7]"
-      >
-        <span class="flex items-center justify-between">
-          <p class="text-[#323232] dark:text-white text-lg font-semibold">
-            Employee Efficiency
-          </p>
-          <!-- <Select.Root portal={null}>
+    <!-- {#if $selectedStore.label === "All Stores"} -->
+    <div
+      class="col-span-4 row-span-3 border rounded-md p-4 flex flex-col gap-4 h-[375px] dark:border-white/[.7]"
+    >
+      <span class="flex items-center justify-between">
+        <p class="text-[#323232] dark:text-white text-lg font-semibold">
+          Employee Efficiency
+        </p>
+        <!-- <Select.Root portal={null}>
           <Select.Trigger
             class="w-[100px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg dark:bg-transparent"
           >
@@ -1043,31 +1112,62 @@
           </Select.Content>
           <Select.Input name="favoriteFruit" />
         </Select.Root> -->
-        </span>
-        <span class="w-full h-full">
-          {#if efficiency.length === 0 || efficiency.data.length === 0}
-            <p class="text-center text-gray-500 mt-8">No data available</p>
-          {:else}
-            <DashboardEfficiencyDataTable {efficiency} />
-          {/if}
-        </span>
+        <!-- <Select.Root portal={null}>
+          <Select.Trigger
+            class="w-[150px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg dark:bg-transparent"
+          >
+            <Select.Value placeholder={$selectedStore?.label} />
+          </Select.Trigger>
+          <Select.Content class="max-h-[200px] overflow-y-auto">
+            <div class="p-2">
+              <Input
+                type="text"
+                placeholder="Search stores..."
+                bind:value={filterText}
+                class="mb-2"
+              />
+            </div>
+            <Select.Group>
+              {#if filteredFruits.length > 0}
+                {#each filteredFruits as fruit}
+                  <Select.Item
+                     on:click={() => updateAllSelects(fruit)}
+                    class="px-1"
+                    value={fruit.value}
+                    label={fruit.label}>{fruit.label}</Select.Item
+                  >
+                {/each}
+              {:else}
+                <Select.Item disabled>N/A</Select.Item>
+              {/if}
+            </Select.Group>
+          </Select.Content>
+        </Select.Root> -->
+      </span>
+      <span class="w-full h-full">
+        {#if efficiency.length === 0 || efficiency.data.length === 0}
+          <p class="text-center text-gray-500 mt-8">No data available</p>
+        {:else}
+          <DashboardEfficiencyDataTable {efficiency} />
+        {/if}
+      </span>
+    </div>
+    <div
+      class="col-span-4 row-span-3 border rounded-md p-4 flex flex-col gap-4 h-[375px] dark:border-white/[.7]"
+    >
+      <span class="flex items-center justify-between">
+        <p class="text-[#323232] dark:text-white text-lg font-semibold">
+          Kitchen Safety Protocol
+        </p>
+      </span>
+      <div class="h-full w-full">
+        {#if safetyDetails?.length === 0 || safetyDetails?.data?.length === 0}
+          <p class="text-center text-gray-500 mt-8">No data available</p>
+        {:else}
+          <DashboardSaftetyDataTable safetyData={safetyDetails} {token} />
+        {/if}
       </div>
-      <div
-        class="col-span-4 row-span-3 border rounded-md p-4 flex flex-col gap-4 h-[375px] dark:border-white/[.7]"
-      >
-        <span class="flex items-center justify-between">
-          <p class="text-[#323232] dark:text-white text-lg font-semibold">
-            Kitchen Safety Protocol
-          </p>
-        </span>
-        <div class="h-full w-full">
-          {#if safetyDetails?.length === 0 || safetyDetails?.data?.length === 0}
-            <p class="text-center text-gray-500 mt-8">No data available</p>
-          {:else}
-            <DashboardSaftetyDataTable safetyData={safetyDetails} {token} />
-          {/if}
-        </div>
-      </div>
-    {/if}
+    </div>
+    <!-- {/if} -->
   </div>
 </section>

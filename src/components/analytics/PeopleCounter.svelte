@@ -90,7 +90,7 @@
 
     socket.on("disconnect", () => {
       console.log("disconnected");
-      liveData.set([]);
+      // liveData.set([]);
     });
   }
 
@@ -146,8 +146,9 @@
   });
 
   async function getLiveData(storeId: number) {
+    console.log("called live data");
     const response = await fetch(
-      `https://api.moksa.ai/people/getPeopleCountLive/${storeId}/30/1/100`,
+      `https://api.moksa.ai/people/getPeopleCountLive/${storeId}/30/1/30`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -552,6 +553,7 @@
         <LivePeopleCountDataTable
           liveData={$liveData}
           selectedStore={$selectedStore}
+          {allStores}
         />
         <!-- {:else}
           <p class="flex items-center justify-center py-4">

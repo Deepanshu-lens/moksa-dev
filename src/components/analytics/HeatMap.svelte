@@ -470,7 +470,7 @@
         <img
           src={storeFloorImg}
           alt="storeFloorImg"
-          class=" w-full h-full max-h-[400px] rounded-md opacity-70"
+          class=" w-full h-full max-h-[400px] rounded-md"
         />
         <canvas
           id="heatmapCanvas"

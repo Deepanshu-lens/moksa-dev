@@ -25,18 +25,18 @@
   export let efficiencyData;
   export let selectedStore;
 
-  $: console.log("emp table", $efficiencyData.data.data);
+  $: console.log("emp table", $efficiencyData.data);
 
   $: dbData = $efficiencyData.data.data.map((item: any) => {
     return {
       employee: `${item.first_name} ${item.last_name}`,
       storeName: item.storeName === undefined ? $selectedStore : item.storeName,
       role: item.role,
-      withCustomers: item.customer,
-      onMobile: item.mobile,
-      sittingIdle: item.idle,
-      fillingShelf: item.fillingShelves,
-      efficiencyScore: item.efficiency_score + "%",
+      customer: item.customer,
+      mobile: item.mobile,
+      idle: item.idle,
+      fillingShelves: item.fillingShelves,
+      efficiency_score: item.efficiency_score + "%",
     };
   });
 
@@ -57,45 +57,58 @@
     select: addSelectedRows(),
   });
 
-  $: columns = table.createColumns([
-    // table.column({
-    //   id: 'select',
-    //   header: '',
-    //   cell: ({ row }) => row.select,
-    // }),
-    table.column({
-      accessor: "employee",
-      header: "Employee",
-    }),
-    table.column({
-      accessor: "storeName",
-      header: "Store Name",
-    }),
-    table.column({
-      accessor: "role",
-      header: "Role",
-    }),
-    table.column({
-      accessor: "withCustomers",
-      header: "With Customers",
-    }),
-    table.column({
-      accessor: "onMobile",
-      header: "On Mobile",
-    }),
-    table.column({
-      accessor: "sittingIdle",
-      header: "Sitting Idle",
-    }),
-    table.column({
-      accessor: "fillingShelf",
-      header: "Filling Shelves",
-    }),
-    table.column({
-      accessor: "efficiencyScore",
-      header: "Efficiency Score",
-    }),
-  ]);
+  // $: columns = table.createColumns([
+  //   // table.column({
+  //   //   id: 'select',
+  //   //   header: '',
+  //   //   cell: ({ row }) => row.select,
+  //   // }),
+  //   table.column({
+  //     accessor: "employee",
+  //     header: "Employee",
+  //   }),
+  //   table.column({
+  //     accessor: "storeName",
+  //     header: "Store Name",
+  //   }),
+  //   table.column({
+  //     accessor: "role",
+  //     header: "Role",
+  //   }),
+  //   table.column({
+  //     accessor: "withCustomers",
+  //     header: "With Customers",
+  //   }),
+  //   table.column({
+  //     accessor: "onMobile",
+  //     header: "On Mobile",
+  //   }),
+  //   table.column({
+  //     accessor: "sittingIdle",
+  //     header: "Sitting Idle",
+  //   }),
+  //   table.column({
+  //     accessor: "fillingShelf",
+  //     header: "Filling Shelves",
+  //   }),
+  //   table.column({
+  //     accessor: "efficiencyScore",
+  //     header: "Efficiency Score",
+  //   }),
+  // ]);
+
+  $: columns = table.createColumns(
+    $efficiencyData.data.column
+      .filter(
+        (col) => !["store_id", "first_name", "last_name"].includes(col.key),
+      )
+      .map((col) =>
+        table.column({
+          accessor: col.key === "employee_id" ? "employee" : col.key,
+          header: col.header,
+        }),
+      ),
+  );
 
   $: ({ headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } =
     table.createViewModel(columns));

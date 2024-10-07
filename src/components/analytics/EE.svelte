@@ -95,8 +95,14 @@
 
   const radius = 40;
   const circumference = calculateCircumference(radius);
-  const progress = 70; // 70% progress
-  const dashOffset = circumference - (progress / 100) * circumference;
+  let progress = 0;
+  let dashOffset = circumference - (progress / 100) * circumference;
+
+  $: console.log(
+    progress,
+    "progress",
+    $employeeDetails?.data?.[0]?.efficiency_score,
+  );
 
   let chartCanvas: HTMLCanvasElement;
   let chart: Chart | null = null;
@@ -240,10 +246,6 @@
     }
   }
 
-  async function updateEmployee() {}
-
-  async function deleteEmployee() {}
-
   let socket: any;
 
   function setupSocket(storeId) {
@@ -323,7 +325,10 @@
     }
   });
 
-  $: if ($dateRange === "custom" && (value?.start || value?.end)) {
+  $: if (
+    $dateRange.toLowerCase() === "custom" &&
+    (value?.start || value?.end)
+  ) {
     getCustomEfficiencyData();
   }
   // }
@@ -342,7 +347,7 @@
     try {
       loading = true;
       const response = await fetch(
-        `https://api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreid/${$selectedStoreId}/${start}/1/100/${end}`,
+        `https://api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/${$selectedStoreId}/${start}/1/100/${end}`,
         {
           method: "GET",
           headers: {
@@ -358,7 +363,11 @@
       );
       // efficiencyData.set(data?.data?.data === undefined ? [] : data?.data?.data);
       efficiencyData.set(data?.data?.data === undefined ? [] : data);
-      await getEmployeeDetails(data?.data?.data?.[0]?.employee_id);
+      await getCustomEmployeeDetails(
+        data?.data?.data?.[0]?.employee_id,
+        start,
+        end,
+      );
       loading = false;
     } catch (error) {
       console.log(error);
@@ -398,7 +407,7 @@
     try {
       loading = true;
       const response = await fetch(
-        `https://api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreid/${$selectedStoreId}/${formatDate(startDate)}/1/100/${formatDate(today)}`,
+        `https://api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/${$selectedStoreId}/${formatDate(startDate)}/1/100/${formatDate(today)}`,
         {
           method: "GET",
           headers: {
@@ -422,24 +431,24 @@
   }
 
   $: {
-    if ($dateRange !== "custom") {
+    if ($dateRange.toLowerCase() !== "custom") {
       console.log("getting efficiency data by time", $dateRange);
       getEfficiencyDataByTime();
     }
   }
 
-  async function getbystoreID() {
-    employeeData.set([]);
-    const response = await fetch("/api/employee/getByStoreId", {
-      method: "POST",
-      body: JSON.stringify({ storeId: $selectedStoreId }),
-      headers: { "Content-Type": "application/json" },
-    });
-    const data = await response.json();
-    // console.log(data);
-    employeeData.set(data);
-    return data;
-  }
+  // async function getbystoreID() {
+  //   employeeData.set([]);
+  //   const response = await fetch("/api/employee/getByStoreId", {
+  //     method: "POST",
+  //     body: JSON.stringify({ storeId: $selectedStoreId }),
+  //     headers: { "Content-Type": "application/json" },
+  //   });
+  //   const data = await response.json();
+  //   // console.log(data);
+  //   employeeData.set(data);
+  //   return data;
+  // }
 
   async function getEmployeeDetails(id: number) {
     employeeDetails.set([]);
@@ -465,10 +474,8 @@
 
     const formatDate = (date: Date) => date.toISOString().split("T")[0];
 
-    // console.log(formatDate(startDate));
-    // console.log(formatDate(today));
-    // console.log(id);
-
+    progress = 0;
+    dashOffset = circumference - (progress / 100) * circumference;
     try {
       const response = await fetch(
         `https://api.moksa.ai/employeeEfficiency/getEmployeeEfficiencyByEmpid/${id}/${formatDate(startDate)}/${formatDate(today)}`,
@@ -486,17 +493,49 @@
       const data = await response.json();
       console.log("employee-details", data);
       employeeDetails.set(data);
+      progress = data.data[0].efficiency_score;
+      dashOffset = circumference - (progress / 100) * circumference;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function getCustomEmployeeDetails(
+    id: number,
+    start: string,
+    end: string,
+  ) {
+    employeeDetails.set([]);
+    progress = 0;
+    dashOffset = circumference - (progress / 100) * circumference;
+
+    try {
+      const response = await fetch(
+        `https://api.moksa.ai/employeeEfficiency/getEmployeeEfficiencyByEmpid/${id}/${start}/${end}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch employees");
+      }
+
+      const data = await response.json();
+      console.log("employee-details", data);
+      employeeDetails.set(data);
+      progress = data.data[0].efficiency_score;
+      dashOffset = circumference - (progress / 100) * circumference;
     } catch (error) {
       console.log(error);
     }
 
     // }
   }
-
-  // $: console.log("emp-dataaaa", $employeeData);
-  // $: console.log("selectedstoreid", $selectedStoreId);
-
-  // $: console.log($employeeDetails);
 
   $: {
     if ($selectedStoreId !== undefined) {
@@ -607,8 +646,8 @@
                       selectedStore.set(store.label);
                       selectedStoreId.set(store.value);
                       console.log(store.value);
-                      const emp = await getbystoreID(store.value);
-                      console.log(emp);
+                      // const emp = await getbystoreID(store.value);
+                      // console.log(emp);
                       // await getEmployeeDetails(emp.data[0].id);
                       await getEfficiencyDataByTime();
                     }}
