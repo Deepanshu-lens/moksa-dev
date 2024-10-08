@@ -1,30 +1,67 @@
 <script lang="ts">
-    export let name:string
-    export let moksaId;
-    export let id;
+  export let name: string;
+  export let moksaId;
+  export let id;
+  export let email;
   let dialogOpen: boolean = false;
+
+  $: if (dialogOpen) {
+    console.log(email);
+  }
+
+  let password = "";
 
   import * as Dialog from "@/components/ui/dialog";
   import { toast } from "svelte-sonner";
   import { Button } from "@/components/ui/button";
   import { addUserLog } from "@/lib/addUserLog";
+  import { Input } from "../ui/input";
 
-  const deleteCamera = () => {
+  const deleteCamera = async () => {
     console.log("deleted", name, moksaId, id);
-    fetch("/api/store/delete", {
-      method: "delete",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        moksaId,   
-        id,
-      }),
-    }).then(() => {
-      toast("Selected store Deleted!");
-      addUserLog(`user deleted store with name ${name} & moksaId ${moksaId}`);
-      dialogOpen = false;
-    });
+
+    if (password.length < 0) {
+      toast.error("Please enter your password");
+      password = "";
+      return;
+    } else if (password.length < 8) {
+      toast.error("Incorrect Password");
+      password = "";
+      return;
+    } else {
+      const login = await fetch(`https://api.moksa.ai/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: email, password: password }),
+      });
+      const data = await login.json();
+
+      if (data.data && data.data.token) {
+        console.log("deleting store with id", id);
+        fetch("/api/store/delete", {
+          method: "delete",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            moksaId,
+            id,
+          }),
+        }).then(() => {
+          toast("Selected store Deleted!");
+          addUserLog(
+            `user deleted store with name ${name} & moksaId ${moksaId}`,
+          );
+          dialogOpen = false;
+        });
+      } else {
+        toast.error("Invalid password, Delete failed");
+        password = "";
+        dialogOpen = false;
+      }
+    }
   };
 </script>
 
@@ -43,6 +80,9 @@
           </span>
         </span>
       </div>
+    </div>
+    <div class="flex items-center justify-start gap-3 w-full">
+      Enter your password: <Input type="password" bind:value={password} />
     </div>
     <Dialog.Footer>
       <span class="flex items-center gap-4">

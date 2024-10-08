@@ -817,7 +817,7 @@
       $selectedNode.camera.some(
         (camera) =>
           camera.expand?.inference?.lineCrossing &&
-          camera.expand?.inference?.lineData.length > 0,
+          camera.expand?.inference?.lineData?.length > 0,
       )
     ) {
       $selectedNode.camera.forEach((camera, index) => {
@@ -865,60 +865,6 @@
       ctx.fill();
     });
   }
-
-  //     let currentIndex = $selectedNode.maxStreamsPerPage;
-  //   // console.log(currentIndex)
-  //   let refreshInterval;
-
-  //   function refreshCamera() {
-  //     const maxStreams = $selectedNode.maxStreamsPerPage;
-  //     const totalCameras = $selectedNode.camera.length;
-
-  //     if (maxStreams !== 0 && currentIndex >= maxStreams) {
-  //       currentIndex = 0;
-  //     }
-
-  //     const camera = $selectedNode.camera[currentIndex];
-  //     if (camera) {
-  //       refreshVideoStream(camera.id);
-  //       console.log(
-  //         "Refreshing camera with index & name:",
-  //         currentIndex,
-  //         camera.name,
-  //       );
-  //     }
-
-  //     if (maxStreams !== 0) {
-  //       currentIndex = (currentIndex + 1) % Math.min(maxStreams, totalCameras);
-  //     } else {
-  //       currentIndex = (currentIndex + 1) % totalCameras;
-  //     }
-  //   }
-
-  //   function startRefreshing() {
-  //     refreshCamera();
-  //     refreshInterval = setInterval(refreshCamera, 15000);
-  //   }
-
-  //     onMount(() => {
-  //     if ($selectedNode) {
-  //       stopRefreshing()
-  //       setTimeout(() => {
-  //         startRefreshing();
-  //       }, 15000);
-  //     }
-  //   });
-
-  //   function stopRefreshing() {
-  //   if (refreshInterval) {
-  //     clearInterval(refreshInterval);
-  //     refreshInterval = null;
-  //   }
-  // }
-
-  // onDestroy(() => {
-  //   stopRefreshing();
-  // });
 
   let currentIndex = 0;
   let refreshTimeout;
@@ -1001,6 +947,8 @@
       console.log("on destroy is refresh false");
     }
   });
+
+  // $: console.log(videos)
 </script>
 
 {#if streamCount > 0 && Object.keys(videos).length > 0}
@@ -1168,7 +1116,7 @@
                         on:refErr={handleRefreshError}
                       />
 
-                      {#if $selectedNode.camera[pageIndex * ($selectedNode.maxStreamsPerPage === 5 || $selectedNode.maxStreamsPerPage === 7 ? $selectedNode.maxStreamsPerPage + 1 : $selectedNode.maxStreamsPerPage) + slotIndex]?.expand?.inference?.lineCrossing === true && $selectedNode.camera[pageIndex * ($selectedNode.maxStreamsPerPage === 5 || $selectedNode.maxStreamsPerPage === 7 ? $selectedNode.maxStreamsPerPage + 1 : $selectedNode.maxStreamsPerPage) + slotIndex]?.expand?.inference?.lineData.length > 0}
+                      {#if $selectedNode.camera[pageIndex * ($selectedNode.maxStreamsPerPage === 5 || $selectedNode.maxStreamsPerPage === 7 ? $selectedNode.maxStreamsPerPage + 1 : $selectedNode.maxStreamsPerPage) + slotIndex]?.expand?.inference?.lineCrossing === true && $selectedNode.camera[pageIndex * ($selectedNode.maxStreamsPerPage === 5 || $selectedNode.maxStreamsPerPage === 7 ? $selectedNode.maxStreamsPerPage + 1 : $selectedNode.maxStreamsPerPage) + slotIndex]?.expand?.inference?.lineData?.length > 0}
                         <canvas
                           id={`lineCanvas-${
                             pageIndex *

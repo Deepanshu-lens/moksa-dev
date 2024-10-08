@@ -154,11 +154,6 @@
   );
 
   const dispatch = createEventDispatcher();
-
-  function handleSelect(fruit) {
-    selectedStore.set(fruit);
-    dispatch("select", fruit);
-  }
 </script>
 
 <section
@@ -413,6 +408,11 @@
     <span class="h-[50px] bg-[#050F40] px-4 py-2 rounded-t-xl">
       <p class="text-white font-medium text-lg">Stores</p>
     </span>
-    <StoresDataTable combinedStores={filteredStores} {searchStore} {token} />
+    <StoresDataTable
+      combinedStores={filteredStores}
+      {searchStore}
+      {token}
+      {user}
+    />
   </div>
 </section>

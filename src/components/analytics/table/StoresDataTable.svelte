@@ -26,6 +26,7 @@
   import EditStoreDialog from "@/components/dialogs/EditStoreDialog.svelte";
   export let combinedStores: any[] = [];
   export let token: string;
+  export let user: any;
 
   const dispatch = createEventDispatcher();
 
@@ -67,8 +68,6 @@
         });
     }
   }
-
-
 
   $: dbData = combinedStores.map((store) => {
     return {
@@ -212,6 +211,7 @@
                         >
                       </EditStoreDialog>
                       <StoreDeleteDialog
+                        email={user.email}
                         name={row.original.storeName}
                         moksaId={row.original.moksaId}
                         id={row.original.lensId}
@@ -277,7 +277,6 @@
               <div
                 class="col-span-1 px-4 py-3 h-[40px] relative flex items-center gap-3 min-w-1/4"
               >
-     
                 <span>
                   <p class="text font-semibold dark:text-white text-black/[.7]">
                     Cameras in Service
@@ -290,7 +289,6 @@
               <div
                 class="col-span-1 px-4 py-3 h-[55px] relative flex items-center gap-3 min-w-1/4"
               >
-               
                 <span>
                   <p class="text font-semibold dark:text-white text-black/[.7]">
                     Suspicious Activities Detected
@@ -303,7 +301,6 @@
               <div
                 class="col-span-1 px-4 py-3 h-[40px] relative flex items-center gap-3 min-w-1/4"
               >
-               
                 <span>
                   <p class="text font-semibold dark:text-white text-black/[.7]">
                     Incidents Cleared by Operator
@@ -315,8 +312,6 @@
                   </p>
                 </span>
               </div>
-
-         
             </Table.Row>
           {/if}
         </Subscribe>

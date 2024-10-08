@@ -14,7 +14,7 @@
   import type { DateRange } from "bits-ui";
   import Spinner from "../ui/spinner/Spinner.svelte";
 
-  let dateRange = writable("1hr");
+  let dateRange = writable("7");
   export let allStores;
   export let aisleStoreData;
   export let token;
@@ -150,6 +150,63 @@
       }
     }
   }
+
+  // function drawHeatmap() {
+  //   const canvas = document.getElementById(
+  //     "heatmapCanvas",
+  //   ) as HTMLCanvasElement;
+  //   const ctx = canvas.getContext("2d");
+  //   if (!ctx) return;
+
+  //   const image = document.querySelector("img") as HTMLImageElement;
+  //   canvas.width = image.width;
+  //   canvas.height = image.height;
+
+  //   let hd = $heatMapData.data;
+  //   if (!Array.isArray(hd) || !Array.isArray(hd[0])) {
+  //     console.error("Heatmap data is not a 2D array:", hd);
+  //     toast.error("Incorrect heatmap data");
+  //     return;
+  //   }
+
+  //   const maxValue = Math.max(...hd.map((row) => Math.max(...row)));
+  //   console.log("maxvalue", maxValue);
+
+  //   const colorStops = [
+  //     { value: 0, color: [0, 0, 255] }, // Blue
+  //     { value: 0.25, color: [0, 255, 255] }, // Cyan
+  //     { value: 0.5, color: [0, 255, 0] }, // Green
+  //     { value: 0.75, color: [255, 255, 0] }, // Yellow
+  //     { value: 1, color: [255, 0, 0] }, // Red
+  //   ];
+
+  //   const cellWidth = canvas.width / hd[0].length;
+  //   const cellHeight = canvas.height / hd.length;
+
+  //   for (let y = 0; y < hd.length; y++) {
+  //     for (let x = 0; x < hd[y].length; x++) {
+  //       const value = hd[y][x];
+  //       const normalizedValue = value / maxValue;
+
+  //       let color;
+  //       for (let i = 1; i < colorStops.length; i++) {
+  //         if (normalizedValue <= colorStops[i].value) {
+  //           const t =
+  //             (normalizedValue - colorStops[i - 1].value) /
+  //             (colorStops[i].value - colorStops[i - 1].value);
+  //           color = colorStops[i - 1].color.map((c, j) =>
+  //             Math.round(c + t * (colorStops[i].color[j] - c)),
+  //           );
+  //           break;
+  //         }
+  //       }
+
+  //       const alpha = Math.min(normalizedValue * 0.7 + 0.3, 1); // Adjust transparency
+  //       ctx.fillStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${alpha})`;
+  //       ctx.fillRect(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
+  //     }
+  //   }
+  // }
 
   //   const maxValue = Math.max(...hd.map((row) => Math.max(...row)));
 
@@ -474,7 +531,7 @@
         />
         <canvas
           id="heatmapCanvas"
-          class="absolute top-0 left-0 w-full h-full pointer-events-none z-[20000000]"
+          class="absolute top-0 left-0 w-full h-full opacity-70 pointer-events-none z-[20000000]"
         ></canvas>
       </div>
     {:else if loadingFloor === true}

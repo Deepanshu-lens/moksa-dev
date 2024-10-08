@@ -38,10 +38,10 @@
   let aisleStoreData = writable([]);
 
   const { user } = data;
-
+  // console.log(user);
   // console.log("pagedata", data);
 
-  console.log("allStores:", allStoresData);
+  // console.log("allStores:", allStoresData);
   $: allStoresLackKitchen =
     allStores.length > 0 ? allStores.every((store) => !store.hasKitchen) : true;
 

@@ -417,13 +417,20 @@
         },
       );
       const data = await response.json();
-      console.log(
-        `recieved efficiency data for ${$selectedStoreId}, ${$dateRange}`,
-        data,
-      );
+      // console.log(
+      //   `recieved efficiency data for ${$selectedStoreId}, ${$dateRange}`,
+      //   data,
+      // );
       // efficiencyData.set(data?.data?.data === undefined ? [] : data?.data?.data);
       efficiencyData.set(data?.data?.data === undefined ? [] : data);
-      await getEmployeeDetails(data?.data?.data?.[0]?.employee_id);
+      // console.log(data?.data?.data?.[0]?.employee_id);
+      // console.log($employeeData);
+      // console.log($selectedEmployee);
+      await getEmployeeDetails(
+        $selectedEmployee !== null
+          ? $selectedEmployee.id
+          : $employeeData?.data?.[0]?.id,
+      );
       loading = false;
     } catch (error) {
       console.log(error);
@@ -542,6 +549,9 @@
       setupSocket($selectedStoreId);
     }
   }
+
+  // $: console.log($employeeData);
+  // $: console.log($employeeDetails);
 </script>
 
 <section

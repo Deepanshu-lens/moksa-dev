@@ -866,7 +866,7 @@
         </Popover.Content>
       </Popover.Root>
     </span>
-    <span class="flex items-center gap-3">
+    <span class="flex flex-row-reverse items-center gap-3">
       {#if user.role !== "Operators" && user.role !== "adminNonPaid" && user.role !== "storeEmployee"}
         <Button
           variant="outline"
@@ -874,6 +874,37 @@
           on:click={exportCSV}><Upload size={18} /> Export</Button
         >
       {/if}
+      <Select.Root portal={null}>
+        <Select.Trigger
+          class="w-[150px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg dark:bg-transparent"
+        >
+          <Select.Value placeholder={$selectedStore?.label} />
+        </Select.Trigger>
+        <Select.Content class="max-h-[200px] overflow-y-auto">
+          <div class="p-2">
+            <Input
+              type="text"
+              placeholder="Search stores..."
+              bind:value={filterText}
+              class="mb-2"
+            />
+          </div>
+          <Select.Group>
+            {#if filteredFruits.length > 0}
+              {#each filteredFruits as fruit}
+                <Select.Item
+                  on:click={() => updateAllSelects(fruit)}
+                  class="px-1"
+                  value={fruit.value}
+                  label={fruit.label}>{fruit.label}</Select.Item
+                >
+              {/each}
+            {:else}
+              <Select.Item disabled>N/A</Select.Item>
+            {/if}
+          </Select.Group>
+        </Select.Content>
+      </Select.Root>
       <!-- <Button
         class="flex items-center flex-row-reverse justify-between px-2 gap-1 font-medium text-white rounded-xl bg-[#00A569] hover:text-[#00A569] hover:bg-white"
         ><img src="/images/money.svg" alt="export" class="scale-90" /> Cost Saving</Button
@@ -944,37 +975,6 @@
               class="w-[10px] h-[10px] bg-gradient-to-r from-[#FFB156] to-[#FF007A] rounded-full"
             />Prevented</span
           >
-          <Select.Root portal={null}>
-            <Select.Trigger
-              class="w-[150px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg dark:bg-transparent"
-            >
-              <Select.Value placeholder={$selectedStore?.label} />
-            </Select.Trigger>
-            <Select.Content class="max-h-[200px] overflow-y-auto">
-              <div class="p-2">
-                <Input
-                  type="text"
-                  placeholder="Search stores..."
-                  bind:value={filterText}
-                  class="mb-2"
-                />
-              </div>
-              <Select.Group>
-                {#if filteredFruits.length > 0}
-                  {#each filteredFruits as fruit}
-                    <Select.Item
-                      on:click={() => updateAllSelects(fruit)}
-                      class="px-1"
-                      value={fruit.value}
-                      label={fruit.label}>{fruit.label}</Select.Item
-                    >
-                  {/each}
-                {:else}
-                  <Select.Item disabled>N/A</Select.Item>
-                {/if}
-              </Select.Group>
-            </Select.Content>
-          </Select.Root>
         </span>
       </span>
       <div class="h-full w-full">

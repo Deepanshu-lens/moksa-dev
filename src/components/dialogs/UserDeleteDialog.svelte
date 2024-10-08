@@ -10,19 +10,30 @@
   export let token;
   let dialogOpen: boolean = false;
 
+  // $: if (dialogOpen) {
+  //   console.log(data);
+  // }
+
   const pocketBase = new PocketBase(`http://${$page.url.hostname}:5555`);
 
   const deleteUser = async () => {
     try {
-      await fetch(`https://api.moksa.ai/auth/delete/${data.moksaId}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+      const del = await fetch(
+        `https://api.moksa.ai/auth/delete/${data.moksaId}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
+      );
 
-      await pocketBase.collection("users").delete(data.lensId);
+      const res = await del.json();
+      console.log(res);
+
+      const pbdel = await pocketBase.collection("users").delete(data.lensId);
+      console.log(pbdel);
 
       toast.success("User deleted successfully");
       addUserLog(`User deleted: ${data.username} (Moksa ID: ${data.moksaId})`);
