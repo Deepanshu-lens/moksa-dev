@@ -2,7 +2,18 @@
   import { createTable, Render, Subscribe } from "svelte-headless-table";
   import * as Table from "@/components/ui/table";
   import { Button } from "@/components/ui/button";
-  import { ArrowUpDown,Check,X, ChevronRight, Edit, Store, StoreIcon, Trash2, TrendingDown, TrendingUp } from "lucide-svelte";
+  import {
+    ArrowUpDown,
+    Check,
+    X,
+    ChevronRight,
+    Edit,
+    Store,
+    StoreIcon,
+    Trash2,
+    TrendingDown,
+    TrendingUp,
+  } from "lucide-svelte";
   import { createEventDispatcher } from "svelte";
   import {
     addPagination,
@@ -14,23 +25,22 @@
   import { readable, writable } from "svelte/store";
   import Spinner from "@/components/ui/spinner/Spinner.svelte";
   import * as Dialog from "@/components/ui/dialog";
-  export let token
+  export let token;
 
   const dispatch = createEventDispatcher();
 
   // Static data
   export let data;
-  
-$:console.log('livetabledata',data)
 
+  $: console.log("livetabledata", data);
 
-let dialogOpen = false;
+  let dialogOpen = false;
   let selectedImage = null;
 
   async function openImageDialog(imageUri) {
     dialogOpen = true;
     selectedImage = null; // Reset selectedImage before fetching
-console.log(imageUri)
+    console.log(imageUri);
     try {
       const response = await fetch("https://api.moksa.ai/stream", {
         method: "POST",
@@ -59,17 +69,16 @@ console.log(imageUri)
     URL.revokeObjectURL(selectedImage);
   }
 
-
- $: dbData = data?.map((item: any) => ({
-    employee: `Id: ${item.emp_id}`,
+  $: dbData = data?.map((item: any) => ({
+    employee: `${item.first_name ? item.first_name + " " + item.last_name : item.emp_id}`,
     masks: item.wearing_mask,
     gloves: item.wearing_gloves,
     hairnet: item.wearing_hair_net,
     uniform: item.wearing_uniform,
-    apron: 'Coming Soon',
-    videoLink: 'Link',
-    videourl: item.img_link
-  }))
+    apron: "Coming Soon",
+    videoLink: "Link",
+    videourl: item.img_link,
+  }));
 
   $: dataa = writable(dbData);
 
@@ -78,17 +87,17 @@ console.log(imageUri)
     return unsubscribe;
   });
 
-    $: table = createTable(readableData, {
+  $: table = createTable(readableData, {
     page: addPagination({ initialPageSize: 100 }),
     sort: addSortBy(),
     filter: addTableFilter({
-      fn: ({ filterValue, value }: { filterValue: string, value: string }) =>
+      fn: ({ filterValue, value }: { filterValue: string; value: string }) =>
         value.toLowerCase().includes(filterValue.toLowerCase()),
     }),
     select: addSelectedRows(),
   });
 
-$: columns = table.createColumns([
+  $: columns = table.createColumns([
     table.column({
       accessor: "employee",
       header: "Employee",
@@ -119,8 +128,8 @@ $: columns = table.createColumns([
     }),
   ]);
 
-  $: ({ headerRows, pageRows, tableAttrs, tableBodyAttrs } = table.createViewModel(columns));
-
+  $: ({ headerRows, pageRows, tableAttrs, tableBodyAttrs } =
+    table.createViewModel(columns));
 </script>
 
 <div class="m-0">
@@ -128,14 +137,28 @@ $: columns = table.createColumns([
     <Table.Header>
       {#each $headerRows as headerRow}
         <Subscribe rowAttrs={headerRow.attrs()}>
-          <Table.Row class="bg-transparent flex flex-row border-b items-center justify-between">
+          <Table.Row
+            class="bg-transparent flex flex-row border-b items-center justify-between"
+          >
             {#each headerRow.cells as cell (cell.id)}
-              <Subscribe attrs={cell.attrs()} let:attrs props={cell.props()} let:props>
+              <Subscribe
+                attrs={cell.attrs()}
+                let:attrs
+                props={cell.props()}
+                let:props
+              >
                 <!-- {#if cell.id === 'chevron'}
                 <p class='w-1/5'></p>
                 {:else} -->
-                <Table.Head {...attrs} class="text-[#727272] whitespace-nowrap text-sm h-full flex items-center text-center justify-center py-2 w-1/4">
-                  <Button variant="ghost" on:click={props.sort.toggle} class="hover:bg-transparent text-[#727272] opacity-60 text-xs">
+                <Table.Head
+                  {...attrs}
+                  class="text-[#727272] whitespace-nowrap text-sm h-full flex items-center text-center justify-center py-2 w-1/4"
+                >
+                  <Button
+                    variant="ghost"
+                    on:click={props.sort.toggle}
+                    class="hover:bg-transparent text-[#727272] opacity-60 text-xs"
+                  >
                     <Render of={cell.render()} />
                     <ArrowUpDown class="ml-2 h-4 w-4" />
                   </Button>
@@ -147,27 +170,35 @@ $: columns = table.createColumns([
         </Subscribe>
       {/each}
     </Table.Header>
-   <Table.Body {...$tableBodyAttrs}>
+    <Table.Body {...$tableBodyAttrs}>
       {#each $pageRows as row (row.id)}
         <Subscribe rowAttrs={row.attrs()} let:rowAttrs>
-          <Table.Row {...rowAttrs} class="border-b flex items-center w-full justify-between">
+          <Table.Row
+            {...rowAttrs}
+            class="border-b flex items-center w-full justify-between"
+          >
             {#each row.cells as cell (cell.id)}
               <Subscribe attrs={cell.attrs()} let:attrs>
-                <Table.Cell {...attrs} class='flex items-center justify-center whitespace-nowrap flex-1 py-2 w-1/4 text-center'>
-                  {#if cell.id === 'employee'}
+                <Table.Cell
+                  {...attrs}
+                  class="flex items-center justify-center whitespace-nowrap flex-1 py-2 w-1/4 text-center"
+                >
+                  {#if cell.id === "employee"}
                     <div class="flex items-center gap-2 text-center">
-                      <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-center">
+                      <div
+                        class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-center"
+                      >
                         <User class="w-4 h-4 text-gray-600" />
                       </div>
                       <span>{row.original.employee}</span>
                     </div>
-                  {:else if ['uniform','masks', 'gloves', 'hairnet'].includes(cell.id)}
+                  {:else if ["uniform", "masks", "gloves", "hairnet"].includes(cell.id)}
                     {#if row.original[cell.id]}
                       <Check class="w-5 h-5 text-blue-500" />
                     {:else}
                       <X class="w-5 h-5 text-red-500" />
                     {/if}
-                    {:else if cell.id === "videoLink"}
+                  {:else if cell.id === "videoLink"}
                     <Button
                       variant="link"
                       class="text-red-500"
@@ -181,14 +212,12 @@ $: columns = table.createColumns([
                 </Table.Cell>
               </Subscribe>
             {/each}
-           
           </Table.Row>
         </Subscribe>
       {/each}
     </Table.Body>
   </Table.Root>
 </div>
-
 
 <Dialog.Root bind:open={dialogOpen}>
   <Dialog.Content class="sm:max-w-[720px]">

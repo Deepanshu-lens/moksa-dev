@@ -67,20 +67,6 @@
     }
   }
 
-  // async function getSafetyData() {
-  //   const res = await fetch("/api/employee/getSafetyByStoreId", {
-  //     method: "POST",
-  //     body: JSON.stringify({ storeId: allStores }),
-  //   });
-  //   const data = await res.json();
-  //   safetyData.set(data);
-  //   console.log("safetyDataBystoreId", data);
-  // }
-
-  // onMount(async () => {
-  //   getSafetyData();
-  // });
-
   async function getSafetyDataByStoreId(time) {
     const today = new Date();
     let startDate = new Date(today);
@@ -109,22 +95,41 @@
     console.log(formatDate(startDate));
     console.log(formatDate(today));
     try {
-      const response = await fetch(
-        `https://api.moksa.ai/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${$selectedStore.value}/1/100/${formatDate(startDate)}/${formatDate(today)}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
+      const [response, liveResponse] = await Promise.all([
+        fetch(
+          `https://api.moksa.ai/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${$selectedStore.value}/1/100/${formatDate(startDate)}/${formatDate(today)}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
           },
-        },
-      );
+        ),
+        fetch(
+          `https://api.moksa.ai/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${$selectedStore.value}/1/100/${formatDate(startDate)}/${formatDate(today)}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+              live: "true",
+            },
+          },
+        ),
+      ]);
       const data = await response.json();
+      const lData = await liveResponse.json();
       console.log(
         `recieved safety data for ${$selectedStore.value}, ${$dateRange}`,
         data,
       );
+      console.log(
+        `recieved live safety records for ${$selectedStore.value}, ${$dateRange}`,
+        lData,
+      );
       safetyData.set(data?.data?.data === undefined ? [] : data?.data?.data);
+      liveData.set(lData?.data?.data === undefined ? [] : lData?.data?.data);
     } catch (error) {
       console.log(error);
     }
@@ -139,7 +144,6 @@
       : "";
     console.log(start);
     console.log(end);
-    const formatDate = (date: Date) => date.toISOString().split("T")[0];
 
     try {
       const response = await fetch(
@@ -164,7 +168,7 @@
   }
 
   $: if ($selectedStore || $dateRange) {
-    if ($dateRange === "custom") {
+    if ($dateRange.toLowerCase() === "custom") {
       getSafetyDataforCustomDate($dateRange);
     } else {
       getSafetyDataByStoreId($dateRange);
@@ -176,10 +180,15 @@
   let sockets: { [key: number]: any } = {};
   let liveData = writable([]);
 
+  $: console.log(allStores);
+
   function setupSocketForAllStores() {
-    allStores.forEach((store: any) => {
-      setupSocket(store.id);
-    });
+    allStores
+      .filter((store: any) => store.id !== -1)
+      .filter((store: any) => store.hasKitchen === true)
+      .forEach((store: any) => {
+        setupSocket(store.id);
+      });
   }
 
   function setupSocket(storeId: number) {
@@ -383,7 +392,7 @@
         </p>
       </span>
       <div
-        class="h-full w-full max-h-[350px] overflow-y-scroll overflow-x-clip"
+        class="h-full w-full min-h-[350px] max-h-[350px] overflow-y-scroll overflow-x-clip"
       >
         {#if $liveData.length > 0}
           <SafetyLiveDataTable data={$liveData} />
@@ -413,28 +422,7 @@
                 : "No Stores"}
             />
           </Select.Trigger>
-          <!-- <Select.Content class="max-h-[200px] overflow-y-auto">
-            <Select.Group>
-              {#if fruits.length > 0}
-                {#each fruits as fruit}
-                  <Select.Item
-                    on:click={() =>
-                      selectedStore.set({
-                        value: fruit.value,
-                        label: fruit.label,
-                      })}
-                    class="px-1"
-                    value={fruit.value}
-                    label={fruit.label}>{fruit.label}</Select.Item
-                  >
-                {/each}
-              {:else}
-                <Select.Item class="px-1" value="0" label="No Stores Found"
-                  >No Stores Found</Select.Item
-                >
-              {/if}
-            </Select.Group>
-          </Select.Content> -->
+
           <Select.Content class="max-h-[200px] overflow-y-auto">
             <div class="p-2">
               <Input
@@ -445,15 +433,6 @@
               />
             </div>
             <Select.Group>
-              <!-- <Select.Item
-                on:click={() => {
-                  selectedStore.set({ value: -1, label: "All Stores" });
-                  fetchDataStoreWise();
-                }}
-                class="px-1"
-                value="All Stores"
-                label="All Stores">All Stores</Select.Item
-              > -->
               {#if filteredFruits.length > 0}
                 {#each filteredFruits as fruit}
                   <Select.Item
@@ -477,7 +456,12 @@
 <p class='text-center text-gray-500'>No data found</p>
 {/if} -->
         {#if $safetyData.length > 0}
-          <SafetyDataTable {token} safetyData={$safetyData} />
+          <SafetyDataTable
+            {token}
+            safetyData={$safetyData}
+            {dateRange}
+            {selectedStore}
+          />
         {:else}
           <p class="text-center text-gray-500">
             No data found for the selected store

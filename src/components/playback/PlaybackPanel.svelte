@@ -326,7 +326,7 @@
       />
     </div>
   </div>
-  <div
+  <!-- <div
     class="flex flex-col gap-6 items-center justify-center px-2 bg-gradient-to-b from-[#000610] via-[#000307] via-[#050E41] to-[#000307] h-[calc(100vh-75px)]"
   >
     <span class="group flex flex-col gap-0.5 items-center justify-center">
@@ -449,7 +449,7 @@
         Fullscreen
       </p>
     </span>
-  </div>
+  </div> -->
 </section>
 
 <style>

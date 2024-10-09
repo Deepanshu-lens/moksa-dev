@@ -3,7 +3,6 @@
   import * as Dialog from "@/components/ui/dialog";
   import { Label } from "@/components/ui/label";
   import { Button } from "@/components/ui/button";
-  import { selectedNode } from "@/lib/stores";
   import * as Select from "@/components/ui/select";
 
   export let token: string;
@@ -16,11 +15,15 @@
   let issue = "";
   let dialogOpen = false;
 
-  const onSubmit = () =>
-    fetch(`https://api.moksa.ai/customerComplaints/create`, {
+  const onSubmit = async () => {
+    console.log("camID", cameraId);
+    console.log("storeID", storeId);
+    console.log("issue", issue);
+    await fetch(`https://api.moksa.ai/customerComplaints/create`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         cameraId,
@@ -29,6 +32,7 @@
       }),
     })
       .then((response) => {
+        console.log(response);
         if (response.ok) {
           dialogOpen = false;
           toast("Ticket raised successfully");
@@ -40,6 +44,7 @@
         console.error("Error:", error);
         toast("An error occurred");
       });
+  };
 
   let cams = [];
 
@@ -47,12 +52,14 @@
     const allCams = await fetch(
       `https://api.moksa.ai/camera/getAllCamerasByStoreId/${id}/1/100`,
       {
+        method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       },
     );
+    console.log("all cameras ticket dialog", allCams);
     if (allCams.ok) {
       const data = await allCams.json();
       console.log(data);
@@ -75,7 +82,7 @@
         <Label for="node-name">Store Id</Label>
         <Select.Root portal={null}>
           <Select.Trigger
-            class="w-[150px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg dark:bg-transparent"
+            class="w-[300px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg dark:bg-transparent"
           >
             <Select.Value placeholder={"Select Store"} />
           </Select.Trigger>
@@ -83,8 +90,8 @@
             {#each nodes as node}
               <Select.Item
                 on:click={() => {
-                  storeId = node.id;
-                  getCams(node.id);
+                  storeId = node.moksaId;
+                  getCams(node.moksaId);
                 }}
                 value={node.id}>{node.name}</Select.Item
               >
@@ -97,7 +104,7 @@
         <Label for="address">Camera Id</Label>
         <Select.Root portal={null}>
           <Select.Trigger
-            class="w-[150px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg dark:bg-transparent"
+            class="w-[300px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg dark:bg-transparent"
           >
             <Select.Value placeholder={"Select Store"} />
           </Select.Trigger>
@@ -107,7 +114,8 @@
                 on:click={() => {
                   cameraId = cam.id;
                 }}
-                value={cam.id}>{cam.name}</Select.Item
+                value={cam.id}
+                >ip:{cam.ip}, camera no:{cam.cameraNo}</Select.Item
               >
             {/each}
           </Select.Content>
@@ -136,7 +144,7 @@
     </div>
 
     <Dialog.Footer>
-      <Button type="submit" on:click={onSubmit}>Add Node</Button>
+      <Button type="submit" on:click={onSubmit}>Raise issue</Button>
     </Dialog.Footer></Dialog.Content
   >
 </Dialog.Root>

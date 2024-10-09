@@ -397,31 +397,52 @@
       >
         <button
           class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "1hr" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
-          on:click={() => dateRange.set("1hr")}>1hr</button
+          on:click={() => {
+            dateRange.set("1hr");
+            value = undefined;
+          }}>1hr</button
         >
         <button
           class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "3hr" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
-          on:click={() => dateRange.set("3hr")}>3hr</button
+          on:click={() => {
+            dateRange.set("3hr");
+            value = undefined;
+          }}>3hr</button
         >
         <button
           class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "5hr" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
-          on:click={() => dateRange.set("5hr")}>5hr</button
+          on:click={() => {
+            dateRange.set("5hr");
+            value = undefined;
+          }}>5hr</button
         >
         <button
           class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "7hr" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
-          on:click={() => dateRange.set("7hr")}>7hr</button
+          on:click={() => {
+            dateRange.set("7hr");
+            value = undefined;
+          }}>7hr</button
         >
         <button
           class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "1" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
-          on:click={() => dateRange.set("1")}>1 Day</button
+          on:click={() => {
+            dateRange.set("1");
+            value = undefined;
+          }}>1 Day</button
         >
         <button
           class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "3" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
-          on:click={() => dateRange.set("3")}>3 Day</button
+          on:click={() => {
+            dateRange.set("3");
+            value = undefined;
+          }}>3 Day</button
         >
         <button
           class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "7" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
-          on:click={() => dateRange.set("7")}>7 Day</button
+          on:click={() => {
+            dateRange.set("7");
+            value = undefined;
+          }}>7 Day</button
         >
         <!-- <button
           class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "live" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}

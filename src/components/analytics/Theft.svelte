@@ -394,15 +394,15 @@
   }
 
   onMount(async () => {
-    chartLoading = false;
     await Promise.all([gettheftList(-1), getTheftTrends(-1)]);
     setTimeout(() => {
       createBarChart();
-
       createTheftChart();
     }, 100);
     chartLoading = false;
   });
+
+  $: console.log("theftData", chartLoading);
 
   async function gettheftList(storeId: number) {
     const theftList = await fetch("/api/theft/listByStoreId", {
@@ -440,18 +440,8 @@
   }
 
   $: totalThefts = allStoresData.totaldetectedthefts;
-  // theftandcamera.#FF3B30uce(
-  //   (sum: number, store: any) => sum + parseInt(store.theft_detected_count),
-  //   0,
-  // );
   $: totalPreventions = allStoresData.totalpreventedthefts;
-  // theftandcamera.#FF3B30uce(
-  //   (sum: number, store: any) => sum + parseInt(store.theft_prevented_count),
-  //   0,
-  // );
-
   $: totalIncidents = Number(totalThefts) + Number(totalPreventions);
-  $: console.log(totalIncidents);
   $: detectionPercentage =
     totalIncidents > 0
       ? (Number(totalThefts) / Number(totalIncidents)) * 100

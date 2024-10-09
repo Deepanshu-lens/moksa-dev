@@ -2,11 +2,7 @@
   import { createTable, Render, Subscribe } from "svelte-headless-table";
   import * as Table from "@/components/ui/table";
   import { Button } from "@/components/ui/button";
-  import {
-    ArrowUpDown,
-    Check,
-    X,
-  } from "lucide-svelte";
+  import { ArrowUpDown, Check, X } from "lucide-svelte";
   import { createEventDispatcher } from "svelte";
   import {
     addPagination,
@@ -17,10 +13,12 @@
   import { User } from "lucide-svelte";
   import { readable, writable } from "svelte/store";
   import * as Dialog from "@/components/ui/dialog";
-    import Spinner from "@/components/ui/spinner/Spinner.svelte";
+  import Spinner from "@/components/ui/spinner/Spinner.svelte";
 
   export let safetyData;
   export let token;
+
+  console.log("safetyData", safetyData);
 
   let dialogOpen = false;
   let selectedImage = null;
@@ -28,7 +26,7 @@
   async function openImageDialog(imageUri) {
     dialogOpen = true;
     selectedImage = null; // Reset selectedImage before fetching
-console.log(imageUri)
+    console.log(imageUri);
     try {
       const response = await fetch("https://api.moksa.ai/stream", {
         method: "POST",
@@ -60,12 +58,12 @@ console.log(imageUri)
   const dispatch = createEventDispatcher();
 
   $: dbData = safetyData?.map((item: any) => ({
-  employee: `${item.first_name} ${item.last_name}`,
-  masks: item.wearing_mask,
+    employee: `${item.first_name} ${item.last_name}`,
+    masks: item.wearing_mask,
     gloves: item.wearing_gloves,
     hairnet: item.wearing_hair_net,
     uniform: item.wearing_uniform,
-    breakingSOPs: 'Coming Soon',
+    breakingSOPs: "Coming Soon",
     videoLink: "Image",
     videourl: item.img_link,
   }));
@@ -184,7 +182,7 @@ console.log(imageUri)
                       </div>
                       <span>{row.original.employee}</span>
                     </div>
-                  {:else if ['masks','uniform', "gloves", "hairnet" ].includes(cell.id)}
+                  {:else if ["masks", "uniform", "gloves", "hairnet"].includes(cell.id)}
                     {#if row.original[cell.id]}
                       <Check class="w-5 h-5 text-blue-500" />
                     {:else}

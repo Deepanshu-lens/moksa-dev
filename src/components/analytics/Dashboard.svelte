@@ -23,13 +23,13 @@
   import { RangeCalendar } from "@/components/ui/range-calendar";
   import { toast } from "svelte-sonner";
   import * as Popover from "../ui/popover";
+  import Spinner from "../ui/spinner/Spinner.svelte";
 
   export let token: string;
   export let allStores;
   export let allStoresData;
   export let aisleData;
   export let theftandcamera;
-  export let busyness;
   export let efficiency;
   export let safetyDetails;
   export let theftData;
@@ -41,13 +41,22 @@
   let barChart: Chart | null = null;
   let barChartCanvas: HTMLCanvasElement;
   let dateRange = writable("7 Days");
+  let heatMapDateRange = writable("7");
   let isInitialLoad = true;
   let isLoading = writable(false);
   let value: DateRange | undefined = undefined;
+  let heatMapValue: DateRange | undefined = undefined;
   let startValue: DateValue | undefined = undefined;
   let customDateLabel = "Custom";
+  let heatMapCustomDateLabel = "Custom";
   let close = false;
+  let heatmapclose = false;
   let busynessStoresData = writable([]);
+  let selectedFloorMap: string | null = null;
+  let storeFloorImg: string | null = null;
+  let loadingFloor = true;
+  let heatMapData = writable(null);
+  let floorMaps = writable([]);
 
   const fruits = allStores?.map((store: any) => ({
     value: store.id,
@@ -80,6 +89,36 @@
       customDateLabel = "Custom";
     }
   }
+
+  $: {
+    if (heatMapValue?.start && heatMapValue?.end) {
+      const start = new Date(
+        heatMapValue.start.year,
+        heatMapValue.start.month - 1,
+        heatMapValue.start.day,
+      );
+      const end = new Date(
+        heatMapValue.end.year,
+        heatMapValue.end.month - 1,
+        heatMapValue.end.day,
+      );
+      heatMapCustomDateLabel = `${start.toLocaleDateString()} - ${end.toLocaleDateString()}`;
+      const dayDifference = Math.ceil(
+        (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24),
+      );
+      console.log(dayDifference);
+      heatMapDateRange.set("custom");
+      setTimeout(() => {
+        heatmapclose = false;
+      }, 200);
+    } else {
+      heatMapCustomDateLabel = "Custom";
+    }
+  }
+
+  onMount(async () => {
+    await getAllFloorMaps();
+  });
 
   function createBarChart() {
     if (barChartCanvas && !barChart) {
@@ -390,6 +429,7 @@
       updateBarChart(theftD);
 
       if ($selectedStore.value !== -1) {
+        await getFloorMap($selectedStore.value);
         setTimeout(() => {
           if (chart === null) {
             createChart();
@@ -813,13 +853,213 @@
     fetchDataStoreWise();
   }
 
-  // function handleSelect(fruit) {
-  //   console.log("selected", fruit);
-  //   selectedStore.set(fruit);
-  //   dispatch("select", fruit);
-  // }
+  function drawHeatmap() {
+    const canvas = document.getElementById(
+      "heatmapCanvas",
+    ) as HTMLCanvasElement;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    // console.log($heatMapData);
+    const image = document.querySelector("img") as HTMLImageElement;
+    canvas.width = image.width;
+    canvas.height = image.height;
 
-  // $: console.log(aisleData);
+    let hd = $heatMapData.data;
+    if (!Array.isArray(hd) || !Array.isArray(hd[0])) {
+      console.error("Heatmap data is not a 2D array:", hd);
+      toast.error("Incorrect heatmap data");
+      return;
+    }
+
+    const maxValue = Math.max(...hd.map((row) => Math.max(...row)));
+    console.log("maxvalue", maxValue);
+
+    for (let y = 0; y < hd.length; y++) {
+      for (let x = 0; x < hd[y].length; x++) {
+        const value = hd[y][x];
+        // const intensity = (value / maxValue) * 10;
+        const intensity = (value / maxValue) * 255;
+        // const maxValue = Math.max(...hd.map((row) => Math.max(...row)));
+        let color;
+
+        if (intensity <= 10) {
+          color = `rgba(0, 0, 0, 0)`;
+        } else if (intensity <= 50) {
+          color = `rgba(0,0,255,1)`;
+        } else if (intensity <= 100) {
+          color = `rgba(255, 255, 0, 1)`;
+        } else if (intensity <= 150) {
+          color = `rgba(255, 165, 0, 1)`;
+        } else if (intensity <= 200) {
+          color = `rgba(255, 0, 0,1)`;
+        }
+
+        ctx.fillStyle = color;
+        ctx.fillRect(
+          (x / hd[y].length) * canvas.width,
+          (y / hd.length) * canvas.height,
+          canvas.width / hd[y].length,
+          canvas.height / hd.length,
+        );
+      }
+    }
+  }
+
+  const getFloorMap = async (storeId) => {
+    try {
+      const res = await fetch(
+        `https://api.moksa.ai/store/getFloorMapByStoreid/${storeId}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+
+      const data = await res.json();
+      console.log(`Floor map for store ${storeId}:`, data);
+      floorMaps.update((maps) => [
+        ...maps,
+        { storeId: storeId, img: data.data },
+      ]);
+      return data;
+    } catch (error) {
+      console.error(`Error fetching floor map for store ${storeId}:`, error);
+    }
+  };
+
+  const getAllFloorMaps = async () => {
+    await Promise.all(
+      allStores
+        ?.filter((store: any) => store.id !== -1)
+        ?.map((store: any) => getFloorMap(store.id)),
+    );
+  };
+
+  async function updateSelectedFloorMap() {
+    console.log("updateSelectedFloorMap called", $heatMapDateRange);
+    heatMapCustomDateLabel = "custom";
+    heatMapValue = undefined;
+
+    loadingFloor = true;
+    const selectedMap = $floorMaps.find(
+      (map) => map.storeId === $selectedStore.value,
+    );
+    selectedFloorMap = selectedMap ? selectedMap.img : null;
+    // console.log('Selected floor map:', selectedFloorMap);
+
+    if (selectedFloorMap !== "" && selectedFloorMap !== null) {
+      // console.log('selectedFloorMap',selectedFloorMap)
+      const mapData = await fetch(
+        `https://api.moksa.ai/heatmap/getHeatMapByTimeAndStoreId/${$heatMapDateRange}/${$selectedStore.value}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+      const data = await mapData.json();
+      console.log("mapData", data);
+      heatMapData.set(data);
+      const res = await fetch("https://api.moksa.ai/stream", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          key: selectedFloorMap,
+        }),
+      });
+      const blob = await res.blob();
+      const imageUrl = URL.createObjectURL(blob);
+      // selectedImage = imageUrl;
+      // console.log('data',data)
+      storeFloorImg = imageUrl;
+      loadingFloor = false;
+      setTimeout(() => {
+        drawHeatmap($heatMapData);
+      }, 100);
+    } else {
+      storeFloorImg = null;
+      loadingFloor = false;
+    }
+  }
+
+  async function updateSelectedFloorMapCustom() {
+    console.log("updateSelectedFloorMap  custom called", $heatMapDateRange);
+    loadingFloor = true;
+    const start = heatMapValue?.start
+      ? `${heatMapValue.start.year}-${String(heatMapValue.start.month).padStart(2, "0")}-${String(heatMapValue.start.day).padStart(2, "0")}`
+      : "";
+    const end = heatMapValue?.end
+      ? `${heatMapValue.end.year}-${String(heatMapValue.end.month).padStart(2, "0")}-${String(heatMapValue.end.day).padStart(2, "0")}`
+      : "";
+    console.log(start);
+    console.log(end);
+    const selectedMap = $floorMaps.find(
+      (map) => map.storeId === $selectedStore.value,
+    );
+    selectedFloorMap = selectedMap ? selectedMap.img : null;
+    // console.log('Selected floor map:', selectedFloorMap);
+
+    if (selectedFloorMap !== "" && selectedFloorMap !== null) {
+      // console.log('selectedFloorMap',selectedFloorMap)
+      const mapData = await fetch(
+        `https://api.moksa.ai/heatmap/getHeatMapByTimeAndStoreId/custom/${$selectedStore.value}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+            startdate: start,
+            enddate: end,
+          },
+        },
+      );
+      const data = await mapData.json();
+      console.log("mapData", data);
+      heatMapData.set(data);
+      const res = await fetch("https://api.moksa.ai/stream", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          key: selectedFloorMap,
+        }),
+      });
+      const blob = await res.blob();
+      const imageUrl = URL.createObjectURL(blob);
+      // selectedImage = imageUrl;
+      // console.log('data',data)
+      storeFloorImg = imageUrl;
+      loadingFloor = false;
+      setTimeout(() => {
+        drawHeatmap($heatMapData);
+      }, 100);
+    } else {
+      storeFloorImg = null;
+      loadingFloor = false;
+    }
+  }
+
+  $: if ($selectedStore.value !== -1 || $heatMapDateRange) {
+    if (heatMapValue?.start || heatMapValue?.end) {
+      updateSelectedFloorMapCustom();
+    } else {
+      updateSelectedFloorMap();
+    }
+  }
 </script>
 
 <section
@@ -912,7 +1152,7 @@
     </span>
   </div>
   <div
-    class={`grid grid-cols-8  gap-4 gap-y-10 ${$selectedStore.label === "All Stores" ? "h-[1400px] grid-rows-11" : "h-[1100px] grid-rows-8"} mt-4`}
+    class={`grid grid-cols-8  gap-4 gap-y-10 ${$selectedStore.label === "All Stores" ? "h-[1400px] grid-rows-11" : "h-[2000px] grid-rows-12"} mt-4`}
   >
     <div
       class="col-span-2 border rounded-lg bg-gradient-to-r from-[#00FEA3] to-[#007077] px-4 py-3 h-[85px] relative"
@@ -1148,7 +1388,13 @@
         {#if efficiency.length === 0 || efficiency.data.length === 0}
           <p class="text-center text-gray-500 mt-8">No data available</p>
         {:else}
-          <DashboardEfficiencyDataTable {efficiency} />
+          <DashboardEfficiencyDataTable
+            {efficiency}
+            {token}
+            {selectedStore}
+            {dateRange}
+            {value}
+          />
         {/if}
       </span>
     </div>
@@ -1164,10 +1410,154 @@
         {#if safetyDetails?.length === 0 || safetyDetails?.data?.length === 0}
           <p class="text-center text-gray-500 mt-8">No data available</p>
         {:else}
-          <DashboardSaftetyDataTable safetyData={safetyDetails} {token} />
+          <DashboardSaftetyDataTable
+            safetyData={safetyDetails}
+            {token}
+            {selectedStore}
+            {dateRange}
+            {value}
+          />
         {/if}
       </div>
     </div>
-    <!-- {/if} -->
+    {#if $selectedStore.label !== "All Stores"}
+      <div
+        class="col-span-8 row-span-8 border flex flex-col rounded-t-xl dark:border-white/[.7] p-4"
+      >
+        <div class="flex w-full items-center justify-between pb-2">
+          <p class="text-lg font-semibold">
+            Heat Map for {$selectedStore.label}
+          </p>
+          <div class="flex flex-row-reverse items-start gap-4">
+            <span
+              class="flex items-center border-black h-[40px] border-opacity-[18%] border-[1px] rounded-md dark:border-white"
+            >
+              <button
+                class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$heatMapDateRange === "1hr" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
+                on:click={() => {
+                  heatMapDateRange.set("1hr");
+                  heatMapValue = undefined;
+                }}>1hr</button
+              >
+              <button
+                class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$heatMapDateRange === "3hr" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
+                on:click={() => {
+                  heatMapDateRange.set("3hr");
+                  heatMapValue = undefined;
+                }}>3hr</button
+              >
+              <button
+                class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$heatMapDateRange === "5hr" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
+                on:click={() => {
+                  heatMapDateRange.set("5hr");
+                  heatMapValue = undefined;
+                }}>5hr</button
+              >
+              <button
+                class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$heatMapDateRange === "7hr" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
+                on:click={() => {
+                  heatMapDateRange.set("7hr");
+                  heatMapValue = undefined;
+                }}>7hr</button
+              >
+              <button
+                class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$heatMapDateRange === "1" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
+                on:click={() => {
+                  heatMapDateRange.set("1");
+                  heatMapValue = undefined;
+                }}>1 Day</button
+              >
+              <button
+                class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$heatMapDateRange === "3" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
+                on:click={() => {
+                  heatMapDateRange.set("3");
+                  heatMapValue = undefined;
+                }}>3 Day</button
+              >
+              <button
+                class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$heatMapDateRange === "7" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
+                on:click={() => {
+                  heatMapDateRange.set("7");
+                  heatMapValue = undefined;
+                }}>7 Day</button
+              >
+              <Popover.Root openFocus bind:open={heatmapclose}>
+                <Popover.Trigger asChild let:builder>
+                  <Button
+                    on:click={() => (heatMapValue = undefined)}
+                    builders={[builder]}
+                    class={`2xl:py-2 2xl:px-3 py-1 px-2  text-sm hover:bg-[#0BA5E9] hover:text-white ${$heatMapDateRange.toLowerCase() === "custom" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white bg-transparent dark:border-white"}`}
+                  >
+                    {heatMapCustomDateLabel}</Button
+                  >
+                </Popover.Trigger>
+                <Popover.Content class="w-auto p-0 z-[600000000]" align="start">
+                  <RangeCalendar
+                    bind:value={heatMapValue}
+                    bind:startValue
+                    initialFocus
+                    numberOfMonths={2}
+                    placeholder={heatMapValue?.start}
+                  />
+                </Popover.Content>
+              </Popover.Root>
+            </span>
+            <div class="flex flex-col items-end">
+              <div class="w-[200px] h-6 flex">
+                <div
+                  class="w-1/3 h-full flex-shrink-0"
+                  style="background: linear-gradient(to right, rgb(0, 0, 255), rgb(255, 255, 0))"
+                ></div>
+                <div
+                  class="w-1/3 h-full flex-shrink-0"
+                  style="background: linear-gradient(to right, rgb(255, 255, 0), rgb(255, 165, 0))"
+                ></div>
+                <div
+                  class="w-1/3 h-full flex-shrink-0"
+                  style="background: linear-gradient(to right, rgb(255, 165, 0), rgb(255, 0, 0))"
+                ></div>
+              </div>
+              <div class="flex justify-between w-[200px] text-xs mt-1">
+                <span>low</span>
+                <span>medium</span>
+                <span>high</span>
+                <span>very high</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="w-full h-full grid grid-cols-8 grid-rows-6">
+          {#if storeFloorImg !== null && loadingFloor === false}
+            <div
+              class="col-span-8 row-span-6 border rounded-md flex flex-col rounded-t-xl dark:border-white/[.7] relative"
+            >
+              <img
+                src={storeFloorImg}
+                alt="storeFloorImg"
+                class=" w-full h-full max-h-[400px] rounded-md"
+              />
+              <canvas
+                id="heatmapCanvas"
+                class="absolute top-0 left-0 w-full h-full opacity-70 pointer-events-none z-[20000000]"
+              ></canvas>
+            </div>
+          {:else if loadingFloor === true}
+            <div
+              class="col-span-8 row-span-6 border rounded-md flex flex-col justify-center items-center rounded-t-xl dark:border-white/[.7]"
+            >
+              <Spinner />
+            </div>
+          {:else}
+            <div
+              class="col-span-8 row-span-6 border rounded-md flex flex-col justify-center items-center rounded-t-xl dark:border-white/[.7]"
+            >
+              <p class="text-lg font-semibold">
+                Floor map not available for this store
+              </p>
+            </div>
+          {/if}
+        </div>
+      </div>
+    {/if}
   </div>
 </section>

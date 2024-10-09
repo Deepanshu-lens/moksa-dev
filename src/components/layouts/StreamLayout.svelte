@@ -463,7 +463,7 @@
   onMount(() => {
     setTimeout(() => {
       initSortable();
-    }, 100);
+    }, 2000);
   });
 
   function initSortable() {
@@ -948,7 +948,7 @@
     }
   });
 
-  // $: console.log(videos)
+  // $: console.log('cells',cells)
 </script>
 
 {#if streamCount > 0 && Object.keys(videos).length > 0}
