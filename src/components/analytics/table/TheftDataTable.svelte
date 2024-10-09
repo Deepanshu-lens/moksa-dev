@@ -77,7 +77,8 @@
     }
   }
 
-  // $: console.log("Table data updated:", $theftData);
+  $: console.log("Table data updated:", $theftData);
+
 
   $: dbData = $theftData.data.map((item) => {
     const createdDate = item?.createdAt ? new Date(item?.createdAt) : null;
@@ -96,18 +97,10 @@
         })
       : "N/A";
 
-    // const getRandomName = () => {
-    //   const firstNames = ["John", "Jane", "Alex", "Emma"];
-    //   const lastNames = ["Smith", "Johnson", "Williams"];
-    //   return `${firstNames[Math.floor(Math.random() * firstNames.length)]} ${lastNames[Math.floor(Math.random() * lastNames.length)]}`;
-    // };
+
 
     return {
       storeName: item.name || "N/A",
-      // employee:
-      //   item.first_name || item.last_name
-      //     ? `${item.first_name || ""} ${item.last_name || ""}`.trim()
-      //     : getRandomName(),
       date: formattedDate,
       videoLink: "Watch Video",
       videoUri: item.video_uri,
@@ -137,36 +130,59 @@
     select: addSelectedRows(),
   });
 
-  $: columns = table.createColumns([
-    table.column({
-      accessor: "storeName",
-      header: "Store Name",
-    }),
-    // table.column({
-    //   accessor: "employee",
-    //   header: "Employee",
-    // }),
-    table.column({
-      accessor: "date",
-      header: "Date",
-    }),
-    table.column({
-      accessor: "videoLink",
-      header: "Video Link",
-    }),
-    table.column({
-      accessor: "time",
-      header: "Time",
-    }),
-    table.column({
-      accessor: "theftProbability",
-      header: "Theft Probability",
-    }),
-    // table.column({
-    //   accessor: "duration",
-    //   header: "Duration",
-    // }),
-  ]);
+    // [
+  //     { header: 'Profile', key: 'profile' },
+  //     { header: 'First Name', key: 'first_name' },
+  //     { header: 'Last Name', key: 'last_name' },
+  //     { header: 'Validated By', key: 'validated_by' },
+  //     { header: 'Date Validated', key: 'date_validated' },
+  //     { header: 'Video Link', key: 'video_uri' },
+  //     { header: 'Store ID', key: 'store_id' },
+  //     { header: 'Created At', key: 'createdAt' },
+  //     { header: 'Theft Probability', key: 'theftProbability' },
+  //     { header: 'Store Name', key: 'name' }
+  //   ],
+
+  // $: columns = table.createColumns([
+  //   table.column({
+  //     accessor: "storeName",
+  //     header: "Store Name",
+  //   }),
+  //   table.column({
+  //     accessor: "date",
+  //     header: "Date",
+  //   }),
+  //   table.column({
+  //     accessor: "videoLink",
+  //     header: "Video Link",
+  //   }),
+  //   table.column({
+  //     accessor: "time",
+  //     header: "Time",
+  //   }),
+  //   table.column({
+  //     accessor: "theftProbability",
+  //     header: "Theft Probability",
+  //   }),
+  //   // table.column({
+  //   //   accessor: "duration",
+  //   //   header: "Duration",
+  //   // }),
+  // ]);
+
+  $: columns = table.createColumns($theftData.column.filter(
+        (col) =>
+          ![
+            "store_id",
+            "first_name",
+            "last_name",
+            "validated_by",
+            "date_validated",
+          ].includes(col.key),
+      ).reverse().map((col) => table.column({
+    accessor: col.key === 'name' ? 'storeName' : col.key === 'video_uri' ? 'videoLink' : col.key === 'createdAt' ? 'date' : col.key === 'profile' ? 'time' : col.key,
+    header: col.header === 'Profile' ? 'time' : col.header === 'Created At' ? 'date' : col.header,
+  })))
 
   $: ({ headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } =
     table.createViewModel(columns));

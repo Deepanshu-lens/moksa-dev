@@ -190,23 +190,6 @@
       currentDataCount = safetyData.data.length;
       data.set(dbData);
       loading = false;
-      table = createTable(readableData, {
-        page: addPagination({
-          initialPageIndex: currentPageIndex + 1,
-          initialPageSize: 5,
-        }),
-        sort: addSortBy(),
-        filter: addTableFilter({
-          fn: ({
-            filterValue,
-            value,
-          }: {
-            filterValue: string;
-            value: string;
-          }) => value.toLowerCase().includes(filterValue.toLowerCase()),
-        }),
-        select: addSelectedRows(),
-      });
     }
   }
 </script>

@@ -61,11 +61,13 @@
   const fruits = allStores?.map((store: any) => ({
     value: store.id,
     label: store.name,
+    hasKitchen: store.hasKitchen,
   }));
 
   let selectedStore = writable({
     value: fruits?.[0]?.value,
     label: fruits?.[0]?.label,
+    hasKitchen: fruits?.[0]?.hasKitchen,
   });
 
   $: {
@@ -1060,6 +1062,10 @@
       updateSelectedFloorMap();
     }
   }
+
+  // $: console.log('selectedStore', $selectedStore)
+  // $: console.log('allStores', allStores)
+  // $: console.log('fruits', fruits)
 </script>
 
 <section
@@ -1408,7 +1414,11 @@
       </span>
       <div class="h-full w-full">
         {#if safetyDetails?.length === 0 || safetyDetails?.data?.length === 0}
+        {#if $selectedStore.hasKitchen}
           <p class="text-center text-gray-500 mt-8">No data available</p>
+        {:else}
+          <p class="text-center text-gray-500 mt-8">Store does not have a kitchen</p>
+        {/if}
         {:else}
           <DashboardSaftetyDataTable
             safetyData={safetyDetails}

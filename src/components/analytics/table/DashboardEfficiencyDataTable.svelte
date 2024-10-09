@@ -122,25 +122,8 @@
       efficiency.data = [...efficiency.data, ...newData?.data?.data];
       currentDataCount = efficiency.data.length;
       data.set(dbData); // Update the data store
-      console.log(currentPageIndex);
+      // console.log(currentPageIndex);
       loading = false;
-      table = createTable(readableData, {
-        page: addPagination({
-          initialPageIndex: currentPageIndex + 1,
-          initialPageSize: 5,
-        }),
-        sort: addSortBy(),
-        filter: addTableFilter({
-          fn: ({
-            filterValue,
-            value,
-          }: {
-            filterValue: string;
-            value: string;
-          }) => value.toLowerCase().includes(filterValue.toLowerCase()),
-        }),
-        select: addSelectedRows(),
-      });
     }
   }
 
