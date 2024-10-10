@@ -344,64 +344,8 @@
 <section
   class="w-full p-4 flex flex-col max-h-[calc(100vh-75px)] overflow-y-auto hide-scrollbar"
 >
-  <div class="flex items-center justify-between">
-    <span class="flex gap-4 items-center">
-      <span
-        class="flex items-center border-black border-opacity-[18%] h-[40px] border-[1px] rounded-md dark:border-white"
-      >
-        <button
-          class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "7 Days" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
-          on:click={() => {
-            dateRange.set("7 Days");
-            value = undefined;
-          }}>7 Days</button
-        >
-        <button
-          class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "15 Days" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
-          on:click={() => {
-            dateRange.set("15 Days");
-            value = undefined;
-          }}>15 Days</button
-        >
-        <button
-          class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "30 Days" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
-          on:click={() => {
-            dateRange.set("30 Days");
-            value = undefined;
-          }}>30 Days</button
-        >
-        <button
-          class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "12 Months" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
-          on:click={() => {
-            dateRange.set("12 Months");
-            value = undefined;
-          }}>12 Months</button
-        >
-        <Popover.Root openFocus bind:open={close}>
-          <Popover.Trigger asChild let:builder>
-            <Button
-              on:click={() => {
-                dateRange.set("Custom");
-                value = undefined;
-              }}
-              builders={[builder]}
-              class={`2xl:py-2 2xl:px-3 py-1 px-2  text-sm hover:bg-[#0BA5E9] hover:text-white ${$dateRange === "custom" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white bg-transparent dark:border-white"}`}
-            >
-              {customDateLabel}</Button
-            >
-          </Popover.Trigger>
-          <Popover.Content class="w-auto p-0" align="start">
-            <RangeCalendar
-              bind:value
-              bind:startValue
-              initialFocus
-              numberOfMonths={2}
-              placeholder={value?.start}
-            />
-          </Popover.Content>
-        </Popover.Root>
-      </span>
-    </span>
+  <div class="flex items-center justify-end">
+  
     <span class="flex items-center gap-3">
       <!-- <Button variant="outline" class="flex items-center gap-1">
         <ListFilter size={18} /> Filters</Button
@@ -576,8 +520,65 @@
       </span>
     </div> -->
     <div
-      class="col-span-8 row-span-4 border rounded-md p-2 flex flex-col dark:border-white/[.7]"
+      class="col-span-8 row-span-4 border rounded-md p-2 flex flex-col dark:border-white/[.7] relative"
     >
+      <span class="flex gap-4 items-center absolute left-1/2 -translate-x-1/2 top-3">
+      <span
+        class="flex items-center border-black border-opacity-[18%] h-[40px] border-[1px] rounded-md dark:border-white"
+      >
+        <button
+          class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "7 Days" ? " rounded-l-md bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
+          on:click={() => {
+            dateRange.set("7 Days");
+            value = undefined;
+          }}>7 Days</button
+        >
+        <button
+          class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "15 Days" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
+          on:click={() => {
+            dateRange.set("15 Days");
+            value = undefined;
+          }}>15 Days</button
+        >
+        <button
+          class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "30 Days" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
+          on:click={() => {
+            dateRange.set("30 Days");
+            value = undefined;
+          }}>30 Days</button
+        >
+        <button
+          class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "12 Months" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
+          on:click={() => {
+            dateRange.set("12 Months");
+            value = undefined;
+          }}>12 Months</button
+        >
+        <Popover.Root openFocus bind:open={close}>
+          <Popover.Trigger asChild let:builder>
+            <Button
+              on:click={() => {
+                dateRange.set("Custom");
+                value = undefined;
+              }}
+              builders={[builder]}
+              class={`2xl:py-2 2xl:px-3 py-1 px-2  text-sm hover:bg-[#0BA5E9] hover:text-white ${$dateRange === "custom" ? "bg-[#0BA5E9] text-white rounded-r-md" : "text-black dark:text-white bg-transparent dark:border-white"}`}
+            >
+              {customDateLabel}</Button
+            >
+          </Popover.Trigger>
+          <Popover.Content class="w-auto p-0" align="start">
+            <RangeCalendar
+              bind:value
+              bind:startValue
+              initialFocus
+              numberOfMonths={2}
+              placeholder={value?.start}
+            />
+          </Popover.Content>
+        </Popover.Root>
+      </span>
+    </span>
       <div class="h-full w-full">
         <!-- {#if $storeData.length > 0} -->
         <PeopleCountDataTable {storeData} {selectedStore} />

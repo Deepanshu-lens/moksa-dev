@@ -1106,7 +1106,7 @@
       class="flex items-center border-black h-[40px] border-opacity-[18%] border-[1px] rounded-md dark:border-white"
     >
       <button
-        class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "7 Days" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
+        class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "7 Days" ? "bg-[#0BA5E9] rounded-l-md text-white" : "text-black dark:text-white dark:border-white"}`}
         on:click={() => dateRange.set("7 Days")}>7 Days</button
       >
       <button
@@ -1126,7 +1126,7 @@
           <Button
             on:click={() => (value = undefined)}
             builders={[builder]}
-            class={`2xl:py-2 2xl:px-3 py-1 px-2  text-sm hover:bg-[#0BA5E9] hover:text-white ${$dateRange === "custom" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white bg-transparent dark:border-white"}`}
+            class={`2xl:py-2 2xl:px-3 py-1 px-2  text-sm hover:bg-[#0BA5E9] hover:text-white ${$dateRange === "custom" ? "bg-[#0BA5E9] rounded-r-md text-white" : "text-black dark:text-white bg-transparent dark:border-white"}`}
           >
             {customDateLabel}</Button
           >
