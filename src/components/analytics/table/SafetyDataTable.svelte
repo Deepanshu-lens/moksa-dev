@@ -228,7 +228,7 @@
                     <Button
                       variant="ghost"
                       on:click={props.sort.toggle}
-                      class="hover:bg-transparent text-[#727272] opacity-60 text-xs"
+                      class={`hover:bg-transparent text-[#727272] opacity-60 text-xs ${cell.id === "employee" ? "text-start min-w-[150px]" : ""}`}
                     >
                       <Render of={cell.render()} />
                       <ArrowUpDown class="ml-2 h-4 w-4" />
@@ -260,7 +260,9 @@
                     class="flex items-center justify-center whitespace-nowrap flex-1 py-2 text-center"
                   >
                     {#if cell.id === "employee"}
-                      <div class="flex items-center gap-2 text-center">
+                      <div
+                        class="flex items-center gap-2 text-start min-w-[150px] justify-start"
+                      >
                         <div
                           class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-center"
                         >
@@ -336,6 +338,7 @@
     </Dialog.Header>
     <div class="flex items-center justify-center w-full h-full">
       {#if selectedImage}
+        <!-- svelte-ignore a11y-img-redundant-alt -->
         <img
           src={selectedImage}
           alt="Safety Data Image"

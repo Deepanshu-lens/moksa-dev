@@ -79,7 +79,6 @@
 
   $: console.log("Table data updated:", $theftData);
 
-
   $: dbData = $theftData.data.map((item) => {
     const createdDate = item?.createdAt ? new Date(item?.createdAt) : null;
     const formattedDate = createdDate
@@ -96,8 +95,6 @@
           hour12: true,
         })
       : "N/A";
-
-
 
     return {
       storeName: item.name || "N/A",
@@ -130,7 +127,7 @@
     select: addSelectedRows(),
   });
 
-    // [
+  // [
   //     { header: 'Profile', key: 'profile' },
   //     { header: 'First Name', key: 'first_name' },
   //     { header: 'Last Name', key: 'last_name' },
@@ -170,7 +167,9 @@
   //   // }),
   // ]);
 
-  $: columns = table.createColumns($theftData.column.filter(
+  $: columns = table.createColumns(
+    $theftData.column
+      .filter(
         (col) =>
           ![
             "store_id",
@@ -179,10 +178,29 @@
             "validated_by",
             "date_validated",
           ].includes(col.key),
-      ).reverse().map((col) => table.column({
-    accessor: col.key === 'name' ? 'storeName' : col.key === 'video_uri' ? 'videoLink' : col.key === 'createdAt' ? 'date' : col.key === 'profile' ? 'time' : col.key,
-    header: col.header === 'Profile' ? 'time' : col.header === 'Created At' ? 'date' : col.header,
-  })))
+      )
+      .reverse()
+      .map((col) =>
+        table.column({
+          accessor:
+            col.key === "name"
+              ? "storeName"
+              : col.key === "video_uri"
+                ? "videoLink"
+                : col.key === "createdAt"
+                  ? "date"
+                  : col.key === "profile"
+                    ? "time"
+                    : col.key,
+          header:
+            col.header === "Profile"
+              ? "time"
+              : col.header === "Created At"
+                ? "date"
+                : col.header,
+        }),
+      ),
+  );
 
   $: ({ headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } =
     table.createViewModel(columns));
@@ -248,7 +266,7 @@
                   <Button
                     variant="ghost"
                     on:click={props.sort.toggle}
-                    class="hover:bg-transparent text-[#727272] opacity-60"
+                    class={`hover:bg-transparent text-[#727272] opacity-60 min-w-[150px] ${cell.id === "storeName" ? "text-start justify-start" : ""}`}
                   >
                     <Render of={cell.render()} />
                     <ArrowUpDown class="ml-2 h-4 w-4" />
@@ -272,7 +290,9 @@
                     class="flex w-[14.285%] items-center justify-center flex-1 whitespace-nowrap py-2"
                   >
                     {#if cell.id === "storeName"}
-                      <div class="flex items-center gap-2 text-sm">
+                      <div
+                        class="flex items-center gap-2 text-sm min-w-[150px] text-start justify-start"
+                      >
                         <Store class="text-blue-600" />
                         <span class="flex gap-2 items-center"
                           >{row.original.storeName}

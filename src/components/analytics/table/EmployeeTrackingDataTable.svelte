@@ -138,7 +138,7 @@
                   <Button
                     variant="ghost"
                     on:click={props.sort.toggle}
-                    class="hover:bg-transparent text-[#727272] opacity-60"
+                    class={`hover:bg-transparent text-[#727272] opacity-60 min-w-[150px] ${cell.id === "employee" ? "text-start justify-start" : ""}`}
                   >
                     <Render of={cell.render()} />
                     <ArrowUpDown class="ml-2 h-4 w-4" />
@@ -169,11 +169,13 @@
                       class="form-checkbox h-4 w-4 text-blue-600"
                     />
                   {:else if cell.id === "employee"}
-                    <div class="flex items-center gap-2">
+                    <div
+                      class="flex items-center gap-2 text-start min-w-[150px] justify-start"
+                    >
                       <div
                         class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center"
                       >
-                        <User class="w-4 h-4 text-gray-500" />
+                        <User class="w-4 h-4 text-gray-500 flex" />
                       </div>
                       <span>{row.original.employee}</span>
                     </div>

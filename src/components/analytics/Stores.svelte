@@ -105,9 +105,6 @@
       label: store.name,
     }));
 
-  $: console.log(fruits);
-  $: console.log("combinedStores", combinedStores);
-
   // $: console.log('uniqueLocations',uniqueLocations)
   // $: console.log('uniquemanager',uniqueManagers)
 

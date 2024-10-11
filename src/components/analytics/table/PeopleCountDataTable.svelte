@@ -209,7 +209,9 @@
                     <Button
                       variant="ghost"
                       on:click={props.sort.toggle}
-                      class="hover:bg-transparent text-[#727272] opacity-60 text-xs"
+                      class={cell.id === "storeName"
+                        ? "hover:bg-transparent text-[#727272] opacity-60 text-xs min-w-[200px] flex justify-start"
+                        : "hover:bg-transparent text-[#727272] opacity-60 text-xs"}
                     >
                       <Render of={cell.render()} />
                       <ArrowUpDown class="ml-2 h-4 w-4" />
@@ -237,9 +239,11 @@
                     class="flex items-center justify-center whitespace-nowrap flex-1 py-2 w-full"
                   >
                     {#if cell.id === "storeName"}
-                      <div class="flex items-center gap-2">
+                      <div
+                        class="flex items-center gap-2 min-w-[200px] justify-start"
+                      >
                         <div
-                          class="w-8 h-8 rounded text-start bg-blue-900 flex items-center justify-center"
+                          class="w-8 h-8 rounded text-start bg-blue-900 flex items-center justify-center flex-shrink-0"
                         >
                           <Store class="w-4 h-4 text-white" />
                         </div>

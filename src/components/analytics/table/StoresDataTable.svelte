@@ -174,7 +174,7 @@
                   <Button
                     variant="ghost"
                     on:click={props.sort.toggle}
-                    class="hover:bg-transparent text-[#323232] dark:text-white/[.8] font-semibold opacity-60"
+                    class={`hover:bg-transparent text-[#323232] dark:text-white/[.8] font-semibold opacity-60 min-w-[150px] ${cell.id === "storeName" ? "text-start justify-start" : ""}`}
                   >
                     <Render of={cell.render()} />
                     <ArrowUpDown class="ml-2 h-4 w-4" />
@@ -236,7 +236,7 @@
                     </span>
                   {:else if cell.id === "storeName"}
                     <span
-                      class="text-sm text-[#727272] flex items-center gap-2"
+                      class="text-sm text-[#727272] flex items-center min-w-[150px] text-start justify-start gap-2"
                     >
                       <Store size={20} class="text-[#3D81FC]" />
                       {row.original.storeName}

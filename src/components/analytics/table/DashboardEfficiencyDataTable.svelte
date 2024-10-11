@@ -188,7 +188,7 @@
                     <Button
                       variant="ghost"
                       on:click={props.sort.toggle}
-                      class="hover:bg-transparent text-[#727272] opacity-60"
+                      class={`hover:bg-transparent text-[#727272] opacity-60 min-w-[150px] ${cell.id === "employee" ? "text-start justify-start" : ""} `}
                     >
                       <Render of={cell.render()} />
                       <ArrowUpDown class="ml-2 h-4 w-4" />
@@ -211,7 +211,7 @@
                     class="flex-1 flex items-center justify-center py-2 px-4 w-full text-center"
                   >
                     {#if cell.id === "employee"}
-                      <div class="flex items-center gap-2">
+                      <div class="flex items-center gap-2 min-w-[150px] text-start justify-start">
                         <!-- <img src="/path/to/avatar.png" alt="Avatar" class="w-8 h-8 rounded-full" /> -->
                         <User class="size-5 text-blue-500 " />
                         <span class="text-sm font-medium whitespace-nowrap"
