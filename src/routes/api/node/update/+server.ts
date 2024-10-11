@@ -27,8 +27,8 @@ export const PATCH: RequestHandler = async ({
       pincode: data.pincode,
       country: data.country,
       manager: data.manager,
-      openingTime: data.openingTime,
-      closingTime: data.closingTime,
+      openingTime: data.is24HrStore === true ? null : data.openingTime,
+      closingTime: data.is24HrStore === true ? null : data.closingTime,
       is24HrStore: data.is24HrStore,
       timezone: data.timezone,
     })

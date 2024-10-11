@@ -149,7 +149,7 @@ export const load: PageServerLoad = async ({ fetch, cookies, locals }) => {
         allstoreData: () => allStoreData(),
         aisleData: () => aisleData(),
         theftandcamera: () => alltheftandcamera(),
-        busyness: () => busyness(),
+        busyness: () => [],
         efficiency: () => efficiency(),
         safetyDetails: () => safetyDetails(),
         usersData: () => allUsers(),

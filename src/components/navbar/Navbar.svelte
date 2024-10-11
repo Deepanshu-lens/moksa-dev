@@ -350,11 +350,14 @@
                 <UserIcon size={18} />
               </span>
               <p class="truncate px-3.5 py-3 relative">
-                <span class="block text-[#323232] font-medium capitalize">
+                <span
+                  class="block text-[#323232] dark:text-white/[.7] font-medium capitalize"
+                >
                   {user?.firstName}
                   {user?.lastName}
                 </span>
-                <span class="mt-0.5 text-sm text-[#32323299]"
+                <span
+                  class="mt-0.5 text-sm text-[#32323299] dark:text-white/[.7]"
                   >{user?.email}</span
                 >
                 <a

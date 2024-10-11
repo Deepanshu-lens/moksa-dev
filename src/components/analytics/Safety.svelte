@@ -66,7 +66,7 @@
       customDateLabel = "Custom";
     }
   }
-
+  let safetyCount = 0;
   async function getSafetyDataByStoreId(time) {
     const today = new Date();
     let startDate = new Date(today);
@@ -128,7 +128,8 @@
         `recieved live safety records for ${$selectedStore.value}, ${$dateRange}`,
         lData,
       );
-      safetyData.set(data?.data?.data === undefined ? [] : data?.data?.data);
+      safetyData.set(data?.data?.data === undefined ? [] : data?.data);
+      safetyCount = data?.data.total;
       liveData.set(lData?.data?.data === undefined ? [] : lData?.data?.data);
     } catch (error) {
       console.log(error);
@@ -161,7 +162,7 @@
         `recieved safety data for ${$selectedStore.value}, ${$dateRange}`,
         data,
       );
-      safetyData.set(data?.data?.data === undefined ? [] : data?.data?.data);
+      safetyData.set(data?.data?.data === undefined ? [] : data?.data);
     } catch (error) {
       console.log(error);
     }
@@ -180,7 +181,7 @@
   let sockets: { [key: number]: any } = {};
   let liveData = writable([]);
 
-  $: console.log(allStores);
+  $: console.log("safetyCount", safetyCount);
 
   function setupSocketForAllStores() {
     allStores
@@ -395,7 +396,7 @@
         class="h-full w-full min-h-[350px] max-h-[350px] overflow-y-scroll overflow-x-clip"
       >
         {#if $liveData.length > 0}
-          <SafetyLiveDataTable data={$liveData} />
+          <SafetyLiveDataTable data={$liveData} {token} />
         {:else}
           <p class="text-center text-gray-500 min-h-[350px] py-4">
             No Live Data found
@@ -455,12 +456,13 @@
         {:else}
 <p class='text-center text-gray-500'>No data found</p>
 {/if} -->
-        {#if $safetyData.length > 0}
+        {#if $safetyData.data && $safetyData.data.length > 0}
           <SafetyDataTable
             {token}
             safetyData={$safetyData}
             {dateRange}
             {selectedStore}
+            {value}
           />
         {:else}
           <p class="text-center text-gray-500">

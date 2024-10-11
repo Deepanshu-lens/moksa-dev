@@ -1096,6 +1096,22 @@
   //   selectedStore.set(fruit);
   //   dispatch("select", fruit);
   // }
+
+  let from;
+  let to = new Date();
+
+  $: if ($dateRange === "custom") {
+    from = value?.start;
+    to = value?.end;
+  } else if ($dateRange === "7 Days") {
+    from = new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000);
+  } else if ($dateRange === "15 Days") {
+    from = new Date(new Date().getTime() - 15 * 24 * 60 * 60 * 1000);
+  } else if ($dateRange === "30 Days") {
+    from = new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000);
+  } else if ($dateRange === "12 Months") {
+    from = new Date(new Date().getTime() - 12 * 30 * 24 * 60 * 60 * 1000);
+  }
 </script>
 
 <section
@@ -1399,7 +1415,12 @@
             Total Thefts Detected:
           </p>
           <p class="text-xl font-semibold text-[#1E293B">{totalThefts}+</p>
-          <p class="text-xs text-[#475569]">from {oneYearAgo} to {today}</p>
+          <p class="text-xs text-[#475569]">
+            from {$dateRange === "custom" ? from : from.toDateString()} to {$dateRange ===
+            "custom"
+              ? to
+              : to.toDateString()}
+          </p>
           <div class="circle-progress">
             <svg viewBox="0 0 36 36">
               <path

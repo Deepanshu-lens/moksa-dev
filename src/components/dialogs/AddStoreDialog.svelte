@@ -10,6 +10,8 @@
   import * as Select from "@/components/ui/select/index";
   import Switch from "../ui/switch/switch.svelte";
 
+  export let refreshStoreData: () => void;
+
   let dialogOpen = false;
   let nodeName = "";
   let address = "";
@@ -45,9 +47,10 @@
         hasKitchen: hasKitchen,
       }),
     })
-      .then(() => {
+      .then(async () => {
         toast("Store added");
         dialogOpen = false;
+        await refreshStoreData();
       })
       .catch((err) => console.log(err));
     return true;

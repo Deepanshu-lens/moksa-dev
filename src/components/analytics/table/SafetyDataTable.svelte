@@ -17,8 +17,18 @@
 
   export let safetyData;
   export let token;
+  export let dateRange;
+  export let selectedStore;
+  export let value;
 
-  console.log("safetyData", safetyData);
+  // $: console.log("safetyData", safetyData);
+
+  // console.log($dateRange, $selectedStore)
+
+  $: if ($dateRange || $selectedStore) {
+    // console.log('here')
+    currentPageIndex = 0;
+  }
 
   let dialogOpen = false;
   let selectedImage = null;
@@ -57,16 +67,18 @@
 
   const dispatch = createEventDispatcher();
 
-  $: dbData = safetyData?.map((item: any) => ({
-    employee: `${item.first_name} ${item.last_name}`,
-    masks: item.wearing_mask,
-    gloves: item.wearing_gloves,
-    hairnet: item.wearing_hair_net,
-    uniform: item.wearing_uniform,
-    breakingSOPs: "Coming Soon",
-    videoLink: "Image",
-    videourl: item.img_link,
-  }));
+  $: dbData =
+    safetyData.data &&
+    safetyData?.data?.map((item: any) => ({
+      employee: `${item.first_name} ${item.last_name}`,
+      masks: item.wearing_mask,
+      gloves: item.wearing_gloves,
+      hairnet: item.wearing_hair_net,
+      uniform: item.wearing_uniform,
+      breakingSOPs: "Coming Soon",
+      videoLink: "Image",
+      videourl: item.img_link,
+    }));
 
   $: data = writable(dbData);
 
@@ -76,7 +88,10 @@
   });
 
   $: table = createTable(readableData, {
-    page: addPagination({ initialPageSize: 3 }),
+    page: addPagination({
+      initialPageSize: 3,
+      initialPageIndex: currentPageIndex,
+    }),
     sort: addSortBy(),
     filter: addTableFilter({
       fn: ({ filterValue, value }: { filterValue: string; value: string }) =>
@@ -120,6 +135,72 @@
     table.createViewModel(columns));
   $: ({ hasNextPage, hasPreviousPage, pageIndex, pageCount } =
     pluginStates.page);
+
+  let currentpage = 1;
+  let currentDataCount = safetyData.data.length;
+  let currentPageIndex = 0;
+
+  const fetchMoreData = async () => {
+    currentpage++;
+    console.log($dateRange, $selectedStore.value);
+    const today = new Date();
+    let startDate = new Date(today);
+
+    switch ($dateRange) {
+      case "7 Days":
+        startDate.setDate(today.getDate() - 7);
+        break;
+      case "15 Days":
+        startDate.setDate(today.getDate() - 15);
+        break;
+      case "30 Days":
+        startDate.setDate(today.getDate() - 30);
+        break;
+      case "12 Months":
+        startDate.setFullYear(today.getFullYear() - 1);
+        break;
+      default:
+        startDate.setDate(today.getDate() - 7);
+    }
+    // console.log(value);
+    const start = value?.start
+      ? `${value.start.year}-${String(value.start.month).padStart(2, "0")}-${String(value.start.day).padStart(2, "0")}`
+      : "";
+    const end = value?.end
+      ? `${value.end.year}-${String(value.end.month).padStart(2, "0")}-${String(value.end.day).padStart(2, "0")}`
+      : "";
+
+    const formatDate = (date: Date) => date.toISOString().split("T")[0];
+    // console.log(currentpage);
+
+    const safetyDetails = await fetch(
+      `https://api.moksa.ai/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${$selectedStore.value}/${currentpage}/100/${$dateRange === "custom" ? start : formatDate(startDate)}/${$dateRange === "custom" ? end : formatDate(today)}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    return safetyDetails.json();
+  };
+  let loading = false;
+
+  async function handlePageChange(newPageIndex) {
+    $pageIndex = newPageIndex;
+    currentPageIndex = newPageIndex;
+    if ($pageIndex === $pageCount - 1 && currentDataCount < safetyData.total) {
+      loading = true;
+      const newData = await fetchMoreData();
+      console.log("new data", newData);
+      safetyData.data = [...safetyData.data, ...newData?.data?.data];
+      currentDataCount = safetyData.data.length;
+      data.set(dbData);
+      loading = false;
+
+      // table.setPageIndex(currentPageIndex);
+    }
+  }
 </script>
 
 <div class="m-0">
@@ -160,52 +241,58 @@
         </Subscribe>
       {/each}
     </Table.Header>
-    <Table.Body {...$tableBodyAttrs}>
-      {#each $pageRows as row (row.id)}
-        <Subscribe rowAttrs={row.attrs()} let:rowAttrs>
-          <Table.Row
-            {...rowAttrs}
-            class="border-b flex items-center w-full justify-between"
-          >
-            {#each row.cells as cell (cell.id)}
-              <Subscribe attrs={cell.attrs()} let:attrs>
-                <Table.Cell
-                  {...attrs}
-                  class="flex items-center justify-center whitespace-nowrap flex-1 py-2 text-center"
-                >
-                  {#if cell.id === "employee"}
-                    <div class="flex items-center gap-2 text-center">
-                      <div
-                        class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-center"
-                      >
-                        <User class="w-4 h-4 text-gray-600" />
+    {#if loading}
+      <div class="flex items-center justify-center w-full h-full min-h-[250px]">
+        <Spinner />
+      </div>
+    {:else}
+      <Table.Body {...$tableBodyAttrs}>
+        {#each $pageRows as row (row.id)}
+          <Subscribe rowAttrs={row.attrs()} let:rowAttrs>
+            <Table.Row
+              {...rowAttrs}
+              class="border-b flex items-center w-full justify-between"
+            >
+              {#each row.cells as cell (cell.id)}
+                <Subscribe attrs={cell.attrs()} let:attrs>
+                  <Table.Cell
+                    {...attrs}
+                    class="flex items-center justify-center whitespace-nowrap flex-1 py-2 text-center"
+                  >
+                    {#if cell.id === "employee"}
+                      <div class="flex items-center gap-2 text-center">
+                        <div
+                          class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-center"
+                        >
+                          <User class="w-4 h-4 text-gray-600" />
+                        </div>
+                        <span>{row.original.employee}</span>
                       </div>
-                      <span>{row.original.employee}</span>
-                    </div>
-                  {:else if ["masks", "uniform", "gloves", "hairnet"].includes(cell.id)}
-                    {#if row.original[cell.id]}
-                      <Check class="w-5 h-5 text-blue-500" />
+                    {:else if ["masks", "uniform", "gloves", "hairnet"].includes(cell.id)}
+                      {#if row.original[cell.id]}
+                        <Check class="w-5 h-5 text-blue-500" />
+                      {:else}
+                        <X class="w-5 h-5 text-red-500" />
+                      {/if}
+                    {:else if cell.id === "videoLink"}
+                      <Button
+                        variant="link"
+                        class="text-red-500"
+                        on:click={() => openImageDialog(row.original.videourl)}
+                      >
+                        {row.original.videoLink}
+                      </Button>
                     {:else}
-                      <X class="w-5 h-5 text-red-500" />
+                      <Render of={cell.render()} />
                     {/if}
-                  {:else if cell.id === "videoLink"}
-                    <Button
-                      variant="link"
-                      class="text-red-500"
-                      on:click={() => openImageDialog(row.original.videourl)}
-                    >
-                      {row.original.videoLink}
-                    </Button>
-                  {:else}
-                    <Render of={cell.render()} />
-                  {/if}
-                </Table.Cell>
-              </Subscribe>
-            {/each}
-          </Table.Row>
-        </Subscribe>
-      {/each}
-    </Table.Body>
+                  </Table.Cell>
+                </Subscribe>
+              {/each}
+            </Table.Row>
+          </Subscribe>
+        {/each}
+      </Table.Body>
+    {/if}
   </Table.Root>
   {#if $pageCount > 1}
     <div class="flex flex-row items-center justify-center space-x-4 py-4">
@@ -213,7 +300,7 @@
         size="sm"
         variant="outline"
         class="bg-transparent hover:bg-[#3D81FC] hover:text-white text-[#727272] gap-2"
-        on:click={() => ($pageIndex = $pageIndex - 1)}
+        on:click={() => handlePageChange($pageIndex - 1)}
         disabled={!$hasPreviousPage}
       >
         Previous
@@ -234,7 +321,7 @@
         variant="outline"
         disabled={!$hasNextPage}
         class="bg-transparent hover:bg-[#3D81FC] hover:text-white text-[#727272] gap-2"
-        on:click={() => ($pageIndex = $pageIndex + 1)}
+        on:click={() => handlePageChange($pageIndex + 1)}
       >
         Next
       </Button>

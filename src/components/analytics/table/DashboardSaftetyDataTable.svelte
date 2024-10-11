@@ -95,6 +95,10 @@
     videourl: item.img_link,
   }));
 
+  $: if ($dateRange || $selectedStore) {
+    currentPageIndex = 0;
+  }
+
   $: data = writable(dbData);
 
   async function openImageDialog(imageUri) {

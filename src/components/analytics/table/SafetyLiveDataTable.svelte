@@ -40,7 +40,6 @@
   async function openImageDialog(imageUri) {
     dialogOpen = true;
     selectedImage = null; // Reset selectedImage before fetching
-    console.log(imageUri);
     try {
       const response = await fetch("https://api.moksa.ai/stream", {
         method: "POST",

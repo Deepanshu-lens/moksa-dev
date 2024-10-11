@@ -81,6 +81,10 @@
   };
   // console.log("dashboard efficiency", efficiency.total);
 
+  $: if ($dateRange || $selectedStore) {
+    currentPageIndex = 0;
+  }
+
   $: dbData = efficiency.data.map((item) => {
     return {
       employee: `${item.first_name} ${item.last_name}`,

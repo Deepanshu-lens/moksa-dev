@@ -190,6 +190,12 @@
             />
           </div>
         </div>
+        <div class="grid grid-cols-4 items-center gap-4 py-2">
+          <Label for={`has-kitchen`}>has Kitchen</Label>
+          <div class="col-span-3">
+            <Switch id={`has-kitchen`} bind:checked={hasKitchen} />
+          </div>
+        </div>
         <div class="space-y-2">
           <Label for={`store-timezone`}>Timezone</Label>
           <span class="relative w-full col-span-3">
@@ -215,7 +221,7 @@
             <Switch id={`store-24hr`} bind:checked={isStore24hr} />
           </div>
         </div>
-        <div class="grid grid-cols-4 items-center gap-4 py-2">
+        <div class="grid grid-cols-4 items-center gap-4 py-2 relative">
           <Label for={`store-open-time`}>Open Time</Label>
           <Input
             id={`store-open-time`}
@@ -224,8 +230,14 @@
             bind:value={storeOpenTime}
             disabled={isStore24hr}
           />
+          <span
+            on:click={() => (storeOpenTime = null)}
+            class="absolute right-2 top-1/2 -translate-y-1/2"
+          >
+            <X />
+          </span>
         </div>
-        <div class="grid grid-cols-4 items-center gap-4 py-2">
+        <div class="grid grid-cols-4 items-center gap-4 py-2 relative">
           <Label for={`store-close-time`}>Close Time</Label>
           <Input
             id={`store-close-time`}
@@ -234,6 +246,12 @@
             bind:value={storeCloseTime}
             disabled={isStore24hr}
           />
+          <span
+            on:click={() => (storeCloseTime = null)}
+            class="absolute right-2 top-1/2 -translate-y-1/2"
+          >
+            <X />
+          </span>
         </div>
 
         <div class="mt-6 flex justify-end space-x-3">

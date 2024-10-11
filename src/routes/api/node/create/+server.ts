@@ -30,19 +30,17 @@ export const POST: RequestHandler = async ({
         "node+": [result?.id],
       });
 
-    const ot = data.is24HrStore === false ? `${data.storeOpenTime}:00` : null
-    const ct = data.is24HrStore === false ? `${data.storeCloseTime}:00` : null
     await fetch(`https://api.moksa.ai/store/create`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify({ name: data.name, address: data.address, pincode: data.pin, country: data.country, manager: data.manager, timezone: data.timezone, openingTime: ot, closingTime: ct, is24HrStore: data.isStore24hr, hasKitchen: data.hasKitchen }),
+      body: JSON.stringify({ name: data.name, address: data.address, pincode: data.pin, country: data.country, manager: data.manager, timezone: data.timezone, openingTime: data.storeOpenTime, closingTime: data.storeCloseTime, is24HrStore: data.isStore24hr, hasKitchen: data.hasKitchen }),
     }).then(async (res) => {
       // console.log(res);
       const newS = await res.json();
-      // console.log(newS);
+      console.log(newS);
       const userStoresResponse = await fetch(`https://api.moksa.ai/store/getUserStoreDetailsByUserId/${locals.user.record.moksaId}`, {
         headers: {
           "Content-Type": "application/json",

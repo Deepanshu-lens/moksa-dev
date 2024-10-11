@@ -1116,7 +1116,7 @@
       {#if user.role !== "Operators" && user.role !== "adminNonPaid" && user.role !== "storeEmployee"}
         <Button
           variant="outline"
-          class="flex items-center gap-1"
+          class="flex items-center gap-1 bg-[#3D81FC] text-white"
           on:click={exportCSV}><Upload size={18} /> Export</Button
         >
       {/if}
@@ -1414,11 +1414,13 @@
       </span>
       <div class="h-full w-full">
         {#if safetyDetails?.length === 0 || safetyDetails?.data?.length === 0}
-        {#if $selectedStore.hasKitchen}
-          <p class="text-center text-gray-500 mt-8">No data available</p>
-        {:else}
-          <p class="text-center text-gray-500 mt-8">Store does not have a kitchen</p>
-        {/if}
+          {#if $selectedStore.hasKitchen}
+            <p class="text-center text-gray-500 mt-8">No data available</p>
+          {:else}
+            <p class="text-center text-gray-500 mt-8">
+              Store does not have a kitchen
+            </p>
+          {/if}
         {:else}
           <DashboardSaftetyDataTable
             safetyData={safetyDetails}

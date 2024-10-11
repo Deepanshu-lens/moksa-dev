@@ -88,6 +88,7 @@
   export let searchStore: string;
 
   // $: console.log(searchStore)
+
   $: data = writable(dbData);
 
   $: readableData = readable([], (set) => {
@@ -173,7 +174,7 @@
                   <Button
                     variant="ghost"
                     on:click={props.sort.toggle}
-                    class="hover:bg-transparent text-[#323232] font-semibold opacity-60"
+                    class="hover:bg-transparent text-[#323232] dark:text-white/[.8] font-semibold opacity-60"
                   >
                     <Render of={cell.render()} />
                     <ArrowUpDown class="ml-2 h-4 w-4" />

@@ -16,12 +16,16 @@
   import Spinner from "../ui/spinner/Spinner.svelte";
   import AddStoreDialog from "../dialogs/AddStoreDialog.svelte";
   import * as DropdownMenu from "@/components/ui/dropdown-menu";
+  import { page } from "$app/stores";
+  import PocketBase from "pocketbase";
+
   let cardData = writable([]);
   export let allStores: any[] = [];
   export let theftandcamera: any[] = [];
   export let nodes;
   export let user;
   export let token: string;
+  const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
 
   // $: console.log('aallstores',allStores)
 
@@ -37,11 +41,48 @@
     cardData.set(data);
   });
 
-  // $: combinedStores = allStores?.map((store) => {
-  //   const theftData = theftandcamera.find((t) => t.name === store.name) || {};
-  //   const nodeData = nodes.find((n: any) => n.moksaId === store.id) || {};
-  //   return { ...store, ...theftData, lensId: nodeData ? nodeData.id : null };
-  // });
+  // $: console.log("nodes", nodes);
+
+  const refreshStoreData = async () => {
+    const today = new Date();
+    const oneYearAgo = new Date(today);
+    const oneWeekAgo = new Date(today);
+    oneYearAgo.setFullYear(today.getFullYear() - 1);
+    oneWeekAgo.setDate(today.getDate() - 7);
+    const formatDate = (date: Date) => date.toISOString().split("T")[0];
+    const theftCamera = await fetch(
+      `https://api.moksa.ai/store/getAllStoresWithTheftAndCameraDetails/1/100/${formatDate(oneYearAgo)}/${formatDate(today)}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+
+    const stores = await fetch(
+      "https://api.moksa.ai/store/getAllStoresForDropdown",
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          enableallstores: "true",
+        },
+      },
+    );
+
+    const updatedNodes = await PB.collection("node").getFullList({
+      filter: `session~"${$page.params.slug}"`,
+    });
+    const data = await theftCamera.json();
+    const storeData = await stores.json();
+    theftandcamera = data?.data?.data === undefined ? [] : data?.data?.data;
+    allStores =
+      storeData?.data?.data === undefined ? [] : storeData?.data?.data;
+    nodes = updatedNodes;
+    console.log("updated theft and camera", data);
+  };
+
   $: combinedStores = allStores
     ?.filter((store) => store.id !== -1)
     .map((store) => {
@@ -161,7 +202,7 @@
 >
   <div class="flex items-center justify-end gap-4">
     {#if user.role !== "Operators" && user.role !== "admin" && user.role !== "storeManager" && user.role !== "storeEmployee"}
-      <AddStoreDialog>
+      <AddStoreDialog {refreshStoreData}>
         <Button
           class="bg-[#3D81FC] text-white hover:bg-white hover:text-[#3D81FC]"
         >
