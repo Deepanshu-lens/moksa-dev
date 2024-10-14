@@ -6,6 +6,8 @@ import { decodeJwt } from "@/lib/jwt";
 export const load: LayoutServerLoad = async ({ locals, url, cookies }) => {
   locals.pb?.autoCancellation(false)
 
+  // console.log(locals.user)
+
   const allRoles = await locals.pb?.collection("roles").getFullList();
   const userRole = locals.user === undefined ? undefined : allRoles?.find(role => role.id === locals.user.record.role);
 
@@ -17,6 +19,7 @@ export const load: LayoutServerLoad = async ({ locals, url, cookies }) => {
     "analytics",
     "users",
     "settings",
+    'account'
   ];
 
   if (
@@ -61,6 +64,8 @@ export const load: LayoutServerLoad = async ({ locals, url, cookies }) => {
               expand: "role"
             })
             .getOne(currentUserToken.id);
+
+
         }
       }
 
@@ -100,6 +105,8 @@ export const load: LayoutServerLoad = async ({ locals, url, cookies }) => {
             role: role?.[0]?.roleName,
             moksaId: locals.user.record.moksaId,
             features: matchedFeatures,
+            collectionId: locals.user.record.collectionId,
+            avatar: locals.user.record.avatar,
           } as User,
           session: { ...session },
           nodes: structuredClone(nodes),

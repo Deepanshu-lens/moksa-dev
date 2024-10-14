@@ -246,6 +246,10 @@
     document?.removeEventListener("click", handleClickOutside);
   });
 
+  function getProfilePicture(collectionId, recordId, fileName, size = "0x0") {
+    return `http://${$page.url.hostname}:5555/api/files/_pb_users_auth_/${recordId}/${fileName}?thumb=${size}`;
+  }
+
   // $: console.log(data)
 </script>
 
@@ -269,6 +273,8 @@
               href={item.href}
               on:click={() => {
                 addUserLog(`user clicked on navbar link "${item.text}"`);
+                isOpen = false;
+                showNotifications = false;
               }}
             >
               <span
@@ -319,11 +325,19 @@
         </span>
         {#if user}
           <span class="flex items-center gap-2">
-            <span
-              class="rounded-md w-10 h-10 p-2 bg-[#3D81FC] flex items-center justify-center text-white"
-            >
-              <UserIcon size={18} />
-            </span>
+            {#if user?.avatar}
+              <img
+                src={getProfilePicture(user.collectionId, user.id, user.avatar)}
+                alt="profile"
+                class="w-10 h-10"
+              />
+            {:else}
+              <span
+                class="rounded-md w-10 h-10 p-2 bg-[#3D81FC] flex items-center justify-center text-white"
+              >
+                <UserIcon size={18} />
+              </span>
+            {/if}
             <span class="flex flex-col gap-1">
               <p class="text-white font-medium capitalize">
                 {user?.firstName}
@@ -344,12 +358,24 @@
                   absolute border right-6 top-14 -mr-0.5 mt-3 w-60 origin-top-right divide-y divide-gray-100 rounded-lg bg-background text-sm font-normal shadow-md ring-1 ring-slate-900/5 focus:outline-none sm:-mr-3.5 transform opacity-100 scale-100 z-[200]"
           >
             <span class="flex items-center px-2">
-              <span
-                class="rounded-md w-10 h-10 p-2 bg-[#3D81FC] flex items-center justify-center text-white"
-              >
-                <UserIcon size={18} />
-              </span>
-              <p class="truncate px-3.5 py-3 relative">
+              {#if user?.avatar}
+                <img
+                  src={getProfilePicture(
+                    user.collectionId,
+                    user.id,
+                    user.avatar,
+                  )}
+                  alt="profile"
+                  class="w-10 h-10"
+                />
+              {:else}
+                <span
+                  class="rounded-md w-10 h-10 p-2 bg-[#3D81FC] flex items-center justify-center text-white"
+                >
+                  <UserIcon size={18} />
+                </span>
+              {/if}
+              <div class="truncate px-3.5 py-3 relative">
                 <span
                   class="block text-[#323232] dark:text-white/[.7] font-medium capitalize"
                 >
@@ -363,11 +389,14 @@
                 <a
                   href="/account/{sessionId}"
                   class="flex gap-1 items-center text-[#3D81FC] text-sm"
+                  on:click={() => {
+                    isOpen = false;
+                  }}
                 >
                   <Settings size={16} />
                   Manage Account
                 </a>
-              </p>
+              </div>
             </span>
 
             <div

@@ -279,113 +279,130 @@
       {/each}
     </Table.Header>
     <div class="w-full h-[350px] overflow-y-auto flex">
-      <Table.Body {...$tableBodyAttrs} class="w-full">
-        {#each $pageRows as row (row.id)}
-          <Subscribe rowAttrs={row.attrs()} let:rowAttrs>
-            <Table.Row {...rowAttrs} class="border-b flex items-center w-full">
-              {#each row.cells as cell (cell.id)}
-                <Subscribe attrs={cell.attrs()} let:attrs>
-                  <Table.Cell
-                    {...attrs}
-                    class="flex w-[14.285%] items-center justify-center flex-1 whitespace-nowrap py-2"
-                  >
-                    {#if cell.id === "storeName"}
-                      <div
-                        class="flex items-center gap-2 text-sm min-w-[150px] text-start justify-start"
-                      >
-                        <Store class="text-blue-600" />
-                        <span class="flex gap-2 items-center"
-                          >{row.original.storeName}
-                          {#if row.original.live}
-                            <span class="text-red-500 font-bold text-xs"
-                              >Live</span
-                            >
-                          {/if}
-                        </span>
-                      </div>
-                    {:else if cell.id === "employee"}
-                      <div class="flex items-center gap-2">
-                        <!-- <img src="/path-to-employee-image.jpg" alt={row.original.employee} class="w-8 h-8 rounded-full" /> -->
-                        <User size="20" />
-                        <span>{row.original.employee}</span>
-                      </div>
-                    {:else if cell.id === "videoLink"}
-                      <Button
-                        variant="link"
-                        class="text-red-500 p-0 flex items-center gap-2"
-                        on:click={() => {
-                          openVideoDialog(row.original.videoUri);
-                        }}
-                      >
-                        <Play size={16} />
-                        {row.original.videoLink}
-                      </Button>
-                    {:else if cell.id === "callHistory"}
-                      <span class="flex items-center gap-2">
-                        <svg
-                          class="w-4 h-4 text-green-500"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
+      {#if $theftData?.data?.length > 0}
+        <Table.Body {...$tableBodyAttrs} class="w-full">
+          {#each $pageRows as row (row.id)}
+            <Subscribe rowAttrs={row.attrs()} let:rowAttrs>
+              <Table.Row
+                {...rowAttrs}
+                class="border-b flex items-center w-full"
+              >
+                {#each row.cells as cell (cell.id)}
+                  <Subscribe attrs={cell.attrs()} let:attrs>
+                    <Table.Cell
+                      {...attrs}
+                      class="flex w-[14.285%] items-center justify-center flex-1 whitespace-nowrap py-2"
+                    >
+                      {#if cell.id === "storeName"}
+                        <div
+                          class="flex items-center gap-2 text-sm min-w-[150px] text-start justify-start"
                         >
-                          <path
-                            d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          />
-                        </svg>
-                        {row.original.callHistory}
-                      </span>
-                    {:else}
-                      <Render of={cell.render()} />
-                    {/if}
-                  </Table.Cell>
-                </Subscribe>
-              {/each}
-            </Table.Row>
-          </Subscribe>
-        {/each}
-      </Table.Body>
+                          <Store class="text-blue-600" />
+                          <span class="flex gap-2 items-center"
+                            >{row.original.storeName}
+                            {#if row.original.live}
+                              <span class="text-red-500 font-bold text-xs"
+                                >Live</span
+                              >
+                            {/if}
+                          </span>
+                        </div>
+                      {:else if cell.id === "employee"}
+                        <div class="flex items-center gap-2">
+                          <!-- <img src="/path-to-employee-image.jpg" alt={row.original.employee} class="w-8 h-8 rounded-full" /> -->
+                          <User size="20" />
+                          <span>{row.original.employee}</span>
+                        </div>
+                      {:else if cell.id === "videoLink"}
+                        <Button
+                          variant="link"
+                          class="text-red-500 p-0 flex items-center gap-2"
+                          on:click={() => {
+                            openVideoDialog(row.original.videoUri);
+                          }}
+                        >
+                          <Play size={16} />
+                          {row.original.videoLink}
+                        </Button>
+                      {:else if cell.id === "callHistory"}
+                        <span class="flex items-center gap-2">
+                          <svg
+                            class="w-4 h-4 text-green-500"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                            />
+                          </svg>
+                          {row.original.callHistory}
+                        </span>
+                      {:else}
+                        <Render of={cell.render()} />
+                      {/if}
+                    </Table.Cell>
+                  </Subscribe>
+                {/each}
+              </Table.Row>
+            </Subscribe>
+          {/each}
+        </Table.Body>
+      {:else}
+        <Table.Body {...$tableBodyAttrs} class="w-full">
+          <Table.Row class="border-b flex items-center w-full">
+            <Table.Cell
+              class="flex w-[14.285%] items-center justify-center flex-1 whitespace-nowrap py-2"
+            >
+              <p class="text-center text-gray-500">No data found</p>
+            </Table.Cell>
+          </Table.Row>
+        </Table.Body>
+      {/if}
     </div>
   </Table.Root>
 </div>
-<div class="flex flex-row items-center justify-center space-x-4 py-4">
-  <Button
-    size="sm"
-    variant="outline"
-    class="bg-transparent hover:bg-transparent text-[#727272] gap-2"
-    on:click={() => ($pageIndex = $pageIndex - 1)}
-    disabled={!$hasPreviousPage}
-  >
-    Previous
-  </Button>
-  <div class="flex flex-row gap-2 items-center text-sm text-muted-foreground">
-    <span class="p-2 rounded-md aspect-square bg-[#015a62] bg-opacity-10">
-      {$pageIndex + 1 < 10 ? "0" + ($pageIndex + 1) : $pageIndex + 1}
-    </span>
-    of
-    <span class="p-2 rounded-md aspect-square bg-[#015a62] bg-opacity-20">
-      {$pageCount < 10 ? "0" + $pageCount : $pageCount}
-    </span> Page.
+
+{#if $theftData?.data?.length > 0}
+  <div class="flex flex-row items-center justify-center space-x-4 py-4">
+    <Button
+      size="sm"
+      variant="outline"
+      class="bg-transparent hover:bg-transparent text-[#727272] gap-2"
+      on:click={() => ($pageIndex = $pageIndex - 1)}
+      disabled={!$hasPreviousPage}
+    >
+      Previous
+    </Button>
+    <div class="flex flex-row gap-2 items-center text-sm text-muted-foreground">
+      <span class="p-2 rounded-md aspect-square bg-[#015a62] bg-opacity-10">
+        {$pageIndex + 1 < 10 ? "0" + ($pageIndex + 1) : $pageIndex + 1}
+      </span>
+      of
+      <span class="p-2 rounded-md aspect-square bg-[#015a62] bg-opacity-20">
+        {$pageCount < 10 ? "0" + $pageCount : $pageCount}
+      </span> Page.
+    </div>
+
+    <Button
+      size="sm"
+      variant="outline"
+      disabled={!$hasNextPage && currentApiPage >= totalApiPages}
+      class="bg-transparent hover:bg-transparent text-[#727272] gap-2"
+      on:click={() => {
+        if ($pageIndex < totalLocalPages - 1) {
+          $pageIndex = $pageIndex + 1;
+        }
+      }}
+    >
+      Next
+    </Button>
   </div>
-
-  <Button
-    size="sm"
-    variant="outline"
-    disabled={!$hasNextPage && currentApiPage >= totalApiPages}
-    class="bg-transparent hover:bg-transparent text-[#727272] gap-2"
-    on:click={() => {
-      if ($pageIndex < totalLocalPages - 1) {
-        $pageIndex = $pageIndex + 1;
-      }
-    }}
-  >
-    Next
-  </Button>
-</div>
-
+{/if}
 <!-- on:close={() => {
     console.log("revoking video");
     if (selectedVideo) {

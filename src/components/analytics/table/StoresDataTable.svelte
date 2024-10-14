@@ -254,18 +254,17 @@
                     </span>
                   {:else if cell.id === "storeManager"}
                     <span
-                      class="text-sm text-[#727272] flex items-center gap-2"
+                      class="text-sm text-[#727272] flex items-center text-start justify-start gap-2 min-w-[125px]"
                     >
-                      <!-- <img
-                        src={row.original.managerImage}
-                        alt={row.original.storeManager}
-                        class="size-7  object-cover"
-                      /> -->
                       <User size={20} class="text-[#3D81FC]" />
                       {row.original.storeManager}
                     </span>
                   {:else}
+                    <!-- <span
+                      class={`${cell.id === "location" ? "text-start min-w-[150px] overflow-x-scroll" : ""}`}
+                    > -->
                     <Render of={cell.render()} />
+                    <!-- </span> -->
                   {/if}
                 </Table.Cell>
               </Subscribe>

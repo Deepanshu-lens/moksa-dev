@@ -1479,7 +1479,7 @@
           <div class="flex items-center justify-center h-full w-full">
             <Spinner />
           </div>
-        {:else if $listtheft?.data?.length > 0}
+        {:else if $listtheft?.column?.length > 0}
           {#key tableKey}
             <TheftDataTable
               {token}

@@ -3,15 +3,16 @@ export const ssr = false
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, fetch, locals }) => {
-    console.log(locals.user)
+    // console.log(locals.user)
+    // console.log(locals.user)
     const { slug } = params;
-    console.log(slug)
+    // console.log(slug)
     try {
         const response = await locals.pb?.collection('users').getFullList({
             filter: `session ~ "${slug}"`
         })
 
-        console.log(response)
+        // console.log(response)
         const serializableAccount = response ? JSON.parse(JSON.stringify(response)) : null;
 
         return {

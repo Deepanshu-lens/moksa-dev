@@ -106,12 +106,12 @@
               >
                 <Table.Head
                   {...attrs}
-                  class="text-[#727272] whitespace-nowrap h-full flex items-center justify-center flex-1 w-full"
+                  class={`text-[#727272] whitespace-nowrap h-full flex items-center justify-center  flex-1 w-full `}
                 >
                   <Button
                     variant="ghost"
                     on:click={props.sort.toggle}
-                    class="hover:bg-transparent text-[#727272] opacity-60"
+                    class={`hover:bg-transparent text-[#727272] opacity-60 ${cell.id === "storeName" ? "min-w-[200px] text-start justify-start" : ""}`}
                   >
                     <Render of={cell.render()} />
                     <ArrowUpDown class="ml-2 h-4 w-4" />
@@ -138,7 +138,7 @@
                 >
                   {#if cell.id === "storeName"}
                     <div
-                      class="flex items-center justify-center gap-2 text-sm text-center"
+                      class="flex items-center min-w-[200px] text-start gap-2 text-sm"
                     >
                       <Store size={16} class="flex-shrink-0" />
                       <span class="text-sm">{row.original.storeName}</span>
