@@ -220,9 +220,13 @@
 
     socket.on(`employee_safety_store_${storeId}`, (data) => {
       console.log(`Received employee_safety for store ${storeId}:`, data);
+      // if($selectedStore.value === -1) {
       liveData.update((currentData) => {
         return [{ storeId, ...data }, ...currentData].slice(0, 100);
       });
+      // } else {
+
+      // }
     });
 
     socket.on("disconnect", () => {
@@ -356,6 +360,42 @@
       <!-- <Button variant="outline" class="flex items-center gap-1">
         <ListFilter size={18} /> Filters</Button
       > -->
+      <Select.Root portal={null}>
+        <Select.Trigger
+          class="w-[150px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg dark:bg-transparent"
+        >
+          <Select.Value
+            placeholder={fruits.length > 0
+              ? $selectedStore?.label
+              : "No Stores"}
+          />
+        </Select.Trigger>
+
+        <Select.Content class="max-h-[200px] overflow-y-auto">
+          <div class="p-2">
+            <Input
+              type="text"
+              placeholder="Search stores..."
+              bind:value={filterText}
+              class="mb-2"
+            />
+          </div>
+          <Select.Group>
+            {#if filteredFruits.length > 0}
+              {#each filteredFruits as fruit}
+                <Select.Item
+                  on:click={() => handleSelect(fruit)}
+                  class="px-1"
+                  value={fruit.value}
+                  label={fruit.label}>{fruit.label}</Select.Item
+                >
+              {/each}
+            {:else}
+              <Select.Item disabled>N/A</Select.Item>
+            {/if}
+          </Select.Group>
+        </Select.Content>
+      </Select.Root>
       <Button
         class="flex items-center gap-1 bg-[#3D81FC] text-white hover:bg-white hover:text-[#3D81FC]"
         on:click={() => {
@@ -413,42 +453,6 @@
         <p class=" text-lg font-semibold flex items-center gap-2">
           Safety Procedures
         </p>
-        <Select.Root portal={null}>
-          <Select.Trigger
-            class="w-[150px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg dark:bg-transparent"
-          >
-            <Select.Value
-              placeholder={fruits.length > 0
-                ? $selectedStore?.label
-                : "No Stores"}
-            />
-          </Select.Trigger>
-
-          <Select.Content class="max-h-[200px] overflow-y-auto">
-            <div class="p-2">
-              <Input
-                type="text"
-                placeholder="Search stores..."
-                bind:value={filterText}
-                class="mb-2"
-              />
-            </div>
-            <Select.Group>
-              {#if filteredFruits.length > 0}
-                {#each filteredFruits as fruit}
-                  <Select.Item
-                    on:click={() => handleSelect(fruit)}
-                    class="px-1"
-                    value={fruit.value}
-                    label={fruit.label}>{fruit.label}</Select.Item
-                  >
-                {/each}
-              {:else}
-                <Select.Item disabled>N/A</Select.Item>
-              {/if}
-            </Select.Group>
-          </Select.Content>
-        </Select.Root>
       </span>
       <div class="h-full w-full">
         <!-- {#if $safetyData !== [] && $safetyData?.data?.data.length > 0}

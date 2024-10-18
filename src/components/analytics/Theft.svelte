@@ -87,6 +87,13 @@
   function createBarChart() {
     if (barChartCanvas && !barChart) {
       const ctx = barChartCanvas.getContext("2d");
+      const gradient = ctx.createLinearGradient(0, 400, 0, 0);
+      gradient.addColorStop(0, "#357DFF");
+      gradient.addColorStop(1, "#053895");
+
+      const gradient2 = ctx.createLinearGradient(0, 400, 0, 0);
+      gradient2.addColorStop(0, "#FFB156");
+      gradient2.addColorStop(1, "#FF007A");
 
       if (ctx) {
         Chart.register(BarController, BarElement, CategoryScale, LinearScale);
@@ -102,17 +109,35 @@
           type: "bar",
           data: {
             labels: labels,
+            // datasets: [
+            //   {
+            //     label: "Theft Detected",
+            //     data: detectedData,
+            //     backgroundColor: "#FF3B30",
+            //     borderRadius: 4,
+            //   },
+            //   {
+            //     label: "Theft Prevented",
+            //     data: preventedData,
+            //     backgroundColor: "#00A86B",
+            //     borderRadius: 4,
+            //   },
+            // ],
             datasets: [
               {
                 label: "Theft Detected",
                 data: detectedData,
-                backgroundColor: "#FF3B30",
+                backgroundColor: gradient,
+                borderColor: gradient,
+                borderWidth: 1,
                 borderRadius: 4,
               },
               {
                 label: "Theft Prevented",
                 data: preventedData,
-                backgroundColor: "#00A86B",
+                backgroundColor: gradient2,
+                borderColor: gradient2,
+                borderWidth: 1,
                 borderRadius: 4,
               },
             ],
@@ -1112,6 +1137,8 @@
   } else if ($dateRange === "12 Months") {
     from = new Date(new Date().getTime() - 12 * 30 * 24 * 60 * 60 * 1000);
   }
+
+  $: console.log($listtheft);
 </script>
 
 <section
@@ -1217,7 +1244,7 @@
   </div>
   <div class="grid grid-cols-8 grid-rows-12 gap-4 my-4 h-[1600px]">
     <div
-      class="col-span-2 border rounded-md bg-gradient-to-r from-[#FFB156] to-[#FF007A] p-2 flex items-center gap-3 max-h-[100px]"
+      class="col-span-2 border rounded-md bg-gradient-to-r from-[#357DFF] to-[#053895] p-2 flex items-center gap-3 max-h-[100px]"
     >
       <span
         class="size-[60px] grid place-items-center text-white bg-white bg-opacity-20 rounded-full rotate-90"
@@ -1245,7 +1272,7 @@
       </span>
     </div>
     <div
-      class="col-span-2 border rounded-md bg-gradient-to-r from-[#00FEA3] to-[#007077] p-2 flex items-center gap-3 max-h-[100px]"
+      class="col-span-2 border rounded-md bg-gradient-to-r from-[#FFB156] to-[#FF007A] p-2 flex items-center gap-3 max-h-[100px]"
     >
       <span
         class="size-[60px] grid place-items-center text-white bg-white bg-opacity-20 rounded-full rotate-90"
@@ -1428,7 +1455,7 @@
             a 15.9155 15.9155 0 0 1 0 31.831
             a 15.9155 15.9155 0 0 1 0 -31.831"
                 fill="none"
-                stroke="#FF3B30"
+                stroke="#FF007A"
                 stroke-width="4"
                 stroke-linecap="round"
               />
@@ -1437,7 +1464,7 @@
             a 15.9155 15.9155 0 0 1 0 31.831
             a 15.9155 15.9155 0 0 1 0 -31.831"
                 fill="none"
-                stroke="#00A86B"
+                stroke="#357DFF"
                 stroke-width="4"
                 stroke-dasharray="{detectionPercentage}, 100"
               />
@@ -1451,12 +1478,16 @@
             <p
               class="flex gap-2 items-center text-xs text-[#030229] dark:text-white"
             >
-              <span class="w-2 h-2 rounded-full bg-[#FF3B30]" /> Detected
+              <span
+                class="w-2 h-2 rounded-full bg-gradient-to-r from-[#357DFF] to-[#053895]"
+              /> Detected
             </p>
             <p
               class="flex gap-2 items-center text-xs text-[#030229] dark:text-white"
             >
-              <span class="w-2 h-2 rounded-full bg-[#00A86B]" /> Prevented
+              <span
+                class="w-2 h-2 rounded-full bg-gradient-to-r from-[#FFB156] to-[#FF007A]"
+              /> Prevented
             </p>
           </span>
         </span>
@@ -1484,6 +1515,7 @@
             <TheftDataTable
               {token}
               theftData={listtheft}
+              column={$listtheft?.column}
               {dateRange}
               {selectedStore}
             />
@@ -1519,12 +1551,12 @@
         <span class="flex items-center gap-2">
           <p class="flex items-center gap-2 text-xs">
             <span
-              class="size-2 rounded-full bg-[#5B93FF] flex-shrink-0"
+              class="size-2 rounded-full bg-gradient-to-r from-[#357DFF] to-[#053895] flex-shrink-0"
             />Detected
           </p>
           <p class="flex items-center gap-2 text-xs">
             <span
-              class="size-2 rounded-full bg-[#FF8F6B] flex-shrink-0"
+              class="size-2 rounded-full bg-gradient-to-r from-[#FFB156] to-[#FF007A] flex-shrink-0"
             />Prevented
           </p>
         </span>

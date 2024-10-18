@@ -118,7 +118,7 @@ export const load: PageServerLoad = async ({ fetch, cookies, locals }) => {
     }
 
     const storePeopleCount = async () => {
-        const spc = await fetch(`https://api.moksa.ai/people/getPeopleCount/-1/${formatDate(oneWeekAgo)}/${formatDate(today)}`, {
+        const spc = await fetch(`https://api.moksa.ai/people/getPeopleCount/-1`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${mToken}`,

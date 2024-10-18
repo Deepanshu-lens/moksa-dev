@@ -33,7 +33,7 @@
   let chart: Chart | null = null;
   let storeData: any = writable([]);
   let liveData = writable([]);
-  let dateRange = writable("7 Days");
+  let dateRange = writable("7");
   let value: DateRange | undefined = undefined;
   let startValue: DateValue | undefined = undefined;
   let customDateLabel = "Custom";
@@ -49,11 +49,15 @@
     label: fruits?.[0]?.label,
   });
 
-  $: console.log($selectedStore);
-
   // let allS = writable(fruits);
 
   let socket: any;
+
+  onMount(async () => {
+    if (allStores.length > 0) {
+      getLiveData($selectedStore.value);
+    }
+  });
 
   function setupSocket() {
     if (socket) {
@@ -73,7 +77,7 @@
     });
 
     socket.on("connect", () => {
-      console.log(`connected for ${$selectedStore.value}`);
+      console.log(`connected for ${$selectedStore.value}, ${userID}`);
       socket.emit("joinUser", userID);
       socket.emit("joinStore", $selectedStore.value);
     });
@@ -84,7 +88,39 @@
         data,
       );
       liveData.update((currentData) => {
-        return [data, ...currentData].slice(0, 100);
+        console.log(currentData);
+        const existingStoreIndex = currentData.data.findIndex(
+          (store) => store.store_id === data.store_id,
+        );
+
+        if (existingStoreIndex !== -1) {
+          // Update existing store data
+          const updatedData = [...currentData.data];
+          updatedData[existingStoreIndex] = {
+            ...updatedData[existingStoreIndex],
+            noofcustomers: data.noofcustomers.toString(),
+            going_out_count: data.noofcustomersgoingout.toString(),
+          };
+          return { ...currentData, data: updatedData };
+        } else {
+          // Add new store data
+          console.log(data);
+          const newStoreData = {
+            store_id: data.store_id,
+            store:
+              data.store_name ||
+              allStores.find((store) => store.id === data.store_id)?.name ||
+              data.store_id, // Assuming the socket message includes store_name
+            noofcustomers: data.noofcustomers.toString(),
+            going_out_count: data.noofcustomersgoingout.toString(),
+            busyhour: data.busyhour,
+            predictedmean: 0,
+            predicted_percentage: 0,
+            total_count: data.going_in.toString(),
+          };
+          return { ...currentData, data: [...currentData.data, newStoreData] };
+          console.log("recieved data from unknow store");
+        }
       });
     });
 
@@ -117,7 +153,7 @@
   }
 
   $: {
-    if ($selectedStore.value !== undefined) {
+    if ($selectedStore.value !== undefined && token !== "") {
       if ($dateRange === "7 Days") {
         console.log("called week data");
         getWeekData($selectedStore.value);
@@ -148,7 +184,7 @@
   async function getLiveData(storeId: number) {
     console.log("called live data");
     const response = await fetch(
-      `https://api.moksa.ai/people/getPeopleCountLive/${storeId}/30/1/30`,
+      `https://api.moksa.ai/people/getPeopleCountLive/${storeId}/1/30`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -160,12 +196,6 @@
     console.log("live 30 min data", storeId, data);
     liveData.set(data?.data);
   }
-
-  onMount(async () => {
-    if (allStores.length > 0) {
-      getLiveData($selectedStore.value);
-    }
-  });
 
   async function getWeekData(storeId: number) {
     const today = new Date().toISOString().split("T")[0];
@@ -202,23 +232,23 @@
 
   async function fetchDataForDateRange() {
     customDateLabel = "Custom";
-
+    console.log(token);
     console.log("called date range function");
     const today = new Date();
     let startDate = new Date(today);
 
     switch ($dateRange) {
-      case "7 Days":
+      case "7":
         startDate.setDate(today.getDate() - 7);
         break;
-      case "15 Days":
-        startDate.setDate(today.getDate() - 15);
+      case "30":
+        startDate.setMonth(today.getMonth() - 1);
         break;
-      case "30 Days":
-        startDate.setDate(today.getDate() - 30);
-        break;
-      case "12 Months":
+      case "year":
         startDate.setFullYear(today.getFullYear() - 1);
+        break;
+      case "yesterday":
+        startDate.setDate(today.getDate() - 1);
         break;
       default:
         startDate.setDate(today.getDate() - 7);
@@ -235,23 +265,15 @@
     try {
       // Call the three APIs
       const d = await fetch(
-        `https://api.moksa.ai/people/getPeopleCount/${storeId}/${formatDate(startDate)}/${formatDate(today)}`,
+        `https://api.moksa.ai/people/getPeopleCount/${storeId}`,
         {
-          headers:
-            $selectedStore.value !== -1
-              ? {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${token}`,
-                  datetype: $dateRange.toLowerCase(),
-                  pagenumber: 1,
-                  pagepersize: 100,
-                }
-              : {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${token}`,
-                  pagenumber: 1,
-                  pagepersize: 100,
-                },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+            datetype: $dateRange,
+            pagenumber: 1,
+            pagepersize: 100,
+          },
         },
       );
       console.log(d);
@@ -267,7 +289,7 @@
   }
 
   async function fetchCustomDateData() {
-    console.log("fetching custom date data");
+    console.log("fetching custom date data", $selectedStore.value);
     const start = value?.start
       ? `${value.start.year}-${String(value.start.month).padStart(2, "0")}-${String(value.start.day).padStart(2, "0")}`
       : "";
@@ -278,25 +300,22 @@
     console.log(end);
     const storeId = $selectedStore.value;
     try {
+      // console.log("fetching custom date data");
+      // console.log(token);
       // Call the three APIs
       const d = await fetch(
-        `https://api.moksa.ai/people/getPeopleCount/${storeId}/${start}/${end}`,
+        `https://api.moksa.ai/people/getPeopleCount/${storeId}`,
         {
-          headers:
-            $selectedStore.value !== -1
-              ? {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${token}`,
-                  datetype: $dateRange,
-                  pagenumber: 1,
-                  pagepersize: 100,
-                }
-              : {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${token}`,
-                  pagenumber: 1,
-                  pagepersize: 100,
-                },
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+            datetype: "custom",
+            pagenumber: 1,
+            pagepersize: 100,
+            startdate: start,
+            enddate: end,
+          },
         },
       );
       console.log(d);
@@ -345,7 +364,6 @@
   class="w-full p-4 flex flex-col max-h-[calc(100vh-75px)] overflow-y-auto hide-scrollbar"
 >
   <div class="flex items-center justify-end">
-  
     <span class="flex items-center gap-3">
       <!-- <Button variant="outline" class="flex items-center gap-1">
         <ListFilter size={18} /> Filters</Button
@@ -375,7 +393,7 @@
           </Select.Group>
         </Select.Content>
       </Select.Root> -->
-      <Select.Root portal={null}>
+      <!-- <Select.Root portal={null}>
         <Select.Trigger
           class="w-[200px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg dark:bg-transparent"
         >
@@ -395,8 +413,6 @@
           <Select.Group>
             {#if filteredFruits.length > 0}
               {#each filteredFruits as fruit}
-                <!-- on:click={() => handleSelect(fruit)}
-                  -->
                 <Select.Item
                   on:click={() => {
                     selectedStore.set(fruit);
@@ -412,14 +428,16 @@
             {/if}
           </Select.Group>
         </Select.Content>
-      </Select.Root>
+      </Select.Root> -->
       <Button
         class="flex items-center gap-1 bg-[#3D81FC] text-white hover:bg-white hover:text-[#3D81FC]"
         ><Upload size={18} /> Export Reports</Button
       >
     </span>
   </div>
-  <div class="grid grid-cols-8 grid-rows-9 gap-4 mt-4">
+  <div
+    class="grid grid-cols-8 grid-rows-9 gap-4 mt-4 w-full max-h-[calc(100vh-150px)] overflow-y-auto"
+  >
     <div
       class="col-span-2 border rounded-md bg-gradient-to-r from-[#00FEA3] to-[#007077] p-2 flex items-center gap-3 max-h-[80px]"
     >
@@ -434,7 +452,7 @@
       </span>
     </div>
     <div
-      class="col-span-2 border rounded-md bg-gradient-to-r from-[#02A7FD] to-[#141C64] p-2 flex items-center gap-3 max-h-[80px]"
+      class="col-span-2 invisible border rounded-md bg-gradient-to-r from-[#02A7FD] to-[#141C64] p-2 flex items-center gap-3 max-h-[80px]"
     >
       <span
         class="size-[60px] grid place-items-center text-white bg-white bg-opacity-20 rounded-full"
@@ -520,68 +538,77 @@
       </span>
     </div> -->
     <div
-      class="col-span-8 row-span-4 border rounded-md p-2 flex flex-col dark:border-white/[.7] relative"
+      class="col-span-8 row-span-4 border rounded-md p-2 flex flex-col dark:border-white/[.7] relative min-h-[450px]"
     >
-      <span class="flex gap-4 items-center absolute left-1/2 -translate-x-1/2 top-3">
       <span
-        class="flex items-center border-black border-opacity-[18%] h-[40px] border-[1px] rounded-md dark:border-white"
+        class="flex gap-4 items-center absolute left-1/2 -translate-x-1/2 top-3"
       >
-        <button
-          class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "7 Days" ? " rounded-l-md bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
-          on:click={() => {
-            dateRange.set("7 Days");
-            value = undefined;
-          }}>7 Days</button
+        <span
+          class="flex items-center border-black border-opacity-[18%] h-[40px] border-[1px] rounded-md dark:border-white"
         >
-        <button
-          class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "15 Days" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
-          on:click={() => {
-            dateRange.set("15 Days");
-            value = undefined;
-          }}>15 Days</button
-        >
-        <button
-          class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "30 Days" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
-          on:click={() => {
-            dateRange.set("30 Days");
-            value = undefined;
-          }}>30 Days</button
-        >
-        <button
-          class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "12 Months" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
-          on:click={() => {
-            dateRange.set("12 Months");
-            value = undefined;
-          }}>12 Months</button
-        >
-        <Popover.Root openFocus bind:open={close}>
-          <Popover.Trigger asChild let:builder>
-            <Button
-              on:click={() => {
-                dateRange.set("Custom");
-                value = undefined;
-              }}
-              builders={[builder]}
-              class={`2xl:py-2 2xl:px-3 py-1 px-2  text-sm hover:bg-[#0BA5E9] hover:text-white ${$dateRange === "custom" ? "bg-[#0BA5E9] text-white rounded-r-md" : "text-black dark:text-white bg-transparent dark:border-white"}`}
-            >
-              {customDateLabel}</Button
-            >
-          </Popover.Trigger>
-          <Popover.Content class="w-auto p-0" align="start">
-            <RangeCalendar
-              bind:value
-              bind:startValue
-              initialFocus
-              numberOfMonths={2}
-              placeholder={value?.start}
-            />
-          </Popover.Content>
-        </Popover.Root>
+          <button
+            class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "yesterday" ? " rounded-l-md bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
+            on:click={() => {
+              dateRange.set("yesterday");
+              value = undefined;
+            }}>Yesterday</button
+          >
+          <button
+            class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "7" ? " bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
+            on:click={() => {
+              dateRange.set("7");
+              value = undefined;
+            }}>Last Week</button
+          >
+          <button
+            class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "30" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
+            on:click={() => {
+              dateRange.set("30");
+              value = undefined;
+            }}>Last Month</button
+          >
+
+          <button
+            class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "year" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
+            on:click={() => {
+              dateRange.set("year");
+              value = undefined;
+            }}>Last Year</button
+          >
+          <Popover.Root openFocus bind:open={close}>
+            <Popover.Trigger asChild let:builder>
+              <Button
+                on:click={() => {
+                  dateRange.set("Custom");
+                  value = undefined;
+                }}
+                builders={[builder]}
+                class={`2xl:py-2 2xl:px-3 py-1 px-2  text-sm hover:bg-[#0BA5E9] hover:text-white ${$dateRange === "custom" ? "bg-[#0BA5E9] text-white rounded-r-md" : "text-black dark:text-white bg-transparent dark:border-white"}`}
+              >
+                {customDateLabel}</Button
+              >
+            </Popover.Trigger>
+            <Popover.Content class="w-auto p-0" align="start">
+              <RangeCalendar
+                bind:value
+                bind:startValue
+                initialFocus
+                numberOfMonths={2}
+                placeholder={value?.start}
+              />
+            </Popover.Content>
+          </Popover.Root>
+        </span>
       </span>
-    </span>
       <div class="h-full w-full">
         <!-- {#if $storeData.length > 0} -->
-        <PeopleCountDataTable {storeData} {selectedStore} />
+        <PeopleCountDataTable
+          {storeData}
+          {selectedStore}
+          {token}
+          {dateRange}
+          {value}
+        />
         <!-- {:else}
           <span
             class="rounded-t-xl w-full h-[50px] bg-transparent flex items-center justify-between px-4"

@@ -35,7 +35,6 @@
   let theftData: any[] = data?.theftData ?? [];
   let usersData: any[] = data?.usersData ?? [];
   let storePeopleCount: any[] = data?.storePeopleCount?.data?.data ?? [];
-  let aisleStoreData = writable([]);
 
   const { user } = data;
   // console.log(user);
@@ -62,8 +61,6 @@
     } else {
       selectedNode.set(nodes[0]);
     }
-    const asd = await getAisleData();
-    aisleStoreData.set(asd);
   });
 
   async function getNodes(): Promise<Node[]> {
@@ -90,17 +87,6 @@
       );
     }
     return [];
-  }
-
-  async function getAisleData() {
-    const response = await fetch(`/api/aisle/getByStoreId`, {
-      method: "POST",
-      body: JSON.stringify({
-        storeId: allStores,
-      }),
-    });
-    const data = await response.json();
-    return data;
   }
 </script>
 
@@ -298,7 +284,7 @@
       curruser={data.user}
     />
   {:else if view === 6}
-    <HeatMap {aisleStoreData} {allStores} token={data.moksaToken} />
+    <HeatMap {allStores} token={data.moksaToken} />
   {:else if view === 7}
     <Safety {allStores} token={data.moksaToken} {user} />
   {/if}

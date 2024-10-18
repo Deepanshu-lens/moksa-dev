@@ -577,7 +577,7 @@
           },
         }).then((res) => res.json()),
         fetch(
-          `https://api.moksa.ai/people/getPeopleCount/-1/${formatDate(startDate)}/${formatDate(today)}`,
+          `https://api.moksa.ai/people/getPeopleCount/${$selectedStore.value}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -586,7 +586,7 @@
                 $dateRange === "7 Days"
                   ? "7"
                   : $dateRange === "15 Days"
-                    ? "15"
+                    ? "7"
                     : $dateRange === "30 Days"
                       ? "30"
                       : $dateRange === "12 Months"
@@ -678,32 +678,38 @@
             },
           },
         ).then((res) => res.json()),
-        fetch(`https://api.moksa.ai/theft/theftDetectionDetailsByStoreid/-1`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-            datetype:
-              $dateRange === "7 Days"
-                ? "7"
-                : $dateRange === "15 Days"
-                  ? "15"
-                  : $dateRange === "30 Days"
-                    ? "30"
-                    : $dateRange === "12 Months"
-                      ? "year"
-                      : $dateRange === "custom"
-                        ? "custom"
-                        : "7",
-            startDate: start,
-            endDate: end,
+        fetch(
+          `https://api.moksa.ai/theft/theftDetectionDetailsByStoreid/${$selectedStore.value}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+              datetype:
+                $dateRange === "7 Days"
+                  ? "7"
+                  : $dateRange === "15 Days"
+                    ? "15"
+                    : $dateRange === "30 Days"
+                      ? "30"
+                      : $dateRange === "12 Months"
+                        ? "year"
+                        : $dateRange === "custom"
+                          ? "custom"
+                          : "7",
+              startDate: start,
+              endDate: end,
+            },
           },
-        }).then((res) => res.json()),
-        fetch(`https://api.moksa.ai/people/getPeopleCount/-1/${start}/${end}`, {
+        ).then((res) => res.json()),
+        fetch(`https://api.moksa.ai/people/getPeopleCount/-1`, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
             Pagepersize: "100",
             Pagenumber: "1",
+            startdate: start,
+            enddate: end,
+            datetype: "custom",
           },
         }).then((res) => res.json()),
         fetch(

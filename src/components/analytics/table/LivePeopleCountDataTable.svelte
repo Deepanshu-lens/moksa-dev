@@ -33,17 +33,35 @@
 
   $: console.log("LivePeopleCountDataTable received new data:", liveData);
 
-  $: dbData = liveData.map((item: any) => ({
-    storeName:
-      item.store_id === selectedStore.value
-        ? selectedStore.label
-        : allStores.find((store) => store.id === item.store_id)?.name ||
-          item.store_id,
+  $: mapData = liveData?.data === undefined ? [] : liveData.data;
+
+  $: console.log("mapData", mapData);
+
+  $: dbData = mapData.map((item: any) => ({
+    storeName: item.store,
+    // item.store_id === selectedStore.value
+    //   ? selectedStore.label
+    //   : allStores.find((store) => store.id === item.store_id)?.name ||
+    //     item.store_id,
     // customerCount: Number(item.going_out) - Number(item.going_in),
-    goingIn: Number(item.going_in),
-    goingOut: Number(item.going_out),
+    customerCount: Number(item.noofcustomers),
+    goingOut: Number(item.going_out_count),
     created: item.createdAt,
+    busyHour: item.busyhour,
+    predictedMean: item.predictedmean,
+    predictedPercentage: item.predicted_percentage,
   }));
+
+  //  {
+  //     store_id: 31,
+  //     store: 'Lion Stop',
+  //     noofcustomers: '8',
+  //     going_out_count: '16',
+  //     busyhour: '05AM-06AM',
+  //     predictedmean: 4,
+  //     predicted_percentage: -50,
+  //     total_count: '1'
+  //   }
 
   $: data = writable(dbData);
 
@@ -72,17 +90,25 @@
     //   header: "Customer Count",
     // }),
     table.column({
-      accessor: "goingIn",
-      header: "Going In",
+      accessor: "customerCount",
+      header: "Coming In",
     }),
     table.column({
       accessor: "goingOut",
       header: "Going Out",
     }),
     table.column({
-      accessor: "created",
-      header: "Created At",
+      accessor: "busyHour",
+      header: "Busy Hour Projections",
     }),
+    table.column({
+      accessor: "customerProjection",
+      header: "Customer Projections",
+    }),
+    // table.column({
+    //   accessor: "created",
+    //   header: "Created At",
+    // }),
     // table.column({
     //   id: 'chevron',
     //   header: '',
@@ -149,7 +175,7 @@
         </Subscribe>
       {/each}
     </Table.Header>
-    {#if liveData.length > 0}
+    {#if mapData.length > 0}
       <Table.Body {...$tableBodyAttrs}>
         {#each $pageRows as row (row.id)}
           <Subscribe rowAttrs={row.attrs()} let:rowAttrs>
@@ -192,17 +218,17 @@
                     {:else if cell.id === "customerProjection"}
                       <div class="flex items-center gap-2">
                         <span class="text-gray-600"
-                          >{row.original.customerProjection.value}</span
+                          >{row.original.predictedMean}</span
                         >
                         <div
-                          class={`px-2 py-1 rounded ${row.original.customerProjection.trend === "up" ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"}`}
+                          class={`px-2 py-1 rounded ${row.original.predictedPercentage < 0 ? "bg-red-100 text-red-600" : "bg-green-100 text-green-600"}`}
                         >
-                          {#if row.original.customerProjection.trend === "up"}
+                          <!-- {#if row.original.predictedPercentage > 0}
                             <TrendingUp class="w-4 h-4 inline mr-1" />
                           {:else}
                             <TrendingDown class="w-4 h-4 inline mr-1" />
-                          {/if}
-                          {row.original.customerProjection.percentage}%
+                          {/if} -->
+                          {row.original.predictedPercentage}%
                         </div>
                       </div>
                       <!-- {:else if cell.id === "chevron"}

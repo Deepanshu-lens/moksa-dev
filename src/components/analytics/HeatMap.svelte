@@ -15,9 +15,12 @@
   import Spinner from "../ui/spinner/Spinner.svelte";
 
   let dateRange = writable("7");
+  let floorMaps = writable([]);
+  let aisleData = writable(["Fetching"]);
+
   export let allStores;
-  export let aisleStoreData;
   export let token;
+
   let close = false;
 
   const fruits = allStores
@@ -76,7 +79,6 @@
       console.error(`Error fetching floor map for store ${storeId}:`, error);
     }
   };
-  let floorMaps = writable([]);
 
   const getAllFloorMaps = async () => {
     await Promise.all(
@@ -151,84 +153,9 @@
     }
   }
 
-  // function drawHeatmap() {
-  //   const canvas = document.getElementById(
-  //     "heatmapCanvas",
-  //   ) as HTMLCanvasElement;
-  //   const ctx = canvas.getContext("2d");
-  //   if (!ctx) return;
-
-  //   const image = document.querySelector("img") as HTMLImageElement;
-  //   canvas.width = image.width;
-  //   canvas.height = image.height;
-
-  //   let hd = $heatMapData.data;
-  //   if (!Array.isArray(hd) || !Array.isArray(hd[0])) {
-  //     console.error("Heatmap data is not a 2D array:", hd);
-  //     toast.error("Incorrect heatmap data");
-  //     return;
-  //   }
-
-  //   const maxValue = Math.max(...hd.map((row) => Math.max(...row)));
-  //   console.log("maxvalue", maxValue);
-
-  //   const colorStops = [
-  //     { value: 0, color: [0, 0, 255] }, // Blue
-  //     { value: 0.25, color: [0, 255, 255] }, // Cyan
-  //     { value: 0.5, color: [0, 255, 0] }, // Green
-  //     { value: 0.75, color: [255, 255, 0] }, // Yellow
-  //     { value: 1, color: [255, 0, 0] }, // Red
-  //   ];
-
-  //   const cellWidth = canvas.width / hd[0].length;
-  //   const cellHeight = canvas.height / hd.length;
-
-  //   for (let y = 0; y < hd.length; y++) {
-  //     for (let x = 0; x < hd[y].length; x++) {
-  //       const value = hd[y][x];
-  //       const normalizedValue = value / maxValue;
-
-  //       let color;
-  //       for (let i = 1; i < colorStops.length; i++) {
-  //         if (normalizedValue <= colorStops[i].value) {
-  //           const t =
-  //             (normalizedValue - colorStops[i - 1].value) /
-  //             (colorStops[i].value - colorStops[i - 1].value);
-  //           color = colorStops[i - 1].color.map((c, j) =>
-  //             Math.round(c + t * (colorStops[i].color[j] - c)),
-  //           );
-  //           break;
-  //         }
-  //       }
-
-  //       const alpha = Math.min(normalizedValue * 0.7 + 0.3, 1); // Adjust transparency
-  //       ctx.fillStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${alpha})`;
-  //       ctx.fillRect(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
-  //     }
-  //   }
-  // }
-
-  //   const maxValue = Math.max(...hd.map((row) => Math.max(...row)));
-
-  //   for (let y = 0; y < hd.length; y++) {
-  //     for (let x = 0; x < hd[y].length; x++) {
-  //       const value = hd[y][x];
-  //       const intensity = value / maxValue;
-  //       const color = `rgba(255, 0, 0, ${intensity * 1})`;
-
-  //       ctx.fillStyle = color;
-  //       ctx.fillRect(
-  //         (x / hd[y].length) * canvas.width,
-  //         (y / hd.length) * canvas.height,
-  //         canvas.width / hd[y].length,
-  //         canvas.height / hd.length,
-  //       );
-  //     }
-  //   }
-  // }
-
   async function updateSelectedFloorMap() {
     console.log("updateSelectedFloorMap called", $dateRange);
+    aisleData.set(["Fetching"]);
     customDateLabel = "custom";
     value = undefined;
 
@@ -240,7 +167,42 @@
     // console.log('Selected floor map:', selectedFloorMap);
 
     if (selectedFloorMap !== "" && selectedFloorMap !== null) {
-      // console.log('selectedFloorMap',selectedFloorMap)
+      console.log("selectedFloorMap", selectedFloorMap);
+
+      const aData = await fetch(
+        `https://api.moksa.ai/people/aisleCount/getAisleCountbyStoreid/${$selectedStore.value}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+            datetype: $dateRange,
+          },
+        },
+      );
+
+      if (aData.ok) {
+        console.log("aData", aData);
+        const aiData = await aData.json();
+
+        console.log(
+          "aisleData for store",
+          $selectedStore.value,
+          aiData?.data?.data,
+        );
+
+        if (aiData?.data?.data?.length > 0) {
+          aisleData.set(aiData?.data?.data);
+          setTimeout(() => {
+            createChart();
+          }, 1000);
+        } else {
+          aisleData.set([]);
+        }
+      } else {
+        aisleData.set([]);
+      }
+
       const mapData = await fetch(
         `https://api.moksa.ai/heatmap/getHeatMapByTimeAndStoreId/${$dateRange}/${$selectedStore.value}`,
         {
@@ -248,6 +210,7 @@
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
+            datetype: $dateRange,
           },
         },
       );
@@ -298,6 +261,43 @@
 
     if (selectedFloorMap !== "" && selectedFloorMap !== null) {
       // console.log('selectedFloorMap',selectedFloorMap)
+
+      const aData = await fetch(
+        `https://api.moksa.ai/people/aisleCount/getAisleCountbyStoreid/${$selectedStore.value}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+            datetype: "custom",
+            startdate: start,
+            enddate: end,
+          },
+        },
+      );
+
+      if (aData.ok) {
+        console.log("aData", aData);
+        const aiData = await aData.json();
+
+        console.log(
+          "aisleData for store",
+          $selectedStore.value,
+          aiData?.data?.data,
+        );
+
+        if (aiData?.data?.data?.length > 0) {
+          aisleData.set(aiData?.data?.data);
+          setTimeout(() => {
+            createChart();
+          }, 1000);
+        } else {
+          aisleData.set([]);
+        }
+      } else {
+        aisleData.set([]);
+      }
+
       const mapData = await fetch(
         `https://api.moksa.ai/heatmap/getHeatMapByTimeAndStoreId/custom/${$selectedStore.value}`,
         {
@@ -347,8 +347,177 @@
     }
   }
 
-  let fusiondevicedata = [];
-  let fusiondevicecategories = [];
+  // $: transformedFusionData = transformApiDataForFusionChart($aisleData);
+  let transformedFusionData;
+
+  $: if ($aisleData[0] === "Fetching" || $aisleData.length === 0) {
+    transformedFusionData = {
+      data: [],
+      categories: [],
+    };
+  } else {
+    console.log("data", $aisleData);
+    transformedFusionData = transformApiDataForFusionChart($aisleData);
+  }
+
+  function transformApiDataForFusionChart(data) {
+    console.log("data", data);
+
+    if (!data || !data[0].aisle_details) return { data: [], categories: [] };
+
+    const aisleDetails = data[0].aisle_details;
+    const categories = [{ category: [] }];
+    const seriesData = [
+      { seriesname: "AisleData", data: [] },
+      { seriesname: "RemainingData", data: [] },
+    ];
+
+    for (const [aisle, details] of Object.entries(aisleDetails)) {
+      categories[0].category.push({ label: aisle });
+      seriesData[0].data.push({ value: details.count, color: "#07E1A4" });
+      seriesData[1].data.push({
+        value: data[0].total_people_count - details.count,
+        color: "#9DFFFF",
+      });
+    }
+
+    return {
+      data: seriesData,
+      categories: categories,
+    };
+  }
+
+  // const fusiondevicedata = [
+  //   {
+  //     seriesname: "DevicesData",
+  //     data: [
+  //       { value: 40, color: "#07E1A4" },
+  //       { value: 50, color: "#07E1A4" },
+  //       { value: 44, color: "#07E1A4" },
+  //       { value: 89, color: "#07E1A4" },
+  //       { value: 90, color: "#07E1A4" },
+  //       { value: 60, color: "#07E1A4" },
+  //       { value: 90, color: "#07E1A4" },
+  //     ],
+  //   },
+  //   {
+  //     seriesname: "DevicesData",
+  //     data: [
+  //       {
+  //         value: 100 - 40,
+  //         color: "#9DFFFF",
+  //       },
+  //       {
+  //         value: 100 - 50,
+  //         color: "#9DFFFF",
+  //       },
+  //       {
+  //         value: 100 - 44,
+  //         color: "#9DFFFF",
+  //       },
+  //       {
+  //         value: 100 - 89,
+  //         color: "#9DFFFF",
+  //       },
+  //       {
+  //         value: 100 - 90,
+  //         color: "#9DFFFF",
+  //       },
+  //       {
+  //         value: 100 - 60,
+  //         color: "#9DFFFF",
+  //       },
+  //       {
+  //         value: 100 - 90,
+  //         color: "#9DFFFF",
+  //       },
+  //     ],
+  //   },
+  // ];
+  // const fusiondevicecategories = [
+  //   {
+  //     category: [
+  //       { label: "vegetables" },
+  //       { label: "fruits" },
+  //       { label: "toys" },
+  //       { label: "books" },
+  //       { label: "liquor" },
+  //       { label: "bread" },
+  //       { label: "washing" },
+  //     ],
+  //   },
+  // ];
+  const colors = [
+    "#1E40AF",
+    "#1D4ED8",
+    "#2563EB",
+    "#3B82F6",
+    "#60A5FA",
+    "#93C5FD",
+    "#BFDBFE",
+    // Add more colors if needed
+  ];
+
+  function createChart() {
+    if (chart) {
+      chart.destroy();
+      chart = null;
+    }
+    if (chartCanvas && !chart) {
+      const ctx = chartCanvas.getContext("2d");
+
+      if (ctx) {
+        Chart.register(PieController, ArcElement, Tooltip, Legend);
+
+        const aisleDetails = $aisleData[0].aisle_details;
+        const data = [];
+        const labels = [];
+
+        for (const [aisle, details] of Object.entries(aisleDetails)) {
+          labels.push(aisle);
+          data.push(details.percentage);
+        }
+
+        chart = new Chart(ctx, {
+          type: "pie",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                data: data,
+                backgroundColor: colors,
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: false,
+              },
+              tooltip: {
+                callbacks: {
+                  label: function (context) {
+                    return `${context.label}: ${context.parsed}%`;
+                  },
+                },
+              },
+            },
+          },
+        });
+      }
+    }
+  }
+
+  // onMount(() => {
+  //   // chartLoading = false;
+  //   setTimeout(() => {
+  //     createChart();
+  //   }, 1000);
+  // });
+
   let selectedStore = writable({
     value: fruits?.[0]?.value,
     label: fruits?.[0]?.label,
@@ -385,6 +554,8 @@
       customDateLabel = "Custom";
     }
   }
+
+  $: console.log("aisleData", $aisleData);
 </script>
 
 <section
@@ -513,11 +684,100 @@
       > -->
     </span>
   </div>
-  <div class="grid grid-cols-8 grid-rows-8 gap-4 mt-4">
+  <div class="grid grid-cols-8 gap-4 mt-4">
+    <div
+      class="col-span-8 row-span-2 border rounded-md flex flex-col rounded-t-xl dark:border-white/[.7] max-h-[200px]"
+    >
+      <span
+        class="rounded-t-xl w-full h-[50px] bg-[#050F40] flex items-center justify-between px-4 flex-shrink-0"
+      >
+        <p class="text-white text-lg font-semibold flex items-center gap-2">
+          {$selectedStore.label}
+          <!-- <span class="text-xs text-white bg-pink-500 rounded-md p-1">
+            Live
+          </span> -->
+        </p>
+      </span>
+      {#if $aisleData.length > 0 && $aisleData[0] !== "Fetching"}
+        <div class="h-full w-full">
+          <HeatMapDataTable {aisleData} />
+        </div>
+      {:else if $aisleData.length === 0}
+        <div
+          class="h-full w-full flex items-center justify-center min-h-[150px]"
+        >
+          <p class="text-lg">No data found</p>
+        </div>
+      {:else if $aisleData[0] === "Fetching"}
+        <div
+          class="h-full w-full flex items-center justify-center min-h-[150px]"
+        >
+          <Spinner />
+        </div>
+      {/if}
+    </div>
+    <div
+      class="col-span-4 row-span-3 border rounded-md flex flex-col dark:border-white/[.7] min-h-[300px]"
+    >
+      <span
+        class="rounded-t-xl w-full h-[50px] flex items-center justify-between px-4 flex-shrink-0"
+      >
+        <p class="text-lg font-semibold flex items-center gap-2">
+          People Count on each aisle
+        </p>
+      </span>
+      <span class="h-full w-full">
+        <FusionChart
+          data={transformedFusionData.data}
+          categoriesdata={transformedFusionData.categories}
+        />
+      </span>
+    </div>
+    <div
+      class="col-span-4 row-span-3 border rounded-md flex flex-col dark:border-white/[.7] min-h-[300px]"
+    >
+      {#if $aisleData.length > 0 && $aisleData[0] !== "Fetching"}
+        <span
+          class="rounded-t-xl w-full h-[50px] flex items-center justify-between px-4 flex-shrink-0"
+        >
+          <p class="text-lg font-semibold flex items-center gap-2">
+            Customers Concentration
+          </p>
+        </span>
+        <div class="h-full w-full flex items-center justify-between p-3">
+          <span class="w-1/4 flex flex-col gap-3">
+            {#each Object.entries($aisleData[0].aisle_details) as [aisle, details], index}
+              <p class="flex items-center gap-2">
+                <span
+                  class=" capitalize flex-shrink-0 size-2 rounded-full"
+                  style="background-color: {colors[index % colors.length]};"
+                />{aisle}
+                <span class="bg-blue-500 text-white text-sm px-2 rounded">
+                  {details.percentage.toFixed(2)}%
+                </span>
+              </p>
+            {/each}
+          </span>
+          <span class="w-3/4">
+            <canvas bind:this={chartCanvas}></canvas>
+          </span>
+        </div>
+      {:else if $aisleData[0] === "Fetching"}
+        <div
+          class="h-full w-full flex items-center justify-center min-h-[150px]"
+        >
+          <Spinner />
+        </div>
+      {:else if $aisleData.length === 0}
+        <div class="h-full w-full flex items-center justify-center">
+          <p class="text-lg">No data found</p>
+        </div>
+      {/if}
+    </div>
     <div
       class="col-span-8 row-span-2 flex items-center justify-between rounded-t-xl dark:border-white/[.7]"
     >
-      <p class="text-lg font-semibold">Heat Map for {$selectedStore.label}</p>
+      <p class="text-lg font-semibold">Heat Map</p>
       <div class="flex flex-col items-end">
         <div class="w-[200px] h-6 flex">
           <div
@@ -570,101 +830,5 @@
         </p>
       </div>
     {/if}
-    <!-- <div
-      class="col-span-8 row-span-4 border rounded-md flex flex-col rounded-t-xl dark:border-white/[.7]"
-    >
-      <span
-        class="rounded-t-xl w-full h-[50px] bg-[#050F40] flex items-center justify-between px-4 flex-shrink-0"
-      >
-        <p class="text-white text-lg font-semibold flex items-center gap-2">
-          Store Name
-          <span class="text-xs text-white bg-pink-500 rounded-md p-1">
-            Live
-          </span>
-        </p>
-      </span>
-      <div class="h-full w-full">
-        <HeatMapDataTable />
-      </div>
-    </div> -->
-
-    <!-- <div
-      class="col-span-4 row-span-3 border rounded-md flex flex-col dark:border-white/[.7]"
-    >
-      <span
-        class="rounded-t-xl w-full h-[50px] flex items-center justify-between px-4 flex-shrink-0"
-      >
-        <p class="text-lg font-semibold flex items-center gap-2">
-          People Count on each aisle
-        </p>
-      </span>
-      <span class="h-full w-full">
-        {#if selectedStoreData !== undefined && selectedStoreData?.totalCount !==0}
-        <FusionChart
-          data={fusiondevicedata}
-          categoriesdata={fusiondevicecategories}
-        />
-        {:else}
-        <p class='px-4'>No data available</p>
-        {/if}
-      </span>
-    </div>
-    <div
-      class="col-span-4 row-span-3 border rounded-md flex flex-col dark:border-white/[.7]"
-    >
-      <span
-        class="rounded-t-xl w-full h-[50px] flex items-center justify-between px-4 flex-shrink-0"
-      >
-        <p class="text-lg font-semibold flex items-center gap-2">
-          Customers Concentration
-        </p>
-      </span>
-      <div class="h-full w-full flex items-start justify-between p-3">
-        {#if selectedStoreData !== undefined && selectedStoreData?.totalCount !==0}
-        <span class="w-1/4 flex flex-col gap-3">
-            {#each chartData as item, index}
-              <p class="flex items-center gap-2">
-                <span
-                  class="flex-shrink-0 size-2 rounded-full"
-                  style="background-color: {[
-                    '#1E40AF',
-                    '#1D4ED8',
-                    '#2563EB',
-                    '#3B82F6',
-                    '#60A5FA',
-                    '#93C5FD',
-                    '#BFDBFE',
-                  ][index % 7]};"
-                />
-                {item?.label}
-                <span class="bg-blue-500 text-white text-sm px-2 rounded">
-                  {item?.value.toFixed(2)}%
-                </span>
-              </p>
-            {/each}
-          </span>
-          <span class="w-3/4">
-            <canvas bind:this={chartCanvas}></canvas>
-          </span>
-          {:else}
-          <p class='px-2'>No data available</p>
-          {/if}
-      </div>
-    </div> -->
-    <!-- <div class="col-span-4 row-span-4 rounded-md dark:border-white/[.7]">
-      <img
-        src="/images/heat1.png"
-        alt="heat1"
-        class="object-cover w-full h-full rounded-md"
-      />
-    </div>
-    <div class="col-span-4 row-span-4 grid-rows-4">
-      <img
-        src="/images/heat2.png"
-        alt="heat2"
-        class="object-cover w-full h-full rounded-md"
-      />
-    </div>
-  </div> -->
   </div>
 </section>

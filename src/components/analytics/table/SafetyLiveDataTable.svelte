@@ -77,6 +77,7 @@
     apron: "Coming Soon",
     videoLink: "Link",
     videourl: item.img_link,
+    date: item.createdAt,
   }));
 
   $: dataa = writable(dbData);
@@ -102,6 +103,10 @@
       header: "Employee",
     }),
     table.column({
+      accessor: "date",
+      header: "Date",
+    }),
+    table.column({
       accessor: "masks",
       header: "Masks",
     }),
@@ -117,10 +122,6 @@
       accessor: "uniform",
       header: "Uniform",
     }),
-    // table.column({
-    //   accessor: "apron",
-    //   header: "Apron",
-    // }),
     table.column({
       accessor: "videoLink",
       header: "Image Link",
@@ -192,10 +193,12 @@
                       <span>{row.original.employee}</span>
                     </div>
                   {:else if ["uniform", "masks", "gloves", "hairnet"].includes(cell.id)}
-                    {#if row.original[cell.id]}
+                    {#if row.original[cell.id] === true}
                       <Check class="w-5 h-5 text-blue-500" />
-                    {:else}
+                    {:else if row.original[cell.id] === false}
                       <X class="w-5 h-5 text-red-500" />
+                    {:else}
+                      <p>row.original[cell.id]</p>
                     {/if}
                   {:else if cell.id === "videoLink"}
                     <Button
@@ -205,6 +208,16 @@
                     >
                       {row.original.videoLink}
                     </Button>
+                  {:else if cell.id === "date"}
+                    {@const date = new Date(row.original.date)}
+                    {@const formattedDate = date.toLocaleDateString("en-US", {
+                      month: "2-digit",
+                      day: "2-digit",
+                      year: "2-digit",
+                      hour: "numeric",
+                      minute: "numeric",
+                    })}
+                    <p>{formattedDate}</p>
                   {:else}
                     <Render of={cell.render()} />
                   {/if}

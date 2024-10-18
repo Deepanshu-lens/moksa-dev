@@ -21,7 +21,7 @@
   export let selectedStore;
   export let value;
 
-  // $: console.log("safetyData", safetyData);
+  $: console.log("safetyData", safetyData);
 
   // console.log($dateRange, $selectedStore)
 
@@ -78,6 +78,7 @@
       breakingSOPs: "Coming Soon",
       videoLink: "Image",
       videourl: item.img_link,
+      date: item.createdAt,
     }));
 
   $: data = writable(dbData);
@@ -106,6 +107,10 @@
       header: "Employee",
     }),
     table.column({
+      accessor: "date",
+      header: "Date",
+    }),
+    table.column({
       accessor: "masks",
       header: "Masks",
     }),
@@ -125,6 +130,7 @@
     //   accessor: "breakingSOPs",
     //   header: "Breaking SOPs",
     // }),
+
     table.column({
       accessor: "videoLink",
       header: "Image",
@@ -228,7 +234,7 @@
                     <Button
                       variant="ghost"
                       on:click={props.sort.toggle}
-                      class={`hover:bg-transparent text-[#727272] opacity-60 text-xs ${cell.id === "employee" ? "text-start min-w-[150px]" : ""}`}
+                      class="hover:bg-transparent text-[#727272] opacity-60 text-xs"
                     >
                       <Render of={cell.render()} />
                       <ArrowUpDown class="ml-2 h-4 w-4" />
@@ -260,9 +266,7 @@
                     class="flex items-center justify-center whitespace-nowrap flex-1 py-2 text-center"
                   >
                     {#if cell.id === "employee"}
-                      <div
-                        class="flex items-center gap-2 text-start min-w-[150px] justify-start"
-                      >
+                      <div class="flex items-center gap-2 text-center">
                         <div
                           class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-center"
                         >
@@ -271,10 +275,12 @@
                         <span>{row.original.employee}</span>
                       </div>
                     {:else if ["masks", "uniform", "gloves", "hairnet"].includes(cell.id)}
-                      {#if row.original[cell.id]}
+                      {#if row.original[cell.id] === true}
                         <Check class="w-5 h-5 text-blue-500" />
-                      {:else}
+                      {:else if row.original[cell.id] === false}
                         <X class="w-5 h-5 text-red-500" />
+                      {:else}
+                        <p>row.original[cell.id]</p>
                       {/if}
                     {:else if cell.id === "videoLink"}
                       <Button
@@ -284,6 +290,16 @@
                       >
                         {row.original.videoLink}
                       </Button>
+                    {:else if cell.id === "date"}
+                      {@const date = new Date(row.original.date)}
+                      {@const formattedDate = date.toLocaleDateString("en-US", {
+                        month: "2-digit",
+                        day: "2-digit",
+                        year: "2-digit",
+                        hour: "numeric",
+                        minute: "numeric",
+                      })}
+                      <p>{formattedDate}</p>
                     {:else}
                       <Render of={cell.render()} />
                     {/if}
@@ -338,7 +354,6 @@
     </Dialog.Header>
     <div class="flex items-center justify-center w-full h-full">
       {#if selectedImage}
-        <!-- svelte-ignore a11y-img-redundant-alt -->
         <img
           src={selectedImage}
           alt="Safety Data Image"
