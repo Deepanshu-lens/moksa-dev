@@ -304,7 +304,7 @@
       </span>
     </div>
     <div
-      class="col-span-1 border rounded-lg bg-gradient-to-r from-[#00FEA3] to-[#007077] px-4 py-3 relative h-[85px] flex items-center gap-3"
+      class="col-span-1 border rounded-lg bg-gradient-to-r from-[#00FEA3] to-[#007077] px-4 py-3 relative h-[85px] invisible flex items-center gap-3"
     >
       <span
         class="size-[60px] grid place-items-center text-white bg-white bg-opacity-20 rounded-full"

@@ -685,7 +685,7 @@
     </span>
   </div>
   <div class="grid grid-cols-8 gap-4 mt-4">
-    <div
+    <!-- <div
       class="col-span-8 row-span-2 border rounded-md flex flex-col rounded-t-xl dark:border-white/[.7] max-h-[200px]"
     >
       <span
@@ -693,9 +693,6 @@
       >
         <p class="text-white text-lg font-semibold flex items-center gap-2">
           {$selectedStore.label}
-          <!-- <span class="text-xs text-white bg-pink-500 rounded-md p-1">
-            Live
-          </span> -->
         </p>
       </span>
       {#if $aisleData.length > 0 && $aisleData[0] !== "Fetching"}
@@ -715,7 +712,7 @@
           <Spinner />
         </div>
       {/if}
-    </div>
+    </div> -->
     <div
       class="col-span-4 row-span-3 border rounded-md flex flex-col dark:border-white/[.7] min-h-[300px]"
     >

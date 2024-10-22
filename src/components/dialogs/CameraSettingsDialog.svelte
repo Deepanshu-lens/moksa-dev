@@ -48,24 +48,24 @@
   export let linePersonThresh: number = 0.3;
   export let lineVehicleThresh: number = 0.3;
   export let personCount: boolean;
-  export let subUrl:string
-  export let theft: boolean
-  export let safety: boolean
-  export let person: boolean
-  export let employeEE: boolean
-  export let heatmap: boolean
-  export let theftDetectionThresh:number = 0.5
+  export let subUrl: string;
+  export let theft: boolean;
+  export let safety: boolean;
+  export let person: boolean;
+  export let employeEE: boolean;
+  export let heatmap: boolean;
+  export let theftDetectionThresh: number = 0.5;
   export let showOptions;
-  export let isSettingsDialogOpen
-  export let cameraNo
+  export let isSettingsDialogOpen;
+  export let cameraNo;
+  export let moksaId;
   let dialogOpen = false;
 
   $: {
-    if(dialogOpen) {
-      isSettingsDialogOpen.set(true)
+    if (dialogOpen) {
+      isSettingsDialogOpen.set(true);
     } else {
-      isSettingsDialogOpen.set(false)
-
+      isSettingsDialogOpen.set(false);
     }
   }
 
@@ -94,8 +94,8 @@
 
   const editCamera = async () => {
     setTimeout(() => {
-      console.log(showOptions.set(''))
-    }, 1000)
+      console.log(showOptions.set(""));
+    }, 1000);
     await fetch("/api/camera/editCamera", {
       method: "put",
       headers: {
@@ -129,7 +129,8 @@
         lineVehicleThresh,
         personCount,
         theft,
-        safety,person,
+        safety,
+        person,
         theftDetectionThresh,
         employeEE,
         heatmap,
@@ -139,28 +140,34 @@
       dialogOpen = false;
     });
     const enabledFeatures = {
-    heat: heatmap || false,
-    count: person || false,
-    theft: theft || false,
-    kitchenhygiene: safety || false,
-    rtsp: false
-  };
-  console.log(enabledFeatures)
-    await fetch(`/api/camera/updateFeatures`, {
-      method: 'POST', headers: {
-        "Content-Type": "application/json"
-      }, body: JSON.stringify({
+      heat: heatmap || false,
+      count: person || false,
+      theft: theft || false,
+      kitchenhygiene: safety || false,
+      rtsp: false,
+    };
+    console.log("features", enabledFeatures);
+    console.log("storeid", $selectedNode.moksaId);
+    console.log("moksaid camid", moksaId);
+    const dev = await fetch(`/api/camera/updateFeatures`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
         storeId: $selectedNode.moksaId,
         camId: moksaId,
-        feature: enabledFeatures
-      })
-    })
+        feature: enabledFeatures,
+      }),
+    });
+    const r = await dev.json();
+    console.log("updatefeature", r);
   };
 </script>
 
 <!-- markup (zero or more items) goes here -->
-<Dialog.Root bind:open={dialogOpen} >
-  <Dialog.Trigger class='flex items-center gap-2'><slot /></Dialog.Trigger>
+<Dialog.Root bind:open={dialogOpen}>
+  <Dialog.Trigger class="flex items-center gap-2"><slot /></Dialog.Trigger>
   <Dialog.Content
     class="sm:max-w-[720px] scale-90 2xl:scale-100 max-h-[90%] overflow-y-scroll"
   >
@@ -236,7 +243,7 @@
         <p class="text-sm font-medium leading-none">Theft Detection</p>
       </div>
       <div class="flex items-center gap-4">
-        <Switch bind:checked={theft}/>
+        <Switch bind:checked={theft} />
       </div>
     </div>
 
@@ -246,17 +253,17 @@
         <p class="text-sm font-medium leading-none">Heatmap</p>
       </div>
       <div class="flex items-center gap-4">
-        <Switch bind:checked={heatmap}/>
+        <Switch bind:checked={heatmap} />
       </div>
     </div>
-    
+
     <div class="rounded-md flex items-center justify-between border p-4 my-2">
       <div class="flex items-center space-x-4">
         <PersonStanding />
         <p class="text-sm font-medium leading-none">Person Count</p>
       </div>
       <div class="flex items-center gap-4">
-        <Switch bind:checked={person}/>
+        <Switch bind:checked={person} />
       </div>
     </div>
 
@@ -266,17 +273,17 @@
         <p class="text-sm font-medium leading-none">Kitchen Safety</p>
       </div>
       <div class="flex items-center gap-4">
-        <Switch bind:checked={safety}/>
+        <Switch bind:checked={safety} />
       </div>
     </div>
 
     <div class="rounded-md flex items-center justify-between border p-4 my-2">
       <div class="flex items-center space-x-4">
-        <ShieldAlert/>
+        <ShieldAlert />
         <p class="text-sm font-medium leading-none">Employee Efficiency</p>
       </div>
       <div class="flex items-center gap-4">
-        <Switch bind:checked={employeEE}/>
+        <Switch bind:checked={employeEE} />
       </div>
     </div>
 

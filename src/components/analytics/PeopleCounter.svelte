@@ -516,6 +516,9 @@
           liveData={$liveData}
           selectedStore={$selectedStore}
           {allStores}
+          {token}
+          {dateRange}
+          {value}
         />
         <!-- {:else}
           <p class="flex items-center justify-center py-4">

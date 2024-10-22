@@ -236,7 +236,7 @@
                     </span>
                   {:else if cell.id === "storeName"}
                     <span
-                      class="text-sm text-[#727272] flex items-center min-w-[150px] text-start justify-start gap-2"
+                      class="text-sm text-[#727272] flex items-center min-w-[200px] text-start justify-start gap-2"
                     >
                       <Store size={20} class="text-[#3D81FC]" />
                       {row.original.storeName}
