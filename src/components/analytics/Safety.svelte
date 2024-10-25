@@ -30,7 +30,7 @@
 
   let selectedStore = writable(fruits[0]);
 
-  $: console.log($selectedStore);
+  // $: console.log($selectedStore);
 
   let dateRange = writable("7 Days");
   let value: DateRange | undefined = undefined;
@@ -178,18 +178,102 @@
 
   // $: console.log("allStores kitchen", allStores);
 
+  // let sockets: { [key: number]: any } = {};
+  // let liveData = writable([]);
+
+  // $: console.log("safetyCount", safetyCount);
+
+  // function setupSocketForAllStores() {
+  //   allStores
+  //     .filter((store: any) => store.id !== -1)
+  //     .filter((store: any) => store.hasKitchen === true)
+  //     .forEach((store: any) => {
+  //       setupSocket(store.id);
+  //     });
+  // }
+
+  // function setupSocket(storeId: number) {
+  //   const userID = user?.moksaId;
+  //   if (sockets[storeId]) {
+  //     sockets[storeId].disconnect();
+  //   }
+
+  //   sockets[storeId] = io("https://api.moksa.ai", {
+  //     withCredentials: true,
+  //     extraHeaders: {
+  //       Authorization: `Bearer ${token}`,
+  //     },
+  //     transports: ["websocket", "polling"],
+  //   });
+
+  //   const socket = sockets[storeId];
+
+  //   socket.on("error", (err) => {
+  //     console.log(`error for store ${storeId}:`, err);
+  //   });
+
+  //   socket.on("connect", () => {
+  //     console.log(`connected for store ${storeId}`);
+  //     socket.emit("joinUser", userID);
+  //     socket.emit("joinStore", storeId);
+  //   });
+
+  //   socket.on(`employee_safety_store_${storeId}`, (data) => {
+  //     console.log(`Received employee_safety for store ${storeId}:`, data);
+  //     // if($selectedStore.value === -1) {
+  //     liveData.update((currentData) => {
+  //       return [{ storeId, ...data }, ...currentData].slice(0, 100);
+  //     });
+  //     // } else {
+
+  //     // }
+  //   });
+
+  //   socket.on("disconnect", () => {
+  //     console.log(`disconnected for store ${storeId}`);
+  //   });
+  // }
+
+  // onMount(() => {
+  //   setTimeout(() => {
+  //     setupSocketForAllStores();
+  //   }, 500);
+  // });
+
+  // // $: console.log($liveData)
+
+  // onDestroy(() => {
+  //   Object.values(sockets).forEach((socket) => {
+  //     console.log("disconnecting socket");
+  //     socket.disconnect();
+  //   });
+  // });
+
   let sockets: { [key: number]: any } = {};
   let liveData = writable([]);
 
-  $: console.log("safetyCount", safetyCount);
+  // function setupSocketForAllStores() {
+  //   disconnectAllSockets();
+  //   allStores
+  //     .filter((store: any) => store.id !== -1)
+  //     .filter((store: any) => store.hasKitchen === true)
+  //     .forEach((store: any) => {
+  //       setupSocket(store.id);
+  //     });
+  // }
 
-  function setupSocketForAllStores() {
-    allStores
-      .filter((store: any) => store.id !== -1)
-      .filter((store: any) => store.hasKitchen === true)
-      .forEach((store: any) => {
-        setupSocket(store.id);
-      });
+  function setupSocketForSingleStore(storeId: number) {
+    disconnectAllSockets();
+    // liveData.set([]); // Clear live data
+    setupSocket(storeId);
+  }
+
+  function disconnectAllSockets() {
+    Object.values(sockets).forEach((socket) => {
+      console.log("disconnecting socket");
+      socket.disconnect();
+    });
+    sockets = {};
   }
 
   function setupSocket(storeId: number) {
@@ -213,41 +297,30 @@
     });
 
     socket.on("connect", () => {
-      console.log(`connected for store ${storeId}`);
+      console.log(`connected for safety socket ${storeId}`);
       socket.emit("joinUser", userID);
       socket.emit("joinStore", storeId);
     });
 
     socket.on(`employee_safety_store_${storeId}`, (data) => {
       console.log(`Received employee_safety for store ${storeId}:`, data);
-      // if($selectedStore.value === -1) {
       liveData.update((currentData) => {
         return [{ storeId, ...data }, ...currentData].slice(0, 100);
       });
-      // } else {
-
-      // }
     });
 
     socket.on("disconnect", () => {
       console.log(`disconnected for store ${storeId}`);
     });
   }
-
-  onMount(() => {
-    setTimeout(() => {
-      setupSocketForAllStores();
-    }, 500);
-  });
-
-  // $: console.log($liveData)
-
-  onDestroy(() => {
-    Object.values(sockets).forEach((socket) => {
-      console.log("disconnecting socket");
-      socket.disconnect();
-    });
-  });
+  // $: console.log($selectedStore);
+  $: if ($selectedStore) {
+    // if ($selectedStore.value === -1) {
+    //   setupSocketForAllStores();
+    // } else {
+    setupSocketForSingleStore($selectedStore.value);
+    // }
+  }
 
   function cleanValue(value: string | number): string {
     const stringValue = String(value);
@@ -305,6 +378,7 @@
   const dispatch = createEventDispatcher();
 
   function handleSelect(fruit) {
+    liveData.set([]);
     selectedStore.set(fruit);
     dispatch("select", fruit);
   }
@@ -426,7 +500,7 @@
         class="rounded-t-xl w-full h-[50px] bg-[#050F40] flex items-center justify-between px-4 flex-shrink-0"
       >
         <p class="text-white text-lg font-semibold flex items-center gap-2">
-          Safety Procedures
+          Safety Procedures for {$selectedStore.label}
           <span class="text-xs text-white bg-pink-500 rounded-md p-1">
             Live
           </span>

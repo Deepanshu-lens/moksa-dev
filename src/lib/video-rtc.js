@@ -22,7 +22,6 @@
 
 import { toast } from "svelte-sonner";
 
-
 export class VideoRTC extends HTMLElement {
   constructor() {
     super();
@@ -351,10 +350,11 @@ export class VideoRTC extends HTMLElement {
       if (typeof ev.data === "string") {
         const msg = JSON.parse(ev.data);
         if (msg.value && msg.value.includes("No connection could be made")) {
-          console.log("connection error",this.wsURL);
-let camName = this.wsURL.split('&cn=')[1]
-          toast.error(`Connection error: No connection could be made with ${camName}!`);
-     
+          console.log("connection error", this.wsURL);
+          let camName = this.wsURL.split("&cn=")[1];
+          toast.error(
+            `Connection error: No connection could be made with ${camName}!`,
+          );
         }
         for (const mode in this.onmessage) {
           this.onmessage[mode](msg);
@@ -602,6 +602,7 @@ let camName = this.wsURL.split('&cn=')[1]
    * @return {Promise<RTCSessionDescriptionInit>}
    */
   async createOffer(pc) {
+    console.log("createofferpc", pc);
     try {
       if (this.media.indexOf("microphone") >= 0) {
         const media = await navigator.mediaDevices.getUserMedia({
@@ -622,6 +623,7 @@ let camName = this.wsURL.split('&cn=')[1]
     }
 
     const offer = await pc.createOffer();
+    console.log("offer", offer);
     await pc.setLocalDescription(offer);
     return offer;
   }

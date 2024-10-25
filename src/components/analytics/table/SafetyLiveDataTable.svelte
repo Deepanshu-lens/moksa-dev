@@ -193,12 +193,12 @@
                       <span>{row.original.employee}</span>
                     </div>
                   {:else if ["uniform", "masks", "gloves", "hairnet"].includes(cell.id)}
-                    {#if row.original[cell.id] === true}
+                    {#if row.original[cell.id] === "true"}
                       <Check class="w-5 h-5 text-blue-500" />
-                    {:else if row.original[cell.id] === false}
+                    {:else if row.original[cell.id] === "false"}
                       <X class="w-5 h-5 text-red-500" />
                     {:else}
-                      <p>row.original[cell.id]</p>
+                      <p>{row.original[cell.id]}</p>
                     {/if}
                   {:else if cell.id === "videoLink"}
                     <Button

@@ -202,7 +202,29 @@
                   class="whitespace-nowrap flex-1 flex items-center justify-center"
                 >
                   {#if cell.id === "action"}
-                    <span class="w-full flex items-center gap-3">
+                    {#if user.role === "superAdmin"}
+                      <span class="w-full flex items-center gap-3">
+                        <EditStoreDialog store={row.original} {token}>
+                          <Button
+                            class="text-[#4976F4] bg-[#4976F4]/[.1] rounded-full text-xs text-start flex items-center gap-1"
+                            variant="ghost"
+                          >
+                            <Edit size={14} /> Modify</Button
+                          >
+                        </EditStoreDialog>
+                        <StoreDeleteDialog
+                          email={user.email}
+                          name={row.original.storeName}
+                          moksaId={row.original.moksaId}
+                          id={row.original.lensId}
+                        >
+                          <Button
+                            class="text-[#F44336] bg-[#F44336]/[.1] rounded-full text-xs text-start flex items-center gap-1"
+                            variant="ghost"><Trash2 size={14} /> Delete</Button
+                          >
+                        </StoreDeleteDialog>
+                      </span>
+                    {:else}
                       <EditStoreDialog store={row.original} {token}>
                         <Button
                           class="text-[#4976F4] bg-[#4976F4]/[.1] rounded-full text-xs text-start flex items-center gap-1"
@@ -211,18 +233,7 @@
                           <Edit size={14} /> Modify</Button
                         >
                       </EditStoreDialog>
-                      <StoreDeleteDialog
-                        email={user.email}
-                        name={row.original.storeName}
-                        moksaId={row.original.moksaId}
-                        id={row.original.lensId}
-                      >
-                        <Button
-                          class="text-[#F44336] bg-[#F44336]/[.1] rounded-full text-xs text-start flex items-center gap-1"
-                          variant="ghost"><Trash2 size={14} /> Delete</Button
-                        >
-                      </StoreDeleteDialog>
-                    </span>
+                    {/if}
                   {:else if cell.id === "dateOfRegistration"}
                     <span class="text-sm text-[#727272]">
                       {new Date(

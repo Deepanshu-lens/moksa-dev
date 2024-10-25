@@ -723,11 +723,14 @@
           People Count on each aisle
         </p>
       </span>
-      <span class="h-full w-full">
+      <span class="h-full w-full relative">
         <FusionChart
           data={transformedFusionData.data}
           categoriesdata={transformedFusionData.categories}
         />
+        <span
+          class="absolute bottom-0 left-0 w-[150px] h-[30px] bg-white z-[200]"
+        ></span>
       </span>
     </div>
     <div

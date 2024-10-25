@@ -48,9 +48,9 @@ export const actions = {
         ?.collection("loginEvents")
         .create(eventData);
 
-      await locals.pb?.collection("users").update(user?.record?.id, {
-        "loginEvents+": [event?.id],
-      });
+      // await locals.pb?.collection("users").update(user?.record?.id, {
+      //   "loginEvents+": [event?.id],
+      // });
     } catch (err: any) {
       console.log("login error", err.message === undefined ? "User not found" : err.message);
       // throw error(err.status || 500, err.message || "An error occurred");
