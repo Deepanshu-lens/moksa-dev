@@ -8,6 +8,7 @@
     ShoppingBag,
     Users,
     Camera,
+    X,
   } from "lucide-svelte";
   import Input from "../ui/input/input.svelte";
   import { onMount } from "svelte";
@@ -304,7 +305,7 @@
       </span>
     </div>
     <div
-      class="col-span-1 border rounded-lg bg-gradient-to-r from-[#00FEA3] to-[#007077] px-4 py-3 relative h-[85px] flex items-center gap-3"
+      class="col-span-1 border rounded-lg bg-gradient-to-r from-[#00FEA3] to-[#007077] px-4 py-3 relative h-[85px] invisible flex items-center gap-3"
     >
       <span
         class="size-[60px] grid place-items-center text-white bg-white bg-opacity-20 rounded-full"
@@ -384,6 +385,12 @@
         placeholder="Search"
       />
       <Search size={18} class="absolute top-1/2 -translate-y-1/2 left-2" />
+      <button
+        class="absolute top-1/2 -translate-y-1/2 right-2"
+        on:click={() => (searchStore = "")}
+      >
+        <X size={18} />
+      </button>
     </span>
     <span class="flex items-center gap-3">
       <!-- <Button variant="outline" class="flex items-center gap-1 text-sm"

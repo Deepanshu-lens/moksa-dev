@@ -100,7 +100,7 @@
           }),
           table.column({
             accessor: "customerCount",
-            header: "Coming In",
+            header: "Customer Count",
           }),
           table.column({
             accessor: "busyHourProjections",
@@ -114,7 +114,7 @@
           }),
           table.column({
             accessor: "customerCount",
-            header: "Coming In",
+            header: "Customer Count",
           }),
           table.column({
             accessor: "busyHourProjections",
@@ -358,13 +358,13 @@
                           >{row.original.predictedMean}</span
                         >
                         <div
-                          class={`px-2 py-1 rounded ${row.original.customerProjection < 0 ? "bg-red-100 text-red-600" : "bg-green-100 text-green-600"}`}
+                          class={`px-2 py-1 rounded ${row.original.predictedMean > row.original.customerCount ? "bg-red-100 text-red-600" : "bg-green-100 text-green-600"}`}
                         >
-                          {#if row.original.customerProjection > 0}
+                          <!-- {#if row.original.customerProjection > 0}
                             <TrendingUp class="w-4 h-4 inline mr-1" />
                           {:else}
                             <TrendingDown class="w-4 h-4 inline mr-1" />
-                          {/if}
+                          {/if} -->
                           {row.original.customerProjection}%
                         </div>
                       </div>

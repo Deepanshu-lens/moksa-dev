@@ -636,7 +636,6 @@
               <ul class="py-2 text-sm" aria-labelledby="dropdownDefaultButton">
                 <li class="w-full">
                   <button
-                    disabled
                     class=" px-4 py-2 hover:bg-[rgba(92,75,221,.1)] rounded-md dark:hover:bg-gray-600 dark:hover:text-white w-full"
                     on:click={() => {
                       captureSlideScreenshot(screens);
@@ -650,7 +649,6 @@
                 </li>
                 <li class="w-full">
                   <button
-                    disabled
                     class=" px-4 py-2 hover:bg-[rgba(92,75,221,.1)] rounded-md dark:hover:bg-gray-600 dark:hover:text-white w-full"
                     on:click={() => {
                       if ($activeCamera === "") {
@@ -668,7 +666,6 @@
                 </li>
                 <li class="w-full">
                   <button
-                    disabled
                     on:click={() => {
                       captureAllScreenshot();
                       addUserLog(

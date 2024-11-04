@@ -30,7 +30,7 @@
   let selectedImage = null;
   let loading = false;
 
-  console.log("safetyDataTable", safetyData);
+  $: console.log("safetyDataTable", safetyData);
 
   export let dateRange;
   export let selectedStore;
@@ -153,7 +153,7 @@
       header: "Employee",
     }),
     table.column({
-      accessor: "mask",
+      accessor: "masks",
       header: "Mask",
     }),
     table.column({
@@ -250,11 +250,13 @@
                           >{row.original.employee}</span
                         >
                       </div>
-                    {:else if ["mask", "gloves", "hairnet", "uniform"].includes(cell.id)}
-                      {#if row.original[cell.id]}
+                    {:else if ["masks", "gloves", "hairnet", "uniform"].includes(cell.id)}
+                      {#if row.original[cell.id] === "true"}
                         <span class="text-green-500">✓</span>
-                      {:else}
+                      {:else if row.original[cell.id] === "false"}
                         <span class="text-red-500">✗</span>
+                      {:else}
+                        <span>{row.original[cell.id]}</span>
                       {/if}
                     {:else if cell.id === "breakingSops"}
                       <span class="text-sm">{row.original.breakingSops}</span>

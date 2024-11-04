@@ -28,7 +28,9 @@
   export let liveData;
   export let selectedStore;
   export let allStores;
-
+  export let value;
+  export let dateRange;
+  export let token;
   // console.log("liveData", allStores);
 
   $: console.log("LivePeopleCountDataTable received new data:", liveData);
@@ -50,6 +52,7 @@
     busyHour: item.busyhour,
     predictedMean: item.predictedmean,
     predictedPercentage: item.predicted_percentage,
+    storeId: item.store_id,
   }));
 
   //  {
@@ -94,16 +97,20 @@
       header: "Coming In",
     }),
     table.column({
-      accessor: "goingOut",
-      header: "Going Out",
-    }),
-    table.column({
       accessor: "busyHour",
       header: "Busy Hour Projections",
     }),
     table.column({
       accessor: "customerProjection",
       header: "Customer Projections",
+    }),
+    table.column({
+      accessor: "goingOut",
+      header: "Going Out",
+    }),
+    table.column({
+      accessor: "chevron",
+      header: "Chevron",
     }),
     // table.column({
     //   accessor: "created",
@@ -133,6 +140,75 @@
   function changePageSize(newSize: number) {
     $pageSize = newSize;
   }
+
+  async function fetchExpandedData(storeId) {
+    const today = new Date();
+    let startDate = new Date(today);
+
+    switch ($dateRange) {
+      case "7":
+        startDate.setDate(today.getDate() - 7);
+        break;
+      case "30":
+        startDate.setMonth(today.getMonth() - 1);
+        break;
+      case "year":
+        startDate.setFullYear(today.getFullYear() - 1);
+        break;
+      default:
+        startDate.setDate(today.getDate() - 7);
+    }
+
+    const formatDate = (date: Date) => date.toISOString().split("T")[0];
+
+    console.log(formatDate(startDate));
+    console.log(formatDate(today));
+    console.log($dateRange);
+    console.log(storeId);
+    console.log(token);
+    try {
+      // Call the three APIs
+      const d = await fetch(
+        `https://api.moksa.ai/people/getPeopleCountLive/${storeId}/1/100`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+            datetype: $dateRange,
+            pagenumber: 1,
+            pagepersize: 100,
+          },
+        },
+      );
+      const peopleCount = await d.json();
+      console.log(peopleCount);
+      return peopleCount;
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+  }
+
+  let expandedRows = new Set();
+  let expandedData = {};
+
+  function toggleRow(storeId) {
+    if (expandedRows.has(storeId)) {
+      expandedRows.delete(storeId);
+      expandedData = { ...expandedData, [storeId]: null };
+    } else {
+      expandedRows.add(storeId);
+      expandedData = { ...expandedData, [storeId]: null };
+      if (!expandedData[storeId]) {
+        fetchExpandedData(storeId).then((data) => {
+          console.log(data);
+          expandedData[storeId] = data?.data?.data;
+          expandedData = expandedData;
+        });
+      }
+    }
+    expandedRows = expandedRows;
+  }
 </script>
 
 <div class="m-0 flex flex-col">
@@ -155,7 +231,7 @@
                 {:else}
                   <Table.Head
                     {...attrs}
-                    class="text-[#727272] whitespace-nowrap text-sm h-full flex items-center text-center justify-center py-2 w-1/3"
+                    class="text-[#727272] whitespace-nowrap text-sm h-full flex items-center text-center justify-center py-2 w-1/6"
                   >
                     <Button
                       variant="ghost"
@@ -187,7 +263,7 @@
                 <Subscribe attrs={cell.attrs()} let:attrs>
                   <Table.Cell
                     {...attrs}
-                    class={`flex items-center justify-center whitespace-nowrap flex-1 py-2 w-1/3`}
+                    class={`flex items-center justify-center whitespace-nowrap flex-1 py-2 w-1/6`}
                   >
                     {#if cell.id === "storeName"}
                       <div
@@ -221,7 +297,7 @@
                           >{row.original.predictedMean}</span
                         >
                         <div
-                          class={`px-2 py-1 rounded ${row.original.predictedPercentage < 0 ? "bg-red-100 text-red-600" : "bg-green-100 text-green-600"}`}
+                          class={`px-2 py-1 rounded ${row.original.predictedMean > row.original.customerCount ? "bg-red-100 text-red-600" : "bg-green-100 text-green-600"}`}
                         >
                           <!-- {#if row.original.predictedPercentage > 0}
                             <TrendingUp class="w-4 h-4 inline mr-1" />
@@ -231,8 +307,20 @@
                           {row.original.predictedPercentage}%
                         </div>
                       </div>
-                      <!-- {:else if cell.id === "chevron"}
-                    <ChevronRight class="w-5 h-5 text-gray-400" /> -->
+                    {:else if cell.id === "chevron"}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        on:click={() => toggleRow(row.original.storeId)}
+                      >
+                        <ChevronRight
+                          class={`w-5 h-5 text-gray-400 ${
+                            expandedRows.has(row.original.storeId)
+                              ? "rotate-90"
+                              : ""
+                          }`}
+                        />
+                      </Button>
                     {:else}
                       <Render of={cell.render()} />
                     {/if}
@@ -240,6 +328,60 @@
                 </Subscribe>
               {/each}
             </Table.Row>
+            {#if expandedRows.has(row.original.storeId)}
+              <Table.Row class="bg-gray-50 w-full">
+                <Table.Cell colspan={columns.length} class="w-full">
+                  {#if expandedRows.has(row.original.storeId)}
+                    <Table.Row class="bg-gray-50 w-full">
+                      <!-- <Table.Cell
+                        colspan={columns.length}
+                        class="w-full bg-pink-900"
+                      > -->
+                      {#if expandedData[row.original.storeId]}
+                        <div class="p-4 w-[85vw] max-h-[150px] overflow-y-auto">
+                          <h3 class="font-bold mb-2">Detailed Information</h3>
+                          <table class="w-full border-collapse">
+                            <thead class="w-full">
+                              <tr
+                                class="w-full flex flex-row items-center justify-between"
+                              >
+                                <th class=" p-2 w-full">Date</th>
+                                <th class=" p-2 w-full">Hour</th>
+                                <th class=" p-2 w-full">Customer Count</th>
+                                <th class=" p-2 w-full">Going Out Count</th>
+                              </tr>
+                            </thead>
+                            <tbody class="w-full">
+                              {#each expandedData[row.original.storeId] as item}
+                                <tr
+                                  class="w-full flex flex-row items-center justify-between"
+                                >
+                                  <td class=" p-2 w-full text-center"
+                                    >{item.date}</td
+                                  >
+                                  <td class=" p-2 w-full text-center"
+                                    >{item.hour}</td
+                                  >
+                                  <td class=" p-2 w-full text-center"
+                                    >{item.noofcustomers}</td
+                                  >
+                                  <td class=" p-2 w-full text-center"
+                                    >{item.going_out_count}</td
+                                  >
+                                </tr>
+                              {/each}
+                            </tbody>
+                          </table>
+                        </div>
+                      {:else}
+                        <div class="p-4">Loading...</div>
+                      {/if}
+                      <!-- </Table.Cell> -->
+                    </Table.Row>
+                  {/if}
+                </Table.Cell>
+              </Table.Row>
+            {/if}
           </Subscribe>
         {/each}
       </Table.Body>

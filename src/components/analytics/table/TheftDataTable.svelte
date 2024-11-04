@@ -179,7 +179,16 @@
             "date_validated",
           ].includes(col.key),
       )
-      .reverse()
+      .sort((a, b) => {
+        const order = [
+          "name",
+          "theftProbability",
+          "createdAt",
+          "profile",
+          "video_uri",
+        ];
+        return order.indexOf(a.key) - order.indexOf(b.key);
+      })
       .map((col) =>
         table.column({
           accessor:
@@ -194,10 +203,12 @@
                     : col.key,
           header:
             col.header === "Profile"
-              ? "time"
+              ? "Time"
               : col.header === "Created At"
-                ? "date"
-                : col.header,
+                ? "Date"
+                : col.header === "Name"
+                  ? "Store"
+                  : col.header,
         }),
       ),
   );

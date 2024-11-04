@@ -99,13 +99,15 @@
         class="absolute bottom-0 h-auto w-full flex flex-wrap justify-around transform translate-y-48"
       >
         <div class="bg-white drop-shadow-lg rounded-lg w-1/4 p-10">
-          <div class="flex flex-col items-center gap-2 justify-center">
-            <Ticket size={45} class="text-blue-500" />
-            <h1 class="text-xl font-semibold">Raise ticket?</h1>
-            <p class="text-center text-sm text-gray-500 font-medium">
-              Raise a ticket, and we'll reply ASAP or come back later.
-            </p>
-          </div>
+          <TicketDialog {nodes} {token}>
+            <div class="flex flex-col items-center gap-2 justify-center">
+              <Ticket size={45} class="text-blue-500" />
+              <h1 class="text-xl font-semibold">Raise ticket?</h1>
+              <p class="text-center text-sm text-gray-500 font-medium">
+                Raise a ticket, and we'll reply ASAP or come back later.
+              </p>
+            </div>
+          </TicketDialog>
         </div>
         <div class="bg-white shadow-md rounded-lg w-1/4 p-10">
           <div class="flex flex-col items-center gap-2">
@@ -245,7 +247,7 @@
               </defs>
             </svg>
 
-            <span>Chat Support</span>
+            <span>Chat Support (Coming Soon)</span>
           </div>
         </div>
       </div>

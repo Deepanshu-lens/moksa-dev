@@ -168,13 +168,6 @@
     }
   }
 
-  // $: if (
-  //   $dateRange.toLowerCase() === "custom" &&
-  //   (value?.start || value?.end)
-  // ) {
-  //   console.log("called custom date data");
-  // }
-
   onDestroy(() => {
     if (socket) {
       socket.disconnect();
@@ -330,34 +323,61 @@
     }
   }
 
-  // $: {
-  //   if ($dateRange !== "custom") {
-  //     fetchDataForDateRange();
-  //   }
-  // }
+  function convertArrToCSV(
+    arr: any[],
+    fileName: string,
+    excludeKeys: string[] = [],
+  ): void {
+    const filteredArr = arr.filter(
+      (item) => item !== null && item !== undefined,
+    );
 
-  // onMount(async () => {
-  //   setTimeout(() => {
-  //     createChart();
-  //   }, 100);
-  // });
+    // Extract the headers
 
-  import { Input } from "../ui/input";
-  import { createEventDispatcher } from "svelte";
+    const headers = Object.keys(filteredArr[0])
+      .filter((key) => !excludeKeys.includes(key))
+      .join(",");
 
-  let filterText = "";
-  $: filteredFruits = fruits.filter((fruit) =>
-    fruit.label.toLowerCase().includes(filterText.toLowerCase()),
-  );
+    // Extract the data rows with value cleaning
+    const rows = filteredArr
+      .map((obj) => {
+        return Object.keys(obj)
+          .filter((key) => !excludeKeys.includes(key))
+          .map((key) => cleanValue(obj[key]))
+          .join(",");
+      })
+      .join("\n");
+    // Combine headers and rows
+    const csvContent = headers + "\n" + rows;
 
-  const dispatch = createEventDispatcher();
+    // Create a Blob for the CSV content
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
 
-  // function handleSelect(fruit) {
-  //   selectedStore.set(fruit);
-  //   dispatch("select", fruit);
-  // }
+    // Create a link element to download the CSV
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName; //file name after download
+    document.body.appendChild(link);
 
-  // $: console.log($storeData);
+    // Programmatically click the link to trigger the download
+    link.click();
+
+    // Clean up the link after download
+    document.body.removeChild(link);
+  }
+
+  function cleanValue(value: string | number): string {
+    const stringValue = String(value);
+
+    // Enclose values containing commas or quotes in double quotes
+    if (stringValue.includes(",") || stringValue.includes('"')) {
+      // Escape any double quotes inside the value by doubling them
+      return `"${stringValue.replace(/"/g, '""')}"`;
+    }
+
+    return stringValue;
+  }
 </script>
 
 <section
@@ -365,71 +385,16 @@
 >
   <div class="flex items-center justify-end">
     <span class="flex items-center gap-3">
-      <!-- <Button variant="outline" class="flex items-center gap-1">
-        <ListFilter size={18} /> Filters</Button
-      > -->
-      <!-- <Select.Root portal={null}>
-        <Select.Trigger
-          class="w-[100px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg dark:bg-transparent"
-        >
-          <Select.Value
-            placeholder={fruits.length > 0 ? $selectedStore.label : "No Stores"}
-          />
-        </Select.Trigger>
-        <Select.Content class="max-h-[200px] overflow-y-auto">
-          <Select.Group>
-            {#if fruits.length > 0}
-              {#each fruits as fruit}
-                <Select.Item
-                  on:click={() => {
-                    selectedStore.set(fruit);
-                  }}
-                  class="px-1"
-                  value={fruit.value}
-                  label={fruit.label}>{fruit.label}</Select.Item
-                >
-              {/each}
-            {/if}
-          </Select.Group>
-        </Select.Content>
-      </Select.Root> -->
-      <!-- <Select.Root portal={null}>
-        <Select.Trigger
-          class="w-[200px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg dark:bg-transparent"
-        >
-          <Select.Value
-            placeholder={fruits.length > 0 ? $selectedStore.label : "No Stores"}
-          />
-        </Select.Trigger>
-        <Select.Content class="max-h-[300px] overflow-y-auto">
-          <div class="p-2">
-            <Input
-              type="text"
-              placeholder="Search stores..."
-              bind:value={filterText}
-              class="mb-2"
-            />
-          </div>
-          <Select.Group>
-            {#if filteredFruits.length > 0}
-              {#each filteredFruits as fruit}
-                <Select.Item
-                  on:click={() => {
-                    selectedStore.set(fruit);
-                    getLiveData(fruit.value);
-                  }}
-                  class="px-1"
-                  value={fruit.value}
-                  label={fruit.label}>{fruit.label}</Select.Item
-                >
-              {/each}
-            {:else}
-              <Select.Item disabled>N/A</Select.Item>
-            {/if}
-          </Select.Group>
-        </Select.Content>
-      </Select.Root> -->
       <Button
+        on:click={() => {
+          const date = new Date().toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          });
+          convertArrToCSV($liveData?.data, `live_people_count_${date}.csv`);
+          convertArrToCSV($storeData, `people_count_${date}.csv`);
+        }}
         class="flex items-center gap-1 bg-[#3D81FC] text-white hover:bg-white hover:text-[#3D81FC]"
         ><Upload size={18} /> Export Reports</Button
       >
@@ -516,6 +481,9 @@
           liveData={$liveData}
           selectedStore={$selectedStore}
           {allStores}
+          {token}
+          {dateRange}
+          {value}
         />
         <!-- {:else}
           <p class="flex items-center justify-center py-4">
