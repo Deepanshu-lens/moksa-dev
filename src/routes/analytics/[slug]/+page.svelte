@@ -88,6 +88,7 @@
     }
     return [];
   }
+
 </script>
 
 <main class="flex flex-row-reverse h-[calc(100vh-75px)] w-full">

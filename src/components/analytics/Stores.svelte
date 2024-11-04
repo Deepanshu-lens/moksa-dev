@@ -27,8 +27,6 @@
   export let token: string;
   const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
 
-  // $: console.log('aallstores',allStores)
-
   onMount(async () => {
     const res = await fetch("/api/store/getStoreDetails", {
       method: "POST",
@@ -90,6 +88,8 @@
       const nodeData = nodes.find((n: any) => n.moksaId === store.id) || {};
       return { ...store, ...theftData, lensId: nodeData ? nodeData.id : null };
     });
+
+    console.log(combinedStores,'combinedStores')
 
   $: uniqueLocations = [
     ...new Set(combinedStores.map((store) => store.country)),

@@ -70,6 +70,7 @@
   }
 
   $: dbData = combinedStores.map((store) => {
+    console.log(store,'store here')
     return {
       storeName: store.name,
       storeImage: store.storeImage,
@@ -84,6 +85,8 @@
       lensId: store.lensId,
     };
   });
+
+  console.log(combinedStores,'combinedStores')
 
   $: console.log(dbData, "db data here");
 

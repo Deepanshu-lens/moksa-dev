@@ -13,7 +13,7 @@
   export let token;
   // $: console.log(store);
   let nodeName = store.storeName;
-  let address = store.location;
+  let address = store.location?.split(",")[0];
   let pincode = store.pincode;
   let country = store.country;
   let manager = store.storeManager;
@@ -65,7 +65,8 @@
   };
 
   const handleSubmit = async () => {
-    console.log(nodeName, address, pincode, country, manager);
+    console.log(address, "address here");
+    console.log(country, "countryhere");
     await fetch("/api/node/update", {
       method: "PATCH",
       headers: {
@@ -95,17 +96,6 @@
   $: if (dialogOpen) {
     fetchStoreData();
   }
-
-  // $: {
-  //   console.log(address)
-  //   console.log(pincode)
-  //   console.log(country)
-  //   console.log(manager)
-  //   console.log(selectedTimezone)
-  //   console.log(isStore24hr)
-  //   console.log(storeOpenTime)
-  //   console.log(storeCloseTime)
-  // }
 </script>
 
 <Dialog.Root bind:open={dialogOpen}>

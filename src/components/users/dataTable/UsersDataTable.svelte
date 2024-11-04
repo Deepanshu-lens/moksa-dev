@@ -33,7 +33,6 @@
 
   // Function to update rows per page based on screen size
   function updateRowsPerPage() {
-    console.log(window.innerWidth, "called");
     if (window.innerWidth < 640) {
       // Small screens
       rowsPerPage = 3;
