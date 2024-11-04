@@ -11,7 +11,7 @@
     Trash2,
     User,
   } from "lucide-svelte";
-  import { createEventDispatcher } from "svelte";
+  import { createEventDispatcher, onDestroy } from "svelte";
   import ModifyUserDialog from "@/components/dialogs/MofifyUserDialog.svelte";
   import {
     addPagination,
@@ -29,6 +29,33 @@
   export let token: string;
   export let filter: string;
   export let role: string;
+  let rowsPerPage = 5;
+
+  // Function to update rows per page based on screen size
+  function updateRowsPerPage() {
+    console.log(window.innerWidth, "called");
+    if (window.innerWidth < 640) {
+      // Small screens
+      rowsPerPage = 3;
+    } else if (window.innerWidth < 1500) {
+      // Medium screens
+      rowsPerPage = 5;
+    } else {
+      // Large screens
+      rowsPerPage = 12;
+    }
+  }
+
+  // Initial call to set rows per page
+  updateRowsPerPage();
+
+  // Update rows per page on window resize
+  window.addEventListener("resize", updateRowsPerPage);
+
+  // Clean up the event listener on component destroy
+  onDestroy(() => {
+    window.removeEventListener("resize", updateRowsPerPage);
+  });
   // $: console.log(searchVal)
 
   // $: console.log(users)
@@ -81,7 +108,7 @@
   // });
 
   $: table = createTable(readableData, {
-    page: addPagination({ initialPageSize: 5 }),
+    page: addPagination({ initialPageSize: rowsPerPage }),
     sort: addSortBy(),
     filter: addTableFilter({
       fn: ({ filterValue, value }) => {
