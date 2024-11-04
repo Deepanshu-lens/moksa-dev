@@ -6,7 +6,6 @@
   import { Button } from "@/components/ui/button";
   import { X } from "lucide-svelte";
 
-
   let dialogOpen = false;
   export let token;
   export let storeId;
@@ -14,8 +13,8 @@
   export let firstName;
   export let lastName;
   export let role;
-  export let id ;
-//   let newEmp = {}
+  export let id;
+  //   let newEmp = {}
 
   const validateFields = () => {
     const fields = [
@@ -34,27 +33,27 @@
   };
 
   $: {
-    console.log(firstName, lastName, role, id, storeId)
+    console.log(firstName, lastName, role, id, storeId);
   }
 
-//   $: console.log(token)
-//   $: console.log($employeeData)
+  //   $: console.log(token)
+  //   $: console.log($employeeData)
 
   const handleSubmit = async () => {
     if (!validateFields()) {
-        toast.error("Please fill all the fields");
-        return;
-    } 
+      toast.error("Please fill all the fields");
+      return;
+    }
 
-//     {{url}}/store/storeEmployee/update
-// method:post
-// {"id":"",//employee id mandatory 
-//  "store_id": "2",
-//   "first_name": "nitya",
-//   "last_name": "P",
-//   "role": "manager",
-//   "photo": ""
-// }
+    //     {{url}}/store/storeEmployee/update
+    // method:post
+    // {"id":"",//employee id mandatory
+    //  "store_id": "2",
+    //   "first_name": "nitya",
+    //   "last_name": "P",
+    //   "role": "manager",
+    //   "photo": ""
+    // }
 
     const res = await fetch(`https://api.moksa.ai/store/storeEmployee/update`, {
       method: "POST",
@@ -75,9 +74,17 @@
     console.log(data);
     if (res.ok) {
       toast.success("Employee updated successfully");
- let newEmp;
-      $employeeData.data = $employeeData.data.filter(employee => employee.id !== id);      newEmp = { id: data.data.id, first_name: firstName, last_name: lastName, role: role },
-      $employeeData.data.push(newEmp)
+      let newEmp;
+      $employeeData.data = $employeeData.data.filter(
+        (employee) => employee.id !== id,
+      );
+      (newEmp = {
+        id: data.data.id,
+        first_name: firstName,
+        last_name: lastName,
+        role: role,
+      }),
+        $employeeData.data.push(newEmp);
       dialogOpen = false;
     } else {
       toast.error("Failed to update employee");
@@ -131,9 +138,8 @@
           />
         </div>
         <div class="space-y-2">
-          <Label
-            for="role"
-            class="block text-sm font-medium text-gray-700">Employee Role</Label
+          <Label for="role" class="block text-sm font-medium text-gray-700"
+            >Employee Role</Label
           >
           <Input
             required

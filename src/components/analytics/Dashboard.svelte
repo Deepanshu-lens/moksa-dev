@@ -1077,6 +1077,7 @@
 <section
   class="w-full p-4 flex flex-col hide-scrollbar overflow-y-auto max-h-[calc(100vh-75px)]"
 >
+  <!-- Date Range filter -->
   <div class="flex items-center justify-between">
     <span
       class="flex items-center border-black border-opacity-[18%] h-[40px] border-[1px] rounded-md dark:border-white"
@@ -1163,9 +1164,12 @@
       > -->
     </span>
   </div>
+
+  <!-- main section -->
   <div
     class={`grid grid-cols-8  gap-4 gap-y-10 ${$selectedStore.label === "All Stores" ? "h-[1400px] grid-rows-11" : "h-[2000px] grid-rows-12"} mt-4`}
   >
+    <!-- Cards Section -->
     <div
       class="col-span-2 border rounded-lg bg-gradient-to-r from-[#00FEA3] to-[#007077] px-4 py-3 h-[85px] relative"
     >
@@ -1204,6 +1208,7 @@
       <img src="/images/card4.png" alt="" class="absolute top-0 right-0" />
     </div>
 
+    <!-- Theft Detected Section -->
     <div
       class="col-span-5 row-span-3 border rounded-md p-4 flex flex-col gap-4 h-[375px] dark:border-white/[.7]"
     >
@@ -1233,6 +1238,7 @@
         <canvas bind:this={barChartCanvas}></canvas>
       </div>
     </div>
+    <!-- All Stores Section -->
     <div
       class="col-span-3 row-span-3 border rounded-md p-4 flex flex-col gap-4 h-[375px] dark:border-white/[.7]"
     >
@@ -1263,6 +1269,7 @@
         {/if}
       </div>
     </div>
+    <!-- Store Busy Hours Section -->
     {#if $selectedStore.label !== "All Stores"}
       <div
         class="col-span-3 row-span-3 border rounded-md p-4 flex flex-col gap-4 h-[375px] dark:border-white/[.7]"
@@ -1284,6 +1291,7 @@
         </div>
       </div>
     {/if}
+    <!-- Stores Overview Section -->
     <div
       class={`${$selectedStore.label === "All Stores" ? "col-span-8 row-span-3" : "col-span-5 row-span-3"} border rounded-md p-4 flex flex-col gap-4 h-[375px] dark:border-white/[.7]`}
     >
@@ -1410,6 +1418,7 @@
         {/if}
       </span>
     </div>
+    <!-- Kitchen Safety Protocol Section -->
     <div
       class="col-span-4 row-span-3 border rounded-md p-4 flex flex-col gap-4 h-[375px] dark:border-white/[.7]"
     >

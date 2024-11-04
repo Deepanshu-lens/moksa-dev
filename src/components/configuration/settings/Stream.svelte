@@ -2,7 +2,7 @@
   import { selectedNode } from "@/lib/stores";
   import { onMount } from "svelte";
   import { addUserLog } from "@/lib/addUserLog";
-    import { Button } from "@/components/ui/button";
+  import { Button } from "@/components/ui/button";
 
   let selected = 1;
   let delayOptions = [
@@ -41,110 +41,118 @@
 <div
   class="flex flex-col items-start h-[calc(100vh-75px)] w-full text-black dark:text-white"
 >
-  <div class='w-full border-b p-4  flex justify-end items-center gap-2 '>
-    <span class='flex items-center gap-2 mr-[2rem]'>
-      <Button variant='outline' class="rounded-lg mr-auto flex bg-[#F8F8F8] text-black border-black border-opacity-[.23]">Cancel</Button>
-      <Button class="mr-auto flex bg-[#3D81FC] rounded-lg text-white">Confirm</Button>
+  <div class="w-full border-b p-4 flex justify-end items-center gap-2">
+    <span class="flex items-center gap-2 mr-[2rem]">
+      <Button
+        variant="outline"
+        class="rounded-lg mr-auto flex bg-[#F8F8F8] text-black border-black border-opacity-[.23]"
+        >Cancel</Button
+      >
+      <Button class="mr-auto flex bg-[#3D81FC] rounded-lg text-white"
+        >Confirm</Button
+      >
     </span>
   </div>
+
+  <!-- Stream delay duration -->
+  <div
+    class=" w-[94.5%] my-4 pt-4 mx-6 shadow-md rounded-md border border-[#00000014]"
+  >
+    <h2 class="px-6 font-medium mb-4">Stream delay duration</h2>
     <div
-      class=" w-[94.5%] my-4 pt-4 mx-6 shadow-md rounded-md border border-[#00000014]"
-    >
-      <h2 class="px-6 font-medium mb-4">Stream delay duration</h2>
-       <div
       class="h-[1px] dark:bg-[#292929] ml-2 mb-4 bg-[#e0e0e0] mt-8 w-[95%]"
     />
-      <form class=" flex items-center justify-center w-[60%] mb-8 px-6">
-        {#each delayOptions as { id, label }}
-          <div class="flex gap-4 w-full">
-            <label>
-              <input
-                type="radio"
-                name="delayOption"
-                class="cursor-pointer"
-                bind:group={delaytype}
-                value={id}
-              />
-              {label}</label
-            >
-          </div>
-        {/each}
-      </form>
-      <p
-        class={`px-6 mt-4 mb-8 text-sm opacity-90 animate-fade   ${
-          delaytype === 1
-            ? "text-[#3B7C26] "
-            : delaytype === 2
-              ? "text-[#FB8A2E] "
-              : "text-[#EF4444] "
-        } `}
-      >
-        <span class="dark:text-[#929292] text-black/[.8] text-sm mr-1">
-          Note:
-        </span>
-        {delaytype === 1
-          ? "Frame lag possible"
+    <form class=" flex items-center justify-center w-[60%] mb-8 px-6">
+      {#each delayOptions as { id, label }}
+        <div class="flex gap-4 w-full">
+          <label>
+            <input
+              type="radio"
+              name="delayOption"
+              class="cursor-pointer"
+              bind:group={delaytype}
+              value={id}
+            />
+            {label}</label
+          >
+        </div>
+      {/each}
+    </form>
+    <p
+      class={`px-6 mt-4 mb-8 text-sm opacity-90 animate-fade   ${
+        delaytype === 1
+          ? "text-[#3B7C26] "
           : delaytype === 2
-            ? "Frame consistent but quality issues can appear at times"
-            : "Will run few seconds behind live but ensures consistent high quality stream"}
-      </p>
-    </div>
-  <!-- {/if}
-  {#if selected === 2} -->
-    <div
-      class=" w-[94.5%] my-4 pt-4 mx-6 shadow-md rounded-md border border-[#00000014]"
+            ? "text-[#FB8A2E] "
+            : "text-[#EF4444] "
+      } `}
     >
-      <h2 class="px-6 font-medium mb-4">Live stream resolution</h2>
-     <div
+      <span class="dark:text-[#929292] text-black/[.8] text-sm mr-1">
+        Note:
+      </span>
+      {delaytype === 1
+        ? "Frame lag possible"
+        : delaytype === 2
+          ? "Frame consistent but quality issues can appear at times"
+          : "Will run few seconds behind live but ensures consistent high quality stream"}
+    </p>
+  </div>
+
+  <!-- Live stream resolution -->
+  <div
+    class=" w-[94.5%] my-4 pt-4 mx-6 shadow-md rounded-md border border-[#00000014]"
+  >
+    <h2 class="px-6 font-medium mb-4">Live stream resolution</h2>
+    <div
       class="h-[1px] dark:bg-[#292929] ml-2 mb-4 bg-[#e0e0e0] mt-8 w-[95%]"
     />
-      <form class=" flex items-center justify-center w-[70%] mb-8 px-6">
-        {#each resoOptions as { id, label }}
-          <div class="flex gap-4 w-full">
-            <label>
-              <input
-                type="radio"
-                class="cursor-pointer"
-                bind:group={resoType}
-                value={id}
-              />
-              {label}</label
-            >
-          </div>
-        {/each}
-      </form>
-      <p
-        id="fadeElement"
-        class={`px-6 mt-4 mb-8 text-sm opacity-90 ${
-          resoType === 1
-            ? "text-[#3B7C26]"
-            : resoType === 2
-              ? "text-[#FB8A2E]"
-              : resoType === 3
-                ? "text-[#FB8A2E]"
-                : resoType === 4
-                  ? "text-[#EF4444]"
-                  : resoType === 5
-                    ? "text-[#EF4444]"
-                    : "text-[#3B7C26]"
-        } `}
-      >
-        <span class="dark:text-[#929292] text-black/[.8] text-sm mr-1">
-          Note:
-        </span>
-        {resoType === 1
-          ? "For smooth lag, free streams"
+    <form class=" flex items-center justify-center w-[70%] mb-8 px-6">
+      {#each resoOptions as { id, label }}
+        <div class="flex gap-4 w-full">
+          <label>
+            <input
+              type="radio"
+              class="cursor-pointer"
+              bind:group={resoType}
+              value={id}
+            />
+            {label}</label
+          >
+        </div>
+      {/each}
+    </form>
+    <p
+      id="fadeElement"
+      class={`px-6 mt-4 mb-8 text-sm opacity-90 ${
+        resoType === 1
+          ? "text-[#3B7C26]"
           : resoType === 2
-            ? "Frame consistent but quality issues"
+            ? "text-[#FB8A2E]"
             : resoType === 3
-              ? "Minor lag could be there"
+              ? "text-[#FB8A2E]"
               : resoType === 4
-                ? "Intermittent frames lag could be observed"
+                ? "text-[#EF4444]"
                 : resoType === 5
-                  ? "Frame lag is expected frequently"
-                  : "Decided based on the number of cameras"}
-      </p>
-    </div>
+                  ? "text-[#EF4444]"
+                  : "text-[#3B7C26]"
+      } `}
+    >
+      <span class="dark:text-[#929292] text-black/[.8] text-sm mr-1">
+        Note:
+      </span>
+      {resoType === 1
+        ? "For smooth lag, free streams"
+        : resoType === 2
+          ? "Frame consistent but quality issues"
+          : resoType === 3
+            ? "Minor lag could be there"
+            : resoType === 4
+              ? "Intermittent frames lag could be observed"
+              : resoType === 5
+                ? "Frame lag is expected frequently"
+                : "Decided based on the number of cameras"}
+    </p>
+  </div>
   <!-- {/if} -->
 
   <!-- <button

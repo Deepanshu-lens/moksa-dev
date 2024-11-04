@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Button } from "@/components/ui/button";
+  import { Button } from "@/components/ui/button";
   import { onMount } from "svelte";
 
   let networkStatus = navigator.onLine;
@@ -29,8 +29,9 @@
   });
 </script>
 
+<!-- Main container -->
 <div class="h-[calc(100vh-75px)] w-full flex flex-col">
-
+  <!-- Internet Connectivity -->
   <div
     class="flex-col mt-4 pt-8 mx-6 shadow-md rounded-md border border-[#00000014]"
   >
@@ -73,11 +74,12 @@
     </div>
   </div>
 
+  <!-- Node & Camera Connectivity -->
   <div
     class="flex-col mt-4 pt-8 mx-6 shadow-md rounded-md border border-[#00000014]"
   >
     <span
-      class="text-base font-medium dark:text-[#e0e0e0] text-[#212427] px-6 py-8 "
+      class="text-base font-medium dark:text-[#e0e0e0] text-[#212427] px-6 py-8"
     >
       Node & Camera Connectivity
     </span>
@@ -117,6 +119,7 @@
     </div>
   </div>
 
+  <!-- Data being backed up -->
   <div
     class="flex-col mt-4 pt-8 mx-6 shadow-md rounded-md border border-[#00000014]"
   >

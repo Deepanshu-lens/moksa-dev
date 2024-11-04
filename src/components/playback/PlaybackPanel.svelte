@@ -162,6 +162,7 @@
 </script>
 
 <section class="right-playback flex-1 flex w-full h-screen justify-between">
+  <!-- Recording Playback Section -->
   <div class="h-full w-full">
     {#if $convertedVideos.length === 0 && addMode === 1}
       <div
@@ -235,6 +236,8 @@
       {/if}
     {/if}
   </div>
+
+  <!-- NVR And Cloud Video Selection Section -->
   <div
     class={`h-[calc(100vh-75px)] ${showRightPanel ? "w-1/4 max-w-72 " : "w-0"} flex-shrink-0 transition-width ease-in-out duration-500 dark:border-[#292929] border-x-[1px] relative`}
   >
@@ -264,7 +267,6 @@
         class="flex items-center bg-[#DADFEA] dark:bg-transparent dark:border-white/[.3] p-0.5 justify-center rounded-lg border-black/[.13] border-solid border-[1px] w-[94%] h-[40px] mx-auto my-2"
       >
         <button
-          disabled
           on:click={() => (addMode = 1)}
           class={`rounded-lg text-xs leading-[18px] disabled:cursor-not-allowed px-[10px] py-[3px] font-medium w-full h-full ${addMode === 1 ? "text-white bg-[#050F41] " : "bg-[#DADFEA] dark:bg-transparent"}`}
           >NVR</button

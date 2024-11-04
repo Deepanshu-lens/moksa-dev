@@ -240,6 +240,7 @@
     </span>
   </div>
 
+  <!-- Dashboard -->
   {#if view === 1}
     <Dashboard
       {moksaUserId}
@@ -255,6 +256,8 @@
       token={data.moksaToken}
       {user}
     />
+
+    <!-- stores -->
   {:else if view === 2}
     <Stores
       {allStores}
@@ -264,6 +267,8 @@
       {user}
       token={data.moksaToken}
     />
+
+    <!-- theft -->
   {:else if view === 3}
     <Theft
       {theftandcamera}
@@ -274,8 +279,12 @@
       {moksaUserId}
       {user}
     />
+
+    <!-- Empoloyees Effeciency -->
   {:else if view === 4}
     <EE {allStores} token={data.moksaToken} {moksaUserId} />
+
+    <!-- people counter -->
   {:else if view === 5}
     <PeopleCounter
       {allStores}
@@ -283,8 +292,12 @@
       {usersData}
       curruser={data.user}
     />
+
+    <!-- heat map -->
   {:else if view === 6}
     <HeatMap {allStores} token={data.moksaToken} />
+
+    <!-- safety -->
   {:else if view === 7}
     <Safety {allStores} token={data.moksaToken} {user} />
   {/if}

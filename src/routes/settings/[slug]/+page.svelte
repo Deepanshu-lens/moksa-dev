@@ -97,10 +97,11 @@
   });
 </script>
 
-<!-- desk -->
+<!-- desktop -->
 <main
   class="hidden sm:flex items-start justify-between w-full overflow-y-hidden min-h-[calc(100vh-75px)]"
 >
+  <!-- Main container -->
   <ConfigPanel
     {user}
     records={data.records}

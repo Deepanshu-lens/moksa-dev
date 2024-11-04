@@ -557,6 +557,7 @@
 <section
   class="w-full p-4 flex flex-col max-h-[calc(100vh-75px)] hide-scrollbar overflow-y-auto"
 >
+  <!-- Date range section -->
   <div class="flex items-center justify-start">
     <span
       class="flex items-center border-black h-[40px] border-opacity-[18%] border-[1px] rounded-md dark:border-white"
@@ -599,6 +600,8 @@
       </Popover.Root>
     </span>
   </div>
+
+  <!-- Employee Tracking Table -->
   <div class="grid grid-cols-8 grid-rows-4 gap-4 mt-4">
     <div
       class="col-span-8 row-span-4 h-[400px] border rounded-md rounded-t-xl bg-white dark:bg-transparent dark:border-white/[.7] flex flex-col gap-3 flex-shrink-0"
@@ -609,6 +612,7 @@
         <p class="text-white flex items-center gap-2 text-xl font-bold">
           Employee Tracking
         </p>
+        <!-- Store Selector -->
         <Select.Root portal={null}>
           <Select.Trigger
             class="w-auto min-w-[150px] bg-[#3D81FC] text-white border-none text-xs px-1 rounded-lg"
@@ -691,6 +695,7 @@
       </div>
     </div>
 
+    <!-- Employee Details Card-->
     <div
       class=" col-span-3 row-span-4 border rounded-md p-2 flex flex-col flex-shrink-0 h-[550px] dark:border-white/[.7]"
     >
@@ -698,6 +703,8 @@
         <p class="text-[#323232] text-lg font-semibold dark:text-white">
           Employee Details
         </p>
+
+        <!-- Employees Selector -->
         <span class="flex items-center justify-between">
           <Select.Root portal={null}>
             <Select.Trigger
@@ -736,6 +743,8 @@
             </Select.Content>
             <Select.Input name="favoriteFruit" />
           </Select.Root>
+
+          <!-- Add Employee Dialog -->
           <span class="flex items-center gap-1">
             <CreateEmployeeDialog
               {employeeData}
@@ -747,6 +756,8 @@
                 ><Plus size={20} /> Add</Button
               >
             </CreateEmployeeDialog>
+
+            <!-- Update Employee Dialog -->
             <UpdateEmployeeDialog
               {token}
               firstName={$selectedEmployee === null

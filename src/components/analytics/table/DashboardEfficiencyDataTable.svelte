@@ -211,7 +211,9 @@
                     class="flex-1 flex items-center justify-center py-2 px-4 w-full text-center"
                   >
                     {#if cell.id === "employee"}
-                      <div class="flex items-center gap-2 min-w-[150px] text-start justify-start">
+                      <div
+                        class="flex items-center gap-2 min-w-[150px] text-start justify-start"
+                      >
                         <!-- <img src="/path/to/avatar.png" alt="Avatar" class="w-8 h-8 rounded-full" /> -->
                         <User class="size-5 text-blue-500 " />
                         <span class="text-sm font-medium whitespace-nowrap"

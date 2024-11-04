@@ -236,6 +236,7 @@
   //   }
   // }
 
+  // fetching videos from s3 Bucket 
   async function fetchfroms3(cameraId, date, startTime, endTime) {
     console.log(date);
     const localDate = new Date(date);

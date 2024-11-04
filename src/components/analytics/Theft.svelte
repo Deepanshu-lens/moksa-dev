@@ -573,9 +573,9 @@
         ).then((res) => res.json()),
       ]);
 
-      console.log(theftD);
-      console.log(theftT);
-      console.log(theftL);
+      console.log(theftD, "theftD");
+      console.log(theftT, "theftT");
+      console.log(theftL, "theftL");
       theftDataa.set(theftD);
       theftTrend.set(theftT);
       listtheft.set(theftL.data);
@@ -1145,6 +1145,7 @@
   class="w-full p-4 flex flex-col max-h-[calc(100vh-75px)] overflow-y-auto hide-scrollbar"
 >
   <div class="flex items-center justify-between">
+    <!-- Date Range Picker -->
     <span
       class="flex items-center border-black h-[40px] border-opacity-[18%] border-[1px] rounded-md dark:border-white"
     >
@@ -1185,6 +1186,8 @@
         </Popover.Content>
       </Popover.Root>
     </span>
+
+    <!-- Store selector -->
     <span class="flex items-center gap-3">
       <Select.Root portal={null}>
         <Select.Trigger
@@ -1242,6 +1245,8 @@
       {/if}
     </span>
   </div>
+
+  <!-- main container -->
   <div class="grid grid-cols-8 grid-rows-12 gap-4 my-4 h-[1600px]">
     <div
       class="col-span-2 border rounded-md bg-gradient-to-r from-[#357DFF] to-[#053895] p-2 flex items-center gap-3 max-h-[100px]"

@@ -208,9 +208,6 @@
   $: ({ pageIndex, hasNextPage, hasPreviousPage, pageCount } =
     pluginStates.page);
 
-  $: ({ pageIndex, hasNextPage, hasPreviousPage, pageCount } =
-    pluginStates.page);
-
   $: if (dialogOpen === false) {
     if (selectedVideo) {
       console.log("revoking video");
@@ -246,6 +243,7 @@
   };
 </script>
 
+<!-- Theft Table -->
 <div class="m-0">
   <Table.Root {...$tableAttrs} class="w-full">
     <Table.Header>
@@ -367,6 +365,7 @@
   </Table.Root>
 </div>
 
+<!-- Pagination -->
 {#if $theftData?.data?.length > 0}
   <div class="flex flex-row items-center justify-center space-x-4 py-4">
     <Button
@@ -412,6 +411,7 @@
     }
   }} -->
 
+<!-- Video Dialog -->
 <Dialog.Root bind:open={dialogOpen}>
   <Dialog.Content class="sm:max-w-[720px]">
     <Dialog.Header>

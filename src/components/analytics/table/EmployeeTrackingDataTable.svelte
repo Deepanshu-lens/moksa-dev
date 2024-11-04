@@ -100,9 +100,9 @@
   $: columns = table.createColumns(
     $efficiencyData.data.column
       .filter(
-        (col) => !["store_id", "first_name", "last_name"].includes(col.key),
+        (col: any) => !["store_id", "first_name", "last_name"].includes(col.key),
       )
-      .map((col) =>
+      .map((col: any) =>
         table.column({
           accessor: col.key === "employee_id" ? "employee" : col.key,
           header: col.header,
