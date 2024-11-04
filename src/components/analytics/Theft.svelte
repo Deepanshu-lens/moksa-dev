@@ -430,13 +430,19 @@
   $: console.log("theftData", chartLoading);
 
   async function gettheftList(storeId: number) {
-    const theftList = await fetch("/api/theft/listByStoreId", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    const today = new Date();
+    let startDate = new Date(today);
+    startDate.setDate(today.getDate() - 7);
+    const formatDate = (date: Date) => date.toISOString().split("T")[0];
+    const theftList = await fetch(
+      `https://api.moksa.ai/theft/theftListBasedOnStoreId/${$selectedStore.value}/${formatDate(startDate)}/${formatDate(today)}/1/100`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
       },
-      body: JSON.stringify({ storeId }),
-    });
+    );
     const data = await theftList.json();
     if (data.status === 200) {
       // console.log(data.data)
