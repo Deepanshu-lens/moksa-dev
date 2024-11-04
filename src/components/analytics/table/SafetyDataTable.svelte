@@ -70,11 +70,11 @@
   $: dbData =
     safetyData.data &&
     safetyData?.data?.map((item: any) => ({
-      employee: `${item.first_name} ${item.last_name}`,
       masks: item.wearing_mask,
+      uniform: item.wearing_uniform,
+      employee: `${item.first_name} ${item.last_name}`,
       gloves: item.wearing_gloves,
       hairnet: item.wearing_hair_net,
-      uniform: item.wearing_uniform,
       breakingSOPs: "Coming Soon",
       videoLink: "Image",
       videourl: item.img_link,
@@ -103,6 +103,14 @@
 
   $: columns = table.createColumns([
     table.column({
+      accessor: "masks",
+      header: "Masks",
+    }),
+    table.column({
+      accessor: "uniform",
+      header: "Uniform",
+    }),
+    table.column({
       accessor: "employee",
       header: "Employee",
     }),
@@ -110,10 +118,7 @@
       accessor: "date",
       header: "Date",
     }),
-    table.column({
-      accessor: "masks",
-      header: "Masks",
-    }),
+
     table.column({
       accessor: "gloves",
       header: "Gloves",
@@ -121,10 +126,6 @@
     table.column({
       accessor: "hairnet",
       header: "Hairnet",
-    }),
-    table.column({
-      accessor: "uniform",
-      header: "Uniform",
     }),
     // table.column({
     //   accessor: "breakingSOPs",
