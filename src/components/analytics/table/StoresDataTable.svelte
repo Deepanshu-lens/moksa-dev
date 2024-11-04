@@ -85,6 +85,8 @@
     };
   });
 
+  $: console.log(dbData, "db data here");
+
   export let searchStore: string;
 
   // $: console.log(searchStore)

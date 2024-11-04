@@ -24,13 +24,24 @@
 
   const dispatch = createEventDispatcher();
 
-  $: console.log("store overview data", aisleData);
+  function parseTimeString(timeString: string): string {
+    const timeRanges = timeString.split(/[-to]/).map((time) => time.trim());
+    return timeRanges
+      .map((time) => {
+        const [hour, modifier] = time.match(/(\d+)([APM]+)/).slice(1);
+        let hour24 = parseInt(hour);
+        if (modifier === "PM" && hour24 < 12) hour24 += 12;
+        if (modifier === "AM" && hour24 === 12) hour24 = 0;
+        return `${hour24.toString().padStart(2, "0")}:00`;
+      })
+      .join(" to ");
+  }
 
   $: dbdata = aisleData.map((item: any) => {
     return {
       storeName: item.store,
       customers: item.noofcustomers,
-      busyHours: item.busyhour,
+      busyHours: parseTimeString(item.busyhour),
       mostVisitedAisle: item.aisle_name,
     };
   });
