@@ -713,7 +713,7 @@
         </div>
       {/if}
     </div> -->
-    <div
+    <!-- <div
       class="col-span-4 row-span-3 border rounded-md flex flex-col dark:border-white/[.7] min-h-[300px]"
     >
       <span
@@ -773,7 +773,7 @@
           <p class="text-lg">No data found</p>
         </div>
       {/if}
-    </div>
+    </div> -->
     <div
       class="col-span-8 row-span-2 flex items-center justify-between rounded-t-xl dark:border-white/[.7]"
     >

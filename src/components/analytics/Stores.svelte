@@ -8,6 +8,7 @@
     ShoppingBag,
     Users,
     Camera,
+    X,
   } from "lucide-svelte";
   import Input from "../ui/input/input.svelte";
   import { onMount } from "svelte";
@@ -384,6 +385,12 @@
         placeholder="Search"
       />
       <Search size={18} class="absolute top-1/2 -translate-y-1/2 left-2" />
+      <button
+        class="absolute top-1/2 -translate-y-1/2 right-2"
+        on:click={() => (searchStore = "")}
+      >
+        <X size={18} />
+      </button>
     </span>
     <span class="flex items-center gap-3">
       <!-- <Button variant="outline" class="flex items-center gap-1 text-sm"
