@@ -33,6 +33,17 @@
 
   $: console.log("people count data", $storeData);
 
+  function parseTimeString(timeString: string): string {
+    const timeRanges = timeString.split(/[-to]/).map((time) => time.trim());
+    return timeRanges
+      .map((time) => {
+        const [hour, modifier] = time.match(/(\d+)([APM]+)/).slice(1);
+        const hourFormatted = hour.padStart(2, "0"); // Ensure two digits
+        return `${hourFormatted}:00${modifier.toLowerCase()}`; // Append minutes and format modifier
+      })
+      .join("-");
+  }
+
   $: dbData =
     $selectedStore.value !== -1
       ? $storeData.map((item: any) => {
@@ -52,7 +63,7 @@
           return {
             storeName: item.store,
             customerCount: item.noofcustomers,
-            busyHourProjections: item.busyhour,
+            busyHourProjections: parseTimeString(item.busyhour),
             customerProjection: item.predicted_percentage,
             predictedMean: item.predictedmean,
             store_id: item.store_id,
@@ -160,7 +171,7 @@
         startDate.setDate(today.getDate() - 7);
     }
 
-    const formatDate = (date: Date) => date.toISOString().split("T")[0];
+    const formatDate = (date: Date) => date.toISOString()?.split("T")[0];
 
     console.log(formatDate(startDate));
     console.log(formatDate(today));

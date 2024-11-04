@@ -29,12 +29,10 @@
     return timeRanges
       .map((time) => {
         const [hour, modifier] = time.match(/(\d+)([APM]+)/).slice(1);
-        let hour24 = parseInt(hour);
-        if (modifier === "PM" && hour24 < 12) hour24 += 12;
-        if (modifier === "AM" && hour24 === 12) hour24 = 0;
-        return `${hour24.toString().padStart(2, "0")}:00`;
+        const hourFormatted = hour.padStart(2, "0"); // Ensure two digits
+        return `${hourFormatted}:00${modifier.toLowerCase()}`; // Append minutes and format modifier
       })
-      .join(" to ");
+      .join("-");
   }
 
   $: dbdata = aisleData.map((item: any) => {
