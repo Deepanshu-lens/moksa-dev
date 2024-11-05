@@ -222,85 +222,39 @@
     <div
       class="flex flex-col items-center max-w-[55%] ml-6 justify-center w-full mb-10"
     >
-      <!-- <div
-          class=" dark:bg-[#1b1b1b] bg-white px-6 w-full flex items-center justify-between py-2"
+      <div class="flex items-center justify-between w-full gap-x-3">
+        <Select.Root
+          portal={null}
+          onSelectedChange={(e) => (nodeIndex = e?.value)}
         >
-          <span class="font-semibold">Node</span>
-          <div class="flex gap-4">
-            <AddNodeDialog {user} {getNodeData}>
-              <button
-                on:click={() =>
-                  addUserLog("user clicked on add node button camera panel")}
-                class="dark:text-[#CAC4D0] text-[#4f4f4f] font-xs bg-[#d9d9d9] border-none dark:bg-[#242424] rounded-md px-3 py-1.5 border-[#333] border dark:border-solid"
-              >
-                Add
-              </button>
-            </AddNodeDialog>
-            {#if !nodeModify}
-              <button
-                class="dark:text-[#CAC4D0] text-[#4f4f4f] font-xs bg-[#d9d9d9] border-none dark:bg-[#242424] rounded-md px-3 py-1.5 border-[#333] border dark:border-solid"
-                on:click={() => {
-                  if (nodeIndex !== undefined && nodeIndex !== null) {
-                    nodeModify = true;
-                    addUserLog(
-                      "user clicked on modify node button camera panel",
-                    );
-                  } else {
-                    alert("please select a node");
-                    addUserLog(
-                      "user clicked on modify node button, without selecting a node,  camera panel",
-                    );
-                  }
-                }}
-              >
-                Modify
-              </button>
-            {:else}
-              <button
-                class="dark:text-[#cac4d0] text-[#4f4f4f] font-xs bg-[#d9d9d9] border-none dark:bg-[#242424] rounded-md px-3 py-1.5 border-[#333] border dark:border-solid"
-                on:click={async () => {
-                  await fetch("/api/node/update", {
-                    method: "PATCH",
-                    headers: {
-                      "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                      name: newNodeName,
-                      id: newData[nodeIndex].id,
-                    }),
-                  }).catch((err) => {
-                    toast.error("failed to update node name");
-                    return;
-                  });
-                  toast(
-                    `${newData[nodeIndex].name} updated to ${newNodeName}!`,
-                  );
-                  newData[nodeIndex].name = newNodeName;
-                  nodeModify = false;
-                }}
-              >
-                Save Changes
-              </button>
-            {/if}
-            {#if nodeModify}
-              <button
-                class="dark:text-[#cac4d0] text-[#4f4f4f] font-xs bg-[#d9d9d9] border-none dark:bg-[#242424] rounded-md px-3 py-1.5 border-[#333] border dark:border-solid"
-                on:click={() => (nodeModify = false)}
-              >
-                Discard Changes
-              </button>
-            {/if}
-            <AlertDeleteNode onDelete={onDeleteNode}>
-              <button
-                class="dark:text-[#cac4d0] text-[#4f4f4f] font-xs bg-[#d9d9d9] border-none dark:bg-[#242424] rounded-md px-3 py-1.5 border-[#333] border dark:border-solid disabled:cursor-not-allowed"
-                disabled={nodeIndex === null}
-              >
-                Delete
-              </button>
-            </AlertDeleteNode>
-          </div>
-        </div> -->
+          <Select.Trigger class="text-sm pl-6">
+            <Select.Value placeholder={"Select a Store"} />
+          </Select.Trigger>
+          <Select.Content>
+            <Select.Group>
+              {#if newData?.length > 0}
+                {#each newData as item, index}
+                  <Select.Item class="pl-6" value={index}
+                    >{item?.name}</Select.Item
+                  >
+                {/each}
+              {/if}
+            </Select.Group>
+          </Select.Content>
+        </Select.Root>
 
+        <Button
+          class="text-[#4976F4] text-sm text-start flex items-center gap-1"
+          variant="ghost"
+        >
+          <Edit size={16} /> Modify</Button
+        >
+        <Button
+          class="text-[#F44336] text-sm text-start flex items-center gap-1"
+          variant="ghost"><Trash2 size={16} /> Delete</Button
+        >
+      </div>
+      <!-- 
       <table class="w-full bg-white rounded-md flex flex-col gap-4">
         <thead class="bg-[#f9f9f9] border-[#e4e4e4] rounded-md">
           <tr class="border-[#e4e4e4] rounded-md">
@@ -345,7 +299,6 @@
                       placeholder={item.name}
                       bind:value={newNodeName}
                       on:input={(e) => {
-                        console.log(e.target.value);
                         newNodeName = e.target.value;
                       }}
                       class="block border-0 px-1 py-1 text-gray-900
@@ -458,7 +411,7 @@
             {/each}
           {/if}
         </tbody>
-      </table>
+      </table> -->
     </div>
 
     {#if nodeIndex !== undefined && nodeIndex !== null}
@@ -598,7 +551,9 @@
         <table
           class="w-[calc(100vh-350px)] xl:w-full bg-white shadow-md rounded scale-90"
         >
-          <thead class="w-full max-w-[calc(100vh-350px)] xl:w-full xl:max-w-full">
+          <thead
+            class="w-full max-w-[calc(100vh-350px)] xl:w-full xl:max-w-full"
+          >
             <tr
               class="dark:bg-[#1b1b1b] bg-[#f2f2f2] border-t-[1px] border-solid dark:border-[#929292]"
             >
