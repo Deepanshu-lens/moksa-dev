@@ -596,9 +596,9 @@
           </div>
         </div>
         <table
-          class="w-[calc(100vh-350px)] bg-white shadow-md rounded scale-90"
+          class="w-[calc(100vh-350px)] xl:w-full bg-white shadow-md rounded scale-90"
         >
-          <thead class="w-full max-w-[calc(100vh-350px)]">
+          <thead class="w-full max-w-[calc(100vh-350px)] xl:w-full xl:max-w-full">
             <tr
               class="dark:bg-[#1b1b1b] bg-[#f2f2f2] border-t-[1px] border-solid dark:border-[#929292]"
             >
