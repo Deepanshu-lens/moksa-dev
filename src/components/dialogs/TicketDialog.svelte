@@ -119,7 +119,7 @@
               >
             {/each}
           </Select.Content>
-          <Select.Input name="favoriteFruit" />
+          <Select.Input name="favoriteFruit" bind:value={cameraId} />
         </Select.Root>
         <!-- <Input
           id="address"

@@ -16,9 +16,11 @@
   import Button from "@/components/ui/button/button.svelte";
   // import RaiseTicketDialog from "@/components/dialogs/RaiseTicketDialog.svelte";
   import TicketDialog from "@/components/dialogs/TicketDialog.svelte";
-
+  import * as Dialog from "@/components/ui/dialog";
+  import Label from "@/components/ui/label/label.svelte";
+  import { toast } from "svelte-sonner";
   let showRightPanel: boolean = true;
-
+  let requestDialogOpen = false;
   let dummyTickets: ITickets[] = [
     {
       id: "1",
@@ -68,6 +70,44 @@
   const { token } = data;
 
   $: console.log(nodes);
+
+  const handleSubmitRequestFeature = async (event: any) => {
+    event.preventDefault(); // Prevent the default form submission
+
+    // Create a FormData object from the form
+    const formData = new FormData(event.target);
+
+    // Get the values from the form
+    const title = formData.get("title");
+    const message = formData.get("message");
+
+    // You can also perform your async operation here
+    // Make the API call
+    try {
+      const response = await fetch(
+        "https://api.moksa.ai/requestfeature/create",
+        {
+          method: "POST",
+          body: JSON.stringify({ title, message }),
+          headers: {
+            // Correctly place headers here
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+      const data = await response?.json();
+      if (data?.status === 201) {
+        toast.success("feature requested successfully");
+        requestDialogOpen = false;
+      }
+    } catch (error) {
+      toast.error(
+        error?.message || "Something went wrong while requesting feature",
+      );
+      console.log(error, "error");
+    }
+  };
 </script>
 
 <section class="flex flex-1 w-full h-screen justify-between relative">
@@ -113,8 +153,14 @@
           <div class="flex flex-col items-center gap-2">
             <Gift size={45} class="text-blue-500" />
             <h1 class="text-xl font-semibold">Feature</h1>
+            <!-- svelte-ignore a11y-no-static-element-interactions -->
             <p class="text-center text-sm text-gray-500 font-medium">
-              If you want to request any additional feature <span
+              <!-- svelte-ignore a11y-click-events-have-key-events -->
+              If you want to request any additional feature
+              <span
+                on:click={() => {
+                  requestDialogOpen = true;
+                }}
                 class="text-blue-500 cursor-pointer hover:underline hover:underline-offset-2"
                 >click here</span
               >
@@ -293,3 +339,35 @@
     <TicketList tickets={tickets.data.data} />
   </div>
 </section>
+
+<!-- Request  -->
+<Dialog.Root bind:open={requestDialogOpen}>
+  <Dialog.Content class="sm:max-w-[720px]">
+    <Dialog.Header>
+      <Dialog.Title>Request Feature</Dialog.Title>
+    </Dialog.Header>
+    <div class="flex items-center w-full h-full">
+      <form action="" method="post" on:submit={handleSubmitRequestFeature}>
+        <div class="p-2 w-full">
+          <Label>Title</Label>
+          <Input
+            type="text"
+            placeholder="title"
+            class="mb-2 w-[30rem]"
+            name={"title"}
+          />
+        </div>
+        <div class="p-2">
+          <Label>Message</Label>
+          <Input
+            type="text"
+            placeholder="message"
+            class="mb-2 w-[30rem]"
+            name={"message"}
+          />
+        </div>
+        <Button type="submit" class="my-3">submit</Button>
+      </form>
+    </div>
+  </Dialog.Content>
+</Dialog.Root>

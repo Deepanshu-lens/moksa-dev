@@ -32,6 +32,7 @@
     { value: "pineapple", label: "Pineapple" },
   ];
 </script>
+
 <Dialog.Root bind:open={isOpen}>
   <Dialog.Trigger><slot /></Dialog.Trigger>
   <Dialog.Content closeButton={false} class="max-w-[500px]">
