@@ -19,6 +19,9 @@
   import * as Dialog from "@/components/ui/dialog";
   import Label from "@/components/ui/label/label.svelte";
   import { toast } from "svelte-sonner";
+  import { onMount } from "svelte";
+  import { writable } from "svelte/store";
+  import { tickets } from "@/lib/stores.js";
   let showRightPanel: boolean = true;
   let requestDialogOpen = false;
   let dummyTickets: ITickets[] = [
@@ -65,11 +68,9 @@
 
   export let data;
 
-  const { tickets } = data;
+  // const { tickets } = data;
   const { nodes } = data;
   const { token } = data;
-
-  $: console.log(nodes);
 
   const handleSubmitRequestFeature = async (event: any) => {
     event.preventDefault(); // Prevent the default form submission
@@ -108,6 +109,30 @@
       console.log(error, "error");
     }
   };
+
+  const fetchComplaints = async () => {
+    try {
+      const response = await fetch(
+        `https://api.moksa.ai/customerComplaints/getAllComplaints/1/10`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      const data = await response.json();
+      tickets.set(data?.data?.data || []);
+    } catch (error) {
+      console.log(error?.message, "error while fetching complaints");
+    }
+  };
+
+  onMount(() => {
+    // getting complaints
+    fetchComplaints();
+  });
 </script>
 
 <section class="flex flex-1 w-full h-screen justify-between relative">
@@ -336,7 +361,7 @@
     <Separator class="mb-2" />
 
     <!-- ticket list -->
-    <TicketList tickets={tickets.data.data} />
+    <TicketList tickets={$tickets || []} />
   </div>
 </section>
 

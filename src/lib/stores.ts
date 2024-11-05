@@ -20,6 +20,7 @@ export const canvasCoordinates = writable({})
 export const activePanel = writable("")
 export const atlasEvents = writable([])
 export const cameraCounts = writable<{ [cameraId: string]: number }>({});
+export let tickets = writable([]);
 
 function persistedWritable(key: string, defaultValue: boolean) {
   let value = defaultValue;

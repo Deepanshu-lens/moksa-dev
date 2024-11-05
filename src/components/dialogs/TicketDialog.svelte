@@ -6,6 +6,7 @@
   import * as Select from "@/components/ui/select";
   import { CloudFog } from "lucide-svelte";
   import Camera from "../configuration/settings/Camera.svelte";
+  import { tickets } from "@/lib/stores";
 
   export let token: string;
   export let nodes: any;
@@ -16,6 +17,25 @@
   let cameraId = "";
   let issue = "";
   let dialogOpen = false;
+
+  const fetchComplaints = async () => {
+    try {
+      const response = await fetch(
+        `https://api.moksa.ai/customerComplaints/getAllComplaints/1/10`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      const data = await response.json();
+      tickets.set(data?.data?.data || []);
+    } catch (error) {
+      console.log(error?.message, "error while fetching complaints");
+    }
+  };
 
   const onSubmit = async () => {
     await fetch(`https://api.moksa.ai/customerComplaints/create`, {
@@ -35,6 +55,7 @@
           dialogOpen = false;
           toast.success("Ticket raised successfully");
           issue = "";
+          fetchComplaints();
         } else {
           toast.error("Failed to raise ticket");
         }

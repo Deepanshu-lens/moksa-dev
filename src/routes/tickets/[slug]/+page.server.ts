@@ -37,7 +37,6 @@ export const load: PageServerLoad = async ({ cookies, params, fetch, locals }) =
     // console.log(response)
 
     const data = await response.json()
-    // console.log(data)
 
     return {
         tickets: data,
