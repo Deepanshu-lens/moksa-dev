@@ -49,7 +49,7 @@
     customerCount: Number(item.noofcustomers),
     goingOut: Number(item.going_out_count),
     created: item.createdAt,
-    busyHour: item.busyhour,
+    busyHour: parseTimeString(item.busyhour),
     predictedMean: item.predictedmean,
     predictedPercentage: item.predicted_percentage,
     storeId: item.store_id,
@@ -65,6 +65,17 @@
   //     predicted_percentage: -50,
   //     total_count: '1'
   //   }
+
+  function parseTimeString(timeString: string): string {
+    const timeRanges = timeString.split(/[-to]/).map((time) => time.trim());
+    return timeRanges
+      .map((time) => {
+        const [hour, modifier] = time.match(/(\d+)([APM]+)/).slice(1);
+        const hourFormatted = hour.padStart(2, "0"); // Ensure two digits
+        return `${hourFormatted}:00${modifier.toLowerCase()}`; // Append minutes and format modifier
+      })
+      .join("-");
+  }
 
   $: data = writable(dbData);
 

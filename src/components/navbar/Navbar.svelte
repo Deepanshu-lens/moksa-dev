@@ -139,7 +139,7 @@
       sockets[storeId].disconnect();
     }
 
-    sockets[storeId] = io("https://api.moksa.ai", {
+    sockets[storeId] = io("https://dev.api.moksa.ai/", {
       withCredentials: true,
       extraHeaders: {
         Authorization: `Bearer ${mToken}`,
@@ -154,7 +154,7 @@
     });
 
     socket.on("connect", () => {
-      console.log(`connected for store ${storeId}`);
+      console.log(`connected for store theft in nav ${storeId}`);
       socket.emit("joinUser", userID);
       socket.emit("joinStore", storeId);
     });

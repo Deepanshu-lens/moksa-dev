@@ -88,12 +88,12 @@
     if (barChartCanvas && !barChart) {
       const ctx = barChartCanvas.getContext("2d");
       const gradient = ctx.createLinearGradient(0, 400, 0, 0);
-      gradient.addColorStop(0, "#357DFF");
-      gradient.addColorStop(1, "#053895");
+      gradient.addColorStop(0, "#00FEA3");
+      gradient.addColorStop(1, "#007077");
 
       const gradient2 = ctx.createLinearGradient(0, 400, 0, 0);
-      gradient2.addColorStop(0, "#FFB156");
-      gradient2.addColorStop(1, "#FF007A");
+      gradient2.addColorStop(0, "#FC1919");
+      gradient2.addColorStop(1, "#B90000");
 
       if (ctx) {
         Chart.register(BarController, BarElement, CategoryScale, LinearScale);
@@ -900,7 +900,7 @@
     const url = URL.createObjectURL(blob);
 
     // Create a link element to download the CSV
-    const link = document.createElement("a");
+    const link = window.document.createElement("a");
     link.href = url;
     link.download = `theft&camera_${date}.csv`;
     document.body.appendChild(link);
@@ -1044,7 +1044,7 @@
       sockets[storeId].disconnect();
     }
 
-    sockets[storeId] = io("https://api.moksa.ai", {
+    sockets[storeId] = io("https://api.moksa.ai/", {
       withCredentials: true,
       extraHeaders: {
         Authorization: `Bearer ${token}`,
@@ -1059,7 +1059,7 @@
     });
 
     socket.on("connect", () => {
-      console.log(`connected for store ${storeId}`);
+      console.log(`connected for store in theft ${storeId}`);
       socket.emit("joinUser", userID);
       socket.emit("joinStore", storeId);
     });
@@ -1255,7 +1255,7 @@
   <!-- main container -->
   <div class="grid grid-cols-8 grid-rows-12 gap-4 my-4 h-[1600px]">
     <div
-      class="col-span-2 border rounded-md bg-gradient-to-r from-[#357DFF] to-[#053895] p-2 flex items-center gap-3 max-h-[100px]"
+      class="col-span-2 border rounded-md bg-gradient-to-r from-[#FE7B7B] to-[#CB0404] p-2 flex items-center gap-3 max-h-[100px]"
     >
       <span
         class="size-[60px] grid place-items-center text-white bg-white bg-opacity-20 rounded-full rotate-90"
@@ -1283,7 +1283,7 @@
       </span>
     </div>
     <div
-      class="col-span-2 border rounded-md bg-gradient-to-r from-[#FFB156] to-[#FF007A] p-2 flex items-center gap-3 max-h-[100px]"
+      class="col-span-2 border rounded-md bg-gradient-to-r from-[#00FEA3] to-[#007077] p-2 flex items-center gap-3 max-h-[100px]"
     >
       <span
         class="size-[60px] grid place-items-center text-white bg-white bg-opacity-20 rounded-full rotate-90"
@@ -1311,7 +1311,7 @@
       </span>
     </div>
     <div
-      class="col-span-2 border rounded-md bg-gradient-to-r from-[#02A7FD] to-[#141C64] p-2 flex items-center gap-3 max-h-[100px] invisible"
+      class="col-span-2 border rounded-md bg-gradient-to-r from-[#FE7B7B] to-[#CB0404] p-2 flex items-center gap-3 max-h-[100px] invisible"
     >
       <span
         class="size-[60px] grid place-items-center text-white bg-white bg-opacity-20 rounded-full rotate-90"
@@ -1466,7 +1466,7 @@
             a 15.9155 15.9155 0 0 1 0 31.831
             a 15.9155 15.9155 0 0 1 0 -31.831"
                 fill="none"
-                stroke="#FF007A"
+                stroke="#007077"
                 stroke-width="4"
                 stroke-linecap="round"
               />
@@ -1475,7 +1475,7 @@
             a 15.9155 15.9155 0 0 1 0 31.831
             a 15.9155 15.9155 0 0 1 0 -31.831"
                 fill="none"
-                stroke="#357DFF"
+                stroke="#CB0404"
                 stroke-width="4"
                 stroke-dasharray="{detectionPercentage}, 100"
               />
@@ -1490,14 +1490,14 @@
               class="flex gap-2 items-center text-xs text-[#030229] dark:text-white"
             >
               <span
-                class="w-2 h-2 rounded-full bg-gradient-to-r from-[#357DFF] to-[#053895]"
+                class="w-2 h-2 rounded-full bg-gradient-to-r from-[#FE7B7B] to-[#CB0404]"
               /> Detected
             </p>
             <p
               class="flex gap-2 items-center text-xs text-[#030229] dark:text-white"
             >
               <span
-                class="w-2 h-2 rounded-full bg-gradient-to-r from-[#FFB156] to-[#FF007A]"
+                class="w-2 h-2 rounded-full bg-gradient-to-r from-[#00FEA3] to-[#007077]"
               /> Prevented
             </p>
           </span>

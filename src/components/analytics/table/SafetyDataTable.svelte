@@ -100,16 +100,8 @@
     }),
     select: addSelectedRows(),
   });
-
+  // Employees date gloves hairnet mask uniforms images
   $: columns = table.createColumns([
-    table.column({
-      accessor: "masks",
-      header: "Masks",
-    }),
-    table.column({
-      accessor: "uniform",
-      header: "Uniform",
-    }),
     table.column({
       accessor: "employee",
       header: "Employee",
@@ -118,7 +110,6 @@
       accessor: "date",
       header: "Date",
     }),
-
     table.column({
       accessor: "gloves",
       header: "Gloves",
@@ -126,6 +117,14 @@
     table.column({
       accessor: "hairnet",
       header: "Hairnet",
+    }),
+    table.column({
+      accessor: "masks",
+      header: "Masks",
+    }),
+    table.column({
+      accessor: "uniform",
+      header: "Uniform",
     }),
     // table.column({
     //   accessor: "breakingSOPs",

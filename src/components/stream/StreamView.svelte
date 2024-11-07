@@ -1454,14 +1454,14 @@
               </div>
             </div>
             {#if roiCamera}
-              <div class="flex items-center gap-2 px-4">
+              <!-- <div class="flex items-center gap-2 px-4">
                 <label
                   for="line-crossing-toggle"
                   class="text-black/[.7] text-sm">Line Crossing Detection</label
                 >
                 <Switch bind:checked={lineCrossing} />
-              </div>
-              {#if lineCrossing}
+              </div> -->
+              <!-- {#if lineCrossing}
                 <div class="flex items-center py-2 gap-2 px-4">
                   <label
                     for="person-detection-toggle"
@@ -1482,7 +1482,7 @@
                     bind:checked={lineVehicle}
                   />
                 </div>
-              {/if}
+              {/if} -->
               <div class="w-full p-4 flex items-center gap-4">
                 <Button
                   on:click={() => {
@@ -1586,4 +1586,5 @@
   .shad {
     box-shadow: -3px 3px 4px 0px #0000001f;
   }
+
 </style>
