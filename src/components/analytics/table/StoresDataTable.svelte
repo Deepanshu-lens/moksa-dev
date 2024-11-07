@@ -27,6 +27,7 @@
   export let combinedStores: any[] = [];
   export let token: string;
   export let user: any;
+  export let refreshStoreData: () => void;
 
   const dispatch = createEventDispatcher();
 
@@ -70,7 +71,7 @@
   }
 
   $: dbData = combinedStores.map((store) => {
-    console.log(store,'store here')
+    console.log(store, "store here");
     return {
       storeName: store.name,
       storeImage: store.storeImage,
@@ -86,7 +87,7 @@
     };
   });
 
-  console.log(combinedStores,'combinedStores')
+  console.log(combinedStores, "combinedStores");
 
   $: console.log(dbData, "db data here");
 
@@ -209,7 +210,11 @@
                   {#if cell.id === "action"}
                     {#if user.role === "superAdmin"}
                       <span class="w-full flex items-center gap-3">
-                        <EditStoreDialog store={row.original} {token}>
+                        <EditStoreDialog
+                          store={row.original}
+                          {token}
+                          {refreshStoreData}
+                        >
                           <Button
                             class="text-[#4976F4] bg-[#4976F4]/[.1] rounded-full text-xs text-start flex items-center gap-1"
                             variant="ghost"

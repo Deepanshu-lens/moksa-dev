@@ -18,7 +18,7 @@
   let country = store.country;
   let manager = store.storeManager;
   let id = store.moksaId;
-
+  export let refreshStoreData: () => void;
   let storeOpenTime;
   let storeCloseTime;
   let isStore24hr;
@@ -86,9 +86,11 @@
         is24HrStore: isStore24hr,
         timezone: selectedTimezone,
       }),
-    }).then(() => {
+    }).then(async () => {
       toast("Store updated");
       dialogOpen = false;
+      await refreshStoreData();
+      // await fetchStoreData();
     });
     return true;
   };

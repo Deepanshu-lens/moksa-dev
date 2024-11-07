@@ -90,7 +90,7 @@
       return { ...store, ...theftData, lensId: nodeData ? nodeData.id : null };
     });
 
-    console.log(combinedStores,'combinedStores')
+  console.log(combinedStores, "combinedStores");
 
   $: uniqueLocations = [
     ...new Set(combinedStores.map((store) => store.country)),
@@ -389,7 +389,9 @@
         class="absolute top-1/2 -translate-y-1/2 right-2"
         on:click={() => (searchStore = "")}
       >
-        <X size={18} />
+        {#if searchStore}
+          <X size={18} />
+        {/if}
       </button>
     </span>
     <span class="flex items-center gap-3">
@@ -458,6 +460,7 @@
       {searchStore}
       {token}
       {user}
+      {refreshStoreData}
     />
   </div>
 </section>
