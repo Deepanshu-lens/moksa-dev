@@ -49,7 +49,7 @@
     customerCount: Number(item.noofcustomers),
     goingOut: Number(item.going_out_count),
     created: item.createdAt,
-    busyHour: parseTimeString(item.busyhour),
+    busyHour: item.busyhour,
     predictedMean: item.predictedmean,
     predictedPercentage: item.predicted_percentage,
     storeId: item.store_id,

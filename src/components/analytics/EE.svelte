@@ -800,6 +800,7 @@
             </DeleteEmployeeDialog>
           </span>
         </span>
+
         {#if $employeeDetails?.data?.length > 0 && $employeeData !== null}
           <span class="flex items-center gap-3 my-2">
             <User size={100} />
@@ -824,6 +825,10 @@
               </span>
             </span>
           </span>
+        {:else}
+          <div class="mx-auto my-20">
+            <Spinner  />
+          </div>
         {/if}
       </span>
       {#if $employeeDetails?.data?.length > 0 && $employeeData !== null}
@@ -855,12 +860,6 @@
             </div>
           {/each}
         </span>
-      {:else}
-        <p
-          class="text-[#323232] text-lg flex items-center gap-2 font-semibold dark:text-white"
-        >
-          No employee Data
-        </p>
       {/if}
     </div>
 

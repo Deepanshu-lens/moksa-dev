@@ -28,9 +28,9 @@
     const timeRanges = timeString.split(/[-to]/).map((time) => time.trim());
     return timeRanges
       .map((time) => {
-        const [hour, modifier] = time.match(/(\d+)([APM]+)/).slice(1);
-        const hourFormatted = hour.padStart(2, "0"); // Ensure two digits
-        return `${hourFormatted}:00${modifier.toLowerCase()}`; // Append minutes and format modifier
+        const [hour, modifier] = time?.match(/(\d+)([APM]+)/)?.slice(1);
+        const hourFormatted = hour?.padStart(2, "0"); // Ensure two digits
+        return `${hourFormatted}:00${modifier?.toLowerCase()}`; // Append minutes and format modifier
       })
       .join("-");
   }
@@ -39,7 +39,7 @@
     return {
       storeName: item.store,
       customers: item.noofcustomers,
-      busyHours: parseTimeString(item.busyhour),
+      busyHours: item.busyhour,
       mostVisitedAisle: item.aisle_name,
     };
   });

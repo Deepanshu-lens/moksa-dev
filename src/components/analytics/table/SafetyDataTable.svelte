@@ -276,9 +276,9 @@
                       </div>
                     {:else if ["masks", "uniform", "gloves", "hairnet"].includes(cell.id)}
                       {#if row.original[cell.id] === "true"}
-                        <Check class="w-5 h-5 text-blue-500" />
+                        <img src="/images/tick.png" alt="tick" srcset="" class="w-5 h-5">
                       {:else if row.original[cell.id] === "false"}
-                        <X class="w-5 h-5 text-red-500" />
+                        <img src="/images/cross.png" alt="cross"  class="w-5 h-5">
                       {:else}
                         <p>{row.original[cell.id]}</p>
                       {/if}

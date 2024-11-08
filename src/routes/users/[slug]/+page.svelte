@@ -728,7 +728,7 @@
         User <br /> Operations
       </p>
     </span>
-    <span class="group flex-col flex items-center justify-center gap-0.5">
+    <!-- <span class="group flex-col flex items-center justify-center gap-0.5">
       <button
         on:click={() => (view = 2)}
         class={view !== 2
@@ -741,7 +741,7 @@
       >
         Operator <br /> management
       </p>
-    </span>
+    </span> -->
   </div>
 
   {#if view === 1}

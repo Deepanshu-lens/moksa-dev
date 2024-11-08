@@ -63,7 +63,7 @@
           return {
             storeName: item.store,
             customerCount: item.noofcustomers,
-            busyHourProjections: parseTimeString(item.busyhour),
+            busyHourProjections: item.busyhour,
             customerProjection: item.predicted_percentage,
             predictedMean: item.predictedmean,
             store_id: item.store_id,

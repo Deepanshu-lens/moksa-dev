@@ -2,18 +2,7 @@
   import { createTable, Render, Subscribe } from "svelte-headless-table";
   import * as Table from "@/components/ui/table";
   import { Button } from "@/components/ui/button";
-  import {
-    ArrowUpDown,
-    Check,
-    X,
-    ChevronRight,
-    Edit,
-    Store,
-    StoreIcon,
-    Trash2,
-    TrendingDown,
-    TrendingUp,
-  } from "lucide-svelte";
+  import { ArrowUpDown, Check, X } from "lucide-svelte";
   import { createEventDispatcher } from "svelte";
   import {
     addPagination,
@@ -194,9 +183,19 @@
                     </div>
                   {:else if ["uniform", "masks", "gloves", "hairnet"].includes(cell.id)}
                     {#if row.original[cell.id] === "true"}
-                      <Check class="w-5 h-5 text-blue-500" />
+                      <img
+                        src="/images/tick.png"
+                        alt="tick"
+                        srcset=""
+                        class="w-5 h-5"
+                      />
                     {:else if row.original[cell.id] === "false"}
-                      <X class="w-5 h-5 text-red-500" />
+                      <img
+                        src="/images/cross.png"
+                        alt="cross"
+                        srcset=""
+                        class="w-5 h-5"
+                      />
                     {:else}
                       <p>{row.original[cell.id]}</p>
                     {/if}
