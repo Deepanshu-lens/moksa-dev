@@ -400,11 +400,9 @@
       >
     </span>
   </div>
-  <div
-    class="grid grid-cols-8 grid-rows-9 gap-4 mt-4 w-full max-h-[calc(100vh-150px)] overflow-y-auto"
-  >
+  <div class="grid grid-cols-8 grid-rows-9 gap-4 mt-4">
     <div
-      class="col-span-2 border rounded-md bg-gradient-to-r from-[#00FEA3] to-[#007077] p-2 flex items-center gap-3 max-h-[80px]"
+      class="col-span-2 border rounded-md bg-gradient-to-r from-[#00FEA3] to-[#007077] p-2 flex items-center gap-3 h-[85px]"
     >
       <span
         class="size-[60px] grid place-items-center text-white bg-white bg-opacity-20 rounded-full"
