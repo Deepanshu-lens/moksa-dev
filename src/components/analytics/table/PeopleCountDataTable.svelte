@@ -22,6 +22,7 @@
   import * as Select from "@/components/ui/select";
   import { User, ChevronLeft } from "lucide-svelte";
   import { readable, writable } from "svelte/store";
+  import Spinner from "@/components/ui/spinner/Spinner.svelte";
 
   const dispatch = createEventDispatcher();
 
@@ -30,19 +31,6 @@
   export let token;
   export let dateRange;
   export let value;
-
-  $: console.log("people count data", $storeData);
-
-  function parseTimeString(timeString: string): string {
-    const timeRanges = timeString.split(/[-to]/).map((time) => time.trim());
-    return timeRanges
-      .map((time) => {
-        const [hour, modifier] = time.match(/(\d+)([APM]+)/).slice(1);
-        const hourFormatted = hour.padStart(2, "0"); // Ensure two digits
-        return `${hourFormatted}:00${modifier.toLowerCase()}`; // Append minutes and format modifier
-      })
-      .join("-");
-  }
 
   $: dbData =
     $selectedStore.value !== -1
@@ -86,6 +74,14 @@
     }),
     select: addSelectedRows(),
   });
+
+  let loading = writable(true);
+
+  $: {
+    if ($storeData?.length > 0) {
+      loading.set(false);
+    }
+  }
 
   $: columns =
     $selectedStore.value !== -1
@@ -229,7 +225,7 @@
   // $: console.log(expandedData);
 </script>
 
-<div class="m-0 flex flex-col">
+<div class="m-0 flex flex-col justify-center items-center">
   <span
     class="rounded-t-xl w-full h-[50px] bg-transparent flex items-center justify-between px-4"
   >
@@ -288,189 +284,198 @@
       </div>
     </div>
   </span>
-  <Table.Root {...$tableAttrs} class="w-full">
-    <Table.Header>
-      {#each $headerRows as headerRow}
-        <Subscribe rowAttrs={headerRow.attrs()}>
+
+  {#if $loading}
+    <div class="flex items-center justify-center w-full h-full min-h-[200px]">
+      <Spinner />
+    </div>
+  {:else}
+    <Table.Root {...$tableAttrs} class="w-full">
+      <Table.Header>
+        {#each $headerRows as headerRow}
+          <Subscribe rowAttrs={headerRow.attrs()}>
+            <Table.Row
+              class="bg-transparent flex flex-row border-b items-center justify-between"
+            >
+              {#each headerRow.cells as cell (cell.id)}
+                <Subscribe
+                  attrs={cell.attrs()}
+                  let:attrs
+                  props={cell.props()}
+                  let:props
+                >
+                  {#if cell.id === "chevron"}
+                    <p class="w-1/5"></p>
+                  {:else}
+                    <Table.Head
+                      {...attrs}
+                      class="text-[#727272] whitespace-nowrap text-sm h-full flex items-center text-center justify-center py-2 w-1/5"
+                    >
+                      <Button
+                        variant="ghost"
+                        on:click={props.sort.toggle}
+                        class={cell.id === "storeName"
+                          ? "hover:bg-transparent text-[#727272] opacity-60 text-xs min-w-[200px] flex justify-start"
+                          : "hover:bg-transparent text-[#727272] opacity-60 text-xs"}
+                      >
+                        <Render of={cell.render()} />
+                        <ArrowUpDown class="ml-2 h-4 w-4" />
+                      </Button>
+                    </Table.Head>
+                  {/if}
+                </Subscribe>
+              {/each}
+            </Table.Row>
+          </Subscribe>
+        {/each}
+      </Table.Header>
+      {#if $storeData.length > 0}
+        <Table.Body {...$tableBodyAttrs}>
+          {#each $pageRows as row (row.id)}
+            <Subscribe rowAttrs={row.attrs()} let:rowAttrs>
+              <Table.Row
+                {...rowAttrs}
+                class="border-b flex items-center w-full justify-between"
+              >
+                {#each row.cells as cell (cell.id)}
+                  <Subscribe attrs={cell.attrs()} let:attrs>
+                    <Table.Cell
+                      {...attrs}
+                      class="flex items-center justify-center whitespace-nowrap flex-1 py-2 w-full"
+                    >
+                      {#if cell.id === "storeName"}
+                        <div
+                          class="flex items-center gap-2 min-w-[200px] justify-start"
+                        >
+                          <div
+                            class="w-8 h-8 rounded text-start bg-blue-900 flex items-center justify-center flex-shrink-0"
+                          >
+                            <Store class="w-4 h-4 text-white" />
+                          </div>
+                          <span>{row.original.storeName}</span>
+                        </div>
+                      {:else if cell.id === "customerProjection"}
+                        <div class="flex items-center gap-2">
+                          <span class="text-gray-600"
+                            >{row.original.predictedMean}</span
+                          >
+                          <div
+                            class={`px-2 py-1 rounded ${row.original.predictedMean > row.original.customerCount ? "bg-red-100 text-red-600" : "bg-green-100 text-green-600"}`}
+                          >
+                            <!-- {#if row.original.customerProjection > 0}
+                              <TrendingUp class="w-4 h-4 inline mr-1" />
+                            {:else}
+                              <TrendingDown class="w-4 h-4 inline mr-1" />
+                            {/if} -->
+                            {row.original.customerProjection}%
+                          </div>
+                        </div>
+                      {:else if cell.id === "chevron"}
+                        <!-- <ChevronRight class="w-5 h-5 text-gray-400" /> -->
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          on:click={() => toggleRow(row.original.store_id)}
+                        >
+                          <ChevronRight
+                            class={`w-5 h-5 text-gray-400 ${
+                              expandedRows.has(row.original.store_id)
+                                ? "rotate-90"
+                                : ""
+                            }`}
+                          />
+                        </Button>
+                      {:else}
+                        <Render of={cell.render()} />
+                      {/if}
+                    </Table.Cell>
+                  </Subscribe>
+                {/each}
+              </Table.Row>
+              {#if expandedRows.has(row.original.store_id)}
+                <Table.Row class="bg-gray-50 w-full">
+                  <Table.Cell colspan={columns.length} class="w-full">
+                    {#if expandedRows.has(row.original.store_id)}
+                      <Table.Row class="bg-gray-50 w-full">
+                        <!-- <Table.Cell
+                          colspan={columns.length}
+                          class="w-full bg-pink-900"
+                        > -->
+                        {#if expandedData[row.original.store_id]}
+                          <div
+                            class="p-4 w-[85vw] max-h-[150px] overflow-y-auto"
+                          >
+                            <h3 class="font-bold mb-2">Detailed Information</h3>
+                            <table class="w-full border-collapse">
+                              <thead class="w-full">
+                                <tr
+                                  class="w-full flex flex-row items-center justify-between"
+                                >
+                                  <th class=" p-2 w-full">Date</th>
+                                  <th class=" p-2 w-full">Hour</th>
+                                  <th class=" p-2 w-full">Customer Count</th>
+                                  <th class=" p-2 w-full">Going Out Count</th>
+                                </tr>
+                              </thead>
+                              <tbody class="w-full">
+                                {#each expandedData[row.original.store_id] as item}
+                                  <tr
+                                    class="w-full flex flex-row items-center justify-between"
+                                  >
+                                    <td class=" p-2 w-full text-center"
+                                      >{item.date}</td
+                                    >
+                                    <td class=" p-2 w-full text-center"
+                                      >{item.hour}</td
+                                    >
+                                    <td class=" p-2 w-full text-center"
+                                      >{item.noofcustomers}</td
+                                    >
+                                    <td class=" p-2 w-full text-center"
+                                      >{item.going_out_count}</td
+                                    >
+                                  </tr>
+                                {/each}
+                              </tbody>
+                            </table>
+                          </div>
+                        {:else}
+                          <div class="p-4">Loading...</div>
+                        {/if}
+                        <!-- </Table.Cell> -->
+                      </Table.Row>
+                    {/if}
+                  </Table.Cell>
+                </Table.Row>
+              {/if}
+            </Subscribe>
+          {/each}
+        </Table.Body>
+      {:else}
+        <!-- <span
+          class="rounded-t-xl w-full h-[50px] bg-transparent flex items-center justify-between px-4"
+        >
+          <p class=" text-xl font-semibold flex items-center gap-2">
+            {$selectedStore.label}
+          </p>
+        </span> -->
+        <!-- <p class="flex items-center justify-center h-[100px]">No data</p> -->
+        {#each $headerRows as headerRow}
           <Table.Row
             class="bg-transparent flex flex-row border-b items-center justify-between"
           >
             {#each headerRow.cells as cell (cell.id)}
-              <Subscribe
-                attrs={cell.attrs()}
-                let:attrs
-                props={cell.props()}
-                let:props
+              <p
+                class="flex items-center justify-center whitespace-nowrap flex-1 py-2 w-1/4"
               >
-                {#if cell.id === "chevron"}
-                  <p class="w-1/5"></p>
-                {:else}
-                  <Table.Head
-                    {...attrs}
-                    class="text-[#727272] whitespace-nowrap text-sm h-full flex items-center text-center justify-center py-2 w-1/5"
-                  >
-                    <Button
-                      variant="ghost"
-                      on:click={props.sort.toggle}
-                      class={cell.id === "storeName"
-                        ? "hover:bg-transparent text-[#727272] opacity-60 text-xs min-w-[200px] flex justify-start"
-                        : "hover:bg-transparent text-[#727272] opacity-60 text-xs"}
-                    >
-                      <Render of={cell.render()} />
-                      <ArrowUpDown class="ml-2 h-4 w-4" />
-                    </Button>
-                  </Table.Head>
-                {/if}
-              </Subscribe>
+                No data
+              </p>
             {/each}
           </Table.Row>
-        </Subscribe>
-      {/each}
-    </Table.Header>
-    {#if $storeData.length > 0}
-      <Table.Body {...$tableBodyAttrs}>
-        {#each $pageRows as row (row.id)}
-          <Subscribe rowAttrs={row.attrs()} let:rowAttrs>
-            <Table.Row
-              {...rowAttrs}
-              class="border-b flex items-center w-full justify-between"
-            >
-              {#each row.cells as cell (cell.id)}
-                <Subscribe attrs={cell.attrs()} let:attrs>
-                  <Table.Cell
-                    {...attrs}
-                    class="flex items-center justify-center whitespace-nowrap flex-1 py-2 w-full"
-                  >
-                    {#if cell.id === "storeName"}
-                      <div
-                        class="flex items-center gap-2 min-w-[200px] justify-start"
-                      >
-                        <div
-                          class="w-8 h-8 rounded text-start bg-blue-900 flex items-center justify-center flex-shrink-0"
-                        >
-                          <Store class="w-4 h-4 text-white" />
-                        </div>
-                        <span>{row.original.storeName}</span>
-                      </div>
-                    {:else if cell.id === "customerProjection"}
-                      <div class="flex items-center gap-2">
-                        <span class="text-gray-600"
-                          >{row.original.predictedMean}</span
-                        >
-                        <div
-                          class={`px-2 py-1 rounded ${row.original.predictedMean > row.original.customerCount ? "bg-red-100 text-red-600" : "bg-green-100 text-green-600"}`}
-                        >
-                          <!-- {#if row.original.customerProjection > 0}
-                            <TrendingUp class="w-4 h-4 inline mr-1" />
-                          {:else}
-                            <TrendingDown class="w-4 h-4 inline mr-1" />
-                          {/if} -->
-                          {row.original.customerProjection}%
-                        </div>
-                      </div>
-                    {:else if cell.id === "chevron"}
-                      <!-- <ChevronRight class="w-5 h-5 text-gray-400" /> -->
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        on:click={() => toggleRow(row.original.store_id)}
-                      >
-                        <ChevronRight
-                          class={`w-5 h-5 text-gray-400 ${
-                            expandedRows.has(row.original.store_id)
-                              ? "rotate-90"
-                              : ""
-                          }`}
-                        />
-                      </Button>
-                    {:else}
-                      <Render of={cell.render()} />
-                    {/if}
-                  </Table.Cell>
-                </Subscribe>
-              {/each}
-            </Table.Row>
-            {#if expandedRows.has(row.original.store_id)}
-              <Table.Row class="bg-gray-50 w-full">
-                <Table.Cell colspan={columns.length} class="w-full">
-                  {#if expandedRows.has(row.original.store_id)}
-                    <Table.Row class="bg-gray-50 w-full">
-                      <!-- <Table.Cell
-                        colspan={columns.length}
-                        class="w-full bg-pink-900"
-                      > -->
-                      {#if expandedData[row.original.store_id]}
-                        <div class="p-4 w-[85vw] max-h-[150px] overflow-y-auto">
-                          <h3 class="font-bold mb-2">Detailed Information</h3>
-                          <table class="w-full border-collapse">
-                            <thead class="w-full">
-                              <tr
-                                class="w-full flex flex-row items-center justify-between"
-                              >
-                                <th class=" p-2 w-full">Date</th>
-                                <th class=" p-2 w-full">Hour</th>
-                                <th class=" p-2 w-full">Customer Count</th>
-                                <th class=" p-2 w-full">Going Out Count</th>
-                              </tr>
-                            </thead>
-                            <tbody class="w-full">
-                              {#each expandedData[row.original.store_id] as item}
-                                <tr
-                                  class="w-full flex flex-row items-center justify-between"
-                                >
-                                  <td class=" p-2 w-full text-center"
-                                    >{item.date}</td
-                                  >
-                                  <td class=" p-2 w-full text-center"
-                                    >{item.hour}</td
-                                  >
-                                  <td class=" p-2 w-full text-center"
-                                    >{item.noofcustomers}</td
-                                  >
-                                  <td class=" p-2 w-full text-center"
-                                    >{item.going_out_count}</td
-                                  >
-                                </tr>
-                              {/each}
-                            </tbody>
-                          </table>
-                        </div>
-                      {:else}
-                        <div class="p-4">Loading...</div>
-                      {/if}
-                      <!-- </Table.Cell> -->
-                    </Table.Row>
-                  {/if}
-                </Table.Cell>
-              </Table.Row>
-            {/if}
-          </Subscribe>
         {/each}
-      </Table.Body>
-    {:else}
-      <!-- <span
-        class="rounded-t-xl w-full h-[50px] bg-transparent flex items-center justify-between px-4"
-      >
-        <p class=" text-xl font-semibold flex items-center gap-2">
-          {$selectedStore.label}
-        </p>
-      </span> -->
-      <!-- <p class="flex items-center justify-center h-[100px]">No data</p> -->
-      {#each $headerRows as headerRow}
-        <Table.Row
-          class="bg-transparent flex flex-row border-b items-center justify-between"
-        >
-          {#each headerRow.cells as cell (cell.id)}
-            <p
-              class="flex items-center justify-center whitespace-nowrap flex-1 py-2 w-1/4"
-            >
-              No data
-            </p>
-          {/each}
-        </Table.Row>
-      {/each}
-    {/if}
-  </Table.Root>
+      {/if}
+    </Table.Root>
+  {/if}
 </div>
 
 <!-- 
