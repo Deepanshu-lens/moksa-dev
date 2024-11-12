@@ -164,10 +164,6 @@
       accessor: "hairnet",
       header: "Hairnet",
     }),
-    table.column({
-      accessor: "uniform",
-      header: "Uniform",
-    }),
     // table.column({
     //   accessor: "breakingSops",
     //   header: "Breaking SOP's",
@@ -175,6 +171,10 @@
     table.column({
       accessor: "videoLink",
       header: "Image",
+    }),
+    table.column({
+      accessor: "uniform",
+      header: "Uniform",
     }),
   ]);
 
