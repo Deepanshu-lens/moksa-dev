@@ -26,6 +26,8 @@
   export let data: PageServerData;
   // let allStores: any[] = data?.stores?.data?.data;
   let allStores: any[] = data?.stores?.data?.data ?? [];
+
+  console.log(allStores, "all stores here");
   let allStoresData: any[] = data?.allstoreData?.data ?? [];
   let aisleData: any[] = data?.aisleData?.data?.data ?? [];
   let theftandcamera: any[] = data?.theftandcamera?.data?.data ?? [];
@@ -88,7 +90,6 @@
     }
     return [];
   }
-
 </script>
 
 <main class="flex flex-row-reverse h-[calc(100vh-75px)] w-full">

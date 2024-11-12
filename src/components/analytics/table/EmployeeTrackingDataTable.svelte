@@ -100,7 +100,8 @@
   $: columns = table.createColumns(
     $efficiencyData.data.column
       .filter(
-        (col: any) => !["store_id", "first_name", "last_name"].includes(col.key),
+        (col: any) =>
+          !["store_id", "first_name", "last_name"].includes(col.key),
       )
       .map((col: any) =>
         table.column({
@@ -122,7 +123,7 @@
       {#each $headerRows as headerRow}
         <Subscribe rowAttrs={headerRow.attrs()}>
           <Table.Row
-            class="bg-transparent flex flex-row border-b items-center justify-between"
+            class="bg-transparent flex flex-row border-b items-center justify-start"
           >
             {#each headerRow.cells as cell (cell.id)}
               <Subscribe
@@ -161,7 +162,7 @@
               <Subscribe attrs={cell.attrs()} let:attrs>
                 <Table.Cell
                   {...attrs}
-                  class="flex items-center justify-center whitespace-nowrap w-full"
+                  class="flex items-center lg:justify-center whitespace-nowrap w-full text-left"
                 >
                   {#if cell.id === "select"}
                     <input

@@ -26,6 +26,7 @@
   import type { DateRange } from "bits-ui";
   import { type DateValue } from "@internationalized/date";
   import { RangeCalendar } from "@/components/ui/range-calendar";
+  import Input from "../ui/input/input.svelte";
   export let allStores;
   export let token;
   let isInitialLoad = true;
@@ -44,10 +45,14 @@
     label: store.name,
   }));
 
-  let selectedStore = writable({
-    value: fruits?.[0]?.value,
-    label: fruits?.[0]?.label,
-  });
+  $: console.log(fruits, "fruits here");
+
+  let selectedStore = writable({ value: -1, label: "All Stores" });
+
+  let filterText = "";
+  $: filteredFruits = fruits.filter((fruit) =>
+    fruit.label.toLowerCase().includes(filterText.toLowerCase()),
+  );
 
   // let allS = writable(fruits);
 
@@ -383,82 +388,72 @@
 <section
   class="w-full p-4 flex flex-col max-h-[calc(100vh-75px)] overflow-y-auto hide-scrollbar"
 >
-  <div class="flex items-center justify-end">
-    <span class="flex items-center gap-3">
-      <Button
-        on:click={() => {
-          const date = new Date().toLocaleDateString("en-GB", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-          });
-          convertArrToCSV($liveData?.data, `live_people_count_${date}.csv`);
-          convertArrToCSV($storeData, `people_count_${date}.csv`);
-        }}
-        class="flex items-center gap-1 bg-[#3D81FC] text-white hover:bg-white hover:text-[#3D81FC]"
-        ><Upload size={18} /> Export Reports</Button
+  <div class="">
+    <div class="flex items-center justify-between w-full mb-4">
+      <div
+        class="w-[20rem] border rounded-md bg-gradient-to-r from-[#00FEA3] to-[#007077] p-2 flex items-center gap-3 h-[85px] mx-1"
       >
-    </span>
-  </div>
-  <div class="grid grid-cols-8 grid-rows-9 gap-4 mt-4">
-    <div
-      class="col-span-2 border rounded-md bg-gradient-to-r from-[#00FEA3] to-[#007077] p-2 flex items-center gap-3 h-[85px]"
-    >
-      <span
-        class="size-[60px] grid place-items-center text-white bg-white bg-opacity-20 rounded-full"
-      >
-        <Store size={40} />
-      </span>
-      <span>
-        <p class="text-white text-xl font-bold">{allStores.length}</p>
-        <p class="text-sm font-semibold text-white">stores registered</p>
-      </span>
-    </div>
-    <div
-      class="col-span-2 invisible border rounded-md bg-gradient-to-r from-[#02A7FD] to-[#141C64] p-2 flex items-center gap-3 max-h-[80px]"
-    >
-      <span
-        class="size-[60px] grid place-items-center text-white bg-white bg-opacity-20 rounded-full"
-      >
-        <Clock size={40} />
-      </span>
-      <span>
-        <p class="text-white text-xl font-bold">
-          {$storeData?.[0]?.busyhour === undefined ||
-          $storeData?.[0].busyhour === null
-            ? "N/A"
-            : $storeData?.[0]?.busyhour}
-        </p>
-        <p class="text-sm font-semibold text-white">peak hours</p>
-      </span>
-    </div>
-    <div
-      class="col-span-2 border rounded-md bg-gradient-to-r from-[#FFB156] to-[#FF007A] p-2 flex items-center gap-3 invisible max-h-[80px]"
-    >
-      <span
-        class="size-[60px] grid place-items-center text-white bg-white bg-opacity-20 rounded-full"
-      >
-        <Users size={40} />
-      </span>
-      <span>
-        <p class="text-white text-xl font-bold">64.32%</p>
-        <p class="text-sm font-semibold text-white">
-          recommended no. of employees
-        </p>
-      </span>
-    </div>
-    <div
-      class="col-span-2 border rounded-md bg-gradient-to-r from-[#C8C303] to-[#597802] p-2 flex items-center gap-3 invisible max-h-[80px]"
-    >
-      <span
-        class="size-[60px] grid place-items-center text-white bg-white bg-opacity-20 rounded-full"
-      >
-        <Store size={40} />
-      </span>
-      <span>
-        <p class="text-white text-xl font-bold">64.32%</p>
-        <p class="text-sm font-semibold text-white">total thefts detected</p>
-      </span>
+        <span
+          class="size-[60px] grid place-items-center text-white bg-white bg-opacity-20 rounded-full"
+        >
+          <Store size={40} />
+        </span>
+        <span>
+          <p class="text-white text-xl font-bold">{allStores.length}</p>
+          <p class="text-sm font-semibold text-white">stores registered</p>
+        </span>
+      </div>
+      <div class="flex items-center justify-end gap-x-3">
+        <Select.Root portal={null}>
+          <Select.Trigger
+            class="w-[150px] bg-[#F4F4F4] border text-xs px-1 border-[#E0E0E0] rounded-lg bg-transparent"
+          >
+            <Select.Value placeholder={$selectedStore.label} />
+          </Select.Trigger>
+          <Select.Content class="max-h-[200px] overflow-y-auto">
+            <div class="p-2">
+              <Input
+                type="text"
+                placeholder="Search stores..."
+                bind:value={filterText}
+                class="mb-2"
+              />
+            </div>
+            <Select.Group>
+              {#if filteredFruits.length > 0}
+                {#each filteredFruits as fruit, index}
+                  <Select.Item
+                    on:click={() => {
+                      selectedStore.set(fruit);
+                      // fetchDataStoreWise();
+                    }}
+                    class="px-1"
+                    value={fruit.value}
+                    label={fruit.label}>{fruit.label}</Select.Item
+                  >
+                {/each}
+              {:else}
+                <Select.Item disabled>N/A</Select.Item>
+              {/if}
+            </Select.Group>
+          </Select.Content>
+        </Select.Root>
+        <span class="flex items-center gap-3">
+          <Button
+            on:click={() => {
+              const date = new Date().toLocaleDateString("en-GB", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+              });
+              convertArrToCSV($liveData?.data, `live_people_count_${date}.csv`);
+              convertArrToCSV($storeData, `people_count_${date}.csv`);
+            }}
+            class="flex items-center gap-1 bg-[#3D81FC] text-white hover:bg-white hover:text-[#3D81FC]"
+            ><Upload size={18} /> Export Reports</Button
+          >
+        </span>
+      </div>
     </div>
     <div
       class="col-span-8 row-span-4 border rounded-md flex flex-col rounded-t-xl dark:border-white/[.7] max-h-[400px]"
@@ -490,21 +485,9 @@
         {/if} -->
       </div>
     </div>
-    <!-- <div
-      class="col-span-3 row-span-4 border rounded-md p-2 flex flex-col dark:border-white/[.7]"
-    >
-      <p
-        class="text-center text-[#000065] text-2xl font-semibold my-2 dark:text-white"
-      >
-        All Stores
-      </p>
-      <p class="text-[#656565] text-lg text-center my-2">Non Busy Hours</p>
-      <span class="flex w-full h-full">
-        <canvas bind:this={chartCanvas}></canvas>
-      </span>
-    </div> -->
+
     <div
-      class="col-span-8 row-span-4 border rounded-md p-2 flex flex-col dark:border-white/[.7] relative min-h-[450px]"
+      class="col-span-8 row-span-4 border rounded-md p-2 flex flex-col dark:border-white/[.7] relative min-h-[450px] mt-10"
     >
       <span
         class="flex gap-4 items-center absolute left-1/2 -translate-x-1/2 top-3"

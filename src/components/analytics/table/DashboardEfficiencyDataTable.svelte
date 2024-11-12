@@ -221,19 +221,19 @@
                         >
                       </div>
                     {:else if cell.id === "customer"}
-                      <span class="text-sm text-green-500"
+                      <span class="text-sm"
                         >{row.original.customer}</span
                       >
                     {:else if cell.id === "idle"}
-                      <span class="text-sm text-blue-500"
+                      <span class="text-sm"
                         >{row.original.idle}</span
                       >
                     {:else if cell.id === "mobile"}
-                      <span class="text-sm text-pink-500"
+                      <span class="text-sm"
                         >{row.original.mobile}</span
                       >
                     {:else if cell.id === "fillingShelves"}
-                      <span class="text-sm text-orange-500"
+                      <span class="text-sm"
                         >{row.original.fillingShelves}</span
                       >
                     {:else}

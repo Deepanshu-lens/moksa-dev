@@ -45,7 +45,7 @@
   export let moksaUserId;
 
   const stores = allStores
-    ?.filter((store: any) => store.id !== -1)
+    // ?.filter((store: any) => store.id !== -1)
     ?.map((store: any) => ({
       value: store.id,
       label: store.name,
@@ -611,6 +611,9 @@
       >
         <p class="text-white flex items-center gap-2 text-xl font-bold">
           Employee Tracking
+          <span class="text-xs text-white bg-pink-500 rounded-md p-1">
+            Live
+          </span>
         </p>
         <!-- Store Selector -->
         <Select.Root portal={null}>
@@ -827,7 +830,7 @@
           </span>
         {:else}
           <div class="mx-auto my-20">
-            <Spinner  />
+            <Spinner />
           </div>
         {/if}
       </span>
