@@ -88,12 +88,12 @@
     if (barChartCanvas && !barChart) {
       const ctx = barChartCanvas.getContext("2d");
       const gradient = ctx.createLinearGradient(0, 400, 0, 0);
-      gradient.addColorStop(0, "#00FEA3");
-      gradient.addColorStop(1, "#007077");
+      gradient.addColorStop(0, "#FFB156");
+      gradient.addColorStop(1, "#FF007A");
 
       const gradient2 = ctx.createLinearGradient(0, 400, 0, 0);
-      gradient2.addColorStop(0, "#FC1919");
-      gradient2.addColorStop(1, "#B90000");
+      gradient2.addColorStop(0, "#02A7FD");
+      gradient2.addColorStop(1, "#141C64");
 
       if (ctx) {
         Chart.register(BarController, BarElement, CategoryScale, LinearScale);
@@ -1311,7 +1311,7 @@
       </span>
     </div>
     <div
-      class="col-span-2 border rounded-md bg-gradient-to-r from-[#FE7B7B] to-[#CB0404] p-2 flex items-center gap-3 max-h-[100px] invisible"
+      class="col-span-2 border rounded-md bg-gradient-to-r from-[#FE7B7B] to-[#02A7FD] p-2 flex items-center gap-3 max-h-[100px] invisible"
     >
       <span
         class="size-[60px] grid place-items-center text-white bg-white bg-opacity-20 rounded-full rotate-90"
@@ -1466,7 +1466,7 @@
             a 15.9155 15.9155 0 0 1 0 31.831
             a 15.9155 15.9155 0 0 1 0 -31.831"
                 fill="none"
-                stroke="#007077"
+                stroke="#FF007A"
                 stroke-width="4"
                 stroke-linecap="round"
               />
@@ -1475,7 +1475,7 @@
             a 15.9155 15.9155 0 0 1 0 31.831
             a 15.9155 15.9155 0 0 1 0 -31.831"
                 fill="none"
-                stroke="#CB0404"
+                stroke="#02A7FD"
                 stroke-width="4"
                 stroke-dasharray="{detectionPercentage}, 100"
               />
@@ -1490,15 +1490,13 @@
               class="flex gap-2 items-center text-xs text-[#030229] dark:text-white"
             >
               <span
-                class="w-2 h-2 rounded-full bg-gradient-to-r from-[#FE7B7B] to-[#CB0404]"
+                class="w-2 h-2 rounded-full bg-gradient-to-r bg-[#02A7FD]"
               /> Detected
             </p>
             <p
               class="flex gap-2 items-center text-xs text-[#030229] dark:text-white"
             >
-              <span
-                class="w-2 h-2 rounded-full bg-gradient-to-r from-[#00FEA3] to-[#007077]"
-              /> Prevented
+              <span class="w-2 h-2 rounded-full bg-[#FF007A]" /> Prevented
             </p>
           </span>
         </span>

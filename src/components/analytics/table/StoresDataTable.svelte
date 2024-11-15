@@ -11,9 +11,6 @@
     User,
     ChevronDown,
     ChevronUp,
-    Camera,
-    ShieldCheck,
-    AlertOctagon,
   } from "lucide-svelte";
   import { createEventDispatcher } from "svelte";
   import {
@@ -180,7 +177,7 @@
                   <Button
                     variant="ghost"
                     on:click={props.sort.toggle}
-                    class={`hover:bg-transparent text-[#323232] dark:text-white/[.8] font-semibold opacity-60 min-w-[150px] ${cell.id === "storeName" ? "text-start justify-start" : ""}`}
+                    class={`hover:bg-transparent text-[#323232] dark:text-white/[.8] font-semibold opacity-60 min-w-[150px] ${cell.id === "storeName" ? "text-center justify-center" : ""}`}
                   >
                     <Render of={cell.render()} />
                     <ArrowUpDown class="ml-2 h-4 w-4" />
@@ -205,7 +202,7 @@
               <Subscribe attrs={cell.attrs()} let:attrs>
                 <Table.Cell
                   {...attrs}
-                  class="whitespace-nowrap flex-1 flex items-center justify-start"
+                  class="whitespace-nowrap flex-1 flex items-center justify-center"
                 >
                   {#if cell.id === "action"}
                     {#if user.role === "superAdmin"}

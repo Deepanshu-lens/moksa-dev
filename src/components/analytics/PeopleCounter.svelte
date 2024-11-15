@@ -478,9 +478,9 @@
         </p>
       </span>
       <div class="h-full w-full max-h-[300px] overflow-y-auto">
-        {#if $liveData.length > 0}
+        {#if $liveData?.data?.length > 0}
           <LivePeopleCountDataTable
-            liveData={$liveData}
+            liveData={$liveData || []}
             selectedStore={$selectedStore}
             {allStores}
             {token}

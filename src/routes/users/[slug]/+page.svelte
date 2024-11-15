@@ -53,6 +53,8 @@
   let searchVal: string = "";
   let roles = [];
 
+  const { userRole } = data;
+
   let userID = "";
 
   let nodes: any[] = [];
@@ -62,8 +64,18 @@
     PB.autoCancellation(false);
     const res = await PB.collection("roles").getFullList();
     const stores = await PB.collection("node").getFullList();
-    console.log(stores);
-    roles = res;
+
+    if (userRole === "superAdmin") {
+      roles = res?.filter((m) => {
+        m?.roleName === "storeManager";
+      });
+    }
+    // if (userRole === "superAdmin") {
+    //   roles = roles?.filter((m) => {
+    //     m?.roleName === "storeManager";
+    //   });
+    // }
+    // console.log(roles, "roles here");
     // nodes = stores
     nodes = stores.map((store) => store.id);
     // moksaNodes = stores.map((store) => store.moksaId);
@@ -268,9 +280,9 @@
   const { user } = data;
   const PB = new PocketBase(`https://server.moksa.ai`);
 
-  onMount(async () => {
-    roles = await PB?.collection("roles").getFullList();
-  });
+  // onMount(async () => {
+  //   roles = await PB?.collection("roles").getFullList();
+  // });
 
   function createChart() {
     if (chartCanvas && !chart) {
@@ -788,7 +800,7 @@
               <DropdownMenu.Separator />
             </DropdownMenu.Content>
           </DropdownMenu.Root>
-          <AddUserDialog user={data.user} {handleSubmit}>
+          <AddUserDialog user={data.user} {handleSubmit} userRole={userRole}>
             <Button
               class="text-white bg-[#3D81FC] hover:bg-white hover:text-[#3D81FC] flex items-center gap-1"
               ><Plus size={18} /> Add User</Button

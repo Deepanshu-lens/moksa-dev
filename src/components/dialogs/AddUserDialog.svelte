@@ -28,14 +28,20 @@
   let nodes: any[] = [];
   let moksaNodes: any[] = [];
   let roles: any[] = [];
+  export let userRole;
 
   const PB = new PocketBase(`https://server.moksa.ai`);
   onMount(async () => {
     PB.autoCancellation(false);
     const res = await PB.collection("roles").getFullList();
     const stores = await PB.collection("node").getFullList();
-    console.log(stores);
     roles = res;
+
+    if (userRole === "admin") {
+      roles = roles?.filter((m) => m?.roleName === "storeManager");
+    }
+
+    console.log(roles, "roles here");
     // nodes = stores
     nodes = stores.map((store) => store.id);
     // moksaNodes = stores.map((store) => store.moksaId);

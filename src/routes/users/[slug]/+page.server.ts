@@ -1,7 +1,7 @@
 import { fail } from '@sveltejs/kit';
 import PocketBase from 'pocketbase';
 
-export const load: PageServerLoad = async ({ fetch, cookies }) => {
+export const load: PageServerLoad = async ({ fetch, cookies, locals }) => {
     // if (!cookies.get('moksa-token')) {
     //     await fetch(`https://api.moksa.ai/auth/login`, {
     //         method: "POST", headers: {
@@ -55,9 +55,17 @@ export const load: PageServerLoad = async ({ fetch, cookies }) => {
             return [];
         }
     };
+
+    // get user role from pb
+    const getUserRole = async () => {
+        const { roleName } = await locals.pb?.collection("roles").getOne(locals?.user?.record?.role);
+        return roleName;
+    }
+
     return {
         moksaToken: cookies.get('moksa-token'),
-        usersData: await safeExecute(allUsers)
+        usersData: await safeExecute(allUsers),
+        userRole: await getUserRole()
     };
 };
 
