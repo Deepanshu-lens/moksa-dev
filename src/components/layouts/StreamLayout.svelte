@@ -110,7 +110,7 @@
     // video.mode = camera.mse ? 'mse' : "webrtc";
     video.url = camera.url;
     video.src = new URL(
-      `ws://${neededUrl}:8082/api/ws?src=${camera.id}&nodeID=${1}&cn=${camera.name}`,
+      `wss://server.moksa.ai/api/ws?src=${camera.id}&nodeID=${1}&cn=${camera.name}`,
     );
     video.style.position = "relative";
     video.style.width = "100%";
@@ -261,7 +261,7 @@
               console.log("first");
               videos[c.id].url = c.url;
               videos[c.id].src = new URL(
-                `ws://${neededUrl}:8082/api/ws?src=${c.id}&nodeID=${1}&cn=${c.name}`,
+                `wss://server.moksa.ai/api/ws?src=${c.id}&nodeID=${1}&cn=${c.name}`,
               );
             }
           }
@@ -310,7 +310,7 @@
               console.log("first");
               videos[c.id].url = c.url;
               videos[c.id].src = new URL(
-                `ws://${neededUrl}:8082/api/ws?src=${c.id}&nodeID=${1}&cn=${c.name}`,
+                `wss://server.moksa.ai/api/ws?src=${c.id}&nodeID=${1}&cn=${c.name}`,
               );
             }
           }
@@ -351,7 +351,7 @@
           if (videos[c.id].url !== c.url) {
             videos[c.id].url = c.url;
             videos[c.id].src = new URL(
-              `ws://${neededUrl}:8082/api/ws?src=${c.id}&nodeID=${1}&cn=${c.name}`,
+              `wss://server.moksa.ai/api/ws?src=${c.id}&nodeID=${1}&cn=${c.name}`,
             );
           }
         }
@@ -374,7 +374,7 @@
             console.log("first");
             videos[c.id].url = c.url;
             videos[c.id].src = new URL(
-              `ws://${neededUrl}:8082/api/ws?src=${c.id}&nodeID=${1}&cn=${c.name}`,
+              `wss://server.moksa.ai/api/ws?src=${c.id}&nodeID=${1}&cn=${c.name}`,
             );
           }
         }

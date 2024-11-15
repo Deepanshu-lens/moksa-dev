@@ -48,7 +48,7 @@
     video.mode = "mse";
     video.url = camera.url;
     video.src = new URL(
-      `ws://${neededUrl}:8082/api/ws?src=${camera.id}&nodeID=${1}`,
+      `wss://server.moksa.ai/api/ws?src=${camera.id}&nodeID=${1}`,
     );
     video.style.position = "relative";
     video.style.width = "100%";
@@ -68,7 +68,7 @@
         if (videos[c.id].url !== c.url) {
           videos[c.id].url = c.url;
           videos[c.id].src = new URL(
-            `ws://${neededUrl}:8082/api/ws?src=${c.id}&nodeID=${1}`,
+            `wss://server.moksa.ai/api/ws?src=${c.id}&nodeID=${1}`,
           );
         }
       }
@@ -334,7 +334,7 @@
                                   nodeId: $selectedNode.id,
                                   name: newName,
                                   url: item.url,
-                                  subUrl: item.subUrl
+                                  subUrl: item.subUrl,
                                 }),
                               }).then(() => {
                                 edit = null;

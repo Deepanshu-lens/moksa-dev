@@ -8,7 +8,7 @@
   import type { Node, Camera, Event } from "@/types.d.ts";
 
   // const PB = new PocketBase(PUBLIC_POCKETBASE_URL);
-  const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
+  const PB = new PocketBase(`https://server.moksa.ai`);
 
   export let data: PageServerData;
   const session = data.session;

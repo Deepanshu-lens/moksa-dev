@@ -14,7 +14,7 @@
   //   console.log(data);
   // }
 
-  const pocketBase = new PocketBase(`http://${$page.url.hostname}:5555`);
+  const pocketBase = new PocketBase(`https://server.moksa.ai`);
 
   const deleteUser = async () => {
     try {

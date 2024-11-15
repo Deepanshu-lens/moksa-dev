@@ -99,7 +99,7 @@
   let linePersonThresh = 0.7;
   let lineVehicleThresh = 0.7;
 
-  const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
+  const PB = new PocketBase(`https://server.moksa.ai`);
   const searchParams = new URLSearchParams(window.location.search);
   let pages = parseInt(searchParams.get("p") ?? "0");
   let activePage = pages === null ? 0 : Number(pages) + 1;
@@ -1586,5 +1586,4 @@
   .shad {
     box-shadow: -3px 3px 4px 0px #0000001f;
   }
-
 </style>

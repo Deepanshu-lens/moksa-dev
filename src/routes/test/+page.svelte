@@ -35,7 +35,7 @@
     video.mode = "webrtc";
     video.url = camera.url;
     video.src = new URL(
-      `ws://${neededUrl}:8082/api/ws?src=${camera.url
+      `wss://server.moksa.ai/api/ws?src=${camera.url
         ?.split("@")[1]
         ?.split(":")[0]
         ?.replace(/\./g, "_")}&camID=${camera.id}&nodeID=${1}`,
@@ -54,7 +54,7 @@
       initVideo(testCameras);
     } else {
       videos[testCameras.id].src = new URL(
-        `ws://${neededUrl}:8082/api/ws?src=${testCameras.url
+        `wss://server.moksa.ai/api/ws?src=${testCameras.url
           ?.split("@")[1]
           ?.split(":")[0]
           ?.replace(/\./g, "_")}&camID=${testCameras.id}&nodeID=${1}`,

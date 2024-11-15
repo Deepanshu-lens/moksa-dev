@@ -33,7 +33,7 @@
   }
 
   let phoneNumber = account[0].phoneNumber;
-  const pb = new PocketBase(`http://${$page.url.hostname}:5555`);
+  const pb = new PocketBase(`https://server.moksa.ai`);
 
   import { goto } from "$app/navigation";
 
@@ -101,7 +101,7 @@
   }
 
   function getProfilePicture(collectionId, recordId, fileName, size = "0x0") {
-    return `http://${$page.url.hostname}:5555/api/files/${collectionId}/${recordId}/${fileName}?thumb=${size}`;
+    return `https://server.moksa.ai/api/files/${collectionId}/${recordId}/${fileName}?thumb=${size}`;
   }
 </script>
 

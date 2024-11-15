@@ -2,16 +2,7 @@
   import { createTable, Render, Subscribe } from "svelte-headless-table";
   import * as Table from "@/components/ui/table";
   import { Button } from "@/components/ui/button";
-  import {
-    ArrowUpDown,
-    ChevronRight,
-    Edit,
-    Store,
-    StoreIcon,
-    Trash2,
-    TrendingDown,
-    TrendingUp,
-  } from "lucide-svelte";
+  import { ArrowUpDown, ChevronRight, Store } from "lucide-svelte";
   import { createEventDispatcher } from "svelte";
   import {
     addPagination,
@@ -19,8 +10,7 @@
     addSelectedRows,
     addSortBy,
   } from "svelte-headless-table/plugins";
-  import * as Select from "@/components/ui/select";
-  import { User, ChevronLeft } from "lucide-svelte";
+  import { ChevronLeft } from "lucide-svelte";
   import { readable, writable } from "svelte/store";
   import Spinner from "@/components/ui/spinner/Spinner.svelte";
 

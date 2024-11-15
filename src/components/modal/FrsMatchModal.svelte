@@ -16,7 +16,7 @@
   console.log(event);
   const dispatch = createEventDispatcher();
 
-  const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
+  const PB = new PocketBase(`https://server.moksa.ai`);
 
   function closeModal() {
     dispatch("close");

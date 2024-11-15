@@ -4,7 +4,7 @@ import { dev } from "$app/environment";
 
 
 export const handle = async ({ event, resolve }) => {
-  event.locals.pb = new PocketBase(VITE_POCKETBASE_URL);
+  event.locals.pb = new PocketBase(`https://server.moksa.ai`);
   event.locals.pb.autoCancellation(false)
   event.locals.pb.authStore.loadFromCookie(
     event.request.headers.get("cookie") || ''

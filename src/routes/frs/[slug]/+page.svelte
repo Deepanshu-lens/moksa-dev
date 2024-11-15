@@ -47,7 +47,7 @@
   const { session } = data;
   let nodes: Node[] = [];
 
-  const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
+  const PB = new PocketBase(`https://server.moksa.ai`);
 
   async function getNodes(): Promise<Node[]> {
     if (session.node.length > 0) {

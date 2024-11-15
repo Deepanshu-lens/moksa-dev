@@ -20,7 +20,7 @@
 
   const addPanel = async () => {
     // console.log(ssl);
-    const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
+    const PB = new PocketBase(`https://server.moksa.ai`);
 
     await PB.collection("panels")
       .create({

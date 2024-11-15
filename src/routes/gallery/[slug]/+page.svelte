@@ -15,7 +15,7 @@
   let gallery: Gallery[] = [];
 
   // const PB = new PocketBase(PUBLIC_POCKETBASE_URL);
-  const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
+  const PB = new PocketBase(`https://server.moksa.ai`);
 
   async function getData(): Promise<Gallery[]> {
     const data = await PB.collection("faceGallery").getFullList();

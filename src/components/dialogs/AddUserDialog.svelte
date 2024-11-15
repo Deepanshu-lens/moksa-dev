@@ -29,7 +29,7 @@
   let moksaNodes: any[] = [];
   let roles: any[] = [];
 
-  const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
+  const PB = new PocketBase(`https://server.moksa.ai`);
   onMount(async () => {
     PB.autoCancellation(false);
     const res = await PB.collection("roles").getFullList();

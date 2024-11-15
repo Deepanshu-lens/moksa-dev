@@ -722,7 +722,7 @@
               />
             </Select.Trigger>
             <Select.Content>
-              <Select.Group>
+              <Select.Group class="h-72 max-h-full overflow-y-auto">
                 {#if $employeeData && $employeeData.data && $employeeData?.data?.length > 0}
                   {#each $employeeData?.data as employee}
                     <Select.Item

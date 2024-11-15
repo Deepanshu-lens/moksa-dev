@@ -32,7 +32,7 @@
   export let value;
   export let dateRange;
   export let token;
-  console.log("liveData", liveData);
+  export let loading;
 
   $: console.log("LivePeopleCountDataTable received new data:", liveData);
 
@@ -66,14 +66,6 @@
   //     predicted_percentage: -50,
   //     total_count: '1'
   //   }
-
-  let loading = writable(true);
-
-  $: {
-    if (mapData?.length > 0) {
-      loading.set(false);
-    }
-  }
 
   $: data = writable(dbData);
 
@@ -221,7 +213,7 @@
 </script>
 
 <div class="m-0 flex flex-col items-center justify-center">
-  {#if $loading}
+  {#if loading}
     <div class="flex items-center justify-center w-full h-full min-h-[200px]">
       <Spinner />
     </div>

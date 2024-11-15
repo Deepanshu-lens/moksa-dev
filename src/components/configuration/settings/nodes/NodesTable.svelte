@@ -27,7 +27,7 @@
           return false;
         });
       });
-  const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
+  const PB = new PocketBase(`https://server.moksa.ai`);
 
   function handleSave() {
     PB.autoCancellation(false);

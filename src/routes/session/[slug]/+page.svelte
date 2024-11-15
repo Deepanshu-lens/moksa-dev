@@ -29,7 +29,7 @@
   let liveData = writable([]);
   // $: console.log("data", data);
 
-  const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
+  const PB = new PocketBase(`https://server.moksa.ai`);
 
   // $: if (browser) {
   //   const urlParams = new URLSearchParams(window.location.search);

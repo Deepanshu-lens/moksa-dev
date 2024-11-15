@@ -19,7 +19,7 @@
   const searchResults = writable([]);
   const neededUrl = $page.url.hostname;
   let loading = false;
-  const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
+  const PB = new PocketBase(`https://server.moksa.ai`);
 
   let startDateTime: string;
   let endDateTime: string;

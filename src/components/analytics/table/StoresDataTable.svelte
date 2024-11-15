@@ -205,7 +205,7 @@
               <Subscribe attrs={cell.attrs()} let:attrs>
                 <Table.Cell
                   {...attrs}
-                  class="whitespace-nowrap flex-1 flex items-center justify-center"
+                  class="whitespace-nowrap flex-1 flex items-center justify-start"
                 >
                   {#if cell.id === "action"}
                     {#if user.role === "superAdmin"}
@@ -280,12 +280,13 @@
                       <User size={20} class="text-[#3D81FC]" />
                       {row.original.storeManager}
                     </span>
+                  {:else if cell.id === "location"}
+                    <span class="text-sm text-[#727272] text-left">
+                      <!-- Left-align the location text -->
+                      {row.original.location}
+                    </span>
                   {:else}
-                    <!-- <span
-                      class={`${cell.id === "location" ? "text-start min-w-[150px] overflow-x-scroll" : ""}`}
-                    > -->
                     <Render of={cell.render()} />
-                    <!-- </span> -->
                   {/if}
                 </Table.Cell>
               </Subscribe>

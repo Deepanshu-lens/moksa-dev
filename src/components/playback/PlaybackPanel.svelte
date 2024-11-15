@@ -33,7 +33,7 @@
   const nodes = data.nodes;
 
   const user = data.user;
-  const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
+  const PB = new PocketBase(`https://server.moksa.ai`);
 
   $: if ($selectedNode && addMode === 1) {
     (async () => {

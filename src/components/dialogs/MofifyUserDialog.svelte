@@ -31,7 +31,7 @@
 
   let roles: any[] = [];
 
-  const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
+  const PB = new PocketBase(`https://server.moksa.ai`);
 
   async function initiate() {
     PB.autoCancellation(false);

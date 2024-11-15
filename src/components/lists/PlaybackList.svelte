@@ -26,7 +26,7 @@
   let selectedCamera;
   let startTime;
   let endTime;
-  const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
+  const PB = new PocketBase(`https://server.moksa.ai`);
 
   $: if (value) {
     const date = new Date(value.year, value.month - 1, value.day);
@@ -236,7 +236,7 @@
   //   }
   // }
 
-  // fetching videos from s3 Bucket 
+  // fetching videos from s3 Bucket
   async function fetchfroms3(cameraId, date, startTime, endTime) {
     console.log(date);
     const localDate = new Date(date);

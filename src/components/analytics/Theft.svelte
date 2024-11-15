@@ -1255,7 +1255,7 @@
   <!-- main container -->
   <div class="grid grid-cols-8 grid-rows-12 gap-4 my-4 h-[1600px]">
     <div
-      class="col-span-2 border rounded-md bg-gradient-to-r from-[#FE7B7B] to-[#CB0404] p-2 flex items-center gap-3 max-h-[100px]"
+      class="col-span-2 border rounded-md bg-gradient-to-r from-[#02A7FD] to-[#141C64] p-2 flex items-center gap-3 max-h-[100px]"
     >
       <span
         class="size-[60px] grid place-items-center text-white bg-white bg-opacity-20 rounded-full rotate-90"
@@ -1283,7 +1283,7 @@
       </span>
     </div>
     <div
-      class="col-span-2 border rounded-md bg-gradient-to-r from-[#00FEA3] to-[#007077] p-2 flex items-center gap-3 max-h-[100px]"
+      class="col-span-2 border rounded-md bg-gradient-to-r from-[#FFB156] to-[#FF007A] p-2 flex items-center gap-3 max-h-[100px]"
     >
       <span
         class="size-[60px] grid place-items-center text-white bg-white bg-opacity-20 rounded-full rotate-90"

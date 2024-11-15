@@ -7,7 +7,7 @@
   import { onMount } from "svelte";
   import { Button } from "@/components/ui/button";
   import { toast } from "svelte-sonner";
-  const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
+  const PB = new PocketBase(`https://server.moksa.ai`);
   let playbackFeatures = [];
   let userFeatures = writable([]);
 

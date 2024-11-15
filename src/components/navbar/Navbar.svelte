@@ -30,7 +30,7 @@
 
   // $: console.log(user);
 
-  // const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
+  // const PB = new PocketBase(`https://server.moksa.ai`);
   const menuList =
     user.role === "Operators" || user.role === "adminNonPaid"
       ? [
@@ -38,10 +38,10 @@
             text: "Live",
             href: `/session/${sessionId}`,
           },
-          {
-            text: "Playback",
-            href: `/playback/${sessionId}`,
-          },
+          // {
+          //   text: "Playback",
+          //   href: `/playback/${sessionId}`,
+          // },
           {
             text: "Settings",
             href: `/settings/${sessionId}`,
@@ -52,10 +52,10 @@
             text: "Live",
             href: `/session/${sessionId}`,
           },
-          {
-            text: "Playback",
-            href: `/playback/${sessionId}`,
-          },
+          // {
+          //   text: "Playback",
+          //   href: `/playback/${sessionId}`,
+          // },
           {
             text: "Analytics",
             href: `/analytics/${sessionId}`,
@@ -75,10 +75,10 @@
       text: "Live",
       href: `/session/${sessionId}`,
     },
-    {
-      text: "Playback",
-      href: `/playback/${sessionId}`,
-    },
+    // {
+    //   text: "Playback",
+    //   href: `/playback/${sessionId}`,
+    // },
     {
       text: "Events",
       href: `/events/${sessionId}`,
@@ -247,7 +247,7 @@
   });
 
   function getProfilePicture(collectionId, recordId, fileName, size = "0x0") {
-    return `http://${$page.url.hostname}:5555/api/files/_pb_users_auth_/${recordId}/${fileName}?thumb=${size}`;
+    return `https://server.moksa.ai/api/files/_pb_users_auth_/${recordId}/${fileName}?thumb=${size}`;
   }
 
   // $: console.log(data)

@@ -132,7 +132,7 @@
           <!-- live content -->
         </Tabs.Content>
         <Tabs.Content value="playback" class='-mt-1'>
-          <PlaybackTable {allUsers}/>
+          <!-- <PlaybackTable {allUsers}/> -->
           <!-- playback content -->
         </Tabs.Content>
         <Tabs.Content value="events" class='-mt-1'>

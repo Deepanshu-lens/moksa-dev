@@ -45,6 +45,8 @@
     label: store.name,
   }));
 
+  let loadingLive = writable(false);
+
   $: console.log(fruits, "fruits here");
 
   let selectedStore = writable({ value: -1, label: "All Stores" });
@@ -63,6 +65,12 @@
       getLiveData($selectedStore.value);
     }
   });
+
+  $: {
+    if ($selectedStore) {
+      getLiveData($selectedStore?.value);
+    }
+  }
 
   function setupSocket() {
     if (socket) {
@@ -180,7 +188,7 @@
   });
 
   async function getLiveData(storeId: number) {
-    console.log("called live data");
+    loadingLive.set(true);
     const response = await fetch(
       `https://api.moksa.ai/people/getPeopleCountLive/${storeId}/1/30`,
       {
@@ -193,6 +201,7 @@
     const data = await response.json();
     console.log("live 30 min data", storeId, data);
     liveData.set(data?.data);
+    loadingLive.set(false);
   }
 
   async function getWeekData(storeId: number) {
@@ -469,20 +478,21 @@
         </p>
       </span>
       <div class="h-full w-full max-h-[300px] overflow-y-auto">
-        <!-- {#if $liveData.length > 0} -->
-        <LivePeopleCountDataTable
-          liveData={$liveData}
-          selectedStore={$selectedStore}
-          {allStores}
-          {token}
-          {dateRange}
-          {value}
-        />
-        <!-- {:else}
-          <p class="flex items-center justify-center py-4">
+        {#if $liveData.length > 0}
+          <LivePeopleCountDataTable
+            liveData={$liveData}
+            selectedStore={$selectedStore}
+            {allStores}
+            {token}
+            {dateRange}
+            {value}
+            loading={$loadingLive}
+          />
+        {:else}
+          <p class="flex items-center justify-center py-10">
             No live data available
           </p>
-        {/if} -->
+        {/if}
       </div>
     </div>
 

@@ -11,7 +11,7 @@
   import { onMount } from "svelte";
   //   const slug = $page.url.pathname.split('/').pop();
   const slug = $page.params.slug;
-  const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
+  const PB = new PocketBase(`https://server.moksa.ai`);
   let queryCam: Camera;
   let isSingleFullscreen = false;
 
@@ -55,7 +55,7 @@
     video.mode = "mse";
     video.url = camera.url;
     video.src = new URL(
-      `ws://${neededUrl}:8082/api/ws?src=${camera.id}&nodeID=${1}&cn=${camera.name}`,
+      `wss://server.moksa.ai/api/ws?src=${camera.id}&nodeID=${1}&cn=${camera.name}`,
     );
     video.style.position = "relative";
     video.style.width = "100%";

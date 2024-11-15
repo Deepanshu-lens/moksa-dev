@@ -26,7 +26,7 @@
   export let nodes;
   export let user;
   export let token: string;
-  const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
+  const PB = new PocketBase(`https://server.moksa.ai`);
 
   onMount(async () => {
     const res = await fetch("/api/store/getStoreDetails", {

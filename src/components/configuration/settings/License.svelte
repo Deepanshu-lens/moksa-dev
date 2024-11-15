@@ -14,7 +14,7 @@
   let anpr = session.anpr;
   let playback = session.playback;
   let mars = session.mars;
-  const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
+  const PB = new PocketBase(`https://server.moksa.ai`);
 
   async function handleInputChange(event, label) {
     console.log(label, event.target.checked);

@@ -52,7 +52,7 @@
   let nodes: Node[] = [];
   // console.log(data)
   // $:console.log(nodes)
-  const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
+  const PB = new PocketBase(`https://server.moksa.ai`);
   // console.log(aisleData)
   onMount(async () => {
     PB.autoCancellation(false);

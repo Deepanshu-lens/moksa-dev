@@ -26,7 +26,7 @@
   export let ptzControl;
   let cameraItems: HTMLDivElement;
   let filterText: string = "";
-  const PB = new PocketBase(`http://${$page.url.hostname}:5555`);
+  const PB = new PocketBase(`https://server.moksa.ai`);
   // console.log(data.user)
 
   function handleEscape(event: KeyboardEvent) {
