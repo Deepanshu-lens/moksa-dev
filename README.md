@@ -97,3 +97,4 @@ Assumes you have a SvelteKit project as created with `npm create svelte@latest <
 7. Fire it up and test. Stripe offers a few test payment card numbers that will let you test the flow. Check that:
    - when you hit the stripe page pocketbase shows the user having a new nonce. You can decode it on jwt.io to make sure its the right selection
    - when you come back from stripe, you have a nonce query string and that it matches what _was_ in pocketbase. pocketbase should show no nonce now.
+# moksa-dev
