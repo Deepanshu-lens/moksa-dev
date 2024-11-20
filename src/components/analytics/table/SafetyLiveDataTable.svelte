@@ -30,7 +30,7 @@
     dialogOpen = true;
     selectedImage = null; // Reset selectedImage before fetching
     try {
-      const response = await fetch("https://dev.api.moksa.ai/stream", {
+      const response = await fetch("https://api.moksa.ai/stream", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,

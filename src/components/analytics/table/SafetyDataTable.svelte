@@ -38,7 +38,7 @@
     selectedImage = null; // Reset selectedImage before fetching
     console.log(imageUri);
     try {
-      const response = await fetch("https://dev.api.moksa.ai/stream", {
+      const response = await fetch("https://api.moksa.ai/stream", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -180,7 +180,7 @@
     // console.log(currentpage);
 
     const safetyDetails = await fetch(
-      `https://dev.api.moksa.ai/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${$selectedStore.value}/${currentpage}/100/${$dateRange === "custom" ? start : formatDate(startDate)}/${$dateRange === "custom" ? end : formatDate(today)}`,
+      `https://api.moksa.ai/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${$selectedStore.value}/${currentpage}/100/${$dateRange === "custom" ? start : formatDate(startDate)}/${$dateRange === "custom" ? end : formatDate(today)}`,
       {
         method: "GET",
         headers: {

@@ -59,7 +59,7 @@
     console.log(formatDate(today));
     try {
       const newData = await fetch(
-        `https://dev.api.moksa.ai/theft/theftListBasedOnStoreId/${$selectedStore.value}/${formatDate(startDate)}/${formatDate(today)}/${currentApiPage}/${apiPageSize}`,
+        `https://api.moksa.ai/theft/theftListBasedOnStoreId/${$selectedStore.value}/${formatDate(startDate)}/${formatDate(today)}/${currentApiPage}/${apiPageSize}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -231,17 +231,13 @@
     const data = { key: videoUri };
     dialogOpen = true;
     try {
-      const response = await axios.post(
-        `https://dev.api.moksa.ai/stream`,
-        data,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          responseType: "blob",
+      const response = await axios.post(`https://api.moksa.ai/stream`, data, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-      );
+        responseType: "blob",
+      });
       // Log the response headers to check the content type and other details
       console.log("Response headers:", response.headers);
 

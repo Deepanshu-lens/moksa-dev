@@ -55,24 +55,21 @@
     //   "photo": ""
     // }
 
-    const res = await fetch(
-      `https://dev.api.moksa.ai/store/storeEmployee/update`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          id: id,
-          store_id: storeId,
-          first_name: firstName,
-          last_name: lastName,
-          role: role,
-          photo: "",
-        }),
+    const res = await fetch(`https://api.moksa.ai/store/storeEmployee/update`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
       },
-    );
+      body: JSON.stringify({
+        id: id,
+        store_id: storeId,
+        first_name: firstName,
+        last_name: lastName,
+        role: role,
+        photo: "",
+      }),
+    });
     const data = await res.json();
     console.log(data);
     if (res.ok) {
