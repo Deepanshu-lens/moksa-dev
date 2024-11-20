@@ -336,33 +336,35 @@
     fileName: string,
     excludeKeys: string[] = [],
   ): void {
-    // Extract the headers
-    const headers = Object.keys(arr[0])
-      .filter((key) => !excludeKeys.length || !excludeKeys.includes(key)) // Filter out excluded keys
-      .join(",");
-    // Extract the data rows with value cleaning
-    const rows = arr
-      .map((obj) => {
-        return Object.keys(obj)
-          .filter((key) => !excludeKeys.length || !excludeKeys.includes(key)) // Filter out excluded keys
-          .map((key) => cleanValue(obj[key]))
-          .join(",");
-      })
-      .join("\n");
-    // Combine headers and rows
-    const csvContent = headers + "\n" + rows;
-    // Create a Blob for the CSV content
-    const blob = new Blob([csvContent], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    // Create a link element to download the CSV
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = fileName; //file name after download
-    document.body.appendChild(link);
-    // Programmatically click the link to trigger the download
-    link.click();
-    // Clean up the link after download
-    document.body.removeChild(link);
+    if (arr?.length > 0) {
+      // Extract the headers
+      const headers = Object.keys(arr[0])
+        .filter((key) => !excludeKeys.length || !excludeKeys.includes(key)) // Filter out excluded keys
+        .join(",");
+      // Extract the data rows with value cleaning
+      const rows = arr
+        .map((obj) => {
+          return Object.keys(obj)
+            .filter((key) => !excludeKeys.length || !excludeKeys.includes(key)) // Filter out excluded keys
+            .map((key) => cleanValue(obj[key]))
+            .join(",");
+        })
+        .join("\n");
+      // Combine headers and rows
+      const csvContent = headers + "\n" + rows;
+      // Create a Blob for the CSV content
+      const blob = new Blob([csvContent], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      // Create a link element to download the CSV
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName; //file name after download
+      document.body.appendChild(link);
+      // Programmatically click the link to trigger the download
+      link.click();
+      // Clean up the link after download
+      document.body.removeChild(link);
+    }
   }
 
   import { Input } from "../ui/input";

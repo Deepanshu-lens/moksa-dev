@@ -42,10 +42,10 @@
           //   text: "Playback",
           //   href: `/playback/${sessionId}`,
           // },
-          // {
-          //   text: "Settings",
-          //   href: `/settings/${sessionId}`,
-          // },
+          {
+            text: "Settings",
+            href: `/settings/${sessionId}`,
+          },
         ]
       : user?.role === "storeManager"
         ? [
@@ -61,10 +61,10 @@
               text: "Analytics",
               href: `/analytics/${sessionId}`,
             },
-            // {
-            //   text: "Settings",
-            //   href: `/settings/${sessionId}`,
-            // },
+            {
+              text: "Settings",
+              href: `/settings/${sessionId}`,
+            },
           ]
         : [
             // {
@@ -79,14 +79,14 @@
               text: "Analytics",
               href: `/analytics/${sessionId}`,
             },
-            // {
-            //   text: "Users",
-            //   href: `/users/${sessionId}`,
-            // },
-            // {
-            //   text: "Settings",
-            //   href: `/settings/${sessionId}`,
-            // },
+            {
+              text: "Users",
+              href: `/users/${sessionId}`,
+            },
+            {
+              text: "Settings",
+              href: `/settings/${sessionId}`,
+            },
           ];
 
   const menuListMob = [
