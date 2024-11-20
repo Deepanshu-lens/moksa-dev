@@ -30,7 +30,7 @@ export const POST: RequestHandler = async ({
         "node+": [result?.id],
       });
 
-    await fetch(`https://api.moksa.ai/store/create`, {
+    await fetch(`https://dev.api.moksa.ai/store/create`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -41,7 +41,7 @@ export const POST: RequestHandler = async ({
       // console.log(res);
       const newS = await res.json();
       console.log(newS);
-      const userStoresResponse = await fetch(`https://api.moksa.ai/store/getUserStoreDetailsByUserId/${locals.user.record.moksaId}`, {
+      const userStoresResponse = await fetch(`https://dev.api.moksa.ai/store/getUserStoreDetailsByUserId/${locals.user.record.moksaId}`, {
         headers: {
           "Content-Type": "application/json",
           'Authorization': `Bearer ${token}`
@@ -58,7 +58,7 @@ export const POST: RequestHandler = async ({
       }
       // console.log(storeIds)
       // console.log(locals.user.record.moksaId)
-      await fetch(`https://api.moksa.ai/store/userStore/updateUserByUserId`, {
+      await fetch(`https://dev.api.moksa.ai/store/userStore/updateUserByUserId`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

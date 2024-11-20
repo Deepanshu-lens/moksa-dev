@@ -38,10 +38,10 @@
             text: "Live",
             href: `/session/${sessionId}`,
           },
-          // {
-          //   text: "Playback",
-          //   href: `/playback/${sessionId}`,
-          // },
+          {
+            text: "Playback",
+            href: `/playback/${sessionId}`,
+          },
           {
             text: "Settings",
             href: `/settings/${sessionId}`,
@@ -53,10 +53,10 @@
               text: "Live",
               href: `/session/${sessionId}`,
             },
-            // {
-            //   text: "Playback",
-            //   href: `/playback/${sessionId}`,
-            // },
+            {
+              text: "Playback",
+              href: `/playback/${sessionId}`,
+            },
             {
               text: "Analytics",
               href: `/analytics/${sessionId}`,
@@ -71,10 +71,10 @@
               text: "Live",
               href: `/session/${sessionId}`,
             },
-            // {
-            //   text: "Playback",
-            //   href: `/playback/${sessionId}`,
-            // },
+            {
+              text: "Playback",
+              href: `/playback/${sessionId}`,
+            },
             {
               text: "Analytics",
               href: `/analytics/${sessionId}`,
@@ -94,10 +94,10 @@
       text: "Live",
       href: `/session/${sessionId}`,
     },
-    // {
-    //   text: "Playback",
-    //   href: `/playback/${sessionId}`,
-    // },
+    {
+      text: "Playback",
+      href: `/playback/${sessionId}`,
+    },
     {
       text: "Events",
       href: `/events/${sessionId}`,
@@ -127,7 +127,7 @@
   onMount(async () => {
     // console.log("mToken", mToken);
     const response = await fetch(
-      "https://api.moksa.ai/store/getAllStoresForDropdown",
+      "https://dev.api.moksa.ai/store/getAllStoresForDropdown",
       {
         method: "GET",
         headers: {

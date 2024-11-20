@@ -11,7 +11,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
     try {
         const { videoUri } = await request.json();
 
-        const response = await fetch('https://api.moksa.ai/stream', {
+        const response = await fetch('https://dev.api.moksa.ai/stream', {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -23,19 +23,19 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
         console.log(response)
         if (!response.ok) {
             throw new Error('Failed to get signed URL');
-          }
-      
-          const blob = await response.blob();
-          console.log(blob)
-          const contentType = response.headers.get('content-type');
-      
-          // Check if the content type is a valid video type
-          if (!contentType.startsWith('video/')) {
+        }
+
+        const blob = await response.blob();
+        console.log(blob)
+        const contentType = response.headers.get('content-type');
+
+        // Check if the content type is a valid video type
+        if (!contentType.startsWith('video/')) {
             throw new Error('Invalid content type for video');
-          }
-      
-          const videoBlob = new Blob([blob], { type: contentType });
-       
+        }
+
+        const videoBlob = new Blob([blob], { type: contentType });
+
         return json(videoBlob);
     } catch (error) {
         console.error('Error generating signed URL:', error);

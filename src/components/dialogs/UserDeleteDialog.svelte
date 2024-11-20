@@ -19,7 +19,7 @@
   const deleteUser = async () => {
     try {
       const del = await fetch(
-        `https://api.moksa.ai/auth/delete/${data.moksaId}`,
+        `https://dev.api.moksa.ai/auth/delete/${data.moksaId}`,
         {
           method: "POST",
           headers: {

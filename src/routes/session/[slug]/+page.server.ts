@@ -24,7 +24,7 @@ export const actions = {
       ?.collection("node")
       .create({ name, session: locals.user.record.session[0], mobileLayout: 1 });
 
-    const moksaStore = await fetch(`https://api.moksa.ai/store/create`, {
+    const moksaStore = await fetch(`https://dev.api.moksa.ai/store/create`, {
       method: 'POST',
       headers: {
         "Content-Type": "application/json",
@@ -34,7 +34,7 @@ export const actions = {
     });
     console.log(moksaStore)
     const store = await moksaStore.json();
-    console.log('store',store)
+    console.log('store', store)
 
     if (store.status === 201) {
       console.log("Store created successfully")
@@ -43,14 +43,14 @@ export const actions = {
         .update(node?.id, {
           "moksaId": store.data.id
         });
-        await locals.pb
+      await locals.pb
         ?.collection("session")
         .update(locals.user.record.session[0], {
           "node+": [node?.id],
         });
     }
 
-  
+
   },
 };
 
@@ -99,7 +99,7 @@ export const load: PageServerLoad = async ({ locals, cookies }) => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-      const response = await fetch('https://api.moksa.ai/store/getAllStoresForDropdown', {
+      const response = await fetch('https://dev.api.moksa.ai/store/getAllStoresForDropdown', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${cookies.get('moksa-token')}`
@@ -114,8 +114,8 @@ export const load: PageServerLoad = async ({ locals, cookies }) => {
       return response.json();
     } catch (error) {
       // if (error.name === 'AbortError') {
-        console.log('Request timed out');
-        // return [];
+      console.log('Request timed out');
+      // return [];
       // }
       return [];
     }
@@ -155,7 +155,7 @@ export const load: PageServerLoad = async ({ locals, cookies }) => {
         }) as unknown as Event,
     );
   }
-  
+
   return {
     events: [],
     galleryItems: [],
