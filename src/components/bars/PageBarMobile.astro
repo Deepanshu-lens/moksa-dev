@@ -1,0 +1,52 @@
+---
+import NodeSelection from "@/components/node/NodeSelection.svelte";
+import NodeActionButton from "@/components/node/crud/NodeActionButton.svelte";
+import { cn } from "@/lib/utils";
+import Avatar from "@/components/avatar/Avatar.svelte";
+
+interface Props {
+  location?: "left" | "top" | "right" | "bottom";
+}
+const { location = "top" } = Astro.props;
+
+const isVertical = location === "left" || location === "right";
+---
+
+<header
+  class={`
+  ${
+    isVertical
+      ? "fixed h-full w-16 md:w-20 flex-col px-4 py-4 lg:py-8 border-l flex justify-between"
+      : "md:h-16 w-full px-4 md:px-4 lg:px-12 mt-6"
+  }  ${
+    location === "top" ? "top-0" : location === "bottom" ? "bottom-0" : ""
+  } ${
+    location === "left" ? "left-0" : location === "right" ? "right-0" : ""
+  }  flex ${
+    isVertical ? "items-center justify-between" : "justify-between items-center"
+  }`}
+>
+  <!-- Mobile Actions add/edit/delete -->
+  <div class="flex items-start justify-between w-full">
+    <div class="w-[50%]">
+      <div class="flex items-center">
+        <img
+          src="/images/Cielo_logo.svg"
+          alt="Cieloview Logo"
+          class="h-8 w-auto"
+        />
+        <div class={`flex flex-col justify-between items-center gap-4 w-full`}>
+          <div class={cn("flex justify-end ml-20", "gap-1")}>
+            <NodeActionButton action="add" client:only="svelte" />
+            <NodeActionButton action="edit" client:only="svelte" />
+            <NodeActionButton action="delete" client:only="svelte" />
+          </div>
+        </div>
+      </div>
+      <div class="mt-4 w-full">
+        <NodeSelection client:only="svelte" />
+      </div>
+    </div>
+    <Avatar client:only="svelte" />
+  </div>
+</header>

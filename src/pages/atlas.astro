@@ -1,0 +1,14 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import AtlasLayout from "@/components/atlas/layout.svelte";
+import AtlasManager from "@/managers/atlas.svelte";
+import EventsManager from "@/managers/atlas-events.svelte";
+import CameraMananger from "@/managers/camera.svelte"
+---
+
+<Layout title="LENS View | Atlas" topbar>
+  <CameraMananger client:only="svelte"/>
+  <AtlasManager client:only="svelte" />
+  <EventsManager client:only="svelte" />
+  <AtlasLayout client:only="svelte" />
+</Layout>

@@ -1,0 +1,10 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import AllEvents from "@/managers/all-events.svelte";
+import EventsLayout from "@/components/all-events/layout.svelte";
+---
+
+<Layout title="LENS View | Events" topbar>
+  <AllEvents client:only="svelte" />
+  <EventsLayout client:only="svelte" />
+</Layout>

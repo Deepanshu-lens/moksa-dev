@@ -1,0 +1,40 @@
+---
+import PageBarItems from "./PageBarItems.svelte";
+import Avatar from "@/components/avatar/Avatar.svelte";
+
+interface Props {
+  location?: "left" | "top" | "right" | "bottom";
+}
+const { location = "top" } = Astro.props;
+
+const isVertical = location === "left" || location === "right";
+---
+
+<header
+  class={`
+  ${
+    isVertical
+      ? "fixed h-full w-16 md:w-20 flex-col px-6 py-4 lg:py-8 border-l"
+      : "h-10 md:h-16 w-full px-4 md:px-4 lg:px-12 border-b"
+  }  ${
+    location === "top" ? "top-0" : location === "bottom" ? "bottom-0" : ""
+  } ${
+    location === "left" ? "left-0" : location === "right" ? "right-0" : ""
+  }  flex ${
+    isVertical ? "items-center justify-between" : "justify-between items-center"
+  }`}
+>
+  <div
+    class=`${isVertical ? " flex flex-col  items-center  w-full" : "flex items-center space-x-3"}`
+  >
+    <img src="./images/view_logo.svg" alt="LENS View Logo" class="h-8 w-auto" />
+  </div>
+
+  <!-- Navigation Links -->
+  <nav
+    class=`${isVertical?"flex flex-col space-y-4 flex-grow justify-center w-full" : "flex flex-grow justify-center"}`
+  >
+    <PageBarItems {isVertical} client:only="svelte" />
+  </nav>
+  <Avatar client:only="svelte" />
+</header>

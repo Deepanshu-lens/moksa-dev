@@ -1,0 +1,11 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import GalleryManager from "@/managers/gallery.svelte";
+import GalleryPage from "@/managers/gallery-page.svelte";
+---
+
+<!-- Changed -->
+<Layout title="LENS View | Gallery">
+  <GalleryManager client:only="svelte" />
+  <GalleryPage client:only="svelte" />
+</Layout>

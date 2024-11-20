@@ -1,0 +1,29 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import StreamLayout from "@/components/live/streams/StreamLayout.svelte";
+import LiveRightSection from "@/components/live/live-right-section.svelte";
+import EventsManager from "@/managers/events.svelte";
+import PersonCountManager from "@/managers/person-count.svelte";
+import Camera from "@/managers/camera.svelte";
+import FaceEventsManager from "@/managers/events-face.svelte";
+import PageBarMobile from "@/components/bars/PageBarMobile.astro";
+
+const STREAM_URL = import.meta.env.STREAM_URL;
+---
+
+<!-- Changed -->
+<Layout title="LENS View">
+  <Camera client:only="svelte" />
+  <div class="block lg:hidden">
+    {(<PageBarMobile location="top" />)}
+  </div>
+  <div class="flex flex-row">
+    <EventsManager client:only="svelte" />
+    <StreamLayout client:only="svelte" {STREAM_URL} />
+    <PersonCountManager client:only="svelte" />
+    <FaceEventsManager client:only="svelte" />
+    <div class="">
+      <LiveRightSection client:only="svelte" />
+    </div>
+  </div>
+</Layout>

@@ -1,0 +1,9 @@
+---
+import AuthShell from "@/layouts/AuthShell.astro";
+import LoginForm from "@/components/forms/LoginForm.svelte";
+export const prerender = true;
+---
+
+<AuthShell title="Login to LENS View">
+  <LoginForm client:only="svelte" />
+</AuthShell>
