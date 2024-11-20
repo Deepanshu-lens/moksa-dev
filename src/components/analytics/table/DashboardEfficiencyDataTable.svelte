@@ -69,7 +69,7 @@
     const formatDate = (date: Date) => date.toISOString().split("T")[0];
     // console.log(currentpage);
     const efficiency = await fetch(
-      `https://api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/${$selectedStore.value}/${$dateRange === "custom" ? start : formatDate(startDate)}/${currentpage}/100/${$dateRange === "custom" ? end : formatDate(today)}`,
+      `https://dev.api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/${$selectedStore.value}/${$dateRange === "custom" ? start : formatDate(startDate)}/${currentpage}/100/${$dateRange === "custom" ? end : formatDate(today)}`,
       {
         method: "GET",
         headers: {
@@ -221,21 +221,13 @@
                         >
                       </div>
                     {:else if cell.id === "customer"}
-                      <span class="text-sm"
-                        >{row.original.customer}</span
-                      >
+                      <span class="text-sm">{row.original.customer}</span>
                     {:else if cell.id === "idle"}
-                      <span class="text-sm"
-                        >{row.original.idle}</span
-                      >
+                      <span class="text-sm">{row.original.idle}</span>
                     {:else if cell.id === "mobile"}
-                      <span class="text-sm"
-                        >{row.original.mobile}</span
-                      >
+                      <span class="text-sm">{row.original.mobile}</span>
                     {:else if cell.id === "fillingShelves"}
-                      <span class="text-sm"
-                        >{row.original.fillingShelves}</span
-                      >
+                      <span class="text-sm">{row.original.fillingShelves}</span>
                     {:else}
                       <Render of={cell.render()} />
                     {/if}

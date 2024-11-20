@@ -6,11 +6,11 @@ export const DELETE: RequestHandler = async ({
     cookies
 }: RequestEvent) => {
     const data = await request.json();
-    if(data.id !== undefined){
+    if (data.id !== undefined) {
         await locals.pb?.collection("node").delete(data.id);
     }
 
-    await fetch(`https://api.moksa.ai/store/delete/${data.moksaId}`, {
+    await fetch(`https://dev.api.moksa.ai/store/delete/${data.moksaId}`, {
         headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${cookies.get("moksa-token")}`,

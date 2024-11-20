@@ -6,7 +6,6 @@
   import { Button } from "@/components/ui/button";
   import { X } from "lucide-svelte";
 
-
   let dialogOpen = false;
   export let token;
   export let storeId;
@@ -14,7 +13,7 @@
   let firstName = "";
   let lastName = "";
   let role = "";
-  let newEmp = {}
+  let newEmp = {};
 
   const validateFields = () => {
     const fields = [
@@ -32,38 +31,46 @@
     return true;
   };
 
-//   $: console.log(token)
-//   $: console.log($employeeData)
+  //   $: console.log(token)
+  //   $: console.log($employeeData)
 
   const handleSubmit = async () => {
     if (!validateFields()) {
-        toast.error("Please fill all the fields");
-        return;
-    } 
+      toast.error("Please fill all the fields");
+      return;
+    }
 
-    const res = await fetch(`https://api.moksa.ai/store/storeEmployee/create`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
+    const res = await fetch(
+      `https://dev.api.moksa.ai/store/storeEmployee/create`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          store_id: storeId,
+          first_name: firstName,
+          last_name: lastName,
+          role: role,
+          photo: "",
+        }),
       },
-      body: JSON.stringify({
-        store_id: storeId,
-        first_name: firstName,
-        last_name: lastName,
-        role: role,
-        photo: "",
-      }),
-    });
+    );
     const data = await res.json();
     console.log(data);
     if (res.ok) {
       toast.success("Employee created successfully");
-      if(data.status === 201) {
-        newEmp = { id: data.data.id, first_name: firstName, last_name: lastName, role: role },
-        $employeeData.data.push(newEmp)
+      if (data.status === 201) {
+        (newEmp = {
+          id: data.data.id,
+          first_name: firstName,
+          last_name: lastName,
+          role: role,
+        }),
+          $employeeData.data.push(newEmp);
         // employeeData.data.update(emp => [...emp, newEmp])
-    }
+      }
       dialogOpen = false;
     } else {
       toast.error("Failed to create employee");
@@ -117,9 +124,8 @@
           />
         </div>
         <div class="space-y-2">
-          <Label
-            for="role"
-            class="block text-sm font-medium text-gray-700">Employee Role</Label
+          <Label for="role" class="block text-sm font-medium text-gray-700"
+            >Employee Role</Label
           >
           <Input
             required

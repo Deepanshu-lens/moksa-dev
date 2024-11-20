@@ -54,7 +54,7 @@
   const getFloorMap = async (storeId) => {
     try {
       const res = await fetch(
-        `https://api.moksa.ai/store/getFloorMapByStoreid/${storeId}`,
+        `https://dev.api.moksa.ai/store/getFloorMapByStoreid/${storeId}`,
         {
           method: "GET",
           headers: {
@@ -170,7 +170,7 @@
       console.log("selectedFloorMap", selectedFloorMap);
 
       const aData = await fetch(
-        `https://api.moksa.ai/people/aisleCount/getAisleCountbyStoreid/${$selectedStore.value}`,
+        `https://dev.api.moksa.ai/people/aisleCount/getAisleCountbyStoreid/${$selectedStore.value}`,
         {
           method: "GET",
           headers: {
@@ -204,7 +204,7 @@
       }
 
       const mapData = await fetch(
-        `https://api.moksa.ai/heatmap/getHeatMapByTimeAndStoreId/${$dateRange}/${$selectedStore.value}`,
+        `https://dev.api.moksa.ai/heatmap/getHeatMapByTimeAndStoreId/${$dateRange}/${$selectedStore.value}`,
         {
           method: "GET",
           headers: {
@@ -217,7 +217,7 @@
       const data = await mapData.json();
       console.log("mapData", data);
       heatMapData.set(data);
-      const res = await fetch("https://api.moksa.ai/stream", {
+      const res = await fetch("https://dev.api.moksa.ai/stream", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -263,7 +263,7 @@
       // console.log('selectedFloorMap',selectedFloorMap)
 
       const aData = await fetch(
-        `https://api.moksa.ai/people/aisleCount/getAisleCountbyStoreid/${$selectedStore.value}`,
+        `https://dev.api.moksa.ai/people/aisleCount/getAisleCountbyStoreid/${$selectedStore.value}`,
         {
           method: "GET",
           headers: {
@@ -299,7 +299,7 @@
       }
 
       const mapData = await fetch(
-        `https://api.moksa.ai/heatmap/getHeatMapByTimeAndStoreId/custom/${$selectedStore.value}`,
+        `https://dev.api.moksa.ai/heatmap/getHeatMapByTimeAndStoreId/custom/${$selectedStore.value}`,
         {
           method: "GET",
           headers: {
@@ -313,7 +313,7 @@
       const data = await mapData.json();
       console.log("mapData", data);
       heatMapData.set(data);
-      const res = await fetch("https://api.moksa.ai/stream", {
+      const res = await fetch("https://dev.api.moksa.ai/stream", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,

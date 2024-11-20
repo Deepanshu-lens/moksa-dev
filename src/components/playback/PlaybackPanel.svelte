@@ -25,7 +25,7 @@
   let isLoading = writable(false);
   let cameraList = [];
   let currentNvr;
-  let addMode = 2;
+  let addMode = 1;
   let videos: { [key: string]: HTMLElement } = {};
 
   export let data;
@@ -40,17 +40,18 @@
       const list = await PB.collection("nvr").getFullList({
         filter: `node~"${$selectedNode.id}"`,
       });
-      for (const nvr of list) {
-        const pingStatus = await PB.collection("nvr_ping_status").getList(
-          1,
-          1,
-          {
-            filter: `nvr="${nvr.id}"`,
-            sort: "-created",
-          },
-        );
-        nvr.pingStatus = pingStatus.items[0];
-      }
+
+      // for (const nvr of list) {
+      //   const pingStatus = await PB.collection("nvr_ping_status").getList(
+      //     1,
+      //     1,
+      //     {
+      //       filter: `nvr="${nvr.id}"`,
+      //       sort: "-created",
+      //     },
+      //   );
+      //   nvr.pingStatus = pingStatus.items[0];
+      // }
 
       nvrList.set(list);
     })();

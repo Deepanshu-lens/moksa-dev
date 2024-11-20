@@ -2,17 +2,6 @@
   import { createTable, Render, Subscribe } from "svelte-headless-table";
   import * as Table from "@/components/ui/table";
   import { Button } from "@/components/ui/button";
-  import {
-    ArrowUpDown,
-    Edit,
-    Store,
-    StoreIcon,
-    Trash2,
-    TrendingDown,
-    TrendingUp,
-    User,
-  } from "lucide-svelte";
-  import { createEventDispatcher } from "svelte";
   import Spinner from "@/components/ui/spinner/Spinner.svelte";
   import * as Dialog from "@/components/ui/dialog";
 
@@ -73,7 +62,7 @@
     // console.log(currentpage);
 
     const safetyDetails = await fetch(
-      `https://api.moksa.ai/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${$selectedStore.value}/${currentpage}/100/${$dateRange === "custom" ? start : formatDate(startDate)}/${$dateRange === "custom" ? end : formatDate(today)}`,
+      `https://dev.api.moksa.ai/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${$selectedStore.value}/${currentpage}/100/${$dateRange === "custom" ? start : formatDate(startDate)}/${$dateRange === "custom" ? end : formatDate(today)}`,
       {
         method: "GET",
         headers: {
@@ -106,7 +95,7 @@
     selectedImage = null; // Reset selectedImage before fetching
     console.log(imageUri);
     try {
-      const response = await fetch("https://api.moksa.ai/stream", {
+      const response = await fetch("https://dev.api.moksa.ai/stream", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -164,17 +153,13 @@
       accessor: "hairnet",
       header: "Hairnet",
     }),
-    // table.column({
-    //   accessor: "breakingSops",
-    //   header: "Breaking SOP's",
-    // }),
-    table.column({
-      accessor: "videoLink",
-      header: "Image",
-    }),
     table.column({
       accessor: "uniform",
       header: "Uniform",
+    }),
+    table.column({
+      accessor: "videoLink",
+      header: "Image",
     }),
   ]);
 

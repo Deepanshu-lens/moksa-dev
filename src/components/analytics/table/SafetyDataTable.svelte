@@ -38,7 +38,7 @@
     selectedImage = null; // Reset selectedImage before fetching
     console.log(imageUri);
     try {
-      const response = await fetch("https://api.moksa.ai/stream", {
+      const response = await fetch("https://dev.api.moksa.ai/stream", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -180,7 +180,7 @@
     // console.log(currentpage);
 
     const safetyDetails = await fetch(
-      `https://api.moksa.ai/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${$selectedStore.value}/${currentpage}/100/${$dateRange === "custom" ? start : formatDate(startDate)}/${$dateRange === "custom" ? end : formatDate(today)}`,
+      `https://dev.api.moksa.ai/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${$selectedStore.value}/${currentpage}/100/${$dateRange === "custom" ? start : formatDate(startDate)}/${$dateRange === "custom" ? end : formatDate(today)}`,
       {
         method: "GET",
         headers: {
@@ -278,18 +278,9 @@
                       </div>
                     {:else if ["masks", "uniform", "gloves", "hairnet"].includes(cell.id)}
                       {#if row.original[cell.id] === "true"}
-                        <img
-                          src="/images/tick.png"
-                          alt="tick"
-                          srcset=""
-                          class="w-5 h-5"
-                        />
+                        <span class="text-green-500">✓</span>
                       {:else if row.original[cell.id] === "false"}
-                        <img
-                          src="/images/cross.png"
-                          alt="cross"
-                          class="w-5 h-5"
-                        />
+                        <span class="text-red-500">✗</span>
                       {:else}
                         <p>{row.original[cell.id]}</p>
                       {/if}

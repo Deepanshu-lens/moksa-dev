@@ -9,7 +9,7 @@ export const actions = {
     // const operatingSystem = os.platform;
     // console.log(operatingSystem);
     try {
-      await fetch(`https://api.moksa.ai/auth/login`, {
+      await fetch(`https://dev.api.moksa.ai/auth/login`, {
         method: "POST", headers: {
           'Content-Type': 'application/json'
         },
@@ -52,7 +52,7 @@ export const actions = {
       //   "loginEvents+": [event?.id],
       // });
     } catch (err: any) {
-      console.log(err,'error here')
+      console.log(err, 'error here')
       console.log("login error", err.message === undefined ? "User not found" : err.message);
       // throw error(err.status || 500, err.message || "An error occurred");
       throw redirect(303, `/login?message=${err.message === undefined ? "User not found," : err.message}`);

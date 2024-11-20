@@ -254,7 +254,7 @@
       socket.disconnect();
     }
 
-    socket = io("https://api.moksa.ai", {
+    socket = io("https://dev.api.moksa.ai", {
       withCredentials: true,
       extraHeaders: {
         Authorization: `Bearer ${token}`,
@@ -347,7 +347,7 @@
     try {
       loading = true;
       const response = await fetch(
-        `https://api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/${$selectedStoreId}/${start}/1/100/${end}`,
+        `https://dev.api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/${$selectedStoreId}/${start}/1/100/${end}`,
         {
           method: "GET",
           headers: {
@@ -407,7 +407,7 @@
     try {
       loading = true;
       const response = await fetch(
-        `https://api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/${$selectedStoreId}/${formatDate(startDate)}/1/100/${formatDate(today)}`,
+        `https://dev.api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/${$selectedStoreId}/${formatDate(startDate)}/1/100/${formatDate(today)}`,
         {
           method: "GET",
           headers: {
@@ -483,27 +483,29 @@
 
     progress = 0;
     dashOffset = circumference - (progress / 100) * circumference;
-    try {
-      const response = await fetch(
-        `https://api.moksa.ai/employeeEfficiency/getEmployeeEfficiencyByEmpid/${id}/${formatDate(startDate)}/${formatDate(today)}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
+    if (!!id) {
+      try {
+        const response = await fetch(
+          `https://dev.api.moksa.ai/employeeEfficiency/getEmployeeEfficiencyByEmpid/${id}/${formatDate(startDate)}/${formatDate(today)}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
           },
-        },
-      );
-      if (!response.ok) {
-        throw new Error("Failed to fetch employees");
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch employees");
+        }
+        const data = await response.json();
+        console.log("employee-details", data);
+        employeeDetails.set(data);
+        progress = data?.data[0]?.efficiency_score;
+        dashOffset = circumference - (progress / 100) * circumference;
+      } catch (error) {
+        console.log(error);
       }
-      const data = await response.json();
-      console.log("employee-details", data);
-      employeeDetails.set(data);
-      progress = data.data[0].efficiency_score;
-      dashOffset = circumference - (progress / 100) * circumference;
-    } catch (error) {
-      console.log(error);
     }
   }
 
@@ -516,29 +518,33 @@
     progress = 0;
     dashOffset = circumference - (progress / 100) * circumference;
 
-    try {
-      const response = await fetch(
-        `https://api.moksa.ai/employeeEfficiency/getEmployeeEfficiencyByEmpid/${id}/${start}/${end}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
+    console.log(id, "id");
+
+    if (!!id) {
+      try {
+        const response = await fetch(
+          `https://dev.api.moksa.ai/employeeEfficiency/getEmployeeEfficiencyByEmpid/${id}/${start}/${end}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
           },
-        },
-      );
+        );
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch employees");
+        if (!response.ok) {
+          throw new Error("Failed to fetch employees");
+        }
+
+        const data = await response.json();
+        console.log("employee-details", data);
+        employeeDetails.set(data);
+        progress = data.data[0].efficiency_score;
+        dashOffset = circumference - (progress / 100) * circumference;
+      } catch (error) {
+        console.log(error);
       }
-
-      const data = await response.json();
-      console.log("employee-details", data);
-      employeeDetails.set(data);
-      progress = data.data[0].efficiency_score;
-      dashOffset = circumference - (progress / 100) * circumference;
-    } catch (error) {
-      console.log(error);
     }
 
     // }

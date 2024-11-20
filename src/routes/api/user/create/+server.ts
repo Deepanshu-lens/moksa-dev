@@ -1,13 +1,13 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
-export const POST: RequestHandler = async ({ request,cookies }) => {
+export const POST: RequestHandler = async ({ request, cookies }) => {
     try {
-        const { firstName, lastName, mailId, password, userType, lensId,phoneNumber } = await request.json();
+        const { firstName, lastName, mailId, password, userType, lensId, phoneNumber } = await request.json();
         const token = cookies.get('moksa-token');
 
         const moksa = await fetch(
-            `https://api.moksa.ai/auth/createUserWithPocketbase`,
+            `https://dev.api.moksa.ai/auth/createUserWithPocketbase`,
             {
                 method: "POST",
                 headers: {
@@ -21,7 +21,7 @@ export const POST: RequestHandler = async ({ request,cookies }) => {
                     password,
                     lensId,
                     role: userType.toLowerCase(),
-                    mobile_number:phoneNumber
+                    mobile_number: phoneNumber
 
                 }),
             },
@@ -30,7 +30,7 @@ export const POST: RequestHandler = async ({ request,cookies }) => {
             return json({ error: 'moksa_failed' }, { status: 500 });
         }
         const response = await moksa.json();
-        
+
         return json(response);
     } catch (error) {
         console.error('Error creating user:', error);

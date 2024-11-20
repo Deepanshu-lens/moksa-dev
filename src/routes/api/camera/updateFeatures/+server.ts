@@ -11,18 +11,18 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
     }
 
 
-    const updatedCamera = await fetch('https://api.moksa.ai/camera/updateFeatureEnabled', {
-        method: 'POST',
+    const updatedCamera = await fetch('https://dev.api.moksa.ai/camera/updateFeatureEnabled', {
+      method: 'POST',
       headers: {
         'Authorization': `Bearer ${cookies.get('moksa-token')}`,
         "Content-Type": "application/json",
       }, body: JSON.stringify({
-        feature: feature, 
+        feature: feature,
         cameraId: camId,
         storeId: storeId
       })
     });
-    
+
 
     return json({ message: 'Camera features updated successfully', camera: updatedCamera });
   } catch (error) {

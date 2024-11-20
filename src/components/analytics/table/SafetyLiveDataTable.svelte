@@ -30,7 +30,7 @@
     dialogOpen = true;
     selectedImage = null; // Reset selectedImage before fetching
     try {
-      const response = await fetch("https://api.moksa.ai/stream", {
+      const response = await fetch("https://dev.api.moksa.ai/stream", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -173,7 +173,9 @@
                   class="flex items-center justify-center whitespace-nowrap flex-1 py-2 w-1/4 text-center"
                 >
                   {#if cell.id === "employee"}
-                    <div class="flex items-center gap-2 text-start w-full justify-start ml-5">
+                    <div
+                      class="flex items-center gap-2 text-start w-full justify-start ml-5"
+                    >
                       <div
                         class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-center"
                       >

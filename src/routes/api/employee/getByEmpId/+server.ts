@@ -21,14 +21,14 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
         console.log(id)
         console.log(today)
         console.log(weekAgo)
-        const response = await fetch(`https://api.moksa.ai/employeeEfficiency/getEmployeeEfficiencyByEmpid/${id}/${formatDate(weekAgo)}/${formatDate(today)}`, {
+        const response = await fetch(`https://dev.api.moksa.ai/employeeEfficiency/getEmployeeEfficiencyByEmpid/${id}/${formatDate(weekAgo)}/${formatDate(today)}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
             },
         });
-console.log(response)
+        console.log(response)
         if (!response.ok) {
             throw new Error('Failed to fetch employees');
         }
