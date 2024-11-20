@@ -15,17 +15,22 @@
 
   const deleteUser = async () => {
     try {
-   const res =   await fetch(`https://api.moksa.ai/store/storeEmployee/deleteEmployee/${empId}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+      const res = await fetch(
+        `https://dev.api.moksa.ai/store/storeEmployee/deleteEmployee/${empId}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
+      );
       const data = await res.json();
       console.log(data);
       toast.success("Employee deleted successfully");
-      $employeeData.data = $employeeData.data.filter(employee => employee.id !== empId);
+      $employeeData.data = $employeeData.data.filter(
+        (employee) => employee.id !== empId,
+      );
       dialogOpen = false;
     } catch (error) {
       console.error("Error deleting user:", error);
@@ -42,9 +47,7 @@
       <Dialog.Title>Delete Employee : {firstName} {lastName}</Dialog.Title>
     </Dialog.Header>
     <div class="grid grid-cols-2">
-      <div class="col-span-2 dark:text-white text-black">
-        Are you sure ?
-      </div>
+      <div class="col-span-2 dark:text-white text-black">Are you sure ?</div>
     </div>
     <Dialog.Footer>
       <span class="flex items-center gap-4">

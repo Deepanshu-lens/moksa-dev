@@ -9,7 +9,7 @@ export const actions = {
     // const operatingSystem = os.platform;
     // console.log(operatingSystem);
     try {
-      await fetch(`https://api.moksa.ai/auth/login`, {
+      await fetch(`https://dev.api.moksa.ai/auth/login`, {
         method: "POST", headers: {
           'Content-Type': 'application/json'
         },

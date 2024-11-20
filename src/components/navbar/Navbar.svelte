@@ -34,25 +34,25 @@
   const menuList =
     user.role === "Operators" || user.role === "adminNonPaid"
       ? [
-          {
-            text: "Live",
-            href: `/session/${sessionId}`,
-          },
+          // {
+          //   text: "Live",
+          //   href: `/session/${sessionId}`,
+          // },
           // {
           //   text: "Playback",
           //   href: `/playback/${sessionId}`,
           // },
-          {
-            text: "Settings",
-            href: `/settings/${sessionId}`,
-          },
+          // {
+          //   text: "Settings",
+          //   href: `/settings/${sessionId}`,
+          // },
         ]
       : user?.role === "storeManager"
         ? [
-            {
-              text: "Live",
-              href: `/session/${sessionId}`,
-            },
+            // {
+            //   text: "Live",
+            //   href: `/session/${sessionId}`,
+            // },
             // {
             //   text: "Playback",
             //   href: `/playback/${sessionId}`,
@@ -61,16 +61,16 @@
               text: "Analytics",
               href: `/analytics/${sessionId}`,
             },
-            {
-              text: "Settings",
-              href: `/settings/${sessionId}`,
-            },
+            // {
+            //   text: "Settings",
+            //   href: `/settings/${sessionId}`,
+            // },
           ]
         : [
-            {
-              text: "Live",
-              href: `/session/${sessionId}`,
-            },
+            // {
+            //   text: "Live",
+            //   href: `/session/${sessionId}`,
+            // },
             // {
             //   text: "Playback",
             //   href: `/playback/${sessionId}`,
@@ -79,37 +79,37 @@
               text: "Analytics",
               href: `/analytics/${sessionId}`,
             },
-            {
-              text: "Users",
-              href: `/users/${sessionId}`,
-            },
-            {
-              text: "Settings",
-              href: `/settings/${sessionId}`,
-            },
+            // {
+            //   text: "Users",
+            //   href: `/users/${sessionId}`,
+            // },
+            // {
+            //   text: "Settings",
+            //   href: `/settings/${sessionId}`,
+            // },
           ];
 
   const menuListMob = [
-    {
-      text: "Live",
-      href: `/session/${sessionId}`,
-    },
+    // {
+    //   text: "Live",
+    //   href: `/session/${sessionId}`,
+    // },
     // {
     //   text: "Playback",
     //   href: `/playback/${sessionId}`,
     // },
-    {
-      text: "Events",
-      href: `/events/${sessionId}`,
-    },
-    {
-      text: "Reports",
-      href: `/reports/${sessionId}`,
-    },
-    {
-      text: "Configuration",
-      href: `/configuration/${sessionId}`,
-    },
+    // {
+    //   text: "Events",
+    //   href: `/events/${sessionId}`,
+    // },
+    // {
+    //   text: "Reports",
+    //   href: `/reports/${sessionId}`,
+    // },
+    // {
+    //   text: "Configuration",
+    //   href: `/configuration/${sessionId}`,
+    // },
   ];
 
   let isOpen = false;
@@ -127,7 +127,7 @@
   onMount(async () => {
     // console.log("mToken", mToken);
     const response = await fetch(
-      "https://api.moksa.ai/store/getAllStoresForDropdown",
+      "https://dev.api.moksa.ai/store/getAllStoresForDropdown",
       {
         method: "GET",
         headers: {

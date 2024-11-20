@@ -21,7 +21,7 @@ export const POST: RequestHandler = async ({ request, cookies, locals }) => {
         // Update the user's password
 
         const token = cookies.get('moksa-token')
-        const moksaUPdate = await fetch('https://api.moksa.ai/auth/changePassword', {
+        const moksaUPdate = await fetch('https://dev.api.moksa.ai/auth/changePassword', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

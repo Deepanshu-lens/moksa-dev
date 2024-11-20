@@ -18,7 +18,6 @@
   import { selectedNode } from "@/lib/stores";
   import HeatMap from "@/components/analytics/HeatMap.svelte";
   import { onMount } from "svelte";
-  import { page } from "$app/stores";
   import PocketBase from "pocketbase";
   import type { PageServerData } from "./$types";
   import { writable } from "svelte/store";

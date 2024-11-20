@@ -50,7 +50,7 @@
     oneWeekAgo.setDate(today.getDate() - 7);
     const formatDate = (date: Date) => date.toISOString().split("T")[0];
     const theftCamera = await fetch(
-      `https://api.moksa.ai/store/getAllStoresWithTheftAndCameraDetails/1/100/${formatDate(oneYearAgo)}/${formatDate(today)}`,
+      `https://dev.api.moksa.ai/store/getAllStoresWithTheftAndCameraDetails/1/100/${formatDate(oneYearAgo)}/${formatDate(today)}`,
       {
         method: "GET",
         headers: {
@@ -60,7 +60,7 @@
     );
 
     const stores = await fetch(
-      "https://api.moksa.ai/store/getAllStoresForDropdown",
+      "https://dev.api.moksa.ai/store/getAllStoresForDropdown",
       {
         method: "GET",
         headers: {
