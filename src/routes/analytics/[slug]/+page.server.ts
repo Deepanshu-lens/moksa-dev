@@ -35,7 +35,7 @@ export const load: PageServerLoad = async ({ fetch, cookies, locals }) => {
         const response = await fetch('https://api.moksa.ai/store/getAllStoresForDropdown', {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${mToken}`,
+                'Authorization': `Bearer ${mToken}`, 
                 'enableallstores': 'true'
             }
         });
