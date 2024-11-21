@@ -67,7 +67,7 @@
     console.log(
       `ws://${$page.url.hostname}:8082/api/ws?src=${currentNvr?.ip + "/" + camera.url.split("channels/")[1]}&nodeID=${1}&cn=${camera?.expand?.camera?.name}`,
     );
-    let video = document.createElement("video-stream") as VideoStreamType;
+    let video = window.document.createElement("video-stream") as VideoStreamType;
     video.id = `playback-stream-${index}`;
     video.mode = "mse";
     video.url = camera.url;
@@ -227,7 +227,7 @@
           <button
             on:click={() => {
               convertedVideos.set([]);
-              document.getElementById("awsvid")?.remove();
+              window.document.getElementById("awsvid")?.remove();
             }}
             class="absolute top-2 right-2 text-white cursor-pointer z-10"
           >

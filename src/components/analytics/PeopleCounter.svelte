@@ -1,25 +1,10 @@
 <script lang="ts">
   import PeopleCountDataTable from "./table/PeopleCountDataTable.svelte";
-  import {
-    ChevronLeft,
-    Clock,
-    ListFilter,
-    Store,
-    Upload,
-    Users,
-  } from "lucide-svelte";
+  import { Store, Upload } from "lucide-svelte";
   import { Button } from "../ui/button";
   import * as Select from "@/components/ui/select";
   import { onDestroy, onMount } from "svelte";
   import { io } from "socket.io-client";
-  import {
-    Chart,
-    LineController,
-    LineElement,
-    PointElement,
-    LinearScale,
-    CategoryScale,
-  } from "chart.js";
   import { writable } from "svelte/store";
   import LivePeopleCountDataTable from "./table/LivePeopleCountDataTable.svelte";
   import * as Popover from "../ui/popover";
@@ -29,9 +14,6 @@
   import Input from "../ui/input/input.svelte";
   export let allStores;
   export let token;
-  let isInitialLoad = true;
-  let chartCanvas: HTMLCanvasElement;
-  let chart: Chart | null = null;
   let storeData: any = writable([]);
   let liveData = writable([]);
   let dateRange = writable("7");
@@ -45,9 +27,8 @@
     label: store.name,
   }));
 
+  export let curruser;
   let loadingLive = writable(false);
-
-  $: console.log(fruits, "fruits here");
 
   let selectedStore = writable({ value: -1, label: "All Stores" });
 
@@ -105,6 +86,14 @@
         const existingStoreIndex = currentData.data.findIndex(
           (store) => store.store_id === data.store_id,
         );
+
+        const storeExists = fruits.some(
+          (store) => store?.value === data?.store_id,
+        );
+        
+        if (curruser?.role !== "superAdmin" && !storeExists) {
+          return;
+        }
 
         if (existingStoreIndex !== -1) {
           // Update existing store data

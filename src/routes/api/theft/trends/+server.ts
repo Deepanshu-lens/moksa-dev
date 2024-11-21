@@ -29,12 +29,15 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
             },
         });
 
+
         // console.log(response)
         if (!response.ok) {
             throw new Error('Failed to fetch theft trends');
         }
 
         const trends = await response.json();
+        console.log(trends,'response')
+
         console.log(trends)
         return json(trends);
     } catch (error) {

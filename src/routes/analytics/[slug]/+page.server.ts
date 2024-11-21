@@ -84,7 +84,9 @@ export const load: PageServerLoad = async ({ fetch, cookies, locals }) => {
                 'endDate': formatDate(today),
             }
         });
-        return theftDetectionDetails.json();
+
+        const data = await theftDetectionDetails?.json();
+        return data;
     }
 
     const busyness = async () => {
