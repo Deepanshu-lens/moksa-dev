@@ -6,22 +6,24 @@
   export let data;
   import PocketBase from "pocketbase";
 
-  const { user } = data;
   const { account } = data;
+  const { user } = data;
 
-  $: console.log("account", account);
+  $: console.log("user", user);
   $: console.log("user", user);
 
   let profile = {
-    name: account[0].firstName + " " + account[0].lastName,
-    email: account[0].email,
-    role: user?.role,
-    phone: data.account[0].phoneNumber,
-    userId: data.account[0].moksaId,
-    avatar: data.account[0].avatar,
+    name: user?.firstName + " " + user?.lastName,
+    email: user?.email || "",
+    role: user?.role || "",
+    phone: data?.user?.phoneNumber || "",
+    userId: data?.user?.moksaId | "",
+    avatar: data?.user?.avatar || "",
   };
 
-  let accountEmail = account[0].email;
+  console.log(user, "accounts here");
+
+  let accountEmail = user.email;
   let password = "";
   let confirmPassword = "";
   let oldPassword = "";
@@ -32,14 +34,14 @@
     profilePictureUrl = URL.createObjectURL(profilePicture[0]);
   }
 
-  let phoneNumber = account[0].phoneNumber;
+  let phoneNumber = user.phoneNumber;
   const pb = new PocketBase(`https://server.moksa.ai`);
 
   import { goto } from "$app/navigation";
 
   async function updatePassword() {
     try {
-      // const update = await pb.collection('users').update(account[0].id, {
+      // const update = await pb.collection('users').update(user.id, {
       //   oldPassword: oldPassword,
       //   password: password,
       //   passwordConfirm: confirmPassword,
@@ -92,7 +94,7 @@
       updateData.append("avatar", file);
       const picUpdate = await pb
         .collection("users")
-        .update(account[0].id, updateData);
+        .update(user.id, updateData);
       console.log(picUpdate);
       profilePicture = null;
       profilePictureUrl = null;
@@ -105,7 +107,7 @@
   }
 </script>
 
-<div class="p-4 max-w-7xl mx-auto">
+<div class="p-4 max-w-7xl mx-auto overflow-auto h-full">
   <div class="grid grid-cols-3 gap-4">
     <!-- Left Profile Card -->
     <div
@@ -117,10 +119,10 @@
         Profile
       </h1>
       <div class="relative">
+        <!-- svelte-ignore a11y-img-redundant-alt -->
         <img
           src={profilePictureUrl ||
-            (user.avatar &&
-              getProfilePicture("users", account[0].id, account[0].avatar)) ||
+            (user.avatar && getProfilePicture("users", user.id, user.avatar)) ||
             "https://via.placeholder.com/150"}
           alt="Profile Picture"
           class="rounded-full size-[215px] object-contain ring-2 ring-gray-300"
@@ -186,24 +188,24 @@
           >{profile.role}</span
         >
         <h2 class="mt-4 text-xl font-semibold">{profile.name}</h2>
-        <p class="text-gray-500">{profile.email}</p>
+        <p class="text-gray-500">{profile?.email}</p>
       </div>
     </div>
 
-    <!-- Right Account Settings -->
+    <!-- Right user Settings -->
     <div
       class="bg-white h-[400px] border border-gray-200 rounded-xl p-2 col-span-2"
     >
       <div class="flex justify-between">
-        <h3 class="text-lg font-semibold">Account Settings</h3>
+        <h3 class="text-lg font-semibold">user Settings</h3>
         <span class="bg-gray-100 text-gray-700 text-sm px-4 py-2 rounded-lg"
           >User ID: {profile.userId}</span
         >
       </div>
       <form class="space-y-4">
-        <!-- Account Email -->
+        <!-- user Email -->
         <div class="flex flex-col items-start gap-2 w-full">
-          <label for="accountEmail" class="w-1/3">Account email</label>
+          <label for="accountEmail" class="w-1/3">user email</label>
           <div class="flex gap-6">
             <input
               id="accountEmail"
@@ -300,7 +302,7 @@
             <input
               id="phone"
               type="text"
-              value={phoneNumber}
+              value={phoneNumber || ""}
               class="border border-gray-300 min-w-[350px] p-2 rounded-md"
             />
             <!-- <button class="text-blue-500"> edit svg </button> -->
@@ -319,7 +321,7 @@
           <div class="flex justify-center"><MessageCircleMore size={32} /></div>
           <h3 class="text-lg font-semibold mt-4">Need help?</h3>
           <p class="text-gray-500">
-            Have questions or concerns regarding your "account settings"? Our
+            Have questions or concerns regarding your "user settings"? Our
             developers are here to help!
           </p>
         </div>
