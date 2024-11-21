@@ -13,7 +13,7 @@
   <Card.Header class="px-4 py-4"
     ><Card.Title>{person.name}</Card.Title></Card.Header
   >
-  <Card.Description class="px-4">Created at: {person.created}</Card.Description>
+  <Card.Description class="px-4">Created at: {new Date(person?.created).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', hour12: true })} </Card.Description>
   <Card.Content>
     <div class="pt-4 flex flex-col gap-y-2">
       <div class="flex -space-x-2 overflow-hidden items-center">

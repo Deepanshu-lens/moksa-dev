@@ -91,7 +91,7 @@
             >
             <Table.Cell
               class="text-[#727272] w-full h-full flex items-center justify-center text-sm"
-              ><span>{person.created}</span></Table.Cell
+              ><span>{new Date(person?.created).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', hour12: true })}</span></Table.Cell
             >
             <Table.Cell
               class="text-[#727272] w-full h-full flex items-center justify-center text-sm"

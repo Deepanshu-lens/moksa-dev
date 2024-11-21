@@ -97,7 +97,7 @@
               </span>
               <span class="text-xs mt-2">
                 <span class="font-medium"> Created at: </span>
-                {person?.created}
+                {new Date(person?.created).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', hour12: true })}
               </span>
               <div class="flex -space-x-2 overflow-hidden my-2">
                 {#each person?.images as galleryImage}
