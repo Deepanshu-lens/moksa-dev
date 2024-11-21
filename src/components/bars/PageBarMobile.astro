@@ -3,6 +3,7 @@ import NodeSelection from "@/components/node/NodeSelection.svelte";
 import NodeActionButton from "@/components/node/crud/NodeActionButton.svelte";
 import { cn } from "@/lib/utils";
 import Avatar from "@/components/avatar/Avatar.svelte";
+import ThemeSwitch from "@/components/ui/theme-button/theme-switch.svelte";
 
 interface Props {
   location?: "left" | "top" | "right" | "bottom";
@@ -47,6 +48,9 @@ const isVertical = location === "left" || location === "right";
         <NodeSelection client:only="svelte" />
       </div>
     </div>
-    <Avatar client:only="svelte" />
+    <div class="flex items-center gap-1">
+      <Avatar client:only="svelte" />
+      <ThemeSwitch client:only="svelte" />
+    </div>
   </div>
 </header>

@@ -1,7 +1,7 @@
 ---
 import PageBarItems from "./PageBarItems.svelte";
 import Avatar from "@/components/avatar/Avatar.svelte";
-
+import ThemeSwitch from "@/components/ui/theme-button/theme-switch.svelte";
 interface Props {
   location?: "left" | "top" | "right" | "bottom";
 }
@@ -36,5 +36,8 @@ const isVertical = location === "left" || location === "right";
   >
     <PageBarItems {isVertical} client:only="svelte" />
   </nav>
-  <Avatar client:only="svelte" />
+  <div class="flex items-center gap-3">
+    <Avatar client:only="svelte" />
+    <ThemeSwitch client:only="svelte" />
+  </div>
 </header>
