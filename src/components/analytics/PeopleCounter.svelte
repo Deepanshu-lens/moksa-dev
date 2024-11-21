@@ -1,12 +1,8 @@
 <script lang="ts">
   import PeopleCountDataTable from "./table/PeopleCountDataTable.svelte";
   import {
-    ChevronLeft,
-    Clock,
-    ListFilter,
     Store,
     Upload,
-    Users,
   } from "lucide-svelte";
   import { Button } from "../ui/button";
   import * as Select from "@/components/ui/select";
@@ -14,11 +10,6 @@
   import { io } from "socket.io-client";
   import {
     Chart,
-    LineController,
-    LineElement,
-    PointElement,
-    LinearScale,
-    CategoryScale,
   } from "chart.js";
   import { writable } from "svelte/store";
   import LivePeopleCountDataTable from "./table/LivePeopleCountDataTable.svelte";
@@ -29,7 +20,6 @@
   import Input from "../ui/input/input.svelte";
   export let allStores;
   export let token;
-  let isInitialLoad = true;
   let chartCanvas: HTMLCanvasElement;
   let chart: Chart | null = null;
   let storeData: any = writable([]);
@@ -44,7 +34,7 @@
     value: store.id,
     label: store.name,
   }));
-
+  export let curruser;
   let loadingLive = writable(false);
 
   let selectedStore = writable({ value: -1, label: "All Stores" });
@@ -98,6 +88,16 @@
         `Received live people count for store ${$selectedStore?.value}:`,
         data,
       );
+
+      const storeExists = fruits.some((store)=>store?.value === data?.store_id);
+      console.log(data?.store_id,'store id');
+      console.log(curruser,'curr user');
+
+      if(curruser?.role !== "superAdmin" && !storeExists){
+        return;
+      }
+
+
       liveData.update((currentData) => {
         console.log(currentData);
         const existingStoreIndex = currentData.data.findIndex(
