@@ -47,8 +47,6 @@
 
   let loadingLive = writable(false);
 
-  $: console.log(fruits, "fruits here");
-
   let selectedStore = writable({ value: -1, label: "All Stores" });
 
   let filterText = "";
@@ -95,9 +93,9 @@
       socket.emit("joinStore", $selectedStore.value);
     });
 
-    socket.on(`people_count_store_${$selectedStore.value}`, (data) => {
+    socket.on(`people_count_store_${$selectedStore?.value}`, (data) => {
       console.log(
-        `Received live people count for store ${$selectedStore.value}:`,
+        `Received live people count for store ${$selectedStore?.value}:`,
         data,
       );
       liveData.update((currentData) => {
