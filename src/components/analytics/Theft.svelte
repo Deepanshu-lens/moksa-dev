@@ -579,9 +579,6 @@
         ).then((res) => res.json()),
       ]);
 
-      console.log(theftD, "theftD");
-      console.log(theftT, "theftT");
-      console.log(theftL, "theftL");
       theftDataa.set(theftD);
       theftTrend.set(theftT);
       listtheft.set(theftL.data);
@@ -599,17 +596,14 @@
   }
 
   function updateBarChart(theftD) {
-    // console.log($dateRange);
-    // console.log("first");
+    console.log(theftD?.data, "theftd");
     if (barChart) {
-      // console.log("first");
-      // console.log(theftD);
-      const labels = theftD?.data.map((item) =>
+      const labels = theftD?.data?.map((item) =>
         $dateRange === "7 Days"
-          ? item.day_of_week.trim()
+          ? item?.day_of_week?.trim()
           : $dateRange === "12 Months"
-            ? item.month_name.trim()
-            : item.date.trim(),
+            ? item?.month_name?.trim()
+            : item?.date?.trim(),
       );
       const theftDetectedData = theftD?.data.map((item) =>
         parseInt(item.theft_detected),
@@ -617,6 +611,8 @@
       const theftPreventedData = theftD?.data.map((item) =>
         parseInt(item.theft_prevented),
       );
+
+      console.log(labels,'labels here')
 
       barChart.data.labels = labels;
       barChart.data.datasets[0].data = theftDetectedData;
@@ -626,17 +622,14 @@
   }
 
   function updateTheftChart(theftD) {
-    console.log($dateRange);
-    console.log("first");
     if (theftChart) {
-      console.log("first");
-      console.log(theftD);
+      console.log(theftD,'theft D in tehft');
       const labels = theftD?.data.map((item) =>
         $dateRange === "7 Days"
-          ? item.day_of_week.trim()
+          ? item?.day_of_week?.trim()
           : $dateRange === "12 Months"
-            ? item.month_name.trim()
-            : item.date.trim(),
+            ? item?.month_name?.trim()
+            : item?.date?.trim(),
       );
       const theftDetectedData = theftD?.data.map((item) =>
         parseInt(-item.theft_detected),
@@ -1070,6 +1063,7 @@
         description: `Store: ${storeId}, Theft Probability: ${data?.theftProbability}, Camera: ${data?.camera_id}`,
       });
 
+      let dataArr = [];
       listtheft.update((currentData) => {
         const dataArray = Array.isArray(currentData) ? currentData : [];
 
@@ -1082,10 +1076,10 @@
             ),
           };
         }
-
+        dataArr = dataArray;
         return [{ storeId, ...data, live: true }, ...dataArray].slice(0, 100);
       });
-      return [storeId, ...dataArray].slice(0, 100);
+      return [storeId, ...dataArr].slice(0, 100);
     });
 
     socket.on("disconnect", () => {
@@ -1136,15 +1130,17 @@
     to = value?.end;
   } else if ($dateRange === "7 Days") {
     from = new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000);
+    to = new Date();
   } else if ($dateRange === "15 Days") {
     from = new Date(new Date().getTime() - 15 * 24 * 60 * 60 * 1000);
+    to = new Date();
   } else if ($dateRange === "30 Days") {
     from = new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000);
+    to = new Date();
   } else if ($dateRange === "12 Months") {
     from = new Date(new Date().getTime() - 12 * 30 * 24 * 60 * 60 * 1000);
+    to = new Date();
   }
-
-  $: console.log($listtheft);
 </script>
 
 <section
@@ -1457,7 +1453,7 @@
             from {$dateRange === "custom" ? from : from.toDateString()} to {$dateRange ===
             "custom"
               ? to
-              : to.toDateString()}
+              : to?.toDateString()}
           </p>
           <div class="circle-progress">
             <svg viewBox="0 0 36 36">
