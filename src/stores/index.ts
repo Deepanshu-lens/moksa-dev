@@ -9,7 +9,7 @@ import { personCount } from "./person-counter";
 import { imageUrl } from "./heatMapimageUrl";
 import { faceEvents } from "./face-events";
 import { allEvents,totalAllEvent,isEventsLoading } from "./all-events";
-import { gallery, totalFaceRegistered } from "./gallery";
+import { gallery, totalFaceRegistered, isGalleryLoading } from "./gallery";
 
 export {
   user,
@@ -33,4 +33,5 @@ export {
   isEventsLoading,
   gallery,
   totalFaceRegistered,
+  isGalleryLoading,
 };

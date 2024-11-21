@@ -20,4 +20,4 @@ const createGalleryStore = () => {
 
 export const gallery = createGalleryStore();
 export const totalFaceRegistered = writable<number>(0);
-
+export const isGalleryLoading = writable<boolean>(false);

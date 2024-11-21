@@ -6,6 +6,7 @@
   import { writable } from "svelte/store";
   import { ChevronDown, X } from "lucide-svelte";
   import { cn } from "@/lib/utils";
+  import { user } from "@/stores";
 
   let dialogOpen = false;
   let captureMode = 1;
@@ -189,6 +190,7 @@
         body: JSON.stringify({
           name: username,
           image: [...$registrationImages],
+          session: $user?.session[0],
         }),
       })
         .then(() => {

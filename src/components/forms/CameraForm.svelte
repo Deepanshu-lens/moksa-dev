@@ -284,32 +284,33 @@
 
   <div class="flex flex-col pb-4">
     <Label class="text-left mb-2">Features</Label>
-    <div
-      class="flex flex-col md:flex-row space-y-2 py-4 md:space-x-4 md:items-center"
-    >
-      <div class="flex items-center space-x-1">
+    <div class="flex flex-wrap py-4 justify-between items-start gap-2">
+      <div class="flex items-center gap-1">
         <Switch id="feedSaving" />
-        <Label for="feedSaving" class="text-xs font-normal mb-2"
+        <Label for="feedSaving" class="text-xs font-normal text-nowrap"
           >Feed Saving</Label
         >
       </div>
-      <div class="flex items-center space-x-1">
+      <div class="flex items-center gap-1">
         <Switch id="vehicleScan" />
-        <Label for="vehicleScan" class="text-xs font-normal">Vehicle Scan</Label
+        <Label for="vehicleScan" class="text-xs font-normal text-nowrap"
+          >Vehicle Scan</Label
         >
       </div>
-      <div class="flex items-center space-x-1">
+      <div class="flex items-center gap-1">
         <Switch id="faceScan" />
-        <Label class="text-left mb-2" for="faceScan">Face Scan</Label>
+        <Label for="faceScan" class="text-xs font-normal text-nowrap">Face Scan</Label>
       </div>
-      <div class="flex items-center space-x-2">
+      <div class="flex items-center gap-1 mr-6 md:mr-auto">
         <Switch id="priority" />
-        <Label class="text-left mb-2" for="priority">Priority</Label>
+        <Label for="priority" class="text-xs font-normal text-nowrap"
+          >Priority</Label
+        >
       </div>
     </div>
-    <div class="flex items-center justify-between pb-4 w-full space-x-12">
-      <Label class="text-left mb-2">Motion Sensitivity</Label>
-      <Slider value={[33]} max={100} step={1} />
+    <div class="flex flex-col md:flex-row items-start md:items-center justify-between md:justify-start pb-4 w-full gap-2 md:gap-1">
+      <Label class="text-left mb-2 text-nowrap">Motion Sensitivity</Label>
+      <Slider value={[33]} max={100} step={1} class="text-left w-full"/>
     </div>
   </div>
 

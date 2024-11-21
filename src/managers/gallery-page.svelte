@@ -2,13 +2,13 @@
   import { ChevronLeft, Loader2 } from "lucide-svelte";
   import GalleryView from "../components/gallery/mobile/GalleryView.svelte";
   import GalleryPanel from "../components/gallery/GalleryPanel.svelte";
-  import { gallery } from "@/stores/gallery";
+  import { gallery, isGalleryLoading } from "@/stores/gallery";
   import PageBarMobile2 from "@/components/bars/PageBarMobile2.svelte";
 </script>
 
 <!-- desk -->
 <div class="h-[calc(100vh-76px)] hidden sm:block w-full">
-  {#if $gallery?.length > 0}
+  {#if !$isGalleryLoading}
     <GalleryPanel gallery={$gallery} />
   {:else}
     <div class="w-full flex justify-center items-center h-full gap-2">

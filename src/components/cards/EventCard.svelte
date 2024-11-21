@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { cn } from "@/lib";
+  import { cn } from "@/lib/utils";
   import type { Event } from "@/types";
   import { MoreVertical } from "lucide-svelte";
   export let event: Event;

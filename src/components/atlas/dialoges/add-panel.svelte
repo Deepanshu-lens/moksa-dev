@@ -112,7 +112,6 @@
         <Switch
           bind:checked={ssl}
           id="ssl"
-          class="data-[state=checked]:bg-brand-foreground dark:data-[state=checked]:bg-brand"
         />
       </div>
     </div>

@@ -139,12 +139,12 @@
         on:click={() => {
           addUserLog(`user clicked on Search button, top panel`);
         }}
-        class={`disabled:cursor-not-allowed text-black/[.4] h-[30px] w-[30px] rounded-full shadow-md group border-2 border-solid border-black/[.4] dark:border-white/[.4] bg-white dark:bg-black dark:text-white group-hover:text-white group-hover:bg-gradient-to-r from-[#115DA0] to-[#06223A] group-hover:border-none grid place-items-center`}
+        class={`disabled:cursor-not-allowed text-black/[.4] h-[30px] w-[30px] rounded-full shadow-md group border-2 border-solid border-black/[.4] dark:border-white/[.4] bg-white dark:bg-black dark:text-white group-hover:text-white group-hover:bg-gradient-to-r from-[#015a62] to-[#06223A] group-hover:border-none grid place-items-center`}
       >
         <Icon icon="material-symbols:search" class="h-[22px] w-[22px]" />
       </button>
       <p
-        class="text-xs group-hover:text-[#015a62] dark:group-hover:text-[#115DA0] text-black/[.4] dark:text-white"
+        class="text-xs group-hover:text-[#015a62] dark:group-hover:text-[#015a62] text-black/[.4] dark:text-white"
       >
         Search
       </p>
@@ -158,7 +158,7 @@
     <!-- <button
         disabled={!features.includes("Grid Fullscreen") || cameraCount === 0} -->
     <button
-      class={`disabled:cursor-not-allowed disabled:opacity-50 text-black/[.4] h-[30px] w-[30px] rounded-full shadow-md group border-2 border-solid border-black/[.4] dark:border-white/[.4] bg-white dark:bg-black dark:text-white group-hover:text-white group-hover:bg-gradient-to-r from-[#115DA0] to-[#06223A] group-hover:border-none grid place-items-center`}
+      class={`disabled:cursor-not-allowed disabled:opacity-50 text-black/[.4] h-[30px] w-[30px] rounded-full shadow-md group border-2 border-solid border-black/[.4] dark:border-white/[.4] bg-white dark:bg-black dark:text-white group-hover:text-white group-hover:bg-[#015a62] dark:group-hover:bg-[#258d9d] group-hover:border-none grid place-items-center`}
       ><Icon icon="material-symbols:fullscreen" class="h-[22px] w-[22px]" />
     </button>
     <p
@@ -170,14 +170,14 @@
   <!--  -->
   <!-- <span class="group flex-col flex items-center justify-center gap-0.5">
       <button
-        class={`disabled:cursor-not-allowed text-black/[.4] h-[30px] w-[30px] rounded-full shadow-md group border-2 border-solid border-black/[.4] dark:border-white/[.4] bg-white dark:bg-black dark:text-white group-hover:text-white group-hover:bg-gradient-to-r from-[#115DA0] to-[#06223A] group-hover:border-none grid place-items-center`}
+        class={`disabled:cursor-not-allowed text-black/[.4] h-[30px] w-[30px] rounded-full shadow-md group border-2 border-solid border-black/[.4] dark:border-white/[.4] bg-white dark:bg-black dark:text-white group-hover:text-white group-hover:bg-gradient-to-r from-[#015a62] to-[#06223A] group-hover:border-none grid place-items-center`}
         ><Icon
           icon="material-symbols:speed-camera-outline-rounded"
           class="h-[22px] w-[22px]"
         />
       </button>
       <p
-        class="text-xs group-hover:text-[#015a62] dark:group-hover:text-[#115DA0] text-black/[.4] dark:text-white"
+        class="text-xs group-hover:text-[#015a62] dark:group-hover:text-[#015a62] text-black/[.4] dark:text-white"
       >
         Add
       </p>
@@ -187,12 +187,12 @@
         disabled={!features.includes("Toggle Alerts")} -->
     <button
       class={cn(
-        $isAlertPanelOpen ? "font-bold bg-gradient-to-r from-[#115DA0] to-[#06223A]" : "border-black/[.4] dark:border-white/[.4] bg-white dark:bg-black",
-        "text-black/[.4] h-[30px] w-[30px] rounded-full shadow-md border-2 border-solid dark:text-white",
-        "group-hover:text-white",
-        "group-hover:bg-gradient-to-r from-[#115DA0] to-[#06223A]",
-        "group-hover:border-none",
-        "grid place-items-center"
+        "text-black/[.4] h-[30px] w-[30px] rounded-full shadow-md border-2 border-solid dark:text-white group-hover:text-white group-hover:bg-[#015a62] dark:group-hover:bg-[#258d9d] group-hover:border-none grid place-items-center", 
+        {
+          "font-bold bg-[#015a62]": $isAlertPanelOpen,
+          "border-black/[.4] dark:border-white/[.4] bg-white dark:bg-black":
+            !$isAlertPanelOpen,
+        }
       )}
       on:click={() => isAlertPanelOpen.update((value) => !value)}
       ><Icon
@@ -209,14 +209,13 @@
   <RegisterFaceDialog>
     <span class="group flex-col flex items-center justify-center gap-0.5">
       <button
-        class={`disabled:cursor-not-allowed text-black/[.4] h-[30px] w-[30px] disabled:opacity-50 rounded-full shadow-md group border-2 border-solid border-black/[.4] dark:border-white/[.4] bg-white dark:bg-black dark:text-white group-hover:text-white group-hover:bg-gradient-to-r from-[#115DA0] to-[#06223A] group-hover:border-none grid place-items-center`}
+        class={`disabled:cursor-not-allowed text-black/[.4] h-[30px] w-[30px] disabled:opacity-50 rounded-full shadow-md group border-2 border-solid border-black/[.4] dark:border-white/[.4] bg-white dark:bg-black dark:text-white group-hover:text-white group-hover:bg-[#015a62] dark:group-hover:bg-[#258d9d] group-hover:border-none grid place-items-center`}
       >
         <Icon
           icon="material-symbols:familiar-face-and-zone"
           class="h-[22px] w-[22px]"
         />
       </button>
-
       <p
         class="text-xs text-black/[.4] dark:text-white"
       >
@@ -233,7 +232,7 @@
     <span class="group flex-col flex items-center justify-center gap-0.5">
       <button
         disabled
-        class={`disabled:cursor-not-allowed disabled:opacity-50 text-black/[.4] h-[30px] w-[30px] rounded-full shadow-md group border-2 border-solid border-black/[.4] dark:border-white/[.4] bg-white dark:bg-black dark:text-white group-hover:text-white group-hover:bg-gradient-to-r from-[#115DA0] to-[#06223A] group-hover:border-none grid place-items-center`}
+        class={`disabled:cursor-not-allowed disabled:opacity-50 text-black/[.4] h-[30px] w-[30px] rounded-full shadow-md group border-2 border-solid border-black/[.4] dark:border-white/[.4] bg-white dark:bg-black dark:text-white group-hover:text-white group-hover:bg-[#015a62] dark:group-hover:bg-[#258d9d] group-hover:border-none grid place-items-center`}
         ><Icon
           icon="material-symbols:screenshot-monitor-outline"
           class="h-[22px] w-[22px]"
@@ -249,7 +248,7 @@
   <span class="group flex-col flex items-center justify-center gap-0.5">
     <button
       disabled
-      class={`disabled:cursor-not-allowed disabled:opacity-50 text-black/[.4] h-[30px] w-[30px] rounded-full shadow-md  border-2 border-solid border-black/[.4] dark:border-white/[.4] bg-white dark:bg-black dark:text-white group-hover:text-white group-hover:bg-gradient-to-r from-[#115DA0] to-[#06223A] group-hover:border-none grid place-items-center`}
+      class={`disabled:cursor-not-allowed disabled:opacity-50 text-black/[.4] h-[30px] w-[30px] rounded-full shadow-md group border-2 border-solid border-black/[.4] dark:border-white/[.4] bg-white dark:bg-black dark:text-white group-hover:text-white group-hover:bg-[#015a62] dark:group-hover:bg-[#258d9d] group-hover:border-none grid place-items-center`}
       ><Icon
         icon="material-symbols:fiber-manual-record-outline"
         class="h-[22px] w-[22px]"
@@ -268,8 +267,8 @@
         recordDropdownOpen = false;
       }}
       class={!snipDropDownOpen
-        ? `disabled:cursor-not-allowed text-black/[.23] h-[40px] w-[40px] rounded-full shadow-md  border-2 border-solid border-black/[.23] dark:border-white/[.23] bg-white dark:bg-black dark:text-white group-hover:text-white group-hover:bg-gradient-to-r from-[#115DA0] to-[#06223A] group-hover:border-none grid place-items-center `
-        : `disabled:cursor-not-allowed relative border-none rounded-full shadow-md h-[40px] w-[40px] text-white bg-[#015a62] grid place-items-center dark:bg-[#115DA0]`}
+        ? `disabled:cursor-not-allowed text-black/[.23] h-[40px] w-[40px] rounded-full shadow-md  border-2 border-solid border-black/[.23] dark:border-white/[.23] bg-white dark:bg-black dark:text-white group-hover:text-white group-hover:bg-[#015a62] dark:group-hover:bg-[#258d9d] group-hover:border-none grid place-items-center `
+        : `disabled:cursor-not-allowed relative border-none rounded-full shadow-md h-[40px] w-[40px] text-white bg-[#015a62] grid place-items-center dark:bg-[#015a62]`}
       ><ImageDown class="h-[22px] w-[22px]" />
       {#if snipDropDownOpen}
         <div
@@ -345,7 +344,7 @@
       <Popover.Trigger let:builder>
         <!-- <Button builders={[builder]} variant="outline">Open</Button> -->
         <button
-          class={`disabled:cursor-not-allowed disabled:opacity-50 text-black/[.4] h-[30px] w-[30px] rounded-full shadow-md group border-2 border-solid border-black/[.4] dark:border-white/[.4] bg-white dark:bg-black dark:text-white group-hover:text-white group-hover:bg-gradient-to-r from-[#115DA0] to-[#06223A] group-hover:border-none grid place-items-center`}
+          class={`disabled:cursor-not-allowed disabled:opacity-50 text-black/[.4] h-[30px] w-[30px] rounded-full shadow-md group border-2 border-solid border-black/[.4] dark:border-white/[.4] bg-white dark:bg-black dark:text-white group-hover:text-white group-hover:bg-[#015a62] dark:group-hover:bg-[#258d9d] group-hover:border-none grid place-items-center`}
           ><Icon
             icon="material-symbols:grid-view-outline-rounded"
             class="h-[22px] w-[22px]"
@@ -366,9 +365,9 @@
           {#each Array.from({ length: 7 }, (_, i) => i - 1).toReversed() as layout}
             <div
               class={cn(
-                "flex flex-col items-center justify-evenly py-4 mt-2 w-1/3 gap-1 hover:border-[#115DA0] hover:border hover:border-solid rounded-md",
+                "flex flex-col items-center justify-evenly py-4 mt-2 w-1/3 gap-1 hover:border-[#015a62] hover:border hover:border-solid rounded-md",
                 selected === layout + 1 &&
-                  "px-2 border border-solid border-[#115DA0] rounded-md text-primary hover:border-[#115DA0] "
+                  "px-2 border border-solid border-[#015a62] rounded-md text-primary hover:border-[#015a62] "
               )}
             >
               <button
@@ -438,11 +437,11 @@
               </button>
             </div>
           {/each}
-          <button
+          <!-- <button
             class={cn(
-              "flex flex-col items-center justify-evenly py-4 mt-2 w-1/3 gap-1 hover:border-[#115DA0] hover:border hover:border-solid rounded-md",
+              "flex flex-col items-center justify-evenly py-4 mt-2 w-1/3 gap-1 hover:border-[#015a62] hover:border hover:border-solid rounded-md",
               selected === 9 &&
-                "px-2 border border-solid border-[#115DA0] rounded-md text-primary"
+                "px-2 border border-solid border-[#015a62] rounded-md text-primary"
             )}
             on:click={(e) => {
               e.preventDefault();
@@ -525,9 +524,9 @@
           </button>
           <button
             class={cn(
-              "flex flex-col items-center justify-evenly py-4 mt-2 w-1/3 gap-1 hover:border-[#115DA0] hover:border hover:border-solid rounded-md",
+              "flex flex-col items-center justify-evenly py-4 mt-2 w-1/3 gap-1 hover:border-[#015a62] hover:border hover:border-solid rounded-md",
               selected === 10 &&
-                "px-2 border border-solid border-[#115DA0] rounded-md text-primary"
+                "px-2 border border-solid border-[#015a62] rounded-md text-primary"
             )}
             on:click={(e) => {
               e.preventDefault();
@@ -632,9 +631,9 @@
           </button>
           <button
             class={cn(
-              "flex flex-col items-center justify-evenly py-4 mt-2 w-1/3 gap-1 hover:border-[#115DA0] hover:border hover:border-solid rounded-md",
+              "flex flex-col items-center justify-evenly py-4 mt-2 w-1/3 gap-1 hover:border-[#015a62] hover:border hover:border-solid rounded-md",
               selected === 7 &&
-                "px-2 border border-solid border-[#115DA0] rounded-md text-primary"
+                "px-2 border border-solid border-[#015a62] rounded-md text-primary"
             )}
             on:click={(e) => {
               e.preventDefault();
@@ -791,9 +790,9 @@
           </button>
           <button
             class={cn(
-              "flex flex-col items-center justify-evenly py-4 mt-2 w-1/3 gap-1 hover:border-[#115DA0] hover:border hover:border-solid rounded-md",
+              "flex flex-col items-center justify-evenly py-4 mt-2 w-1/3 gap-1 hover:border-[#015a62] hover:border hover:border-solid rounded-md",
               selected === 8 &&
-                "px-2 border border-solid border-[#115DA0] rounded-md text-primary"
+                "px-2 border border-solid border-[#015a62] rounded-md text-primary"
             )}
             on:click={(e) => {
               e.preventDefault();
@@ -914,26 +913,11 @@
               </g>
             </svg>
             <span>2 + 8</span>
-          </button>
+          </button> -->
         </div>
       </Popover.Content>
     </Popover.Root>
     <!-- </LayoutDialog> -->
-    <p
-      class="text-xs group-hover:text-[#015a62] dark:group-hover:text-[#657274] text-black/[.4] dark:text-white"
-    >
-      Layouts
-    </p>
+    <p class="text-xs text-black/[.4] dark:text-white">Layouts</p>
   </span>
 </div>
-
-<!-- <aside
-    class="w-20 bg-gray-200 border-l p-2 flex flex-col space-y-4 items-center"
-  >
-    <button class="hover:bg-gray-300 p-2 rounded">🔍</button>
-    <button class="hover:bg-gray-300 p-2 rounded">⛶</button>
-    <button class="hover:bg-gray-300 p-2 rounded">➕</button>
-    <button class="hover:bg-gray-300 p-2 rounded">⚠️</button>
-    <button class="hover:bg-gray-300 p-2 rounded">🔔</button>
-    <button class="hover:bg-gray-300 p-2 rounded">⚙️</button>
-  </aside> -->

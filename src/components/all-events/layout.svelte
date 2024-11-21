@@ -1,23 +1,10 @@
 <script lang="ts">
-  import {
-    X,
-    Expand,
-    Filter,
-    Search,
-    ChevronRight,
-    LucideCalendarDays,
-    FilterIcon,
-    Settings,
-  } from "lucide-svelte";
-  import { Calendar } from "@/components/ui/calendar";
   import EventGrid from "./component/event-grid.svelte";
-  import { allEvents } from "@/stores";
-
 </script>
 
 <section class="right flex-1 flex h-screen w-full justify-between">
   <div class="w-full h-full px-4">
-    <EventGrid data={$allEvents} />
+    <EventGrid />
   </div>
 <!-- 
   <div
