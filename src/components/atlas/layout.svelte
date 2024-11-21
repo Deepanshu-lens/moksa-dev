@@ -14,10 +14,10 @@
   import AddPanel from "@/components/atlas/dialoges/add-panel.svelte";
   import { panels, activePanel, user } from "@/stores";
   import pb from "@/lib/pb";
+  import * as Tabs from "@/components/ui/tabs";
 
   // Variables
   let searchDoor = writable("");
-  let view = "users";
   let showRightPanel = true;
   let serverIp = "";
   let serverPort = "";
@@ -67,64 +67,51 @@
 >
   {#if $panels?.length > 0 && $activePanel}
   <div class="w-full h-[calc(100vh-75px)] relative">
-    <div
-      class="flex items-center justify-center rounded-lg border-black/[.13] border-solid border-[1px] p-1 w-[500px] h-[40px] mx-auto mt-4 dark:border-white/[.13] dark:bg-white/10"
-    >
-      <button
-        on:click={() => (view = "users")}
-        class={`rounded-lg text-xs leading-[18px] px-[10px] py-[3px] font-medium w-1/3 h-full  ${view === "users" ? "text-white bg-brand-foreground dark:bg-black" : "bg-transparent"}`}
-        >Users</button>
-      <button
-        on:click={() => (view = "doors")}
-        class={`rounded-lg text-xs leading-[18px] px-[10px] py-[3px] font-medium w-1/3 h-full ${view === "doors" ? "text-white bg-brand-foreground dark:bg-black" : "bg-transparent"}`}
-        >Doors</button>
-      <button
-        on:click={() => (view = "events")}
-        class={`rounded-lg text-xs leading-[18px] px-[10px] py-[3px] font-medium w-1/3 h-full ${view === "events" ? "text-white bg-brand-foreground dark:bg-black" : "bg-transparent"}`}
-        >Events</button>
-    </div>
-    {#if view === "users"}
-      <div class="px-4">
-        <UserTable data={userList || []} />
-      </div>
-    {/if}
-    {#if view === "doors"}
-      <div class="top-bar p-4 flex justify-between items-center on:cl">
-        <span class="flex items-center justify-between gap-4 py-4 w-full">
-          <span class="flex flex-col gap-1">
-            <span class="flex items-center gap-2">
-              <p class="text-xl font-medium">
-                Doors
-              </p>
-              <p
-                class="text-[#0070FF] bg-[#0070FF]/[.2] text-sm rounded-full px-2 py-.5 font-medium mt-1"
-              >
-                Super Admin
-              </p>
+    <Tabs.Root value="users" class="px-4">
+      <Tabs.List class="flex items-center justify-center gap-4 max-w-[500px] mx-auto mt-4 rounded-lg">
+        <Tabs.Trigger value="users" class="w-1/3 rounded-lg">Users</Tabs.Trigger>
+        <Tabs.Trigger value="doors" class="w-1/3 rounded-lg">Doors</Tabs.Trigger>
+        <Tabs.Trigger value="events" class="w-1/3 rounded-lg">Events</Tabs.Trigger>
+      </Tabs.List>
+      <Tabs.Content value="users">
+          <UserTable data={userList || []} />
+      </Tabs.Content>
+      <Tabs.Content value="doors">
+        <div class="top-bar py-4 flex justify-between items-center">
+          <span class="flex items-center justify-between gap-4 py-4 w-full">
+            <span class="flex flex-col gap-1">
+              <span class="flex items-center gap-2">
+                <p class="text-xl font-medium">
+                  Doors
+                </p>
+                <p
+                  class="text-[#0070FF] bg-[#0070FF]/[.2] text-sm rounded-full px-2 py-.5 font-medium mt-1"
+                >
+                  Super Admin
+                </p>
+              </span>
+            </span>
+            <span class="relative">
+              <Input
+                placeholder="Search"
+                class="w-[250px] pl-8 active:border-brand"
+                on:input={(e:any) => searchDoor.set(e.target.value)}
+              />
+              <Search
+                size={18}
+                class="absolute top-1/2 -translate-y-1/2 left-2"
+              />
             </span>
           </span>
-          <span class="relative">
-            <Input
-              placeholder="Search"
-              class="w-[250px] pl-8 active:border-brand"
-              on:input={(e:any) => searchDoor.set(e.target.value)}
-            />
-            <Search
-              size={18}
-              class="absolute top-1/2 -translate-y-1/2 left-2"
-            />
-          </span>
-        </span>
-      </div>
-      <div class="max-h-[70vh] overflow-y-auto">
-        <Doors data={doorList} search={searchDoor} />
-      </div>
-    {/if}
-    {#if view === "events"}
-      <div class="px-4">
-        <EventTable />
-      </div>
-    {/if}
+        </div>
+        <div class="max-h-[70vh] overflow-y-auto">
+          <Doors data={doorList} search={searchDoor} />
+        </div>
+      </Tabs.Content>
+      <Tabs.Content value="events">
+          <EventTable />
+      </Tabs.Content>
+    </Tabs.Root>
   </div>
   {:else if $panels?.length > 0 && !$activePanel}
     <div
