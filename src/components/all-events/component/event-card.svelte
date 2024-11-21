@@ -7,7 +7,7 @@
   <div
     class="bg-transparent rounded-md p-2 flex flex-col gap-3 border border-[#e4e4e4] dark:border-[#333] scale-100 w-full"
   >
-    <p class="text-sm font-semibold">{event.title}</p>
+    <p class="text-sm font-semibold hover:underline cursor-pointer">{event.title}</p>
     <p class="text-xs text-[#727272] dark:text-slate-300">{event.created}</p>
     <div class="flex items-center justify-between">
       <img
