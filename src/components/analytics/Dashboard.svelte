@@ -461,17 +461,14 @@
   }
 
   function updateBarChart(theftD) {
-    console.log($dateRange);
-    console.log("first");
+    console.log("first", theftD);
     if (barChart) {
-      console.log("first");
-      console.log(theftD);
-      const labels = theftD?.data.map((item) =>
+      const labels = theftD?.data?.map((item) =>
         $dateRange === "7 Days"
-          ? item.day_of_week.trim()
+          ? item?.day_of_week?.trim()
           : $dateRange === "12 Months"
-            ? item.month_name.trim()
-            : item.date.trim(),
+            ? item?.month_name?.trim()
+            : item?.date?.trim(),
       );
       const theftDetectedData = theftD?.data.map((item) =>
         parseInt(item.theft_detected),

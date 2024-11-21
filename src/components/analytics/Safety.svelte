@@ -336,13 +336,14 @@
     fileName: string,
     excludeKeys: string[] = [],
   ): void {
+    console.log(arr, "arr");
     // Extract the headers
-    const headers = Object.keys(arr[0])
+    const headers = Object.keys(arr?.data)
       .filter((key) => !excludeKeys.length || !excludeKeys.includes(key)) // Filter out excluded keys
       .join(",");
     // Extract the data rows with value cleaning
-    const rows = arr
-      .map((obj) => {
+    const rows = arr?.data
+      ?.map((obj) => {
         return Object.keys(obj)
           .filter((key) => !excludeKeys.length || !excludeKeys.includes(key)) // Filter out excluded keys
           .map((key) => cleanValue(obj[key]))
