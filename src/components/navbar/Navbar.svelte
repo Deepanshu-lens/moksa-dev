@@ -38,10 +38,10 @@
             text: "Live",
             href: `/session/${sessionId}`,
           },
-          {
-            text: "Playback",
-            href: `/playback/${sessionId}`,
-          },
+          // {
+          //   text: "Playback",
+          //   href: `/playback/${sessionId}`,
+          // },
           {
             text: "Settings",
             href: `/settings/${sessionId}`,
@@ -53,10 +53,10 @@
               text: "Live",
               href: `/session/${sessionId}`,
             },
-            {
-              text: "Playback",
-              href: `/playback/${sessionId}`,
-            },
+            // {
+            //   text: "Playback",
+            //   href: `/playback/${sessionId}`,
+            // },
             {
               text: "Analytics",
               href: `/analytics/${sessionId}`,
@@ -71,10 +71,10 @@
               text: "Live",
               href: `/session/${sessionId}`,
             },
-            {
-              text: "Playback",
-              href: `/playback/${sessionId}`,
-            },
+            // {
+            //   text: "Playback",
+            //   href: `/playback/${sessionId}`,
+            // },
             {
               text: "Analytics",
               href: `/analytics/${sessionId}`,
@@ -94,10 +94,10 @@
       text: "Live",
       href: `/session/${sessionId}`,
     },
-    {
-      text: "Playback",
-      href: `/playback/${sessionId}`,
-    },
+    // {
+    //   text: "Playback",
+    //   href: `/playback/${sessionId}`,
+    // },
     {
       text: "Events",
       href: `/events/${sessionId}`,
