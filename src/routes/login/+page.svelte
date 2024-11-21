@@ -88,7 +88,7 @@
           autoComplete="off"
           id="email"
           type="email"
-          placeholder="Enter Email"
+          placeholder="Email"
           name="email"
           required
         />
