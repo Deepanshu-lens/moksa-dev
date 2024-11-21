@@ -2,10 +2,8 @@
   import { Loader2 } from "lucide-svelte";
   import EventCard from "./event-card.svelte";
   import EventHeading from "./event-heading.svelte";
-  import { isEventsLoading, allEvents, totalAllEvent, selectedNode } from "@/stores";
+  import { isEventsLoading, allEvents, totalAllEvent, selectedNode, personCount } from "@/stores";
   import pb from "@/lib/pb";
-
-  export let data; 
 
   let currentPage = 1; 
   const eventsPerPage = 10; 
@@ -38,35 +36,70 @@
     }
   };
 
+  // Mapping of event types to their headers and colors
+  const eventTypes = [
+    { type: 'person', heading: 'Person Detection', color: '#FF4764' },
+    { type: 'fire', heading: 'Fire Detection', color: '#FF5733' },
+    { type: 'face', heading: 'Face Detection', color: '#24DA8E' },
+    // { type: 'heatmap', heading: 'Heatmap Detection', color: '#FFB347' },
+    { type: 'alpr', heading: 'Vehicle Detection', color: '#8A2BE2' }
+  ];
+
+  // Function to filter events by type
+  const filterEventsByType = (type: string) => {
+    return $allEvents.filter(event => event.type === type);
+  };
+  $:console.log($personCount, "person Count");
 </script>
 
-<section class="grid w-full h-full grid-cols-4 gap-x-8 px-4 py-4">
+<section class="grid w-full h-full grid-cols-5 gap-x-8 px-4 py-4">
   {#if $isEventsLoading && currentPage === 1}
-    <div class="col-span-4 w-full flex justify-center items-center h-full gap-2">
+    <div class="col-span-5 w-full flex justify-center items-center h-full gap-2">
       <Loader2 class="animate-spin" />
       Fetching Events...
     </div>
   {:else}
-    <div class="col-span-4 h-full w-full flex flex-col gap-4">
+    {#each eventTypes as { type, heading, color }}
+      <div class="col-span-1 h-full w-full flex flex-col gap-4">
+        <EventHeading {heading} color={color} />
+        <div
+          on:scroll={handleScroll}
+          class="event-grid-container w-full flex flex-col gap-2 overflow-y-auto max-h-[calc(100vh-175px)] h-full"
+        >
+          {#each filterEventsByType(type) as event}
+            <EventCard {event} />
+          {:else}
+            <div class="w-full flex justify-center items-center h-10 mt-2 text-gray-500">
+              No {heading.toLowerCase()} events available.
+            </div>
+          {/each}
+        </div>
+      </div>
+    {/each}
+
+    <!-- sepearate heatmap -->
+    <div class="col-span-1 h-full w-full flex flex-col gap-4">
       <EventHeading
-        heading={"Person Detection"}
-        color={"#FF4764"}
+        heading={"Heatmap"}
+        color={"#FFB347"}
       />
       <div
-        on:scroll={handleScroll}
-        id="event-grid-container"
-        class="event-grid-container w-full flex flex-col gap-2 overflow-y-auto max-h-[calc(100vh-175px)] h-full"
+        class="w-full flex flex-col gap-2 overflow-y-auto max-h-[calc(100vh-175px)] h-full"
       >
-        {#each data as event}
-          <EventCard {event} />
+        {#each $personCount as count}
+         <img src={"data:image/jpeg;base64," + count.image} alt="heatmap" loading="lazy" class="aspect-video scale-100">
+         {:else}
+            <div class="w-full flex justify-center items-center h-10 mt-2 text-gray-500">
+              No Heatmap available.
+            </div>
         {/each}
-        {#if isLoadingMore}
-          <div class="w-full flex justify-center items-center h-10 mt-2 gap-2">
-            <Loader2 class="animate-spin" />
-            Loading more events...
-          </div>
-        {/if}
       </div>
     </div>
+    {#if isLoadingMore}
+      <div class="col-span-5 w-full flex justify-center items-center h-10 mt-2 gap-2">
+        <Loader2 class="animate-spin" />
+        Loading more events...
+      </div>
+    {/if}
   {/if}
 </section>

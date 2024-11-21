@@ -17,7 +17,7 @@
     </span>
     <p class="text-[#2c2c2c] dark:text-slate-200 font-bold">{heading}</p>
     <p class="text-[#727272] dark:text-slate-400 text-sm font-medium">
-      {start} - {end}
+      {start} - 24 Hrs
     </p>
   </div>
   

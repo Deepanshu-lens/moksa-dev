@@ -50,8 +50,8 @@
 
   // Styles
   const baseButtonClass = "h-[40px] w-[40px] rounded-full grid place-items-center";
-  const inactiveButtonClass = `text-[#727272]/90 ${baseButtonClass} border border-solid border-[#727272]/90 dark:border-white/[.23] bg-white dark:bg-black dark:text-white group-hover:text-white group-hover:bg-[linear-gradient(90deg,#115DA0_0%,#06223A_100%)] dark:group-hover:bg-[#06223A] group-hover:border-none`;
-  const activeButtonClass = `relative border-none ${baseButtonClass} text-white bg-[linear-gradient(90deg,#115DA0_0%,#06223A_100%)] dark:bg-[#06223A]`;
+  const inactiveButtonClass = `text-[#727272]/90 ${baseButtonClass} border border-solid border-[#727272]/90 dark:border-white/[.23] bg-white dark:bg-black dark:text-white group-hover:text-white group-hover:bg-[linear-gradient(90deg,#113046_0%,#2B6365_100%)] dark:group-hover:bg-[#258D9D] group-hover:border-none`;
+  const activeButtonClass = `relative border-none ${baseButtonClass} text-white bg-[linear-gradient(90deg,#113046_0%,#2B6365_100%)] dark:bg-[#258d9d]`;
 </script>
 <div class="block lg:hidden">
   <PageBarMobile2 />

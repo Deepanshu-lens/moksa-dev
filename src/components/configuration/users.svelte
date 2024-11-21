@@ -189,7 +189,7 @@
             {item.label}
           </span>
           <span
-            class="h-[3px] rounded-full bg-[#115DA0] w-full absolute left-0 -bottom-4"
+            class="h-[3px] rounded-full bg-[#015A62] w-full absolute left-0 -bottom-4"
           ></span>
         </div>
       {:else}
@@ -233,12 +233,12 @@
         >
           <button
             on:click={() => (permissionTab = "permissions")}
-            class={`rounded-lg text-xs leading-[18px] px-[10px] py-[3px] font-medium w-full h-full ${permissionTab === "permissions" ? "text-white bg-[#115DA0]" : "bg-transparent"}`}
+            class={`rounded-lg text-xs leading-[18px] px-[10px] py-[3px] font-medium w-full h-full ${permissionTab === "permissions" ? "text-white bg-[#015A62]" : "bg-transparent"}`}
             >Permissions</button
           >
           <button
             on:click={() => (permissionTab = "nodes")}
-            class={`rounded-lg text-xs leading-[18px] px-[10px] py-[3px] font-medium w-full h-full ${permissionTab === "nodes" ? "text-white bg-[#115DA0]" : "bg-transparent"}`}
+            class={`rounded-lg text-xs leading-[18px] px-[10px] py-[3px] font-medium w-full h-full ${permissionTab === "nodes" ? "text-white bg-[#015A62]" : "bg-transparent"}`}
             >Nodes</button
           >
         </span>

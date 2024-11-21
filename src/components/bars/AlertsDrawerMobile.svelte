@@ -29,7 +29,7 @@
               class="flex flex-col gap-3 overflow-y-auto max-h-[calc(100vh-3rem)] text-xs overflow-visible"
             >
               {#if $liveEvents.length > 0}
-                {#each $liveEvents.reverse() as event}
+                {#each $liveEvents as event}
                   <!-- svelte-ignore a11y_click_events_have_key_events -->
                   <!-- svelte-ignore a11y_no_static_element_interactions -->
                   <div

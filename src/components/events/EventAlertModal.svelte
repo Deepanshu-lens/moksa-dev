@@ -1,6 +1,7 @@
 <script lang="ts">
   import * as Dialog from "@/components/ui/dialog";
   import type { Event } from "@/types";
+  import * as Tabs from "@/components/ui/tabs";
   export let event: Event;
   export let onClose: () => void;
   let modalOpen = true;
@@ -16,12 +17,24 @@
       </Dialog.Title>
     </Dialog.Header>
 
-    <!-- Large Image -->
-    <img
-      src={"data:image/jpeg;base64," + event.frameImage}
-      alt={event.title || "Event Image"}
-      class="w-full h-auto rounded-lg object-cover mb-4"
-    />
+    <Tabs.Root class="w-full">
+      <Tabs.List class="w-full">
+        <Tabs.Trigger value="images" class="w-1/2">Images</Tabs.Trigger>
+        <Tabs.Trigger value="videos" class="w-1/2">Videos</Tabs.Trigger>
+      </Tabs.List>
+      <Tabs.Content value="images">
+        <!-- Large Image -->
+        <img
+          src={"data:image/jpeg;base64," + event.frameImage}
+          alt={event.title || "Event Image"}
+          class="w-full h-auto rounded-lg object-cover mb-4"
+        />
+      </Tabs.Content>
+      <Tabs.Content value="videos">
+        <!-- svelte-ignore a11y_media_has_caption -->
+        <video src={event.videoPath} class="w-full h-auto rounded-lg object-cover mb-4" controls></video>
+      </Tabs.Content>
+    </Tabs.Root>
 
     <!-- Event Details -->
     <div class="space-y-2">

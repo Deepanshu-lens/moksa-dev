@@ -58,16 +58,14 @@
       .collection("node")
       .delete($nodes.find((n) => n.id === $selectedNode)?.id);
   };
-
-  $: console.log(action, "action here");
 </script>
 
 {#if action === "add"}
   <Dialog.Root bind:open={modalOpen}>
     <Dialog.Trigger><slot /></Dialog.Trigger>
-    <Dialog.Content class="sm:max-w-[48rem] h-[90vh] overflow-auto">
+    <Dialog.Content class="max-w-[95vw] md:max-w-[48rem] h-[90vh] overflow-auto">
       <Dialog.Header>
-        <Dialog.Title class="border-b pb-4"
+        <Dialog.Title class="border-b pb-4 text-left"
           >{action.charAt(0).toUpperCase() + action.slice(1)} Node</Dialog.Title
         >
       </Dialog.Header>
@@ -104,7 +102,7 @@
                 <Input id="picture" type="file" />
               </div>
             </Card.Content>
-            <Card.Footer class="flex items-center justify-end w-full">
+            <Card.Footer class="flex items-end justify-end w-full">
               <Button
                 type="submit"
                 variant="brand"
@@ -185,9 +183,9 @@
 {:else if action === "edit"}
   <Dialog.Root bind:open={modalOpen}>
     <Dialog.Trigger><slot /></Dialog.Trigger>
-    <Dialog.Content class="sm:max-w-[48rem]">
+    <Dialog.Content class="max-w-[95vw] md:max-w-[48rem]">
       <Dialog.Header>
-        <Dialog.Title class="border-b pb-4">Edit Node</Dialog.Title>
+        <Dialog.Title class="border-b pb-4 text-left">Edit Node</Dialog.Title>
       </Dialog.Header>
       <div class="space-y-1">
         <Label for="nodeName">Name</Label>
@@ -197,7 +195,7 @@
           bind:value={nodeName}
         />
       </div>
-      <Dialog.Footer class="flex items-center justify-end w-full">
+      <Dialog.Footer class="flex items-end justify-center w-full">
         <Button
           type="submit"
           variant="brand"
