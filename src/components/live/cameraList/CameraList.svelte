@@ -40,7 +40,7 @@
   }
 </script>
 
-<section class="border-l overflow-y-auto">
+<section class="border-l overflow-y-auto w-full">
   <div class="w-full p-2 px-4">
     <div class={`flex justify-between items-center gap-4 w-full`}>
       <NodeSelection />
