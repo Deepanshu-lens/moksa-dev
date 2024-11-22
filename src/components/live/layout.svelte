@@ -271,4 +271,6 @@ style="height: calc(100vh - 3rem);"
   </Resizable.Pane>
 </Resizable.PaneGroup>
 
-<SidePannel />
+<div class="hidden lg:block">
+  <SidePannel />
+</div>

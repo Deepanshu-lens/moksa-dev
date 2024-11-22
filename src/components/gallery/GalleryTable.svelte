@@ -5,10 +5,50 @@
 
   import TimeAgo from "javascript-time-ago";
   import en from "javascript-time-ago/locale/en";
+  import { writable } from "svelte/store";
+  import { onMount } from "svelte";
   TimeAgo.addLocale(en);
   const timeAgo = new TimeAgo("en-US");
 
   export let data: Gallery[];
+
+  let tableData = writable();
+
+  onMount(() => {
+    tableData.set(data);
+  });
+
+  let sortKey = "sno"; // Default sort key
+  let sortOrder = "desc"; // Default sort order
+
+  function sortData(key: string) {
+    let temp = [...$tableData];
+    // Toggle sort order if the same key is clicked
+    if (sortKey === key) {
+      sortOrder = sortOrder === "asc" ? "desc" : "asc";
+    } else {
+      sortKey = key;
+      sortOrder = "asc"; // Reset to ascending order for new key
+    }
+
+    // Sort the events based on the current sortKey and sortOrder
+    temp.sort((a, b) => {
+      let comparison = -1;
+
+      if (key === "created" || key === "updated") {
+        // Compare dates
+        const dateA = new Date(a[sortKey]);
+        const dateB = new Date(b[sortKey]);
+        comparison = dateA.getTime() - dateB.getTime();
+      } else {
+        // Compare other fields (string or number)
+        comparison = a[sortKey] > b[sortKey] ? 1 : -1;
+      }
+      return sortOrder === "asc" ? comparison : -comparison;
+    });
+
+    tableData?.set(temp);
+  }
 </script>
 
 <div class="max-h-[calc(100vh-160px)] h-full w-full overflow-y-scroll">
@@ -20,37 +60,40 @@
         <Table.Head
           class="text-[#727272] w-full h-full flex items-center justify-center"
         >
-          <span class="flex items-center gap-1">
-            S.No
-            <ChevronsUpDown class="scale-75" />
-          </span>
+          <span class="flex items-center gap-1"> S.No </span>
         </Table.Head>
         <Table.Head
           class="text-[#727272] w-full h-full flex items-center justify-center"
         >
           <span class="flex items-center gap-1">
-            Name <ChevronsUpDown class="scale-75" />
+            Name
+            <button on:click={() => sortData("name")}>
+              <ChevronsUpDown class="scale-75" />
+            </button>
           </span>
         </Table.Head>
         <Table.Head
           class="text-[#727272] w-full h-full flex items-center justify-center"
         >
-          <span class="flex items-center gap-1">
-            Images <ChevronsUpDown class="scale-75" />
-          </span>
+          <span class="flex items-center gap-1"> Images </span>
         </Table.Head>
         <Table.Head
           class="text-[#727272] w-full h-full flex items-center justify-center"
         >
           <span class="flex items-center gap-1">
-            Created on <ChevronsUpDown class="scale-75" />
+            Created on
+            <button on:click={() => sortData("created")}>
+              <ChevronsUpDown class="scale-75" />
+            </button>
           </span></Table.Head
         >
         <Table.Head
           class="text-[#727272] w-full h-full flex items-center justify-center"
         >
           <span class="flex items-center gap-1">
-            Last Updated <ChevronsUpDown class="scale-75" />
+            Last Updated <button on:click={() => sortData("created")}>
+              <ChevronsUpDown class="scale-75" />
+            </button>
           </span></Table.Head
         >
         <Table.Head
@@ -60,8 +103,8 @@
       </Table.Row>
     </Table.Header>
     <Table.Body>
-      {#if data && data.length > 0}
-        {#each data as person, index}
+      {#if $tableData && $tableData?.length > 0}
+        {#each $tableData as person, index}
           <Table.Row
             class="bg-transparent flex items-center justify-between mt-4 rounded-lg  border-2 border-solid border-[#e4e4e4]"
           >
@@ -72,14 +115,14 @@
             </Table.Cell>
             <Table.Cell
               class="text-[#727272] w-full h-full flex items-center justify-center text-sm"
-              ><span>{person.name}</span></Table.Cell
+              ><span>{person?.name}</span></Table.Cell
             >
             <Table.Cell
               class="text-[#727272] w-full h-full flex items-center justify-center text-sm"
             >
               <span class="flex -space-x-2 overflow-hidden my-2">
                 {#if person?.images?.length > 0}
-                  {#each person.images as img}
+                  {#each person?.images as img}
                     <img
                       class={`inline-block h-10 w-10 rounded-full ring-2 ring-white 3xl:w-16 3xl:h-16`}
                       src={"data:image/jpeg;base64," + img}
@@ -91,7 +134,13 @@
             >
             <Table.Cell
               class="text-[#727272] w-full h-full flex items-center justify-center text-sm"
-              ><span>{new Date(person?.created).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', hour12: true })}</span></Table.Cell
+              ><span
+                >{new Date(person?.created).toLocaleString("en-US", {
+                  dateStyle: "medium",
+                  timeStyle: "short",
+                  hour12: true,
+                })}</span
+              ></Table.Cell
             >
             <Table.Cell
               class="text-[#727272] w-full h-full flex items-center justify-center text-sm"
@@ -106,7 +155,7 @@
                 class="text-[#D28E3D] bg-[#D28E3D] bg-opacity-15 font-medium text-sm rounded-xl flex items-center p-2 gap-2"
               >
                 <!-- svelte-ignore element_invalid_self_closing_tag -->
-                <span class="h-2 w-2 rounded-full bg-[#D28E3D]" /> update now
+                <span class="h-2 w-2 rounded-full bg-[#D28E3D]" /> updated now
               </button>
             </Table.Cell>
           </Table.Row>
