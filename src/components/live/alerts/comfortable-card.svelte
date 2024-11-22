@@ -30,13 +30,13 @@
 >
   <Card.Content class=" h-full w-full flex items-start px-2 py-1 gap-4">
     <img
-      src={"data:image/jpeg;base64," + event.images}
+      src={"data:image/jpeg;base64," + event.images[0]}
       alt="profile"
       class=" h-16 w-16 aspect-square object-contain rounded-md my-auto"
       />
     <span class="flex flex-col gap-1.5 w-full">
       <span class="font-semibold">{event.name}</span>
-      <!-- <div class="flex -space-x-2 overflow-hidden">
+      <div class="flex -space-x-2 overflow-hidden">
         {#each event.images as galleryImage}
           <img
             class="inline-block h-6 w-6 rounded-full ring-2 ring-black 3xl:w-16 3xl:h-16"
@@ -44,7 +44,7 @@
             alt=""
           />
         {/each}
-      </div> -->
+      </div>
       <!-- svelte-ignore element_invalid_self_closing_tag -->
       <span
         class="block w-full h-[1px] bg-[#1c1c1c] dark:bg-slate-50 bg-opacity-10"

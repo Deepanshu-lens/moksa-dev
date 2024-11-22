@@ -4,7 +4,7 @@
   import Icon from "@iconify/svelte";
   import { isAlertPanelOpen } from "@/stores";
   import CameraList from "@/components/live/cameraList/CameraList.svelte";
-  import { nodes, liveEvents, faceEvents } from "@/stores";
+  import { nodes, liveEvents, gallery } from "@/stores";
   import SidePannel from "./side-pannel.svelte";
   import EventAlertModal from "../events/EventAlertModal.svelte";
   import * as Tabs from "@/components/ui/tabs";
@@ -36,6 +36,8 @@
   function closeEventModal() {
     selectedEvent = null;
   }
+
+  $:console.log($gallery)
 </script>
 
 
@@ -97,17 +99,25 @@ style="height: calc(100vh - 3rem);"
                         <Accordion.Item value="open">
                           <Accordion.Trigger>Whitelisted</Accordion.Trigger>
                           <Accordion.Content>
-                            {#each $faceEvents.filter((event: any) => !event.blackList) as event}
-                              <ComfortableCard {event} />
-                            {/each}
+                            <div class="flex flex-col gap-4 max-h-[calc(100vh-22rem)] overflow-y-auto">
+                              {#each $gallery.filter((event: any) => !event.blackList) as event}
+                                <ComfortableCard {event} />
+                              {:else}
+                                <div class="p-3">No whitelisted faces</div>
+                              {/each}
+                            </div>
                           </Accordion.Content>
                         </Accordion.Item>
                         <Accordion.Item value="item-2">
                           <Accordion.Trigger>BlackListed</Accordion.Trigger>
                           <Accordion.Content>
-                            {#each $faceEvents.filter((event: any) => event.blacklist) as event}
-                              <ComfortableCard {event} />
-                            {/each}
+                            <div class="flex flex-col gap-4 max-h-[calc(100vh-22rem)] overflow-y-auto">
+                              {#each $gallery.filter((event: any) => event.blackList) as event}
+                                <ComfortableCard {event} />
+                              {:else}
+                                <div class="p-3">No blacklisted faces</div>
+                              {/each}
+                            </div>
                           </Accordion.Content>
                         </Accordion.Item>
                       </Accordion.Root>

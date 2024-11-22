@@ -3,8 +3,8 @@ import Layout from "@/layouts/Layout.astro";
 import EventsManager from "@/managers/events.svelte";
 import PersonCountManager from "@/managers/person-count.svelte";
 import Camera from "@/managers/camera.svelte";
-import FaceEventsManager from "@/managers/events-face.svelte";
 import PageBarMobile from "@/components/bars/PageBarMobile.astro";
+import GalleryPage from "@/managers/gallery.svelte";
 import LiveLayout from "@/components/live/layout.svelte";
 const STREAM_URL = import.meta.env.STREAM_URL;
 
@@ -19,7 +19,7 @@ const STREAM_URL = import.meta.env.STREAM_URL;
   <div class="flex flex-row">
     <EventsManager client:only="svelte" />
     <PersonCountManager client:only="svelte" />
-    <FaceEventsManager client:only="svelte" />
+    <GalleryPage client:only="svelte" />
     <LiveLayout client:only="svelte" {STREAM_URL} />
   </div>
 </Layout>
