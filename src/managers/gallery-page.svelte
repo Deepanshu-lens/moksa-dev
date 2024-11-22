@@ -1,9 +1,10 @@
 <script>
-  import { ChevronLeft, Loader2 } from "lucide-svelte";
+  import { ChevronLeft, Loader2, ScanFace } from "lucide-svelte";
   import GalleryView from "../components/gallery/mobile/GalleryView.svelte";
   import GalleryPanel from "../components/gallery/GalleryPanel.svelte";
   import { gallery, isGalleryLoading } from "@/stores/gallery";
   import PageBarMobile2 from "@/components/bars/PageBarMobile2.svelte";
+  import RegisterMobileDialog from "@/components/live/faceRegister/register-mobile-dialog.svelte";
 </script>
 
 <!-- desk -->
@@ -20,14 +21,26 @@
 
 <!-- mob -->
 <div class="block sm:hidden">
-  <PageBarMobile2 location="top"/>
+  <PageBarMobile2 location="top" />
   <div class="flex flex-col w-full bg-[#f5f6f7] z-10 relative h-[100vh]">
     <div class="top-config w-full">
-      <button class="flex items-center justify-start text-black/[.7] pt-4">
+      <button class="flex items-center justify-start text-black/[.7] pt-2">
         <ChevronLeft class="h-[30px] w-[30px]" />
         <p class="text-lg font-semibold">Gallery</p>
       </button>
+
+      <div class="flex items-center justify-between p-2">
+        <h3 class="text-lg font-semibold">Add new Person:</h3>
+        <RegisterMobileDialog>
+          <button
+            class="flex items-center justify-center gap-2 cursor-pointer relative hover:text-primary text-xl"
+          >
+            <ScanFace size={18} />
+            Register
+          </button>
+        </RegisterMobileDialog>
+      </div>
     </div>
-    <GalleryView data={$gallery} />
+    <GalleryPanel gallery={$gallery} />
   </div>
 </div>

@@ -22,7 +22,7 @@
   <div class="flex items-start justify-between w-full h-[10vh] border-b">
     <div class="flex items-center justify-between w-full">
       <img
-        src="/images/Cielo_logo.svg"
+        src="/images/view_logo.svg"
         alt="Cieloview Logo"
         class="h-8 w-auto"
       />

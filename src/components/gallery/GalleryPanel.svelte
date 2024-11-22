@@ -15,7 +15,7 @@
 
 <section class="w-full h-full flex flex-row-reverse">
   <div
-    class="flex flex-col gap-4 items-center justify-center px-4 h-[calc(100vh-75px)] my-auto"
+    class="flex-col gap-4 items-center justify-center px-4 h-[calc(100vh-75px)] my-auto hidden md:flex"
   >
     <RegisterFaceDialog>
       <span class="group flex-col flex items-center justify-center gap-0.5">
@@ -75,13 +75,15 @@
       </p>
     </span>
   </div>
-  <div class="flex flex-col px-8 pt-8 h-full w-full gap-4">
-    <h1 class="text-2xl font-semibold text-black/[.87] dark:text-white/[.87]">
+  <div class="flex flex-col px-8 lg:pt-8 pt-3 h-full w-full gap-4">
+    <h1
+      class="text-2xl font-semibold text-black/[.87] dark:text-white/[.87] hidden lg:block"
+    >
       Gallery / Registered People
     </h1>
     {#if view === 1}
       <div
-        class="flex flex-wrap gap-6 h-full w-full overflow-y-scroll pb-10 pt-3"
+        class="flex flex-wrap gap-3 lg:gap-6 lg:h-full h-[60vh] w-full overflow-y-scroll pb-10 pt-3"
       >
         {#if gallery && gallery?.length > 0}
           {#each gallery as person}
@@ -97,7 +99,11 @@
               </span>
               <span class="text-xs mt-2">
                 <span class="font-medium"> Created at: </span>
-                {new Date(person?.created).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', hour12: true })}
+                {new Date(person?.created).toLocaleString("en-US", {
+                  dateStyle: "medium",
+                  timeStyle: "short",
+                  hour12: true,
+                })}
               </span>
               <div class="flex -space-x-2 overflow-hidden my-2">
                 {#each person?.images as galleryImage}
