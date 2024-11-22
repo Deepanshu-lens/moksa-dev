@@ -36,6 +36,7 @@
         "fullscreenchange",
         function handleFullscreenChange() {
           if (!document.fullscreenElement) {
+            isFullScreen.set(false);
             // Reset the data-url when exiting fullscreen
             // videoElement.changeURL(`wss://vms.lenscorp.cloud/api/ws?src=${id}`);
 
@@ -56,8 +57,6 @@
       isFullScreen.set(false);
     }
   }
-
-  $: console.log($isFullScreen, "full screen element");
 
   onMount(() => {
     // Ensure VideoStream is defined before using it
