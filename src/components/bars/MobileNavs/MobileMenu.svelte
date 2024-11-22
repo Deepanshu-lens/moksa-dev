@@ -17,7 +17,6 @@
 
   // selected screen ss
   const handleSingleSS = async () => {
-    console.log("clicked");
     if ($selectedCamera) {
       const element = document.getElementById(`${$selectedCamera}`);
       if (element) {

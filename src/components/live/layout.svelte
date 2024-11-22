@@ -152,7 +152,7 @@ style="height: calc(100vh - 3rem);"
                                       class="flex flex-col items-start gap-0"
                                     >
                                       <span
-                                        class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-sm"
+                                        class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-xs"
                                         >Confidence: {Math.round(
                                           event?.score * 100
                                         )} %</span
