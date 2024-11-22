@@ -28,7 +28,6 @@
 
   // Handle pagination navigation
   const nextPage = () => {
-    console.log("calling next page");
     currentPage.update((page) => {
       if ((page + 1) * MAX_CAMERAS_PER_PAGE < $totalCameras) {
         fetchCameras(page + 1);
@@ -39,12 +38,6 @@
   };
 
   const goToPage = (page: any) => {
-    console.log(
-      "calling got page",
-      page,
-      page * MAX_CAMERAS_PER_PAGE,
-      $totalCameras
-    );
     currentPage.update((current) => {
       if (page >= 0 ) {
         fetchCameras(page);
@@ -55,7 +48,6 @@
   };
 
   const prevPage = () => {
-    console.log("calling prev page");
     currentPage.update((page) => {
       if (page > 0) {
         fetchCameras(page - 1);
@@ -73,7 +65,7 @@
 
 <Pagination.Root
   count={$totalCameras}
-  perPage={MAX_CAMERAS_PER_PAGE}
+  perPage={MAX_CAMERAS_PER_PAGE || 9}
   siblingCount={1}
   let:pages
   let:currentPage
