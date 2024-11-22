@@ -418,14 +418,75 @@
 
   let previousNode: string | null = null;
   $: if ($selectedNode && $selectedNode !== previousNode) {
-    console.log("Getting previous cams", $selectedNode);
     isLoading.set(true);
     getCameras($selectedNode).then((cameras) => {
-      console.log("c", cameras);
       availableChannels.set(cameras);
       isLoading.set(false);
       previousNode = $selectedNode;
     });
+  }
+
+  function toggleFullscreen(index: number) {
+    const video = videoRefs[index];
+    if (video.requestFullscreen) {
+      video.requestFullscreen();
+    } else if ((video as any).webkitRequestFullscreen) { /* Safari */
+      (video as any).webkitRequestFullscreen();
+    } else if ((video as any).msRequestFullscreen) { /* IE11 */
+      (video as any).msRequestFullscreen();
+    }
+  }
+
+  // for double click on video to toggle fullscreen
+  $: videoRefs.forEach((video, index) => {
+    video.addEventListener('dblclick', () => toggleFullscreen(index));
+  });
+
+  let scale = 1;
+  let translateX = 0;
+  let translateY = 0;
+  let isPanning = false;
+  let startX = 0;
+  let startY = 0;
+  let panSpeed = 0.3; // Adjust this value to control pan speed
+
+  function handleWheel(event: WheelEvent, index: number) {
+    event.preventDefault();
+    const video = videoRefs[index];
+    const delta = event.deltaY > 0 ? -0.1 : 0.1;
+    scale = Math.max(1, scale + delta);
+
+    if (scale === 1) {
+        // Reset translation when zooming out completely
+        translateX = 0;
+        translateY = 0;
+    }
+
+    updateTransform(video);
+  }
+
+  function handleMouseDown(event: MouseEvent) {
+    if (scale > 1) { // Allow panning only when zoomed in
+      isPanning = true;
+      startX = event.clientX - translateX;
+      startY = event.clientY - translateY;
+    }
+  }
+
+  function handleMouseMove(event: MouseEvent) {
+    if (!isPanning || scale <= 1) return; // Prevent panning when not zoomed in
+    translateX = (event.clientX - startX) * panSpeed;
+    translateY = (event.clientY - startY) * panSpeed;
+    updateTransform(event.target as HTMLVideoElement);
+  }
+
+  function handleMouseUp() {
+    isPanning = false;
+  }
+
+  function updateTransform(video: HTMLVideoElement) {
+    video.style.transform = `scale(${scale}) translate(${translateX}px, ${translateY}px)`;
+    video.style.zIndex = scale > 1 ? '10' : '1'; // Adjust z-index when zoomed in
   }
 </script>
 
@@ -456,13 +517,18 @@
         {#each videoUrls.responses as video, index}
           <video
             bind:this={videoRefs[index]}
-            class="w-full h-full"
+            class="w-full h-full zoomable-video"
             src={video}
             autoplay
             muted
             playsinline
             on:play={handlePlayed}
             on:ended={handleEnded}
+            on:wheel={(e) => handleWheel(e, index)}
+            on:mousedown={handleMouseDown}
+            on:mousemove={handleMouseMove}
+            on:mouseup={handleMouseUp}
+            on:mouseleave={handleMouseUp}
           ></video>
         {/each}
       {:else}
@@ -564,6 +630,17 @@
                   />
                 {/if}
               </button>
+              <button on:click={() => toggleFullscreen(index)}>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-4 w-4 cursor-pointer"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v6h6M4 20v-6h6M20 4v6h-6M20 20v-6h-6" />
+                </svg>
+              </button>
             </div>
             <div
               class="bg-white/10 w-[89%] 2xl:w-[90%] h-[95%] p-0 m-0 flex gap-1 pr-6 2xl:pr-7 relative"
@@ -603,10 +680,10 @@
   >
     <button
       on:click={() => (showRightPanel = !showRightPanel)}
-      class={`absolute ${showRightPanel ? "-left-6" : "-left-6"} py-1 rounded-l-md bg-[#f9f9f9] dark:bg-slate-800  top-1/2 -translate-y-1/2 shadow-md transition-position ease-in-out duration-500 z-[99999]`}
+      class={`absolute ${showRightPanel ? "-left-6" : "-left-6"} py-1 rounded-l-md bg-[#f9f9f9] dark:bg-slate-800  top-1/2 -translate-y-1/2 shadow-md transition-position ease-in-out duration-500 z-[5]`}
     >
       <ChevronRight
-        class={`${showRightPanel ? "rotate-0" : "rotate-180"} transition-transform ease-in-out duration-700 cursor-pointer`}
+        class={`${showRightPanel ? "rotate-0" : "rotate-180"} transition-transform ease-in-out duration-700 cursor-pointer z-10`}
       />
     </button>
     <div
@@ -834,5 +911,15 @@
   /* Optional: Add transition for smooth updates */
   div {
     transition: all 0.3s ease;
+  }
+
+  .zoomable-video {
+    transform-origin: center center;
+    /* transition: transform 0.3s ease-in-out; */
+    cursor: grab;
+  }
+
+  .zoomable-video:fullscreen:active {
+    cursor: grabbing;
   }
 </style>

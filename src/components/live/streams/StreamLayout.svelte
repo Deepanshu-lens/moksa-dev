@@ -14,7 +14,7 @@
   import { onMount } from "svelte";
   import { writable } from "svelte/store";
 
-  export let STREAM_URL = "";
+  export let STREAM_URL;
   const isMobile = writable(false);
   let localCaptureRef;
   // // Function to determine the grid style based on the number of cameras
@@ -147,7 +147,10 @@
       </div>
 
       {#if $totalCameras > 0}
-        <Pagination />
+        <Pagination
+          MAX_CAMERAS_PER_PAGE={$selectedLayout * $selectedLayout}
+          initialPage={0}
+        />
       {/if}
     </div>
   {/if}

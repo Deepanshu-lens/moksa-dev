@@ -4,7 +4,7 @@
   import ChevronRight from "lucide-svelte/icons/chevron-right";
   import { writable } from "svelte/store";
   import pb from "@/lib/pb";
-  import { cameras, totalCameras } from "@/stores";
+  import { cameras, totalCameras, selectedNode } from "@/stores";
 
   export let MAX_CAMERAS_PER_PAGE = 9;
   export let initialPage = 0;
@@ -16,8 +16,9 @@
     try {
       const response = await pb
         .collection("camera")
-        .getList(page + 1, MAX_CAMERAS_PER_PAGE, {
+        .getList(page, MAX_CAMERAS_PER_PAGE, {
           fields: "id,name,url,subUrl,save",
+          filter: `node.id ?= "${$selectedNode}"`,
         });
       cameras.set(response.items); // Update the cameras store with new data
     } catch (error) {
@@ -45,7 +46,7 @@
       $totalCameras
     );
     currentPage.update((current) => {
-      if (page >= 0 && page * MAX_CAMERAS_PER_PAGE < $totalCameras) {
+      if (page >= 0 ) {
         fetchCameras(page);
         return page;
       }
@@ -64,7 +65,10 @@
     });
   };
 
-  $: console.log("curr page: ", $currentPage, $totalCameras);
+  $: if (MAX_CAMERAS_PER_PAGE) {
+    currentPage.set(initialPage - 1);
+    fetchCameras(initialPage - 1);
+  }
 </script>
 
 <Pagination.Root
