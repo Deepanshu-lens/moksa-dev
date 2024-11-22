@@ -124,7 +124,7 @@
           {/each}
         {:else}
           <div class="flex flex-col h-full p-4 my-auto z-10 relative">
-            <p class="text-center text-xl font-medium">
+            <p class="text-center text-xl font-medium dark:text-black">
               No registered people found, Register to add people to your gallery
             </p>
           </div>

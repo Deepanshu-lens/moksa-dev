@@ -30,10 +30,10 @@
       </button>
 
       <div class="flex items-center justify-between p-2">
-        <h3 class="text-lg font-semibold">Add new Person:</h3>
+        <h3 class="text-lg font-semibold dark:text-black">Add new Person:</h3>
         <RegisterMobileDialog>
           <button
-            class="flex items-center justify-center gap-2 cursor-pointer relative hover:text-primary text-xl"
+            class="flex items-center justify-center gap-2 cursor-pointer relative hover:text-primary text-xl dark:text-black"
           >
             <ScanFace size={18} />
             Register
