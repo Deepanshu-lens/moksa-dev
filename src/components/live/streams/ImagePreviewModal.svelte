@@ -4,15 +4,17 @@
   import { imageUrl } from "@/stores";
   // variables
   export let loading;
+  export let imgDialogOpen;
 
   const imageHandler = (open: boolean) => {
     if (!open) {
       imageUrl.set("");
+      imgDialogOpen.set(false);
     }
   };
 </script>
 
-<Dialog.Root onOpenChange={imageHandler}>
+<Dialog.Root onOpenChange={imageHandler} bind:open={$imgDialogOpen}>
   <Dialog.Trigger><slot /></Dialog.Trigger>
   <Dialog.Content class="sm:max-w-[600px] z-[70] ">
     <Dialog.Header>

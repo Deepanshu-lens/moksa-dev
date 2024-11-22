@@ -96,8 +96,10 @@
   }
 
   let loading = false;
+  let imgDialogOpen = writable(false);
 
   const getHeatImg = async (id) => {
+    imgDialogOpen.set(true);
     loading = true;
     await getHeatMapImage(id);
     loading = false;
@@ -133,7 +135,7 @@
       <Icon icon="mdi:fullscreen" class="text-white text-3xl cursor-pointer" />
     </div>
   {:else}
-  <!-- when screen is full screen -->
+    <!-- when screen is full screen -->
     <div
       class="fixed top-5 right-5 rounded-md bg-black bg-opacity-50 transition-opacity duration-300"
       on:click={() => exitFullscreen()}
@@ -156,16 +158,15 @@
     <span class="size-2 bg-green-700 rounded-full"></span>
     {name}
   </div>
-  <ImagePreviewModal {loading}>
-    <div
-      class="absolute right-10 bottom-2 rounded-md transition-opacity duration-300 flex items-center gap-x-2 w-10"
+  <div
+    class="absolute right-10 bottom-2 rounded-md transition-opacity duration-300 flex items-center gap-x-2 w-10"
+  >
+    <span class="size-2 bg-green-700 rounded-full ml-2"></span>
+    <Button variant="ghost" class="text-white" on:click={() => getHeatImg(id)}
+      >H</Button
     >
-      <span class="size-2 bg-green-700 rounded-full ml-2"></span>
-      <Button variant="ghost" class="text-white" on:click={() => getHeatImg(id)}
-        >H</Button
-      >
-    </div>
-  </ImagePreviewModal>
+  </div>
+  <ImagePreviewModal {loading} {imgDialogOpen}></ImagePreviewModal>
 </div>
 
 <style>
