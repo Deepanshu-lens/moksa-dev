@@ -95,14 +95,16 @@
     selectedImage = null; // Reset selectedImage before fetching
     console.log(imageUri);
     try {
-      const response = await fetch("https://api.moksa.ai/stream", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
+      const response = await fetch(
+        `https://api.moksa.ai/stream?key=${imageUri}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         },
-        body: JSON.stringify({ key: imageUri }),
-      });
+      );
 
       if (!response.ok) {
         throw new Error("Failed to get image");
@@ -142,16 +144,16 @@
       header: "Employee",
     }),
     table.column({
-      accessor: "masks",
-      header: "Mask",
-    }),
-    table.column({
       accessor: "gloves",
       header: "Gloves",
     }),
     table.column({
       accessor: "hairnet",
       header: "Hairnet",
+    }),
+    table.column({
+      accessor: "masks",
+      header: "Mask",
     }),
     table.column({
       accessor: "uniform",

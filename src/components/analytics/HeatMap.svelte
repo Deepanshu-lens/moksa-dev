@@ -217,16 +217,16 @@
       const data = await mapData.json();
       console.log("mapData", data);
       heatMapData.set(data);
-      const res = await fetch("https://api.moksa.ai/stream", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
+      const res = await fetch(
+        `https://api.moksa.ai/stream?key=${selectedFloorMap}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         },
-        body: JSON.stringify({
-          key: selectedFloorMap,
-        }),
-      });
+      );
       const blob = await res.blob();
       const imageUrl = URL.createObjectURL(blob);
       // selectedImage = imageUrl;
@@ -313,16 +313,16 @@
       const data = await mapData.json();
       console.log("mapData", data);
       heatMapData.set(data);
-      const res = await fetch("https://api.moksa.ai/stream", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
+      const res = await fetch(
+        `https://api.moksa.ai/stream?key=${selectedFloorMap}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         },
-        body: JSON.stringify({
-          key: selectedFloorMap,
-        }),
-      });
+      );
       const blob = await res.blob();
       const imageUrl = URL.createObjectURL(blob);
       // selectedImage = imageUrl;

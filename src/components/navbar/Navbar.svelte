@@ -27,6 +27,7 @@
   import { io } from "socket.io-client";
   import { writable } from "svelte/store";
   import { toast } from "svelte-sonner";
+  import * as DropdownMenu from "@/components/ui/dropdown-menu";
 
   // $: console.log(user);
 
@@ -342,8 +343,10 @@
             </div>
           {/if}
         </span>
-        {#if user}
-          <span class="flex items-center gap-2">
+        <DropdownMenu.Root>
+          <DropdownMenu.Trigger
+            class="flex items-center justify-between gap-x-2"
+          >
             {#if user?.avatar}
               <img
                 src={getProfilePicture(user.collectionId, user.id, user.avatar)}
@@ -366,11 +369,65 @@
                 {user?.role}
               </p>
             </span>
-            <button on:click={toggleOpen} class="text-white mb-auto mt-1">
+            <button class="text-white mb-auto mt-1">
               <ChevronDown size={22} />
             </button>
-          </span>
-        {/if}
+          </DropdownMenu.Trigger>
+          <DropdownMenu.Content class="max-h-[250px] overflow-y-scroll">
+            <DropdownMenu.Label class="flex items-center justify-between">
+              <div class="truncate px-2 py-2 relative flex items-center justify-between gap-x-2">
+                {#if user?.avatar}
+                  <img
+                    src={getProfilePicture(
+                      user.collectionId,
+                      user.id,
+                      user.avatar,
+                    )}
+                    alt="profile"
+                    class="w-10 h-10"
+                  />
+                {:else}
+                  <span
+                    class="rounded-md w-10 h-10 p-2 bg-[#3D81FC] flex items-center justify-center text-white"
+                  >
+                    <UserIcon size={18} />
+                  </span>
+                {/if}
+                <div>
+                  <span
+                    class="mt-0.5 text-sm text-[#32323299] dark:text-white/[.7]"
+                    >{user?.email}</span
+                  >
+                  <a
+                    href="/account/{sessionId}"
+                    class="flex gap-1 items-center text-[#3D81FC] text-sm"
+                    on:click={() => {
+                      isOpen = false;
+                    }}
+                  >
+                    <Settings size={16} />
+                    Manage Account
+                  </a>
+                </div>
+              </div>
+            </DropdownMenu.Label>
+            <DropdownMenu.Separator />
+            <DropdownMenu.Label>
+              <div
+                class="px-6 py-3 bg-neutral-100 dark:hover:bg-gray-600 hover:cursor-pointer transition font-semibold relative z-[200]"
+              >
+                <a
+                  href="/logout"
+                  class="flex flex-row gap-2 items-center text-[#323232]"
+                >
+                  <LogOut size={18} />
+                  Sign Out
+                </a>
+              </div>
+            </DropdownMenu.Label>
+            <DropdownMenu.Separator />
+          </DropdownMenu.Content>
+        </DropdownMenu.Root>
         {#if isOpen}
           <div
             class="
