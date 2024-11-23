@@ -7,7 +7,7 @@
   const getInitialCameras = async (nodeId: string) => {
     try {
       const localCameras = await pb.collection("camera").getList<Camera>(1, 9, {
-        fields: "id,name,url,subUrl,save",
+        fields: "id,name,url,subUrl,save,created",
         filter: `node.id ?= "${nodeId}"`,
         sort: "-created",
       });

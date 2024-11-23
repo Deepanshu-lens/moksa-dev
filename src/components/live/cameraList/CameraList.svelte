@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import Sortable from "sortablejs";
-
+  import * as DropdownMenu from "@/components/ui/dropdown-menu/index.js";
   import { cameras, nodes, selectedNode } from "@/stores";
   import NodeSelection from "@/components/node/NodeSelection.svelte";
   import NodeActionButton from "@/components/node/crud/NodeActionButton.svelte";
@@ -10,6 +10,12 @@
   import { Input } from "@/components/ui/input";
   import Button from "@/components/ui/button/button.svelte";
   import CameraActionButton from "@/components/camera/crud/CameraActionButton.svelte";
+  import {
+    ArrowDownZA,
+    CalendarArrowDown,
+    ArrowUpZA,
+    CalendarArrowUp,
+  } from "lucide-svelte";
 
   let cameraItems: HTMLDivElement;
   onMount(() => {
@@ -22,9 +28,39 @@
       });
     }
   });
+  let sortCriteria = "name"; // Default sort criteria
+  let sortDirection = "asc"; // Default sort direction
 
   let currentCameras = $cameras;
-  $: currentCameras = $cameras;
+  $: currentCameras = sortCameras($cameras, sortCriteria, sortDirection);
+
+  function sortCameras(cameras, criteria, direction) {
+    return [...cameras].sort((a, b) => {
+      let comparison = 0;
+
+      if (criteria === "created") {
+        comparison =
+          new Date(b.created).getTime() - new Date(a.created).getTime(); // Sort by created date
+      } else {
+        comparison = a.name.localeCompare(b.name); // Sort by name
+      }
+
+      return direction === "asc" ? comparison : -comparison; // Toggle direction
+    });
+  }
+
+  function handleSortChange(selectedSort) {
+    if (sortCriteria === selectedSort) {
+      // Toggle sort direction if the same criteria is clicked
+      sortDirection = sortDirection === "asc" ? "desc" : "asc";
+    } else {
+      // Set new criteria and default to ascending
+      sortCriteria = selectedSort;
+      sortDirection = "asc";
+    }
+    // Reapply the sort with the current criteria and direction
+    currentCameras = sortCameras($cameras, sortCriteria, sortDirection);
+  }
 
   function handleInput(event) {
     let searchQuery = event.target.value.toLowerCase();
@@ -36,7 +72,6 @@
       return nameMatch || urlMatch || subUrlMatch;
     });
     currentCameras = filteredCameras;
-    console.log(filteredCameras);
   }
 </script>
 
@@ -70,9 +105,50 @@
             on:input={handleInput}
           />
         </div>
-        <Button class="text-xs h-10" variant="outline" size="sm">
-          <Icon icon="mdi:filter-outline" class="w-5 h-5" />
-        </Button>
+        <DropdownMenu.Root>
+          <DropdownMenu.Trigger asChild let:builder>
+            <Button
+              builders={[builder]}
+              class="text-xs h-10"
+              variant="outline"
+              size="sm"
+            >
+              <Icon icon="mdi:filter-outline" class="w-5 h-5" />
+            </Button>
+          </DropdownMenu.Trigger>
+          <DropdownMenu.Content class="w-48">
+            <DropdownMenu.Label>Filters</DropdownMenu.Label>
+            <DropdownMenu.Separator />
+            <DropdownMenu.Group>
+              <DropdownMenu.Item
+                class="flex items-center justify-between"
+                on:click={() => handleSortChange("created")}
+              >
+                <span>Date (created on)</span>
+                <span>
+                  {#if sortDirection === "asc"}
+                    <CalendarArrowUp size={15} />
+                  {:else}
+                    <CalendarArrowDown size={15} />
+                  {/if}
+                </span>
+              </DropdownMenu.Item>
+              <DropdownMenu.Item
+                class="flex items-center justify-between"
+                on:click={() => handleSortChange("name")}
+              >
+                <span> Camera Name </span>
+                <span>
+                  {#if sortDirection === "asc"}
+                    <ArrowUpZA size={15} />
+                  {:else}
+                    <ArrowDownZA size={15} />
+                  {/if}
+                </span>
+              </DropdownMenu.Item>
+            </DropdownMenu.Group>
+          </DropdownMenu.Content>
+        </DropdownMenu.Root>
         <CameraActionButton action="add" icon />
       </div>
     </div>
