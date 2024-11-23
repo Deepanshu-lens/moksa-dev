@@ -177,10 +177,10 @@
 </script>
 
 <div
-  class="flex flex-col items-start mt-12 h-[calc(100vh-75px)] w-full text-black dark:text-white"
+  class="flex flex-col items-start lg:mt-12 mt-2 h-[calc(100vh-75px)] w-full text-black dark:text-white"
 >
   <div
-    class="flex w-full justify-start items-center gap-20 font-bold mb-4 px-8"
+    class="flex w-full justify-start items-center lg:gap-20 gap-10 font-bold mb-4 px-8"
   >
     {#each navItems as item}
       {#if selected === item.id}
@@ -211,7 +211,7 @@
     </div>
   {:else}
     {#if selected === 1}
-      <div class="h-[1px] dark:bg-[#292929] w-[96%] mb-8 bg-[#e0e0e0]"></div>
+      <div class="h-[1px] dark:bg-[#292929] w-[96%] lg:mb-8 mb-2 bg-[#e0e0e0]"></div>
       <!-- User Table -->
       <UserTable {userData} {userChildrenData} />
     {/if}

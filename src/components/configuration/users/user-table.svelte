@@ -66,7 +66,7 @@ $: if($user) {
 <div class="p-2 h-auto rounded-lg w-full">
   <div class="border border-gray-200 rounded-lg shadow-sm">
     <!-- Table Heading -->
-    <div class="flex justify-between items-center mb-4 px-5 pt-4">
+    <div class="flex lg:flex-row flex-col justify-between lg:items-center mb-4 px-3 gap-2 pt-2 lg:px-5 lg:pt-4">
       <div>
         <div class="flex items-center gap-2 my-1">
           <h2 class="text-xl font-semibold">{userData?.name || 'User Name'}</h2>
@@ -78,14 +78,14 @@ $: if($user) {
         <p class="text-sm text-gray-500">Record of user & log events</p>
       </div>
       <div class="flex items-center space-x-2">
-        <Button disabled variant="outline" class="flex items-center">
+        <Button disabled variant="outline" class="flex items-center" size="sm">
           <SlidersHorizontal class="w-4 h-4 mr-2" />
           Filters
         </Button>
        
         {#if userData?.expand?.role?.name !== 'user'}
           <AddUser parentId={userData?.id} featureBundles={featureBundles}>
-            <Button>
+            <Button size="sm">
               <Plus class="w-4 h-4 mr-2" />
               Add User
             </Button>
@@ -122,7 +122,7 @@ $: if($user) {
     </Table>
 
     <!-- Scrollable Table Body -->
-    <div class="max-h-[58vh] overflow-y-auto">
+    <div class="lg:max-h-[58vh] max-h-[30vh] overflow-y-auto">
       <Table class="w-full">
         <TableBody>
           {#if userChildrenData.length === 0}
