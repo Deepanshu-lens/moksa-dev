@@ -34,9 +34,8 @@
     logMessage?: string;
   }
 
-
   // Constants
-  const BASE_URL = 'https://license.lenscorp.cloud/api';
+  const BASE_URL = "https://license.lenscorp.cloud/api";
   // const BASE_URL = "https://license.lenscorp.cloud/test";
 
   const navItems: NavItem[] = [
@@ -58,7 +57,7 @@
   ];
 
   // State Variables
-  let selected = 1;
+  let selected = 2;
   let permissionTab: "permissions" | "nodes" = "permissions";
   let permissionTabs: PermissionsTabItem[] = [];
   let userChildrenData: any[] = [];
@@ -105,7 +104,6 @@
           (permission: any) => permission.feature === feature.id
         ),
       }));
-
     } catch (error) {
       console.error("Error fetching feature API:", error);
     }
@@ -211,14 +209,17 @@
     </div>
   {:else}
     {#if selected === 1}
-      <div class="h-[1px] dark:bg-[#292929] w-[96%] lg:mb-8 mb-2 bg-[#e0e0e0]"></div>
+      <div
+        class="h-[1px] dark:bg-[#292929] w-[96%] lg:mb-8 mb-2 bg-[#e0e0e0]"
+      ></div>
       <!-- User Table -->
       <UserTable {userData} {userChildrenData} />
     {/if}
     {#if selected === 2}
       <div class="h-[1px] dark:bg-[#292929] w-[96%] mb-8 bg-[#e0e0e0]"></div>
+      <!-- Header Container -->
       <div
-        class="w-[96%] mx-auto justify-between flex items-center px-6 mb-4 border border-gray-300 rounded-lg mt-5"
+        class="w-[96%] mx-auto justify-between flex items-start lg:items-center lg:flex-row flex-col px-6 mb-4 border border-gray-300 rounded-lg mt-5"
       >
         <div class="py-3">
           <div class="flex-cb">
