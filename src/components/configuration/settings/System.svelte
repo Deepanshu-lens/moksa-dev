@@ -72,7 +72,7 @@
                 name="delayOption"
                 bind:group={firmType}
                 value={id}
-                class="mr-3"
+                class="mr-4"
               />
               {label}
             </label>
