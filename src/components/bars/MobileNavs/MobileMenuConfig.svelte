@@ -59,7 +59,7 @@
 
   // Styles
   const baseButtonClass =
-    "h-[30px] w-[30px] rounded-full flex items-center justify-center mx-auto px-auto";
+    "h-[30px] w-[30px] rounded-full flex items-center justify-center mx-auto px-auto dark:text-white";
   const inactiveButtonClass = `text-[#727272]/90 ${baseButtonClass} border border-solid border-[#727272]/90 dark:border-white/[.23] bg-white dark:bg-black dark:text-white group-hover:text-white group-hover:bg-[linear-gradient(90deg,#115DA0_0%,#06223A_100%)] dark:group-hover:bg-[#06223A] group-hover:border-none`;
   const activeButtonClass = `relative border-none ${baseButtonClass} text-white bg-[linear-gradient(90deg,#115DA0_0%,#06223A_100%)] dark:bg-[#06223A]`;
 </script>
@@ -90,7 +90,7 @@
         {/if}
       </button>
       <span
-        class="text-xs text-black/[.6] tracking-[-0.12px] font-medium text-center"
+        class="text-xs text-black/[.6] dark:text-white tracking-[-0.12px] font-medium text-center"
       >
         {section}
       </span>

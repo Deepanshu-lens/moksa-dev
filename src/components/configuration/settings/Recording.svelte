@@ -128,7 +128,7 @@
         </p>
       {:else}
         <div
-          class="flex text-black dark:text-white opacity-90 text-sm gap-4 items-center px-6 mt-4 mb-8"
+          class="flex text-black dark:text-white opacity-90 text-sm gap-4 items-center px-6 mt-4 mb-8 flex-wrap"
         >
           <span class="text-[#333] dark:text-[#929292] text-sm"> Select: </span>
           {#each bufferOptions as { id, label }}
