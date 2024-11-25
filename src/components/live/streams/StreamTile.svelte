@@ -168,6 +168,25 @@
               minTranslateY,
               Math.min(maxTranslateY, translateY)
             );
+            // Block panning outside the zoomable area
+            if (
+              translateX < -areaRect.width / 2 ||
+              translateX > areaRect.width / 2
+            ) {
+              translateX = Math.max(
+                -areaRect.width / 2,
+                Math.min(areaRect.width / 2, translateX)
+              );
+            }
+            if (
+              translateY < -areaRect.height / 2 ||
+              translateY > areaRect.height / 2
+            ) {
+              translateY = Math.max(
+                -areaRect.height / 2,
+                Math.min(areaRect.height / 2, translateY)
+              );
+            }
             updateTransform(video, scale, translateX, translateY);
           }
         }
