@@ -131,7 +131,7 @@
     $: fetchSubUsers(featureId).then((data:any) => subUsers = data)
 </script>
 
-<Table.Root class="mx-auto h-full w-full flex flex-col max-w-[calc(100vw-8.3rem)] max-h-[calc(100vh-360px)] overflow-auto">
+<Table.Root class="mt-5 p-3 lg:mx-auto h-full lg:w-full w-[90vw] flex flex-col lg:max-w-[calc(100vw-8.3rem)] max-h-[calc(100vh-360px)] overflow-auto lg:pb-0 pb-[25vh]">
     <Table.Header class="border rounded-lg w-max min-w-full">
         <Table.Row class="flex items-center p-3 gap-4">
             <!-- <Table.Head class="w-[30px]">
@@ -139,7 +139,7 @@
             </Table.Head> -->
             <Table.Head class="w-[130px]">User Info</Table.Head>
             {#if permissions.length === 0}
-                <Table.Head class="mx-auto">
+                <Table.Head class="lg:mx-auto">
                     No features to assign
                 </Table.Head>
             {:else}
@@ -151,7 +151,7 @@
             {/if}
         </Table.Row>
     </Table.Header>
-    <Table.Body class="pb-10">
+    <Table.Body class="lg:pb-10 pb-3">
         {#if subUsers.length === 0}
             <Table.Row class="flex items-center gap-4 mt-2 px-3 rounded-lg border w-max min-w-full">
                 <Table.Cell class="w-full text-left">
@@ -161,14 +161,14 @@
         {:else}
             {#each subUsers as user}
                 <Table.Row class="flex items-center gap-4 mt-2 px-3 rounded-lg border w-max min-w-full">
-                    <Table.Cell class="w-[130px]">
+                    <Table.Cell class="lg:w-[130px] w-full">
                         <span class="flex flex-col">
                             <span>Name: {user.name}</span>
                             <span class="text-xs">Email: {user.email}</span>
                         </span>
                     </Table.Cell>
                     {#each permissions as permission}
-                        <Table.Cell class="w-[130px]">
+                        <Table.Cell class="lg:w-[130px] w-full">
                             <Checkbox class="rounded-full" checked={user.permissions.some((userPermission: any) => userPermission.id === permission.id)} onCheckedChange={(v)=>handlePermissionChange(user.id, permission.id, v)}/>
                         </Table.Cell>
                     {/each}

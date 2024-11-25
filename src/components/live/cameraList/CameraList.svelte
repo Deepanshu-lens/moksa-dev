@@ -15,6 +15,8 @@
     CalendarArrowDown,
     ArrowUpZA,
     CalendarArrowUp,
+    ArrowDownWideNarrow,
+    Check,
   } from "lucide-svelte";
 
   let cameraItems: HTMLDivElement;
@@ -30,6 +32,7 @@
   });
   let sortCriteria = "name"; // Default sort criteria
   let sortDirection = "asc"; // Default sort direction
+  let searchCriteria = "name"; // Default search criteria
 
   let currentCameras = $cameras;
   $: currentCameras = sortCameras($cameras, sortCriteria, sortDirection);
@@ -58,6 +61,9 @@
       sortCriteria = selectedSort;
       sortDirection = "asc";
     }
+    searchCriteria = selectedSort; // Update search criteria based on selection
+    selectedIcon =
+      selectedSort === "name" ? "material-symbols:search-rounded" : "mdi:link"; // Update icon based on selection
     // Reapply the sort with the current criteria and direction
     currentCameras = sortCameras($cameras, sortCriteria, sortDirection);
   }
@@ -69,7 +75,9 @@
       const urlMatch = camera.url.toLowerCase().includes(searchQuery);
       const subUrlMatch =
         camera.subUrl && camera.subUrl.toLowerCase().includes(searchQuery);
-      return nameMatch || urlMatch || subUrlMatch;
+
+      // Filter based on selected search criteria
+      return searchCriteria === "name" ? nameMatch : urlMatch || subUrlMatch;
     });
     currentCameras = filteredCameras;
   }
@@ -92,6 +100,57 @@
       bind:this={cameraItems}
     >
       <div class="flex justify-between gap-2 items-center">
+        <!-- search Criteria selector -->
+        <DropdownMenu.Root>
+          <DropdownMenu.Trigger asChild let:builder>
+            <Button
+              builders={[builder]}
+              class="text-xs h-10"
+              variant="outline"
+              size="sm"
+            >
+              <ArrowDownWideNarrow size={17} />
+            </Button>
+          </DropdownMenu.Trigger>
+          <DropdownMenu.Content class="w-36 mr-8">
+            <DropdownMenu.Label>Search By</DropdownMenu.Label>
+            <DropdownMenu.Separator />
+            <DropdownMenu.Group>
+              <DropdownMenu.Item
+                class="flex items-center justify-between"
+                on:click={() => {
+                  handleSortChange("name"); // Update sort criteria
+                  searchCriteria = "name"; // Set search criteria to "name"
+                }}
+              >
+                <div class="flex items-center gap-x-2 justify-between w-full">
+                  <span>Camera Name</span>
+                  <span>
+                    {#if searchCriteria === "name"}
+                      <Check class="mr-2" size={12} />
+                    {/if}
+                  </span>
+                </div>
+              </DropdownMenu.Item>
+              <DropdownMenu.Item
+                class="flex items-center justify-between"
+                on:click={() => {
+                  handleSortChange("url"); // Update sort criteria
+                  searchCriteria = "url"; // Set search criteria to "RTSP URL"
+                }}
+              >
+                <div class="flex items-center gap-x-2 w-full justify-between">
+                  <span>RTSP URL</span>
+                  <span>
+                    {#if searchCriteria === "url"}
+                      <Check class="mr-2" size={12} />
+                    {/if}
+                  </span>
+                </div>
+              </DropdownMenu.Item>
+            </DropdownMenu.Group>
+          </DropdownMenu.Content>
+        </DropdownMenu.Root>
         <div class="relative w-11/12">
           <Icon
             icon="material-symbols:search-rounded"

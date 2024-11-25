@@ -265,30 +265,30 @@
         </span>
       </div>
       {#if permissionTab === "permissions"}
-        <Tabs.Root class="mx-auto w-full px-6 pb-0 bg-transparent">
+          <Tabs.Root class="mx-auto w-full px-6 pb-0 bg-transparent">
           <Tabs.List class="flex items-center w-full">
-            {#each permissionTabs as tab (tab.id)}
-              <Tabs.Trigger
-                bind:value={tab.value}
-                class="rounded-t-md flex items-center justify-start px-2 gap-4 border-[#eaecf0] border-[1px] border-solid border-b-0 w-full"
-              >
-                <Checkbox class="rounded-full" />
-                {tab.label}
-              </Tabs.Trigger>
-            {/each}
-          </Tabs.List>
+              {#each permissionTabs as tab (tab.id)}
+                <Tabs.Trigger
+                  bind:value={tab.value}
+                  class="rounded-t-md flex items-center justify-start px-2 gap-4 border-[#eaecf0] border-[1px] border-solid border-b-0 w-full"
+                >
+                  <Checkbox class="rounded-full" />
+                  {tab.label}
+                </Tabs.Trigger>
+              {/each}
+            </Tabs.List>
 
-          {#each permissionTabs as tab (tab.id)}
+            {#each permissionTabs as tab (tab.id)}
             <Tabs.Content value={tab.value} class="mt-0">
-              <LiveTable
-                permissions={tab.features}
-                featureId={tab.id}
-                fetchSubUsers={fetchUserChildrenDataByFeature}
-                {assignPermissions}
-              />
-            </Tabs.Content>
-          {/each}
-        </Tabs.Root>
+                <LiveTable
+                  permissions={tab.features}
+                  featureId={tab.id}
+                  fetchSubUsers={fetchUserChildrenDataByFeature}
+                  {assignPermissions}
+                />
+              </Tabs.Content>
+            {/each}
+          </Tabs.Root>
       {:else}
         <div
           class="w-full overflow-x-auto overflow-y-auto max-h-[calc(100vh-250px)] max-w-[calc(100vw-5.5rem)] hide-scrollbar pb-10 pt-4 px-6"
