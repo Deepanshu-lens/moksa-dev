@@ -15,8 +15,7 @@
   import { getCameras } from "@/managers/get-camera";
   import {
     toggleFullscreen,
-    updateTransform,
-    constrainPan,
+    updateTransform
   } from "@/lib/video-utils";
 
   // Variables
@@ -946,7 +945,7 @@
     object-fit: contain;
     transform-origin: center;
     transform: scale(1) translate(0, 0);
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease-out;
   }
 
   /* Optional: Add transition for smooth updates */

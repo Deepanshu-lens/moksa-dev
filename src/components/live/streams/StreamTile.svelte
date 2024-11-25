@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import Icon from "@iconify/svelte";
 
@@ -10,44 +10,32 @@
   import Button from "@/components/ui/button/button.svelte";
   import { cn } from "@/lib/utils";
   import { writable } from "svelte/store";
+  import { updateTransform } from "@/lib/video-utils";
 
   // Props
-  export let url = ""; // WebSocket URL for the stream
-  export let id = "";
-  export let mode = "mse"; // Supported modes
-  export let media = "video,audio"; // Requested media types
-  export let background = false; // Run stream when not displayed
-  export let visibilityThreshold = 0; // Viewport visibility threshold
-  export let visibilityCheck = true; // Check browser tab visibility
-  export let name;
+  export let url: string = "";
+  export let id: string = "";
+  export let mode: string = "mse";
+  export let media: string = "video,audio";
+  export let background: boolean = false;
+  export let visibilityThreshold: number = 0;
+  export let visibilityCheck: boolean = true;
+  export let name: string;
 
-  let videoElement;
-  let state = "LOADING";
-  const isFullScreen = writable(false);
+  // State Variables
+  let videoElement: HTMLVideoElement;
+  let state: string = "LOADING";
+  const isFullScreen = writable<boolean>(false);
+  let loading: boolean = false;
+  let imgDialogOpen = writable<boolean>(false);
 
-  function fullscreen(id) {
-    // videoElement.changeURL(`wss://vms.lenscorp.cloud/api/ws?src=${id}_FULL`);
+  // Fullscreen Functions
+  function fullscreen(id: string) {
     let cell = document.getElementById(`grid-cell-${id}`);
-
-    if (cell.requestFullscreen) {
+    if (cell?.requestFullscreen) {
       cell.requestFullscreen({ navigationUI: "show" });
       isFullScreen.set(true);
-      document.addEventListener(
-        "fullscreenchange",
-        function handleFullscreenChange() {
-          if (!document.fullscreenElement) {
-            isFullScreen.set(false);
-            // Reset the data-url when exiting fullscreen
-            // videoElement.changeURL(`wss://vms.lenscorp.cloud/api/ws?src=${id}`);
-
-            // Remove the event listener after fullscreen change is handled
-            document.removeEventListener(
-              "fullscreenchange",
-              handleFullscreenChange
-            );
-          }
-        }
-      );
+      document.addEventListener("fullscreenchange", handleFullscreenChange);
     }
   }
 
@@ -58,29 +46,41 @@
     }
   }
 
+  function handleFullscreenChange() {
+    if (!document.fullscreenElement) {
+      isFullScreen.set(false);
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+    }
+  }
+
+  // Heatmap Image Function
+  const getHeatImg = async (id: string) => {
+    imgDialogOpen.set(true);
+    loading = true;
+    await getHeatMapImage(id);
+    loading = false;
+  };
+
+  // Lifecycle Hooks
   onMount(() => {
-    // Ensure VideoStream is defined before using it
     if (!customElements.get("video-stream")) {
       customElements.define("video-stream", VideoStream);
     }
-
-    // Configure the video stream element
     if (videoElement) {
-      videoElement.mode = mode;
-      videoElement.media = media;
-      videoElement.background = background;
-      videoElement.visibilityThreshold = visibilityThreshold;
-      videoElement.visibilityCheck = visibilityCheck;
-
-      // Set the source to start streaming
-      // if (url) {
-      //   videoElement.src = url;
-      // }
-
-      videoElement.addEventListener("statechange", (event) => {
-        state = videoElement.state;
+      videoElement.setAttribute("mode", mode);
+      videoElement.setAttribute("media", media);
+      videoElement.setAttribute("background", background.toString());
+      videoElement.setAttribute(
+        "visibilityThreshold",
+        visibilityThreshold.toString()
+      );
+      videoElement.setAttribute("visibilityCheck", visibilityCheck.toString());
+      videoElement.addEventListener("statechange", () => {
+        state = videoElement.getAttribute("state") || "LOADING";
       });
     }
+
+    setupZoomAndPan();
   });
 
   onDestroy(() => {
@@ -89,31 +89,117 @@
     }
   });
 
-  // Handle stream URL changes
+  // Reactive Statement for URL changes
   $: if (videoElement && url) {
     videoElement.src = url;
   }
 
-  let loading = false;
-  let imgDialogOpen = writable(false);
+  // Zoom and Pan Setup
+  function setupZoomAndPan() {
+    const zoomableAreas =
+      document.querySelectorAll<HTMLElement>(".zoomable-area");
+    let scale: number = 1;
+    const zoomStep: number = 0.2;
+    const maxScale: number = 3;
+    const minScale: number = 1;
+    let translateX: number = 0;
+    let translateY: number = 0;
+    let isDragging: boolean = false;
+    let startX: number | null = null;
+    let startY: number | null = null;
 
-  const getHeatImg = async (id) => {
-    imgDialogOpen.set(true);
-    loading = true;
-    await getHeatMapImage(id);
-    loading = false;
-  };
+    zoomableAreas.forEach((area) => {
+      const video = area.querySelector<HTMLVideoElement>("video");
+
+      document.addEventListener("fullscreenchange", () => {
+        if (!document.fullscreenElement) {
+          scale = 1;
+          translateX = 0;
+          translateY = 0;
+          if (video) {
+            updateTransform(video, scale, translateX, translateY);
+          }
+        }
+      });
+
+      area.addEventListener("wheel", (e: WheelEvent) => {
+        e.preventDefault();
+        if (document.fullscreenElement) {
+          if (e.deltaY < 0) {
+            scale = Math.min(scale + zoomStep, maxScale);
+          } else {
+            scale = Math.max(scale - zoomStep, minScale);
+          }
+          if (video) {
+            updateTransform(video, scale, translateX, translateY);
+          }
+        }
+      });
+
+      area.addEventListener("mousedown", (e: MouseEvent) => {
+        if (document.fullscreenElement) {
+          isDragging = true;
+          startX = e.pageX - translateX;
+          startY = e.pageY - translateY;
+          area.style.cursor = "grabbing";
+        }
+      });
+
+      area.addEventListener("mousemove", (e: MouseEvent) => {
+        if (isDragging && document.fullscreenElement) {
+          translateX = e.pageX - (startX ?? 0);
+          translateY = e.pageY - (startY ?? 0);
+          if (video) {
+            const videoRect = video.getBoundingClientRect();
+            const areaRect = area.getBoundingClientRect();
+            const maxTranslateX =
+              (videoRect.width * scale - areaRect.width) / 2;
+            const maxTranslateY =
+              (videoRect.height * scale - areaRect.height) / 2;
+            const minTranslateX =
+              areaRect.width / 2 - (videoRect.width * scale) / 2;
+            const minTranslateY =
+              areaRect.height / 2 - (videoRect.height * scale) / 2;
+            translateX = Math.max(
+              minTranslateX,
+              Math.min(maxTranslateX, translateX)
+            );
+            translateY = Math.max(
+              minTranslateY,
+              Math.min(maxTranslateY, translateY)
+            );
+            updateTransform(video, scale, translateX, translateY);
+          }
+        }
+      });
+
+      area.addEventListener("mouseup", () => {
+        isDragging = false;
+        area.style.cursor = "grab";
+      });
+
+      area.addEventListener("mouseleave", () => {
+        isDragging = false;
+        area.style.cursor = "grab";
+      });
+    });
+  }
 </script>
 
+<!-- HTML Template -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
   id={`grid-cell-${id}`}
-  class={state === "LOADING"
-    ? "camera-placeholder"
-    : "relative overflow-hidden group"}
+  class={cn(
+    "zoomable-area",
+    state === "LOADING"
+      ? "camera-placeholder"
+      : "relative overflow-hidden group"
+  )}
 >
-  <!-- svelte-ignore element_invalid_self_closing_tag -->
   <!-- svelte-ignore a11y_click_events_have_key_events -->
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
+  <!-- svelte-ignore element_invalid_self_closing_tag -->
   <video-stream
     bind:this={videoElement}
     class={cn(
@@ -130,10 +216,8 @@
       }
     }}
   />
-  <!-- svelte-ignore a11y_click_events_have_key_events -->
-  <!-- svelte-ignore a11y_no_static_element_interactions -->
   {#if !$isFullScreen}
-    <!-- when full screen is off -->
+    <!-- svelte-ignore a11y_click_events_have_key_events -->
     <div
       class="absolute top-2 right-2 rounded-md bg-black bg-opacity-50 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
       on:click={() => fullscreen(id)}
@@ -141,7 +225,7 @@
       <Icon icon="mdi:fullscreen" class="text-white text-3xl cursor-pointer" />
     </div>
   {:else}
-    <!-- when screen is full screen -->
+    <!-- svelte-ignore a11y_click_events_have_key_events -->
     <div
       class="fixed top-5 right-5 rounded-md bg-black bg-opacity-50 transition-opacity duration-300"
       on:click={() => exitFullscreen()}
@@ -204,7 +288,6 @@
     );
   }
 
-  /* Shimmer animation */
   @keyframes shimmer {
     100% {
       transform: translateX(100%);

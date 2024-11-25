@@ -36,8 +36,6 @@
   function closeEventModal() {
     selectedEvent = null;
   }
-
-  $:console.log($gallery)
 </script>
 
 <div class="hidden lg:block w-full">
