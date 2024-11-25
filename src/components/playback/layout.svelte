@@ -13,6 +13,11 @@
   import pb from "@/lib/pb";
   import NodeSelection from "../node/NodeSelection.svelte";
   import { getCameras } from "@/managers/get-camera";
+  import {
+    toggleFullscreen,
+    updateTransform,
+    constrainPan,
+  } from "@/lib/video-utils";
 
   // Variables
   let availableChannels = writable<{ id: string; label: string }[]>([]);
@@ -238,7 +243,7 @@
               sort: "-created",
               expand: "user",
             });
-            const filteredEvents = localEvents.filter((event: any) => {
+          const filteredEvents = localEvents.filter((event: any) => {
             const eventUnixTime = new Date(event.created).getTime();
             const startOfDay = new Date(eventDate).getTime();
             const endOfDay = startOfDay + 24 * 60 * 60 * 1000;
@@ -313,17 +318,6 @@
   $: if (searchDate) {
     showCalendar.update((currentValue) => !currentValue);
   }
-
-  // $: if ($selectedNode) {
-  //   isLoading.set(true);
-  //   console.log(cameras);
-  //   const channel_list = cameras
-  //     .filter((camera) => camera.save)
-  //     .map((camera) => ({ id: camera.id, label: camera.name }));
-  //   // const channel_list = [{id: "vdgi9n1t1iru7sw", label: "nvrCam 1"},{id: "h7qklv8zk1v9uf2", label: "nvrCam 2"},{id: "uqvadixbm65ior5", label: "nvrCam 6"},{id: "3mmfkxip4crwx4s", label: "nvrCam 9"}]
-  //   availableChannels.set(channel_list);
-  //   isLoading.set(false);
-  // }
 
   $: if (startTime) {
     const [hours, minutes] = startTime.split(":").map(Number);
@@ -426,67 +420,93 @@
     });
   }
 
-  function toggleFullscreen(index: number) {
-    const video = videoRefs[index];
-    if (video.requestFullscreen) {
-      video.requestFullscreen();
-    } else if ((video as any).webkitRequestFullscreen) { /* Safari */
-      (video as any).webkitRequestFullscreen();
-    } else if ((video as any).msRequestFullscreen) { /* IE11 */
-      (video as any).msRequestFullscreen();
-    }
-  }
+  $: if (videoRefs) {
+    const zoomableAreas = document.querySelectorAll(".zoomable-area");
 
-  // for double click on video to toggle fullscreen
-  $: videoRefs.forEach((video, index) => {
-    video.addEventListener('dblclick', () => toggleFullscreen(index));
-  });
+    let scale = 1;
+    const zoomStep = 0.2;
+    const maxScale = 3;
+    const minScale = 1;
+    let translateX = 0;
+    let translateY = 0;
+    let isDragging = false;
+    let startX: number | null = null;
+    let startY: number | null = null;
 
-  let scale = 1;
-  let translateX = 0;
-  let translateY = 0;
-  let isPanning = false;
-  let startX = 0;
-  let startY = 0;
-  let panSpeed = 0.3; // Adjust this value to control pan speed
+    zoomableAreas.forEach((area) => {
+      const video = area.querySelector("video");
+      area.addEventListener("dblclick", () => {
+        if (!document.fullscreenElement) {
+          toggleFullscreen(area);
+        } else {
+          document.exitFullscreen();
+        }
+      });
+      document.addEventListener("fullscreenchange", () => {
+        if (!document.fullscreenElement) {
+          scale = 1;
+          translateX = 0;
+          translateY = 0;
+          updateTransform(video, scale, translateX, translateY);
+        }
+      });
+      area.addEventListener("wheel", (e) => {
+        e.preventDefault();
+        if (document.fullscreenElement) {
+          if (e instanceof WheelEvent && e.deltaY < 0) {
+            scale = Math.min(scale + zoomStep, maxScale);
+          } else if (e instanceof WheelEvent) {
+            scale = Math.max(scale - zoomStep, minScale);
+          }
+          updateTransform(video, scale, translateX, translateY);
+        }
+      });
+      area.addEventListener("mousedown", (e) => {
+        if (document.fullscreenElement) {
+          isDragging = true;
+          startX = (e as MouseEvent).pageX - translateX;
+          startY = (e as MouseEvent).pageY - translateY;
+          (area as HTMLElement).style.cursor = "grabbing";
+        }
+      });
 
-  function handleWheel(event: WheelEvent, index: number) {
-    event.preventDefault();
-    const video = videoRefs[index];
-    const delta = event.deltaY > 0 ? -0.1 : 0.1;
-    scale = Math.max(1, scale + delta);
+      area.addEventListener("mousemove", (e) => {
+        if (isDragging && document.fullscreenElement) {
+          if (e instanceof MouseEvent) {
+            translateX = e.pageX - (startX ?? 0);
+            translateY = e.pageY - (startY ?? 0);
+            if (video) {
+              const videoRect = video.getBoundingClientRect();
+              const areaRect = area.getBoundingClientRect();
+              const maxTranslateX = (videoRect.width * scale - areaRect.width) / 2;
+              const maxTranslateY = (videoRect.height * scale - areaRect.height) / 2;
+              const minTranslateX = areaRect.width / 2 - (videoRect.width * scale) / 2;
+              const minTranslateY = areaRect.height / 2 - (videoRect.height * scale) / 2;
+              translateX = Math.max(minTranslateX, Math.min(maxTranslateX, translateX));
+              translateY = Math.max(minTranslateY, Math.min(maxTranslateY, translateY));
+              // Block panning outside the zoomable area
+              if (translateX < -areaRect.width / 2 || translateX > areaRect.width / 2) {
+                translateX = Math.max(-areaRect.width / 2, Math.min(areaRect.width / 2, translateX));
+              }
+              if (translateY < -areaRect.height / 2 || translateY > areaRect.height / 2) {
+                translateY = Math.max(-areaRect.height / 2, Math.min(areaRect.height / 2, translateY));
+              }
+              updateTransform(video, scale, translateX, translateY);
+            }
+          }
+        }
+      });
 
-    if (scale === 1) {
-        // Reset translation when zooming out completely
-        translateX = 0;
-        translateY = 0;
-    }
+      area.addEventListener("mouseup", () => {
+        isDragging = false;
+        (area as HTMLElement).style.cursor = "grab";
+      });
 
-    updateTransform(video);
-  }
-
-  function handleMouseDown(event: MouseEvent) {
-    if (scale > 1) { // Allow panning only when zoomed in
-      isPanning = true;
-      startX = event.clientX - translateX;
-      startY = event.clientY - translateY;
-    }
-  }
-
-  function handleMouseMove(event: MouseEvent) {
-    if (!isPanning || scale <= 1) return; // Prevent panning when not zoomed in
-    translateX = (event.clientX - startX) * panSpeed;
-    translateY = (event.clientY - startY) * panSpeed;
-    updateTransform(event.target as HTMLVideoElement);
-  }
-
-  function handleMouseUp() {
-    isPanning = false;
-  }
-
-  function updateTransform(video: HTMLVideoElement) {
-    video.style.transform = `scale(${scale}) translate(${translateX}px, ${translateY}px)`;
-    video.style.zIndex = scale > 1 ? '10' : '1'; // Adjust z-index when zoomed in
+      area.addEventListener("mouseleave", () => {
+        isDragging = false;
+        (area as HTMLElement).style.cursor = "grab";
+      });
+    });
   }
 </script>
 
@@ -515,21 +535,19 @@
     >
       {#if videoUrls.responses && videoUrls.responses.length > 0}
         {#each videoUrls.responses as video, index}
-          <video
-            bind:this={videoRefs[index]}
-            class="w-full h-full zoomable-video"
-            src={video}
-            autoplay
-            muted
-            playsinline
-            on:play={handlePlayed}
-            on:ended={handleEnded}
-            on:wheel={(e) => handleWheel(e, index)}
-            on:mousedown={handleMouseDown}
-            on:mousemove={handleMouseMove}
-            on:mouseup={handleMouseUp}
-            on:mouseleave={handleMouseUp}
-          ></video>
+          <div class="zoomable-area" id={`area-${index}`}>
+            <video
+              id={`video-${index}`}
+              bind:this={videoRefs[index]}
+              class="w-full h-full"
+              src={video}
+              autoplay
+              muted
+              playsinline
+              on:play={handlePlayed}
+              on:ended={handleEnded}
+            ></video>
+          </div>
         {/each}
       {:else}
         <div
@@ -630,7 +648,10 @@
                   />
                 {/if}
               </button>
-              <button on:click={() => toggleFullscreen(index)}>
+              <button
+                aria-label="Fullscreen"
+                on:click={() => toggleFullscreen(index)}
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   class="h-4 w-4 cursor-pointer"
@@ -638,7 +659,12 @@
                   viewBox="0 0 24 24"
                   stroke="currentColor"
                 >
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v6h6M4 20v-6h6M20 4v6h-6M20 20v-6h-6" />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M4 4v6h6M4 20v-6h6M20 4v6h-6M20 20v-6h-6"
+                  />
                 </svg>
               </button>
             </div>
@@ -652,7 +678,7 @@
                 <div
                   class="absolute top-0 h-full w-[2px] bg-red-500"
                   style="left: {position}%"
-                />
+                ></div>
               {/each}
               <input
                 type="range"
@@ -908,18 +934,23 @@
     cursor: ew-resize;
   }
 
+  .zoomable-area {
+    overflow: hidden;
+    cursor: grab;
+    position: relative;
+  }
+
+  .zoomable-area video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transform-origin: center;
+    transform: scale(1) translate(0, 0);
+    transition: transform 0.3s ease;
+  }
+
   /* Optional: Add transition for smooth updates */
   div {
     transition: all 0.3s ease;
-  }
-
-  .zoomable-video {
-    transform-origin: center center;
-    /* transition: transform 0.3s ease-in-out; */
-    cursor: grab;
-  }
-
-  .zoomable-video:fullscreen:active {
-    cursor: grabbing;
   }
 </style>
