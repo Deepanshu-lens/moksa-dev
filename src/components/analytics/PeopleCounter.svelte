@@ -90,9 +90,10 @@
         const storeExists = fruits.some(
           (store) => store?.value === data?.store_id,
         );
-        
+
+        // if store doesn't exist and user is not super-admin
         if (curruser?.role !== "superAdmin" && !storeExists) {
-          return;
+          return { data: currentData?.data };
         }
 
         if (existingStoreIndex !== -1) {
