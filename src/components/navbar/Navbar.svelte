@@ -128,7 +128,7 @@
   onMount(async () => {
     // console.log("mToken", mToken);
     const response = await fetch(
-      "https://api.moksa.ai/store/getAllStoresForDropdown",
+      "https://dev.api.moksa.ai/store/getAllStoresForDropdown",
       {
         method: "GET",
         headers: {
@@ -159,7 +159,7 @@
       sockets[storeId].disconnect();
     }
 
-    sockets[storeId] = io("https://api.moksa.ai/", {
+    sockets[storeId] = io("https://dev.api.moksa.ai/", {
       withCredentials: true,
       extraHeaders: {
         Authorization: `Bearer ${mToken}`,
@@ -375,7 +375,9 @@
           </DropdownMenu.Trigger>
           <DropdownMenu.Content class="max-h-[250px] overflow-y-scroll">
             <DropdownMenu.Label class="flex items-center justify-between">
-              <div class="truncate px-2 py-2 relative flex items-center justify-between gap-x-2">
+              <div
+                class="truncate px-2 py-2 relative flex items-center justify-between gap-x-2"
+              >
                 {#if user?.avatar}
                   <img
                     src={getProfilePicture(

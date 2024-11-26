@@ -51,7 +51,7 @@
       sockets[userId].disconnect();
     }
     // console.log(token)
-    sockets[userId] = io("https://api.moksa.ai", {
+    sockets[userId] = io("https://dev.api.moksa.ai", {
       withCredentials: true,
       extraHeaders: {
         Authorization: `Bearer ${token}`,
@@ -227,7 +227,7 @@
   //     sockets[storeId].disconnect();
   //   }
 
-  //   sockets[storeId] = io("https://api.moksa.ai", {
+  //   sockets[storeId] = io("https://dev.api.moksa.ai", {
   //     withCredentials: true,
   //     extraHeaders: {
   //       Authorization: `Bearer ${token}`,

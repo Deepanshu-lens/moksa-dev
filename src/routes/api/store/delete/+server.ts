@@ -10,7 +10,7 @@ export const DELETE: RequestHandler = async ({
         await locals.pb?.collection("node").delete(data.id);
     }
 
-    await fetch(`https://api.moksa.ai/store/delete/${data.moksaId}`, {
+    await fetch(`https://dev.api.moksa.ai/store/delete/${data.moksaId}`, {
         headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${cookies.get("moksa-token")}`,

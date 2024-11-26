@@ -19,7 +19,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
     try {
         const { storeId } = await request.json();
         console.log(storeId)
-        // const response = await fetch(`https://api.moksa.ai/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${storeId}/1/20/${formatDate(weekAgo)}/${formatDate(today)}`, {
+        // const response = await fetch(`https://dev.api.moksa.ai/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${storeId}/1/20/${formatDate(weekAgo)}/${formatDate(today)}`, {
         //     method: 'GET',
         //     headers: {
         //         'Authorization': `Bearer ${token}`,
@@ -31,7 +31,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
         //     throw new Error('Failed to fetch employees');
         // }
         const responses = await Promise.all(storeId.map(async (store: any) => {
-            const response = await fetch(`https://api.moksa.ai/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${store.id}/1/20/${formatDate(weekAgo)}/${formatDate(today)}`, {
+            const response = await fetch(`https://dev.api.moksa.ai/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${store.id}/1/20/${formatDate(weekAgo)}/${formatDate(today)}`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,

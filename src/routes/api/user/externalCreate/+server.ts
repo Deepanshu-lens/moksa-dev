@@ -31,7 +31,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
         console.log('lensId', lensId);
 
         const moksa = await fetch(
-            `https://api.moksa.ai/auth/createUserWithPocketbase`,
+            `https://dev.api.moksa.ai/auth/createUserWithPocketbase`,
             {
                 method: "POST",
                 headers: {

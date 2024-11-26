@@ -54,7 +54,7 @@
   const getFloorMap = async (storeId) => {
     try {
       const res = await fetch(
-        `https://api.moksa.ai/store/getFloorMapByStoreid/${storeId}`,
+        `https://dev.api.moksa.ai/store/getFloorMapByStoreid/${storeId}`,
         {
           method: "GET",
           headers: {
@@ -170,7 +170,7 @@
       console.log("selectedFloorMap", selectedFloorMap);
 
       const aData = await fetch(
-        `https://api.moksa.ai/people/aisleCount/getAisleCountbyStoreid/${$selectedStore.value}`,
+        `https://dev.api.moksa.ai/people/aisleCount/getAisleCountbyStoreid/${$selectedStore.value}`,
         {
           method: "GET",
           headers: {
@@ -185,14 +185,8 @@
         console.log("aData", aData);
         const aiData = await aData.json();
 
-        console.log(
-          "aisleData for store",
-          $selectedStore.value,
-          aiData?.data?.data,
-        );
-
-        if (aiData?.data?.data?.length > 0) {
-          aisleData.set(aiData?.data?.data);
+        if (aiData?.data?.length > 0) {
+          aisleData.set(aiData?.data);
           setTimeout(() => {
             createChart();
           }, 1000);
@@ -204,7 +198,7 @@
       }
 
       const mapData = await fetch(
-        `https://api.moksa.ai/heatmap/getHeatMapByTimeAndStoreId/${$dateRange}/${$selectedStore.value}`,
+        `https://dev.api.moksa.ai/heatmap/getHeatMapByTimeAndStoreId/${$dateRange}/${$selectedStore.value}`,
         {
           method: "GET",
           headers: {
@@ -218,7 +212,7 @@
       console.log("mapData", data);
       heatMapData.set(data);
       const res = await fetch(
-        `https://api.moksa.ai/stream?key=${selectedFloorMap}`,
+        `https://dev.api.moksa.ai/stream?key=${selectedFloorMap}`,
         {
           method: "GET",
           headers: {
@@ -263,7 +257,7 @@
       // console.log('selectedFloorMap',selectedFloorMap)
 
       const aData = await fetch(
-        `https://api.moksa.ai/people/aisleCount/getAisleCountbyStoreid/${$selectedStore.value}`,
+        `https://dev.api.moksa.ai/people/aisleCount/getAisleCountbyStoreid/${$selectedStore.value}`,
         {
           method: "GET",
           headers: {
@@ -286,8 +280,8 @@
           aiData?.data?.data,
         );
 
-        if (aiData?.data?.data?.length > 0) {
-          aisleData.set(aiData?.data?.data);
+        if (aiData?.data?.length > 0) {
+          aisleData.set(aiData?.data);
           setTimeout(() => {
             createChart();
           }, 1000);
@@ -299,7 +293,7 @@
       }
 
       const mapData = await fetch(
-        `https://api.moksa.ai/heatmap/getHeatMapByTimeAndStoreId/custom/${$selectedStore.value}`,
+        `https://dev.api.moksa.ai/heatmap/getHeatMapByTimeAndStoreId/custom/${$selectedStore.value}`,
         {
           method: "GET",
           headers: {
@@ -314,7 +308,7 @@
       console.log("mapData", data);
       heatMapData.set(data);
       const res = await fetch(
-        `https://api.moksa.ai/stream?key=${selectedFloorMap}`,
+        `https://dev.api.moksa.ai/stream?key=${selectedFloorMap}`,
         {
           method: "GET",
           headers: {
@@ -356,7 +350,6 @@
       categories: [],
     };
   } else {
-    console.log("data", $aisleData);
     transformedFusionData = transformApiDataForFusionChart($aisleData);
   }
 
@@ -387,66 +380,67 @@
     };
   }
 
-  // const fusiondevicedata = [
-  //   {
-  //     seriesname: "DevicesData",
-  //     data: [
-  //       { value: 40, color: "#07E1A4" },
-  //       { value: 50, color: "#07E1A4" },
-  //       { value: 44, color: "#07E1A4" },
-  //       { value: 89, color: "#07E1A4" },
-  //       { value: 90, color: "#07E1A4" },
-  //       { value: 60, color: "#07E1A4" },
-  //       { value: 90, color: "#07E1A4" },
-  //     ],
-  //   },
-  //   {
-  //     seriesname: "DevicesData",
-  //     data: [
-  //       {
-  //         value: 100 - 40,
-  //         color: "#9DFFFF",
-  //       },
-  //       {
-  //         value: 100 - 50,
-  //         color: "#9DFFFF",
-  //       },
-  //       {
-  //         value: 100 - 44,
-  //         color: "#9DFFFF",
-  //       },
-  //       {
-  //         value: 100 - 89,
-  //         color: "#9DFFFF",
-  //       },
-  //       {
-  //         value: 100 - 90,
-  //         color: "#9DFFFF",
-  //       },
-  //       {
-  //         value: 100 - 60,
-  //         color: "#9DFFFF",
-  //       },
-  //       {
-  //         value: 100 - 90,
-  //         color: "#9DFFFF",
-  //       },
-  //     ],
-  //   },
-  // ];
-  // const fusiondevicecategories = [
-  //   {
-  //     category: [
-  //       { label: "vegetables" },
-  //       { label: "fruits" },
-  //       { label: "toys" },
-  //       { label: "books" },
-  //       { label: "liquor" },
-  //       { label: "bread" },
-  //       { label: "washing" },
-  //     ],
-  //   },
-  // ];
+  const fusiondevicedata = [
+    {
+      seriesname: "DevicesData",
+      data: [
+        { value: 40, color: "#07E1A4" },
+        { value: 50, color: "#07E1A4" },
+        { value: 44, color: "#07E1A4" },
+        { value: 89, color: "#07E1A4" },
+        { value: 90, color: "#07E1A4" },
+        { value: 60, color: "#07E1A4" },
+        { value: 90, color: "#07E1A4" },
+      ],
+    },
+    {
+      seriesname: "DevicesData",
+      data: [
+        {
+          value: 100 - 40,
+          color: "#9DFFFF",
+        },
+        {
+          value: 100 - 50,
+          color: "#9DFFFF",
+        },
+        {
+          value: 100 - 44,
+          color: "#9DFFFF",
+        },
+        {
+          value: 100 - 89,
+          color: "#9DFFFF",
+        },
+        {
+          value: 100 - 90,
+          color: "#9DFFFF",
+        },
+        {
+          value: 100 - 60,
+          color: "#9DFFFF",
+        },
+        {
+          value: 100 - 90,
+          color: "#9DFFFF",
+        },
+      ],
+    },
+  ];
+  const fusiondevicecategories = [
+    {
+      category: [
+        { label: "vegetables" },
+        { label: "fruits" },
+        { label: "toys" },
+        { label: "books" },
+        { label: "liquor" },
+        { label: "bread" },
+        { label: "washing" },
+      ],
+    },
+  ];
+
   const colors = [
     "#1E40AF",
     "#1D4ED8",
@@ -567,6 +561,13 @@
         class="flex items-center border-black h-[40px] border-opacity-[18%] border-[1px] rounded-md dark:border-white"
       >
         <button
+          class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "live" ? "bg-[#0BA5E9] rounded-l-md text-white" : "text-black dark:text-white dark:border-white"}`}
+          on:click={() => {
+            dateRange.set("live");
+            value = undefined;
+          }}>live</button
+        >
+        <button
           class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "1hr" ? "bg-[#0BA5E9] rounded-l-md text-white" : "text-black dark:text-white dark:border-white"}`}
           on:click={() => {
             dateRange.set("1hr");
@@ -675,24 +676,29 @@
       </Select.Root>
     </span>
     <span class="flex items-center gap-3">
-      <!-- <Button variant="outline" class="flex items-center gap-1">
+      <Button variant="outline" class="flex items-center gap-1">
         <ListFilter size={18} /> Filters</Button
-      > -->
-      <!-- <Button
+      >
+      <Button
         class="flex items-center gap-1 bg-[#3D81FC] text-white hover:bg-white hover:text-[#3D81FC]"
         ><Upload size={18} /> Export Reports</Button
-      > -->
+      >
     </span>
   </div>
   <div class="grid grid-cols-8 gap-4 mt-4">
-    <!-- <div
+    <div
       class="col-span-8 row-span-2 border rounded-md flex flex-col rounded-t-xl dark:border-white/[.7] max-h-[200px]"
     >
       <span
-        class="rounded-t-xl w-full h-[50px] bg-[#050F40] flex items-center justify-between px-4 flex-shrink-0"
+        class="rounded-t-xl w-full h-[50px] bg-[#050F40] flex items-center justify-between px-4"
       >
         <p class="text-white text-lg font-semibold flex items-center gap-2">
           {$selectedStore.label}
+          {#if $dateRange === "live"}
+            <span class="text-xs text-white bg-pink-500 rounded-md p-1">
+              Live
+            </span>
+          {/if}
         </p>
       </span>
       {#if $aisleData.length > 0 && $aisleData[0] !== "Fetching"}
@@ -712,8 +718,8 @@
           <Spinner />
         </div>
       {/if}
-    </div> -->
-    <!-- <div
+    </div>
+    <div
       class="col-span-4 row-span-3 border rounded-md flex flex-col dark:border-white/[.7] min-h-[300px]"
     >
       <span
@@ -725,8 +731,8 @@
       </span>
       <span class="h-full w-full relative">
         <FusionChart
-          data={transformedFusionData.data}
-          categoriesdata={transformedFusionData.categories}
+          data={transformedFusionData?.data}
+          categoriesdata={transformedFusionData?.categories}
         />
         <span
           class="absolute bottom-0 left-0 w-[150px] h-[30px] bg-white z-[200]"
@@ -773,7 +779,7 @@
           <p class="text-lg">No data found</p>
         </div>
       {/if}
-    </div> -->
+    </div>
     <div
       class="col-span-8 row-span-2 flex items-center justify-between rounded-t-xl dark:border-white/[.7]"
     >
