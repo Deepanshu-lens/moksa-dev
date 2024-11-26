@@ -270,8 +270,8 @@
         <Tabs.Root
           class="lg:mx-auto lg:w-full overflow-x-auto px-6 pb-0 bg-transparent"
         >
-          <div class="lg:w-full w-[95vw] px-10 overflow-x-auto">
-            <Tabs.List class="flex flex-wrap items-center w-full">
+          <div class="lg:w-full w-[90vw] lg:px-2 overflow-auto">
+            <Tabs.List class="flex flex-wrap lg:flex-nowrap items-center w-full">
               {#each permissionTabs as tab (tab.id)}
                 <Tabs.Trigger
                   bind:value={tab.value}
