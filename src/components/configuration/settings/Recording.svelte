@@ -54,7 +54,7 @@
 </script>
 
 <div
-  class="flex flex-col items-start mt-12 lg:h-[calc(100vh-75px)] w-full text-black dark:text-white pb-[5vh] overflow-y-auto h-[60vh]"
+  class="flex flex-col items-start mt-12 lg:h-[calc(100vh-75px)] w-full text-black dark:text-white pb-[5vh] overflow-y-auto h-[60vh] overflow-x-hidden"
 >
   <!-- Selecting Tabs -->
   <div
@@ -128,7 +128,7 @@
         </p>
       {:else}
         <div
-          class="flex text-black dark:text-white opacity-90 text-sm gap-4 items-center px-6 mt-4 mb-8 flex-wrap"
+          class="flex text-black dark:text-white opacity-90 text-sm gap-4 lg:items-center px-6 mt-4 mb-8 lg:flex-row flex-col"
         >
           <span class="text-[#333] dark:text-[#929292] text-sm"> Select: </span>
           {#each bufferOptions as { id, label }}

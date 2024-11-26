@@ -216,7 +216,9 @@
       <UserTable {userData} {userChildrenData} />
     {/if}
     {#if selected === 2}
-      <div class="h-[1px] dark:bg-[#292929] w-[96%] mb-8 bg-[#e0e0e0]"></div>
+      <div
+        class="h-[1px] dark:bg-[#292929] w-[96%] lg:mb-8 mb-3 bg-[#e0e0e0]"
+      ></div>
       <!-- Header Container -->
       <div
         class="w-[96%] mx-auto justify-between flex items-start lg:items-center lg:flex-row flex-col px-6 mb-4 border border-gray-300 rounded-lg mt-5"
@@ -265,8 +267,11 @@
         </span>
       </div>
       {#if permissionTab === "permissions"}
-          <Tabs.Root class="mx-auto w-full px-6 pb-0 bg-transparent">
-          <Tabs.List class="flex items-center w-full">
+        <Tabs.Root
+          class="lg:mx-auto lg:w-full overflow-x-auto px-6 pb-0 bg-transparent"
+        >
+          <div class="lg:w-full w-[95vw] px-10 overflow-x-auto">
+            <Tabs.List class="flex flex-wrap items-center w-full">
               {#each permissionTabs as tab (tab.id)}
                 <Tabs.Trigger
                   bind:value={tab.value}
@@ -277,18 +282,19 @@
                 </Tabs.Trigger>
               {/each}
             </Tabs.List>
+          </div>
 
-            {#each permissionTabs as tab (tab.id)}
+          {#each permissionTabs as tab (tab.id)}
             <Tabs.Content value={tab.value} class="mt-0">
-                <LiveTable
-                  permissions={tab.features}
-                  featureId={tab.id}
-                  fetchSubUsers={fetchUserChildrenDataByFeature}
-                  {assignPermissions}
-                />
-              </Tabs.Content>
-            {/each}
-          </Tabs.Root>
+              <LiveTable
+                permissions={tab.features}
+                featureId={tab.id}
+                fetchSubUsers={fetchUserChildrenDataByFeature}
+                {assignPermissions}
+              />
+            </Tabs.Content>
+          {/each}
+        </Tabs.Root>
       {:else}
         <div
           class="w-full overflow-x-auto overflow-y-auto max-h-[calc(100vh-250px)] max-w-[calc(100vw-5.5rem)] hide-scrollbar pb-10 pt-4 px-6"
