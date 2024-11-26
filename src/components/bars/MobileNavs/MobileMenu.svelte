@@ -83,7 +83,7 @@
         }`}
       />
       <span
-        class="text-xs text-black/[.6] tracking-[-0.12px] font-medium text-center"
+        class="text-xs text-black/[.6] dark:text-neutral-300 tracking-[-0.12px] font-medium text-center"
       >
         Register
       </span>
@@ -152,7 +152,7 @@
       }`}
     />
     <span
-      class="text-xs text-black/[.6] tracking-[-0.12px] font-medium text-center"
+      class="text-xs text-black/[.6] dark:text-neutral-300  tracking-[-0.12px] font-medium text-center"
     >
       Snip
     </span>
@@ -213,7 +213,7 @@
         }`}
       />
       <span
-        class="text-xs text-black/[.6] tracking-[-0.12px] font-medium text-center"
+        class="text-xs text-black/[.6] dark:text-neutral-300  tracking-[-0.12px] font-medium text-center"
       >
         Alerts
       </span>
