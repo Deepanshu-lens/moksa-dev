@@ -65,8 +65,10 @@
         class=" flex flex-col items-start justify-center gap-10 lg:w-[75%] mb-8 px-6"
       >
         {#each firmOptions as { id, label }}
-          <div class="flex gap-4 w-full items-center lg:flex-row flex-col justify-between">
-            <label>
+          <div
+            class="flex gap-4 w-full items-center lg:flex-row flex-col justify-between"
+          >
+            <label class="flex items-center justify-between">
               <input
                 type="radio"
                 name="delayOption"

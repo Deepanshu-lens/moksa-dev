@@ -68,7 +68,7 @@
   class="flex items-center justify-evenly px-2 fixed w-screen bottom-[66px] z-30 pb-4 pt-2 backdrop-blur-xl"
 >
   {#each ["Remote", "Stream", "Recording", "System", "License", "User"] as section}
-    <div>
+    <div class="flex flex-col items-center">
       <button
         class={($currentSection !== section
           ? inactiveButtonClass
