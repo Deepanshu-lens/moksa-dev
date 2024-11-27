@@ -3,6 +3,7 @@
   import { isAlertMobileOpen } from "@/stores/ui";
   import { nodes, liveEvents } from "@/stores";
   import * as Drawer from "@/components/ui/drawer";
+  import EventAlertModal from "../events/EventAlertModal.svelte";
 
   const eventTypeIcons = {
     person: "mdi:human",
@@ -14,6 +15,10 @@
 
   function openEventModal(event: Event): any {
     selectedEvent = { ...event };
+  }
+
+  function closeEventModal() {
+    selectedEvent = null;
   }
 </script>
 
@@ -46,20 +51,20 @@
                         class="flex justify-between w-full items-center gap-4"
                       >
                         <div class="flex flex-col gap-2 justify-between">
-                          <div class="flex items-center space-x-1">
+                          <div class="flex items-center">
                             {#if eventTypeIcons[event.type]}
                               <Icon
                                 icon={eventTypeIcons[event.type]}
                                 width="20"
                               />
                             {/if}
-                            <h3 class="text-sm">
+                            <h3 class="text-xs">
                               {event.title || "Unknown Identity"}
                             </h3>
                           </div>
                           <div class="flex flex-col items-start gap-0">
                             <span
-                              class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-sm"
+                              class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-xs"
                               >Confidence: {Math.round(event.score * 100)} %</span
                             >
                             <!-- <span
@@ -102,3 +107,9 @@
     </Drawer.Footer>
   </Drawer.Content>
 </Drawer.Root>
+
+<!-- for events details modal-->
+{#if selectedEvent}
+  <EventAlertModal event={selectedEvent} onClose={closeEventModal}
+  ></EventAlertModal>
+{/if}

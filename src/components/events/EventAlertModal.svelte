@@ -10,7 +10,9 @@
 
 <Dialog.Root bind:open={modalOpen}>
   <Dialog.Trigger><slot /></Dialog.Trigger>
-  <Dialog.Content class="p-6 max-w-2xl max-h-full mx-auto rounded-lg shadow-lg">
+  <Dialog.Content
+    class="p-6 max-w-2xl lg:max-h-full max-h-[90vh] overflow-auto mx-auto rounded-lg shadow-lg"
+  >
     <Dialog.Header>
       <Dialog.Title class="text-xl font-bold border-b pb-4 mb-4">
         {event.title || "Event Details"}
@@ -27,7 +29,7 @@
         <img
           src={"data:image/jpeg;base64," + event.frameImage}
           alt={event.title || "Event Image"}
-          class="w-full h-96 rounded-lg object-cover mb-4"
+          class="w-full lg:h-96 h-52 rounded-lg object-cover mb-4"
         />
       </Tabs.Content>
       <Tabs.Content value="videos">
