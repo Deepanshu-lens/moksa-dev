@@ -10,7 +10,7 @@
 
 <Dialog.Root bind:open={modalOpen}>
   <Dialog.Trigger><slot /></Dialog.Trigger>
-  <Dialog.Content class="p-6 max-w-2xl mx-auto rounded-lg shadow-lg">
+  <Dialog.Content class="p-6 max-w-2xl max-h-full mx-auto rounded-lg shadow-lg">
     <Dialog.Header>
       <Dialog.Title class="text-xl font-bold border-b pb-4 mb-4">
         {event.title || "Event Details"}
@@ -27,12 +27,16 @@
         <img
           src={"data:image/jpeg;base64," + event.frameImage}
           alt={event.title || "Event Image"}
-          class="w-full h-auto rounded-lg object-cover mb-4"
+          class="w-full h-96 rounded-lg object-cover mb-4"
         />
       </Tabs.Content>
       <Tabs.Content value="videos">
         <!-- svelte-ignore a11y_media_has_caption -->
-        <video src={event.videoPath} class="w-full h-auto rounded-lg object-cover mb-4" controls></video>
+        <video
+          src={event.videoPath}
+          class="w-full h-auto rounded-lg object-cover mb-4"
+          controls
+        ></video>
       </Tabs.Content>
     </Tabs.Root>
 
