@@ -190,7 +190,7 @@
 </script>
 
 <article
-  class="w-full h-full bg-gradient-to-b pb-4 from-[#E9EAEC] via-[#D5D6D8] to-[#959699]"
+  class="w-full h-full bg-gradient-to-b pb-4 from-[#000000]/60 via-[#000000]/75 to-[#000000]/100"
 >
   <span class="bg-black text-white flex px-1 items-center justify-between">
     <p class="text-white font-semibold">PTZ Control</p>
@@ -211,14 +211,14 @@
         <button on:click={() => moveSpeed("", 0.1)}><Plus size="16" /></button>
         <button on:click={() => moveSpeed("", 0.1)}><Minus size="16" /></button>
       </span>
-      <p class="text-sm">Focus</p>
+      <p class="text-sm text-white">Focus</p>
     </span>
     <span>
       <span
-        class="size-[120px] p-2 rounded-full bg-gradient-to-b from-[#202020] to-[#141414] text-white flex flex-col items-center justify-center relative"
+        class="size-[120px] p-2 rounded-full bg-gradient-to-b border border-gray-800 shadow-custom-inset drop-shadow-3xl drop-shadow-gray-200 dark:border-gray-600 dark:shadow-gray-600 text-white flex flex-col items-center justify-center relative"
       >
         <span
-          class="size-[80px] rounded-full bg-gradient-to-b from-[#202020] to-[#141414] text-white border border-solid border-black relative"
+          class="size-[80px] rounded-full bg-gradient-to-b shadow-lg drop-shadow-md shadow-gray-700  dark:border-gray-600 dark:shadow-gray-600 text-white border border-solid relative"
         >
           <!-- <Tooltip.Root>
             <Tooltip.Trigger asChild let:builder> -->
@@ -268,11 +268,11 @@
         <button on:click={() => move("", 0.1)}><Plus size="16" /></button>
         <button on:click={() => move("", -0.1)}><Minus size="16" /></button>
       </span>
-      <p class="text-sm">Zoom</p>
+      <p class="text-sm text-white">Zoom</p>
     </span>
   </div>
   <div class="flex flex-col items-start justify-center gap-2 my-2 px-4">
-    <p class="text-sm text-[#202020]">Camera speed</p>
+    <p class="text-sm text-white">Camera speed</p>
     <Slider
       class="w-full bg-[#181818]"
       rangeBg="bg-[red]"
