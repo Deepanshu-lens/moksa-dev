@@ -6,7 +6,7 @@
   import type { Camera } from "@/types";
   type Props =
     | { action: "add"; icon?: boolean; camera?: undefined }
-    | { action: "edit" | "delete"; icon?: boolean; camera: Camera };
+    | { action: "edit" | "delete" | "ptz"; icon?: boolean; camera: Camera };
 
   export let action: Props["action"];
   export let icon: Props["icon"] = false;

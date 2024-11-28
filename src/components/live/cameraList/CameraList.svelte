@@ -236,6 +236,7 @@
             class="flex flex-row gap-0 xl:ml-auto space-x-2 list-none cursor-pointer items-end"
           >
             <CameraActionButton {camera} action="edit" />
+            <CameraActionButton {camera} action="ptz" />
             <CameraActionButton {camera} action="delete" />
           </div>
         </article>

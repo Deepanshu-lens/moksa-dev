@@ -97,7 +97,7 @@
                           <Accordion.Item value="open">
                             <Accordion.Trigger>Whitelisted</Accordion.Trigger>
                             <Accordion.Content>
-                              <div class="flex flex-col gap-4 max-h-[calc(100vh-22rem)] overflow-y-auto">
+                              <div class="flex flex-col gap-4 max-h-[calc(100vh-22rem)] h-60 overflow-y-auto">
                                 {#each $gallery.filter((event: any) => !event.blackList) as event}
                                   <ComfortableCard {event} />
                                 {:else}
@@ -109,7 +109,7 @@
                           <Accordion.Item value="item-2">
                             <Accordion.Trigger>BlackListed</Accordion.Trigger>
                             <Accordion.Content>
-                              <div class="flex flex-col gap-4 max-h-[calc(100vh-22rem)] overflow-y-auto">
+                              <div class="flex flex-col gap-4 max-h-[calc(100vh-22rem)] overflow-y-auto h-60">
                                 {#each $gallery.filter((event: any) => event.blackList) as event}
                                   <ComfortableCard {event} />
                                 {:else}

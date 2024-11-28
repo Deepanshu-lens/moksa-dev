@@ -2,6 +2,7 @@
   import pb from "@/lib/pb";
   import { selectedNode } from "@/stores";
   import * as Dialog from "@/components/ui/dialog";
+  import * as Popover from "@/components/ui/popover";
   import { Button } from "@/components/ui/button";
   import AddCameraForm from "@/components/forms/CameraForm.svelte";
 
@@ -12,12 +13,15 @@
 
   import { createForm } from "felte";
   import { validator } from "@felte/validator-zod";
+  import PtzControlModal from "./PTZControlModal.svelte";
+  import { writable } from "svelte/store";
 
-  export let action: "add" | "edit" | "delete";
+  export let action: "add" | "edit" | "delete" | "ptz";
   export let camera;
 
   let modalOpen = false;
-
+  let ptzControl = writable("");
+  let openPTZ = writable(false);
   let cameraName = camera ? camera.name : "";
   let mainUrl = camera ? camera.url : "";
   let subUrl = camera ? camera.subUrl : "";
@@ -142,6 +146,17 @@ wss://view.lenscorp.cloud/api/ws?src=${camera.id}`
       </form>
     </Dialog.Content>
   </Dialog.Root>
+{:else if action === "ptz"}
+  <Popover.Root>
+    <Popover.Trigger asChild let:builder>
+      <Button builders={[builder]} variant="outline" size="sm" class="text-xs"
+        >Ptz</Button
+      >
+    </Popover.Trigger>
+    <Popover.Content class="w-80 p-0" alignOffset={200}>
+      <PtzControlModal {ptzControl} {openPTZ}/>
+    </Popover.Content>
+  </Popover.Root>
 {:else}
   <AlertDialog.Root>
     <AlertDialog.Trigger><slot /></AlertDialog.Trigger>

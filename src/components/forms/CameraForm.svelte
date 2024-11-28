@@ -45,12 +45,15 @@
   });
 
   const streamUri = async (index: any) => {
-    const res = await fetch(`${BASE_URI}/stream-uri/${index}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    const res = await fetch(
+      `${import.meta.env.PUBLIC_ONVIF_URL}/stream-uri/${index}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
     const data = await res.json();
     if (data.uri) {
       const url = data.uri.split("//");
@@ -99,7 +102,7 @@
       }
     } else {
       console.log("Details tab api called");
-      await fetch(`${BASE_URI}/initialize`, {
+      await fetch(`${import.meta.env.PUBLIC_ONVIF_URL}/initialize`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -174,7 +177,7 @@
   <Tabs.Root bind:value={tabValue}>
     <Tabs.List class="grid w-full grid-cols-2">
       <Tabs.Trigger value="url">Using URL</Tabs.Trigger>
-      <Tabs.Trigger value="details" disabled>Using Details</Tabs.Trigger>
+      <Tabs.Trigger value="details">Using Details</Tabs.Trigger>
     </Tabs.List>
     <Tabs.Content value="url" class="py-2">
       <div class="flex flex-col pb-4">
@@ -299,7 +302,9 @@
       </div>
       <div class="flex items-center gap-1">
         <Switch id="faceScan" />
-        <Label for="faceScan" class="text-xs font-normal text-nowrap">Face Scan</Label>
+        <Label for="faceScan" class="text-xs font-normal text-nowrap"
+          >Face Scan</Label
+        >
       </div>
       <div class="flex items-center gap-1 mr-6 md:mr-auto">
         <Switch id="priority" />
@@ -308,15 +313,15 @@
         >
       </div>
     </div>
-    <div class="flex flex-col md:flex-row items-start md:items-center justify-between md:justify-start pb-4 w-full gap-2 md:gap-1">
+    <div
+      class="flex flex-col md:flex-row items-start md:items-center justify-between md:justify-start pb-4 w-full gap-2 md:gap-1"
+    >
       <Label class="text-left mb-2 text-nowrap">Motion Sensitivity</Label>
-      <Slider value={[33]} max={100} step={1} class="text-left w-full"/>
+      <Slider value={[33]} max={100} step={1} class="text-left w-full" />
     </div>
   </div>
 
   <div class="flex flex-col mx-auto">
-    <Button variant="brand" type="submit" class="font-semibold">
-      Confirm
-    </Button>
+    <Button variant="brand" type="submit" class="font-semibold">Confirm</Button>
   </div>
 </form>
