@@ -149,12 +149,16 @@ wss://view.lenscorp.cloud/api/ws?src=${camera.id}`
 {:else if action === "ptz"}
   <Popover.Root>
     <Popover.Trigger asChild let:builder>
-      <Button builders={[builder]} variant="outline" size="sm" class="text-xs"
-        >Ptz</Button
+      <Button
+        on:click={() => ptzControl.set(camera)}
+        builders={[builder]}
+        variant="outline"
+        size="sm"
+        class="text-xs">Ptz</Button
       >
     </Popover.Trigger>
     <Popover.Content class="w-80 p-0" alignOffset={200}>
-      <PtzControlModal {ptzControl} {openPTZ}/>
+      <PtzControlModal {ptzControl} {openPTZ} />
     </Popover.Content>
   </Popover.Root>
 {:else}
