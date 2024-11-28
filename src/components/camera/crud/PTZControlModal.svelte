@@ -129,6 +129,28 @@
       })
       .catch((err) => console.log(err));
   }
+
+  async function moveSpeed(move: any, zoomValue: number) {
+    await fetch(`${import.meta.env.PUBLIC_ONVIF_URL}/relative-move/${$index}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        speed: {
+          x: move[0],
+          y: move[0],
+          zoom: zoomValue,
+        },
+      }),
+    })
+      .then(async (res) => {
+        const data = await res.json();
+        console.log(data);
+        await getStatus();
+      })
+      .catch((err) => console.log(err));
+  }
   async function gotoPreset(preset) {
     await fetch(`${import.meta.env.PUBLIC_ONVIF_URL}/goto-preset/${$index}`, {
       method: "POST",
@@ -186,12 +208,8 @@
       <span
         class="h-[75px] w-[35px] p-2 rounded-2xl bg-[#202020] interior text-white flex flex-col items-center justify-between"
       >
-        <button
-          on:click={() => move("", 0.1)}><Plus size="16" /></button
-        >
-        <button
-          on:click={() => move("", 0.1)}><Minus size="16" /></button
-        >
+        <button on:click={() => moveSpeed("", 0.1)}><Plus size="16" /></button>
+        <button on:click={() => moveSpeed("", 0.1)}><Minus size="16" /></button>
       </span>
       <p class="text-sm">Focus</p>
     </span>
@@ -260,7 +278,7 @@
       rangeBg="bg-[red]"
       max={1}
       step={0.1}
-      onValueChange={(v) => move(v, 0)}
+      onValueChange={(v) => moveSpeed(v, 0)}
     />
   </div>
   <div class="flex flex-col items-start justify-center gap-1 my-2 px-4">
