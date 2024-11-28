@@ -18,6 +18,7 @@
   let index = writable(null);
   let status = writable(null);
   let presets = writable([]);
+  let zoomSpeed = writable("");
 
   onMount(async () => {
     try {
@@ -38,7 +39,7 @@
         if (!res?.ok) {
           throw new Error(data?.message);
         }
-        index.set(data.index);
+        index.set(data?.index);
         await getStatus();
         await getPresets();
       });
@@ -103,7 +104,8 @@
       console.log(error?.message, "err");
     }
   }
-  async function move(move: string, zoomValue: number) {
+  async function move(move: any, zoomValue: number) {
+    console.log(move, "move");
     await fetch(`${import.meta.env.PUBLIC_ONVIF_URL}/relative-move/${$index}`, {
       method: "POST",
       headers: {
@@ -114,9 +116,9 @@
         y: move === "up" ? 0.2 : move === "down" ? -0.2 : 0,
         zoom: zoomValue === undefined ? $status.position.zoom : zoomValue,
         speed: {
-          x: 1,
-          y: 1,
-          zoom: 0,
+          x: move[0],
+          y: move[0],
+          zoom: zoomValue,
         },
       }),
     })
@@ -184,11 +186,11 @@
       <span
         class="h-[75px] w-[35px] p-2 rounded-2xl bg-[#202020] interior text-white flex flex-col items-center justify-between"
       >
-        <button disabled class="disabled:cursor-not-allowed"
-          ><Plus size="16" /></button
+        <button
+          on:click={() => move("", 0.1)}><Plus size="16" /></button
         >
-        <button disabled class="disabled:cursor-not-allowed"
-          ><Minus size="16" /></button
+        <button
+          on:click={() => move("", 0.1)}><Minus size="16" /></button
         >
       </span>
       <p class="text-sm">Focus</p>
@@ -217,25 +219,25 @@
 
         <button
           class="absolute text-white top-1/2 left-1 -translate-y-1/2"
-          on:click={() => move("left")}
+          on:click={() => move("left", 0)}
         >
           <Dot size="20" />
         </button>
         <button
           class="absolute text-white top-1 left-1/2 -translate-x-1/2"
-          on:click={() => move("up")}
+          on:click={() => move("up", 0)}
         >
           <Dot size="20" />
         </button>
         <button
           class="absolute text-white top-1/2 right-1 -translate-y-1/2"
-          on:click={() => move("right")}
+          on:click={() => move("right", 0)}
         >
           <Dot size="20" />
         </button>
         <button
           class="absolute text-white bottom-1 right-1/2 translate-x-1/2"
-          on:click={() => move("down")}
+          on:click={() => move("down", 0)}
         >
           <Dot size="20" />
         </button>
@@ -253,7 +255,13 @@
   </div>
   <div class="flex flex-col items-start justify-center gap-2 my-2 px-4">
     <p class="text-sm text-[#202020]">Camera speed</p>
-    <Slider class="w-full bg-[#181818]" rangeBg="bg-[red]" />
+    <Slider
+      class="w-full bg-[#181818]"
+      rangeBg="bg-[red]"
+      max={1}
+      step={0.1}
+      onValueChange={(v) => move(v, 0)}
+    />
   </div>
   <div class="flex flex-col items-start justify-center gap-1 my-2 px-4">
     <p class="text-sm text-[#202020]">Presets</p>
@@ -269,8 +277,8 @@
               <Select.Item
                 class="text-white"
                 on:click={() => gotoPreset(preset)}
-                value={preset.token}
-                label={preset.name}>{preset.name}</Select.Item
+                value={preset?.token}
+                label={preset?.name}>{preset?.name}</Select.Item
               >
             {/each}
           {:else}
