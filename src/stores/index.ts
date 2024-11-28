@@ -4,11 +4,11 @@ import { selectedNode, nodes } from "./node";
 import { activePanel, panels } from "./panels";
 import { events } from "./events";
 import { liveEvents } from "./live-events";
-import { isAlertPanelOpen, selectedLayout } from "./ui";
+import { isAlertPanelOpen, selectedLayout, isRoiPanelOpen } from "./ui";
 import { personCount } from "./person-counter";
 import { imageUrl } from "./heatMapimageUrl";
 import { faceEvents } from "./face-events";
-import { allEvents,totalAllEvent,isEventsLoading } from "./all-events";
+import { allEvents, totalAllEvent, isEventsLoading } from "./all-events";
 import { gallery, totalFaceRegistered, isGalleryLoading } from "./gallery";
 
 export {
@@ -25,6 +25,7 @@ export {
   liveEvents,
   faceEvents,
   isAlertPanelOpen,
+  isRoiPanelOpen,
   selectedLayout,
   personCount,
   imageUrl,

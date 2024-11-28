@@ -3,13 +3,14 @@
   import {
     selectedLayout,
     isAlertPanelOpen,
+    isRoiPanelOpen,
     cameras,
     selectedCamera,
     captureRef,
   } from "@/stores";
   import { cn } from "@/lib/utils";
   import * as Popover from "@/components/ui/popover";
-  import { ImageDown } from "lucide-svelte";
+  import { ImageDown, ScanSearch } from "lucide-svelte";
   import html2canvas from "html2canvas";
   import { toast } from "svelte-sonner";
   import JSZip from "jszip";
@@ -161,11 +162,7 @@
       class={`disabled:cursor-not-allowed disabled:opacity-50 text-black/[.4] h-[30px] w-[30px] rounded-full shadow-md group border-2 border-solid border-black/[.4] dark:border-white/[.4] bg-white dark:bg-black dark:text-white group-hover:text-white group-hover:bg-[#015a62] dark:group-hover:bg-[#258d9d] group-hover:border-none grid place-items-center`}
       ><Icon icon="material-symbols:fullscreen" class="h-[22px] w-[22px]" />
     </button>
-    <p
-      class="text-xs text-black/[.4] dark:text-white"
-    >
-      Fullscreen
-    </p>
+    <p class="text-xs text-black/[.4] dark:text-white">Fullscreen</p>
   </span>
   <!--  -->
   <!-- <span class="group flex-col flex items-center justify-center gap-0.5">
@@ -187,14 +184,17 @@
         disabled={!features.includes("Toggle Alerts")} -->
     <button
       class={cn(
-        "text-black/[.4] h-[30px] w-[30px] rounded-full shadow-md border-2 border-solid dark:text-white group-hover:text-white group-hover:bg-[#015a62] dark:group-hover:bg-[#258d9d] group-hover:border-none grid place-items-center", 
+        "text-black/[.4] h-[30px] w-[30px] rounded-full shadow-md border-2 border-solid dark:text-white group-hover:text-white group-hover:bg-[#015a62] dark:group-hover:bg-[#258d9d] group-hover:border-none grid place-items-center",
         {
           "font-bold bg-[#015a62]": $isAlertPanelOpen,
           "border-black/[.4] dark:border-white/[.4] bg-white dark:bg-black":
             !$isAlertPanelOpen,
         }
       )}
-      on:click={() => isAlertPanelOpen.update((value) => !value)}
+      on:click={() => {
+        isAlertPanelOpen.update((value) => !value);
+        isRoiPanelOpen.set(false);
+      }}
       ><Icon
         icon="material-symbols:notifications-active-outline-rounded"
         class="h-[22px] w-[22px]"
@@ -216,11 +216,7 @@
           class="h-[22px] w-[22px]"
         />
       </button>
-      <p
-        class="text-xs text-black/[.4] dark:text-white"
-      >
-        Register
-      </p>
+      <p class="text-xs text-black/[.4] dark:text-white">Register</p>
     </span>
   </RegisterFaceDialog>
   <!-- svelte-ignore a11y_missing_attribute -->
@@ -238,13 +234,33 @@
           class="h-[22px] w-[22px]"
         /></button
       >
-      <p
-        class="text-xs text-black/[.4] dark:text-white"
-      >
-        Extend
-      </p>
+      <p class="text-xs text-black/[.4] dark:text-white">Extend</p>
     </span>
   </a>
+
+  <span class="group flex-col flex items-center justify-center gap-0.5">
+    <!-- <button
+        disabled={!features.includes("Toggle Alerts")} -->
+    <button
+      class={cn(
+        "text-black/[.4] h-[30px] w-[30px] rounded-full shadow-md border-2 border-solid dark:text-white group-hover:text-white group-hover:bg-[#015a62] dark:group-hover:bg-[#258d9d] group-hover:border-none grid place-items-center",
+        {
+          "font-bold bg-[#015a62]": $isRoiPanelOpen,
+          "border-black/[.4] dark:border-white/[.4] bg-white dark:bg-black":
+            !$isRoiPanelOpen,
+        }
+      )}
+      on:click={() => {
+        isRoiPanelOpen.update((value) => !value);
+        isAlertPanelOpen.set(false);
+      }}><ScanSearch class="h-[22px] w-[22px]" /></button
+    >
+    <p
+      class={`text-xs ${!$isRoiPanelOpen && "text-black/[.4] dark:text-white"}`}
+    >
+      Mark ROI
+    </p>
+  </span>
   <span class="group flex-col flex items-center justify-center gap-0.5">
     <button
       disabled
@@ -254,11 +270,7 @@
         class="h-[22px] w-[22px]"
       />
     </button>
-    <p
-      class="text-xs text-black/[.4] dark:text-white"
-    >
-      Record
-    </p>
+    <p class="text-xs text-black/[.4] dark:text-white">Record</p>
   </span>
   <span class="group flex-col flex items-center justify-center gap-0.5">
     <button
@@ -332,11 +344,7 @@
         </div>
       {/if}
     </button>
-    <p
-      class="text-xs text-black/[.23] dark:text-white"
-    >
-      Snip
-    </p>
+    <p class="text-xs text-black/[.23] dark:text-white">Snip</p>
   </span>
   <span class="group flex-col flex items-center justify-center gap-0.5">
     <!-- <LayoutDialog {toggleDisplayLayouts}> -->

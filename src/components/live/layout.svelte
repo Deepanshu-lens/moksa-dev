@@ -2,7 +2,7 @@
   import StreamLayout from "./streams/StreamLayout.svelte";
   import * as Resizable from "@/components/ui/resizable";
   import Icon from "@iconify/svelte";
-  import { isAlertPanelOpen } from "@/stores";
+  import { isAlertPanelOpen, isRoiPanelOpen, cameras, selectedCamera } from "@/stores";
   import CameraList from "@/components/live/cameraList/CameraList.svelte";
   import { nodes, liveEvents, gallery } from "@/stores";
   import SidePannel from "./side-pannel.svelte";
@@ -11,6 +11,8 @@
   import * as Accordion from "@/components/ui/accordion/index.ts";
   import ComfortableCard from "./alerts/comfortable-card.svelte";
   import { PaneResizer, type PaneAPI } from "paneforge";
+  import Button from "../ui/button/button.svelte";
+  import { ChevronDown } from "lucide-svelte";
   export let STREAM_URL;
   let isCollapsed = false;
 
@@ -20,7 +22,7 @@
   let paneOne: PaneAPI;
   let shouldUpdateContainer = false;
 
-
+  let roiCamera = null;
   const eventTypeIcons = {
     person: "mdi:human",
     face: "mdi:face-recognition",
@@ -36,6 +38,36 @@
   function closeEventModal() {
     selectedEvent = null;
   }
+
+  function onSelectCamera(e:any){
+    const selectedCam = $cameras.find(
+     (cam) => cam?.id === e.target.value,
+    );
+    selectedCamera.set(e.target.value);
+    console.log(selectedCam);
+    // activeCamera.set(selectedCam)
+    roiCamera = selectedCam;
+    // filteredNodeCameras.set([selectedCam]);
+    // // console.log($filteredNodeCameras);
+    // intrusionDetection =
+    //   selectedCam?.expand?.inference?.intrusionDetection;
+    // lineCrossing = selectedCam?.expand?.inference?.lineCrossing;
+    // intrusionPerson =
+    //   selectedCam?.expand?.inference?.intrusionPerson;
+    // intrusionVehicle =
+    //   selectedCam?.expand?.inference?.intrusionVehicle;
+    // intrusionPersonThresh =
+    //   selectedCam?.expand?.inference?.intrusionPersonThresh;
+    // intrusionVehicleThresh =
+    //   selectedCam?.expand?.inference?.intrusionVehicleThresh;
+    // linePerson = selectedCam?.expand?.inference?.linePerson;
+    // lineVehicle = selectedCam?.expand?.inference?.lineVehicle;
+    // linePersonThresh =
+    //   selectedCam?.expand?.inference?.linePersonThresh;
+    // lineVehicleThresh =
+    //   selectedCam?.expand?.inference?.lineVehicleThresh;
+  }
+
 </script>
 
 <div class="hidden lg:block w-full">
@@ -73,11 +105,13 @@
       <div class="lg:block hidden">
         {#if $nodes && $nodes.length > 0}
           <div class="lg:relative">
-            {#if $isAlertPanelOpen}
+            {#if $isAlertPanelOpen || $isRoiPanelOpen}
               <div class="flex">
                 {#if currentPanel == 0}
                   <CameraList />
                 {:else if currentPanel == 1}
+
+                  {#if $isAlertPanelOpen}
                   <div class="border-l flex flex-col p-2 overflow-visible w-full min-w-[360px]">
                     <h1 class="text-lg font-bold p-3">Events</h1>
                     <Tabs.Root>
@@ -205,6 +239,53 @@
                       </Tabs.Content>
                     </Tabs.Root>
                   </div>
+                  {:else if $isRoiPanelOpen}
+                  <div class="border-l flex flex-col p-2 overflow-visible w-full min-w-[360px]">
+                    <h1 class="text-lg font-bold p-3">Mark ROI</h1>
+                    <div class="px-4 py-4 flex flex-col gap-1">
+                      <label for="camera" class="text-black/[.7] text-sm"
+                        >Select Camera</label
+                      >
+                      <div class="relative w-full">
+                        <select
+                          id="selectedCamSelect"
+                          class={`block text-primary capitalize font-semibold rounded-md appearance-none w-full bg-[#F6F6F6] border-2 py-2 text-sm px-2 leading-tight `}
+                          on:change={onSelectCamera}
+                        >
+                          <option value="" disabled selected>Select from list</option>
+                          {#each $cameras as cam}
+                            <option value={cam?.id}>{cam?.name}</option>
+                          {/each}
+                        </select>
+                        <ChevronDown
+                          size={22}
+                          class="text-[#727272] absolute top-1/2 -translate-y-1/2 right-2 pointer-events-none cursor-pointer outline-none"
+                        />
+                      </div>
+                    </div>
+                    <!-- {#if roiCamera} -->
+                      <div class="w-full p-4 flex items-center gap-4">
+                        <Button
+                          variant="brand"
+                          on:click={() => {
+                            // updateAi();
+                            // document.getElementById("selectedCamSelect").value = "";
+                          }}>Save</Button
+                        >
+                        <Button
+                          variant="secondary"
+                          on:click={() => {
+                            // markRoi.set(false);
+                            // roiCamera = null;
+                            // filteredNodeCameras.set($selectedNode.camera);
+                            // $selectedDetections = [];
+                            // document.getElementById("selectedCamSelect").value = "";
+                          }}>Cancel</Button
+                        >
+                      </div>
+                    <!-- {/if} -->
+                  </div>
+                  {/if}
                 {/if}
                 <!-- <SidePannel /> -->
               </div>
@@ -220,7 +301,7 @@
               ></EventAlertModal>
             {/if}
   
-            {#if $isAlertPanelOpen}
+            {#if $isAlertPanelOpen || $isRoiPanelOpen}
               <div
                 class="absolute z-50 -translate-x-full top-44 transform -left-8 transition-all duration-500 ease-in-out"
               >
@@ -246,6 +327,7 @@
                       </button>
                     </div>
                   </div>
+                  {#if $isAlertPanelOpen}
                   <div
                     class={`${currentPanel == 1 ? "font-bold bg-accent" : "bg-background/80 "} cursor-pointer h-[32px] rounded-t-xl  text-black dark:text-white px-3 flex items-center whitespace-nowrap shadow-xl z-40 border dark:border-muted-foreground/10`}
                   >
@@ -268,6 +350,30 @@
                       </button>
                     </div>
                   </div>
+                  {:else if $isRoiPanelOpen}
+                  <div
+                  class={`${currentPanel == 1 ? "font-bold bg-accent" : "bg-background/80 "} cursor-pointer h-[32px] rounded-t-xl  text-black dark:text-white px-3 flex items-center whitespace-nowrap shadow-xl z-40 border dark:border-muted-foreground/10`}
+                >
+                  <!-- svelte-ignore a11y_click_events_have_key_events -->
+                  <!-- svelte-ignore a11y_no_static_element_interactions -->
+                  <div
+                    class={`flex items-center justify-center place-items-center my-auto space-x-2`}
+                    on:click={() => {
+                      currentPanel = 1;
+                      isPaneCollapsed = false;
+                    }}
+                  >
+                    <span>Mark ROI</span>
+                    <button
+                      class={`text-center items-center flex place-items-center hover:bg-foreground/50 hover:dark:text-black hover:text-white rounded-full hover:m-1`}
+                      on:click|stopPropagation={() =>
+                        isRoiPanelOpen.set(false)}
+                    >
+                      <Icon icon="material-symbols:close-rounded" width={14} />
+                    </button>
+                  </div>
+                </div>
+                  {/if}
                 </div>
               </div>
             {/if}
