@@ -13,6 +13,7 @@
   import { io } from "socket.io-client";
   import type { DateRange } from "bits-ui";
   import Spinner from "../ui/spinner/Spinner.svelte";
+  const userID = 8;
 
   let dateRange = writable("7");
   let floorMaps = writable([]);
@@ -93,6 +94,7 @@
   let storeFloorImg: string | null = null;
   let loadingFloor = true;
   let heatMapData = writable(null);
+  let socket: any;
   onMount(async () => {
     await getAllFloorMaps();
     setTimeout(async () => {
@@ -152,6 +154,102 @@
       }
     }
   }
+
+  function setupSocket() {
+    if (socket) {
+      socket.disconnect();
+    }
+
+    socket = io("https://dev.api.moksa.ai", {
+      withCredentials: true,
+      extraHeaders: {
+        Authorization: `Bearer ${token}`,
+      },
+      transports: ["websocket", "polling"],
+    });
+
+    socket.on("error", (err) => {
+      console.log("error", err);
+    });
+
+    socket.on("connect", () => {
+      console.log(`connected for ${$selectedStore.value}, ${userID}`);
+      socket.emit("joinUser", userID);
+      socket.emit("joinStore", $selectedStore.value);
+    });
+
+    socket.on(`aisle_count_store_${$selectedStore?.value}`, (data) => {
+      console.log(
+        `Received aisle data for store ${$selectedStore.value}:`,
+        data,
+      );
+      aisleData.update((currentData) => {
+        console.log(currentData[0], "current data");
+
+        let existingStoreIndex = 0;
+        if (typeof currentData !== "object") {
+          existingStoreIndex = currentData?.findIndex(
+            (store) => store?.store_id == data?.store_id,
+          );
+          let arr = [];
+          arr[0] = { ...data };
+          console.log(arr, "data in arr");
+          return arr[0];
+        } else {
+          let temp = {...data};
+          temp['store_id'] = data['store_id']?.toString();
+          temp['total_people_count'] = data['total_people_count']?.toString();
+          return [{ ...temp }];
+        }
+      });
+    });
+
+    // New heatmap data listener
+    socket.on(`heatmap_2d_store_${$selectedStore?.value}`, async (data) => {
+      console.log(
+        `Received heatmap data for store ${$selectedStore.value}:`,
+        data,
+      );
+      heatMapData.set(data); // Update heatMapData with the received data
+      const res = await fetch(
+        `https://dev.api.moksa.ai/stream?key=${selectedFloorMap}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+      const blob = await res.blob();
+      const imageUrl = URL.createObjectURL(blob);
+      // selectedImage = imageUrl;
+      // console.log('data',data)
+      storeFloorImg = imageUrl;
+      loadingFloor = false;
+      setTimeout(() => {
+        drawHeatmap($heatMapData);
+      }, 100);
+    });
+
+    socket.on("disconnect", () => {
+      console.log("disconnected");
+    });
+  }
+
+  $: console.log($aisleData, "aisle Daa");
+
+  $: {
+    if ($selectedStore.value !== undefined && token !== "") {
+      setupSocket();
+    }
+  }
+
+  onDestroy(() => {
+    if (socket) {
+      socket.disconnect();
+    }
+  });
 
   async function updateSelectedFloorMap() {
     console.log("updateSelectedFloorMap called", $dateRange);
@@ -356,7 +454,7 @@
   function transformApiDataForFusionChart(data) {
     console.log("data", data);
 
-    if (!data || !data[0].aisle_details) return { data: [], categories: [] };
+    if (!data || !data[0]?.aisle_details) return { data: [], categories: [] };
 
     const aisleDetails = data[0].aisle_details;
     const categories = [{ category: [] }];

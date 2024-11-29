@@ -2,18 +2,7 @@
   import { createTable, Render, Subscribe } from "svelte-headless-table";
   import * as Table from "@/components/ui/table";
   import { Button } from "@/components/ui/button";
-  import {
-    ArrowUpDown,
-    Check,
-    X,
-    ChevronRight,
-    Edit,
-    Store,
-    StoreIcon,
-    Trash2,
-    TrendingDown,
-    TrendingUp,
-  } from "lucide-svelte";
+  import { ArrowUpDown, StoreIcon } from "lucide-svelte";
   import { createEventDispatcher } from "svelte";
   import {
     addPagination,
