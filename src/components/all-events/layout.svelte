@@ -1,12 +1,17 @@
 <script lang="ts">
   import EventGrid from "./component/event-grid.svelte";
+  import NodeSelection from "../node/NodeSelection.svelte";
 </script>
+
+<div class="w-52 ml-8 mt-3 flex justify-end">
+  <NodeSelection />
+</div>
 
 <section class="right flex-1 flex h-screen w-full justify-between">
   <div class="w-full h-full px-4">
     <EventGrid />
   </div>
-<!-- 
+  <!-- 
   <div
     class={`relative h-[calc(100vh-75px)] ${showRightPanel ? "w-1/4 max-w-72 " : " w-0"} transition-width ease-in-out duration-500 dark:border-[#292929] border-x-[1px]`}
   >

@@ -4,7 +4,7 @@
 
   import { VideoStream } from "@/lib/video-stream";
   import { personCount, selectedCamera } from "@/stores";
-  import { PersonStanding, Minimize } from "lucide-svelte";
+  import { PersonStanding } from "lucide-svelte";
   import { getHeatMapImage } from "@/managers/get-heathmap";
   import ImagePreviewModal from "./ImagePreviewModal.svelte";
   import Button from "@/components/ui/button/button.svelte";

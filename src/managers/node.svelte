@@ -1,6 +1,6 @@
 <script lang="ts">
   import pb from "@/lib/pb";
-  import { selectedNode, nodes } from "@/stores";
+  import { selectedNode, nodes, user } from "@/stores";
   import type { Node } from "@/types";
   import { sleep } from "node_modules/bits-ui/dist/internal";
 
@@ -30,12 +30,11 @@
     }
   })();
 
-  $: if ($selectedNode) localStorage.setItem("selectedNode", $selectedNode);
-
   try {
     pb.collection("node").subscribe(
       "*",
       (e) => {
+        console.log("Node collection updated", e.action, e.record);
         if (e.action === "create") {
           nodes.update((current) => [...current, e.record]);
         } else if (e.action === "update") {
