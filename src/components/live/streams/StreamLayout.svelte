@@ -147,10 +147,7 @@
       </div>
 
       {#if $totalCameras > 0}
-        <Pagination
-          MAX_CAMERAS_PER_PAGE={$selectedLayout * $selectedLayout}
-          initialPage={0}
-        />
+        <Pagination/>
       {/if}
     </div>
   {/if}

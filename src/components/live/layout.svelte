@@ -12,15 +12,16 @@
   import ComfortableCard from "./alerts/comfortable-card.svelte";
   import { PaneResizer, type PaneAPI } from "paneforge";
   import Button from "../ui/button/button.svelte";
+  import { onMount } from 'svelte'; 
   import { ChevronDown } from "lucide-svelte";
   export let STREAM_URL;
-  let isCollapsed = false;
 
 
   let currentPanel = 1;
   let isPaneCollapsed = false;
   let paneOne: PaneAPI;
   let shouldUpdateContainer = false;
+  let isMobile = false;
 
   let roiCamera = null;
   const eventTypeIcons = {
@@ -37,6 +38,10 @@
 
   function closeEventModal() {
     selectedEvent = null;
+  }
+
+  function checkIfMobile() {
+    isMobile = window.matchMedia("(max-width: 1024px)").matches;
   }
 
   function onSelectCamera(e:any){
@@ -68,6 +73,14 @@
     //   selectedCam?.expand?.inference?.lineVehicleThresh;
   }
 
+  onMount(() => {
+    checkIfMobile(); // Initial check
+    window.addEventListener('resize', checkIfMobile); // Update on resize
+
+    return () => {
+      window.removeEventListener('resize', checkIfMobile); // Clean up
+    };
+  });
 </script>
 
 <div class="hidden lg:block w-full">
@@ -77,7 +90,9 @@
   style="height: calc(100vh - 3rem);"
   >
   <Resizable.Pane defaultSize={70}>
+    {#if !isMobile}
       <StreamLayout {STREAM_URL} />
+    {/if}
     </Resizable.Pane>
     <Resizable.Handle withHandle />
     <Resizable.Pane
@@ -386,9 +401,11 @@
   </Resizable.PaneGroup>
 </div>
 
-<div class="w-full lg:hidden">
-  <StreamLayout {STREAM_URL} />
-</div>
+<!-- {#if isMobile}
+  <div class="w-full lg:hidden">
+    <StreamLayout {STREAM_URL} />
+  </div>
+{/if} -->
 <div class="hidden lg:block">
   <SidePannel />
 </div>

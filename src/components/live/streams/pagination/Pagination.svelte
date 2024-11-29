@@ -4,10 +4,17 @@
   import ChevronRight from "lucide-svelte/icons/chevron-right";
   import { writable } from "svelte/store";
   import pb from "@/lib/pb";
-  import { cameras, totalCameras, selectedNode } from "@/stores";
+  import {
+    cameras,
+    totalCameras,
+    selectedNode,
+    selectedLayout,
+  } from "@/stores";
 
-  export let MAX_CAMERAS_PER_PAGE = 9;
-  export let initialPage = 0;
+  $: MAX_CAMERAS_PER_PAGE =
+    $selectedLayout * $selectedLayout ||
+    parseInt(localStorage.getItem("selectedLayout") || "5") ** 2;
+  let initialPage = 1;
 
   const currentPage = writable(initialPage); // Tracks the current page
 
@@ -29,7 +36,8 @@
   // Handle pagination navigation
   const nextPage = () => {
     currentPage.update((page) => {
-      if ((page + 1) * MAX_CAMERAS_PER_PAGE < $totalCameras) {
+      const totalPages = Math.ceil($totalCameras / MAX_CAMERAS_PER_PAGE);
+      if (page + 1 < totalPages) {
         fetchCameras(page + 1);
         return page + 1;
       }
@@ -39,7 +47,7 @@
 
   const goToPage = (page: any) => {
     currentPage.update((current) => {
-      if (page >= 0 ) {
+      if (page >= 0) {
         fetchCameras(page);
         return page;
       }
@@ -58,8 +66,7 @@
   };
 
   $: if (MAX_CAMERAS_PER_PAGE) {
-    currentPage.set(initialPage - 1);
-    fetchCameras(initialPage - 1);
+    fetchCameras(1);
   }
 </script>
 

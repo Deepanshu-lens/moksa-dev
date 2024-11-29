@@ -34,10 +34,6 @@
                 cam.id === e.record.id ? e.record : cam
               )
             );
-          } else if (e.action === "delete") {
-            allEvents.update((current: any) =>
-              current.filter((cam: any) => cam.id !== e.record.id)
-            );
           }
         },
         {

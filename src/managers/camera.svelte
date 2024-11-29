@@ -1,16 +1,27 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import pb from "@/lib/pb";
-  import { cameras, selectedNode, totalCameras } from "@/stores";
+  import {
+    cameras,
+    selectedNode,
+    totalCameras,
+    selectedLayout,
+  } from "@/stores";
   import { validateCamera, type Camera } from "@/types";
+
+  let MAX_CAMERAS_PER_PAGE =
+    $selectedLayout * $selectedLayout ||
+    parseInt(localStorage.getItem("selectedLayout") || "1") ** 2;
 
   const getInitialCameras = async (nodeId: string) => {
     try {
-      const localCameras = await pb.collection("camera").getList<Camera>(1, 9, {
-        fields: "id,name,url,subUrl,save,created",
-        filter: `node.id ?= "${nodeId}"`,
-        sort: "-created",
-      });
+      const localCameras = await pb
+        .collection("camera")
+        .getList<Camera>(1, MAX_CAMERAS_PER_PAGE, {
+          fields: "id,name,url,subUrl,save,created",
+          filter: `node.id ?= "${nodeId}"`,
+          sort: "-created",
+        });
 
       cameras.set(localCameras.items);
       totalCameras.set(localCameras.totalItems);

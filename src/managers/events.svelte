@@ -1,3 +1,4 @@
+
 <script lang="ts">
   import pb from "@/lib/pb";
   import { liveEvents, selectedNode } from "@/stores";
@@ -29,10 +30,6 @@
               current.map((cam: any) =>
                 cam.id === e.record.id ? e.record : cam
               )
-            );
-          } else if (e.action === "delete") {
-            liveEvents.update((current: any) =>
-              current.filter((cam: any) => cam.id !== e.record.id)
             );
           }
         },
