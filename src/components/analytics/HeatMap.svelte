@@ -114,7 +114,7 @@
     canvas.width = image.width;
     canvas.height = image.height;
 
-    let hd = $heatMapData.data;
+    let hd = $heatMapData;
     if (!Array.isArray(hd) || !Array.isArray(hd[0])) {
       console.error("Heatmap data is not a 2D array:", hd);
       toast.error("Incorrect heatmap data");
@@ -160,7 +160,7 @@
       socket.disconnect();
     }
 
-    socket = io("https://dev.api.moksa.ai", {
+    socket = io("https://api.moksa.ai", {
       withCredentials: true,
       extraHeaders: {
         Authorization: `Bearer ${token}`,
@@ -196,9 +196,9 @@
           console.log(arr, "data in arr");
           return arr[0];
         } else {
-          let temp = {...data};
-          temp['store_id'] = data['store_id']?.toString();
-          temp['total_people_count'] = data['total_people_count']?.toString();
+          let temp = { ...data };
+          temp["store_id"] = data["store_id"]?.toString();
+          temp["total_people_count"] = data["total_people_count"]?.toString();
           return [{ ...temp }];
         }
       });
@@ -210,34 +210,37 @@
         `Received heatmap data for store ${$selectedStore.value}:`,
         data,
       );
-      heatMapData.set(data); // Update heatMapData with the received data
-      const res = await fetch(
-        `https://dev.api.moksa.ai/stream?key=${selectedFloorMap}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
+
+      if (data?.heatmapValues) {
+        heatMapData.set(data?.heatmapValues); // Update heatMapData with the received data
+        const res = await fetch(
+          `https://dev.api.moksa.ai/stream?key=${selectedFloorMap}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
           },
-        },
-      );
-      const blob = await res.blob();
-      const imageUrl = URL.createObjectURL(blob);
-      // selectedImage = imageUrl;
-      // console.log('data',data)
-      storeFloorImg = imageUrl;
-      loadingFloor = false;
-      setTimeout(() => {
-        drawHeatmap($heatMapData);
-      }, 100);
+        );
+        const blob = await res.blob();
+        const imageUrl = URL.createObjectURL(blob);
+        // selectedImage = imageUrl;
+        // console.log('data',data)
+        storeFloorImg = imageUrl;
+        loadingFloor = false;
+        setTimeout(() => {
+          drawHeatmap($heatMapData);
+        }, 100);
+      } else {
+        toast.error("heat map data issue in socket");
+      }
     });
 
     socket.on("disconnect", () => {
       console.log("disconnected");
     });
   }
-
-  $: console.log($aisleData, "aisle Daa");
 
   $: {
     if ($selectedStore.value !== undefined && token !== "") {
@@ -261,7 +264,7 @@
     const selectedMap = $floorMaps.find(
       (map) => map.storeId === $selectedStore.value,
     );
-    selectedFloorMap = selectedMap ? selectedMap.img : null;
+    selectedFloorMap = selectedMap ? selectedMap?.img : null;
     // console.log('Selected floor map:', selectedFloorMap);
 
     if (selectedFloorMap !== "" && selectedFloorMap !== null) {
@@ -308,7 +311,7 @@
       );
       const data = await mapData.json();
       console.log("mapData", data);
-      heatMapData.set(data);
+      heatMapData.set(data?.data);
       const res = await fetch(
         `https://dev.api.moksa.ai/stream?key=${selectedFloorMap}`,
         {
@@ -404,7 +407,7 @@
       );
       const data = await mapData.json();
       console.log("mapData", data);
-      heatMapData.set(data);
+      heatMapData.set(data?.data);
       const res = await fetch(
         `https://dev.api.moksa.ai/stream?key=${selectedFloorMap}`,
         {
@@ -576,9 +579,17 @@
             labels: labels,
             datasets: [
               {
+                label: "Aisle Data",
                 data: data,
                 backgroundColor: colors,
                 borderWidth: 1,
+              },
+              {
+                label: "Remaining Data",
+                data: [0],
+                backgroundColor: "transparent",
+                borderWidth: 0,
+                hidden: true,
               },
             ],
           },
@@ -587,7 +598,7 @@
             maintainAspectRatio: false,
             plugins: {
               legend: {
-                display: false,
+                display: true,
               },
               tooltip: {
                 callbacks: {
@@ -659,13 +670,6 @@
         class="flex items-center border-black h-[40px] border-opacity-[18%] border-[1px] rounded-md dark:border-white"
       >
         <button
-          class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "live" ? "bg-[#0BA5E9] rounded-l-md text-white" : "text-black dark:text-white dark:border-white"}`}
-          on:click={() => {
-            dateRange.set("live");
-            value = undefined;
-          }}>live</button
-        >
-        <button
           class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "1hr" ? "bg-[#0BA5E9] rounded-l-md text-white" : "text-black dark:text-white dark:border-white"}`}
           on:click={() => {
             dateRange.set("1hr");
@@ -714,10 +718,6 @@
             value = undefined;
           }}>7 Day</button
         >
-        <!-- <button
-          class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "live" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
-          on:click={() => dateRange.set("live")}>live</button
-        > -->
         <Popover.Root openFocus bind:open={close}>
           <Popover.Trigger asChild let:builder>
             <Button
@@ -773,7 +773,7 @@
         </Select.Content>
       </Select.Root>
     </span>
-    <span class="flex items-center gap-3">
+    <!-- <span class="flex items-center gap-3">
       <Button variant="outline" class="flex items-center gap-1">
         <ListFilter size={18} /> Filters</Button
       >
@@ -781,7 +781,7 @@
         class="flex items-center gap-1 bg-[#3D81FC] text-white hover:bg-white hover:text-[#3D81FC]"
         ><Upload size={18} /> Export Reports</Button
       >
-    </span>
+    </span> -->
   </div>
   <div class="grid grid-cols-8 gap-4 mt-4">
     <div
@@ -792,11 +792,9 @@
       >
         <p class="text-white text-lg font-semibold flex items-center gap-2">
           {$selectedStore.label}
-          {#if $dateRange === "live"}
-            <span class="text-xs text-white bg-pink-500 rounded-md p-1">
-              Live
-            </span>
-          {/if}
+          <span class="text-xs text-white bg-pink-500 rounded-md p-1">
+            Live
+          </span>
         </p>
       </span>
       {#if $aisleData.length > 0 && $aisleData[0] !== "Fetching"}

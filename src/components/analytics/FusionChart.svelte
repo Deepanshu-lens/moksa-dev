@@ -20,7 +20,7 @@
         theme: "fusion",
         showlegend: "0",
         showyaxisname: "0",
-        showLabels: "1",
+        showLabels: "0",
         showShadow: "1",
         bgAlpha: "100",
         showYAxisValues: "0",
