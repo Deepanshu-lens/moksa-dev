@@ -6,14 +6,15 @@
   import { Switch } from "@/components/ui/switch";
   import * as Tabs from "@/components/ui/tabs";
   import { Slider } from "@/components/ui/slider";
-  import { cameraSchema } from "@/types";
-
+  import * as Table from "@/components/ui/table/index";
+  import { onMount } from "svelte";
   import pb from "@/lib/pb";
   import { selectedNode } from "@/stores";
 
   import { createForm } from "felte";
   import { toast } from "svelte-sonner";
   import { writable } from "svelte/store";
+  import Checkbox from "../ui/checkbox/checkbox.svelte";
 
   export let cameraName = "";
   export let mainUrl = "";
@@ -25,7 +26,8 @@
   let ipAddress = "";
   let httpPort = "";
   let tabValue = "url";
-  let BASE_URI = "https://vms.lenscorp.cloud/onvif";
+  let discoveryData = writable<[]>([]);
+  const selectedRows = writable([]);
 
   const { form, errors, reset, isSubmitting } = createForm({
     initialValues: { name: "", url: "", subUrl: "" },
@@ -171,27 +173,6 @@
     await Promise.all(promises);
   };
 
-  import {
-    Render,
-    Subscribe,
-    createRender,
-    createTable,
-  } from "svelte-headless-table";
-  import {
-    addHiddenColumns,
-    addPagination,
-    addSelectedRows,
-    addSortBy,
-    addTableFilter,
-  } from "svelte-headless-table/plugins";
-  import DataTableCheckbox from "./data-table-checkbox.svelte";
-  import * as Table from "@/components/ui/table/index";
-  import { cn } from "@/lib/utils";
-  import { onMount } from "svelte";
-  import { getDataEntryById } from "astro:content";
-
-  let discoveryData = writable<[]>([]);
-
   // let data = [
   //   {
   //     urn: "uuid:66f52bf6-dd69-4aa7-b50e-21617afcfcb5",
@@ -278,87 +259,12 @@
   //   },
   // ];
 
-  const selectedRows = writable([]);
-
+  // row selection
   const toggleRowSelection = (row: any) => {
-    row = row?.original;
     selectedRows.update((rows) =>
       rows?.includes(row) ? rows?.filter((r) => r !== row) : [...rows, row]
     );
   };
-
-  const table = createTable(discoveryData || [], {
-    sort: addSortBy({ disableMultiSort: true }),
-    page: addPagination(),
-    filter: addTableFilter({
-      fn: ({ filterValue, value }) => value.includes(filterValue),
-    }),
-    select: addSelectedRows(),
-    hide: addHiddenColumns(),
-  });
-
-  const columns = table.createColumns([
-    table.column({
-      header: (_, { pluginStates }) => {
-        const { allPageRowsSelected } = pluginStates.select;
-        return createRender(DataTableCheckbox, {
-          checked: allPageRowsSelected,
-        });
-      },
-      accessor: "id",
-      cell: ({ row }, { pluginStates }) => {
-        const { getRowState } = pluginStates.select;
-        const { isSelected } = getRowState(row);
-
-        return createRender(DataTableCheckbox, {
-          checked: isSelected,
-        });
-      },
-      plugins: {
-        sort: {
-          disable: true,
-        },
-        filter: {
-          exclude: true,
-        },
-      },
-    }),
-    table.column({
-      header: "Model",
-      accessor: "hardware",
-      plugins: { sort: { disable: true }, filter: { exclude: true } },
-    }),
-    table.column({
-      header: "IP",
-      accessor: "xaddrs",
-      cell: ({ value }) => value[0]?.split("//")[1]?.split("/")[0],
-      plugins: {
-        filter: {},
-      },
-    }),
-  ]);
-
-  const {
-    headerRows,
-    pageRows,
-    tableAttrs,
-    tableBodyAttrs,
-    flatColumns,
-    pluginStates,
-    rows,
-  } = table.createViewModel(columns);
-
-  const { hiddenColumnIds } = pluginStates.hide;
-  const ids = flatColumns.map((c) => c.id);
-  let hideForId = Object.fromEntries(ids.map((id) => [id, true]));
-
-  $: $hiddenColumnIds = Object.entries(hideForId)
-    .filter(([, hide]) => !hide)
-    .map(([id]) => id);
-
-  const { hasNextPage, hasPreviousPage, pageIndex } = pluginStates.page;
-
-  const { selectedDataIds } = pluginStates.select;
 
   onMount(() => {
     getCameraDiscoveryList();
@@ -591,93 +497,34 @@
       <h4 class="mb-5">Select the cameras you want to register</h4>
       <div class="w-full">
         <div class="rounded-md border">
-          <Table.Root {...$tableAttrs}>
+          <Table.Root>
             <Table.Header>
-              {#each $headerRows as headerRow}
-                <Subscribe rowAttrs={headerRow.attrs()}>
-                  <Table.Row>
-                    {#each headerRow.cells as cell (cell.id)}
-                      <Subscribe
-                        attrs={cell.attrs()}
-                        let:attrs
-                        props={cell.props()}
-                        let:props
-                      >
-                        <Table.Head
-                          {...attrs}
-                          class={cn("[&:has([role=checkbox])]:pl-3")}
-                        >
-                          {#if cell.id === "amount"}
-                            <div class="text-right">
-                              <Render of={cell.render()} />
-                            </div>
-                          {:else if cell.id === "email"}
-                            <Button
-                              variant="ghost"
-                              on:click={props.sort.toggle}
-                            >
-                              <Render of={cell.render()} />
-                            </Button>
-                          {:else}
-                            <Render of={cell.render()} />
-                          {/if}
-                        </Table.Head>
-                      </Subscribe>
-                    {/each}
-                  </Table.Row>
-                </Subscribe>
-              {/each}
+              <Table.Row>
+                <Table.Head class="w-[100px]"></Table.Head>
+                <Table.Head>Model</Table.Head>
+                <Table.Head>IP</Table.Head>
+              </Table.Row>
             </Table.Header>
-            <Table.Body {...$tableBodyAttrs}>
-              {#each $pageRows as row (row.id)}
-                <Subscribe rowAttrs={row.attrs()} let:rowAttrs>
-                  <Table.Row
-                    {...rowAttrs}
-                    data-state={$selectedDataIds[row.id] && "selected"}
-                    on:click={() => toggleRowSelection(row)}
+            <Table.Body>
+              {#each $discoveryData as row, i (i)}
+                <Table.Row>
+                  <Table.Cell class="font-medium"
+                    ><Checkbox
+                      onCheckedChange={() => toggleRowSelection(row)}
+                    /></Table.Cell
                   >
-                    {#each row.cells as cell (cell.id)}
-                      <Subscribe attrs={cell.attrs()} let:attrs>
-                        <Table.Cell
-                          class="[&:has([role=checkbox])]:pl-3"
-                          {...attrs}
-                        >
-                          {#if cell.id === "amount"}
-                            <div class="text-right font-medium">
-                              <Render of={cell.render()} />
-                            </div>
-                          {:else}
-                            <Render of={cell.render()} />
-                          {/if}
-                        </Table.Cell>
-                      </Subscribe>
-                    {/each}
-                  </Table.Row>
-                </Subscribe>
+                  <Table.Cell>{row?.hardware}</Table.Cell>
+                  <Table.Cell
+                    >{row.xaddrs[0]?.split("//")[1]?.split("/")[0]}</Table.Cell
+                  >
+                </Table.Row>
               {/each}
             </Table.Body>
           </Table.Root>
         </div>
-        <div class="flex items-center justify-end space-x-2 py-4">
-          <div class="text-muted-foreground flex-1 text-sm">
-            {Object.keys($selectedDataIds).length} of {$rows.length} row(s) selected.
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            on:click={() => ($pageIndex = $pageIndex - 1)}
-            disabled={!$hasPreviousPage}>Previous</Button
-          >
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={!$hasNextPage}
-            on:click={() => ($pageIndex = $pageIndex + 1)}>Next</Button
-          >
-        </div>
       </div>
 
-      <div class="flex items-center justify-between pb-4">
+      <div class="flex items-center justify-between py-4">
         <Label>User Name</Label>
         <div class="w-[75%]">
           <Input

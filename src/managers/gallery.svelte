@@ -19,8 +19,6 @@
           sort: "-created",
         });
 
-      console.log(localGallery, "gallery");
-
       gallery.set(localGallery);
       totalFaceRegistered.set(localGallery?.length || 0);
     } catch (error) {
