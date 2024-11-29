@@ -26,6 +26,7 @@
         .getList(page, MAX_CAMERAS_PER_PAGE, {
           fields: "id,name,url,subUrl,save,created",
           filter: `node.id ?= "${$selectedNode}"`,
+          sort: "-created",
         });
       cameras.set(response.items); // Update the cameras store with new data
     } catch (error) {
