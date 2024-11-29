@@ -25,7 +25,7 @@
   if (typeof localStorage !== "undefined") {
     const savedSelected = localStorage.getItem("selectedLayout");
     if (savedSelected !== null) {
-      selectedLayout.set(Number(savedSelected)); // Load stored value
+      selectedLayout.set(Number(savedSelected));
     }
   }
 
@@ -36,7 +36,7 @@
   $: if (selectedLayout && selectedLayout.set) {
     selectedLayout.set(selected);
     if (typeof localStorage !== "undefined") {
-      localStorage.setItem("selectedLayout", String(selected)); // Persist the value
+      localStorage.setItem("selectedLayout", String(selected));
     }
   }
 
@@ -50,23 +50,6 @@
       container[0].requestFullscreen();
     }
   }
-
-  // const captureSlideScreenshot = async (index: number) => {
-  //   const num = index === null || index === undefined ? "0" : index;
-  //   const element = document.getElementById(`${num}`);
-  //   if (element) {
-  //     const canvas = await html2canvas(element);
-  //     const imgData = canvas.toDataURL("image/webp");
-  //     const link = document.createElement("a");
-  //     link.href = imgData;
-  //     link.download = "screenshot.webp";
-  //     link.click();
-  //     toast.success("Downloaded screen snip.");
-  //     link.remove();
-  //   } else {
-  //     console.log("ref unavailable");
-  //   }
-  // };
 
   const captureAllScreenshot = async () => {
     const zip = new JSZip();
@@ -134,24 +117,8 @@
   class="flex flex-col space-y-8 items-center justify-center px-2 h-screen border-l relative"
   style="height:calc(100vh - 3rem);"
 >
-  <!-- <span class="group flex-col flex items-center justify-center gap-0.5">
-      <button
-        disabled
-        on:click={() => {
-          addUserLog(`user clicked on Search button, top panel`);
-        }}
-        class={`disabled:cursor-not-allowed text-black/[.4] h-[30px] w-[30px] rounded-full shadow-md group border-2 border-solid border-black/[.4] dark:border-white/[.4] bg-white dark:bg-black dark:text-white group-hover:text-white group-hover:bg-gradient-to-r from-[#015a62] to-[#06223A] group-hover:border-none grid place-items-center`}
-      >
-        <Icon icon="material-symbols:search" class="h-[22px] w-[22px]" />
-      </button>
-      <p
-        class="text-xs group-hover:text-[#015a62] dark:group-hover:text-[#015a62] text-black/[.4] dark:text-white"
-      >
-        Search
-      </p>
-    </span> -->
-  <!-- svelte-ignore a11y-no-static-element-interactions -->
-  <!-- svelte-ignore a11y-click-events-have-key-events -->
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
+  <!-- svelte-ignore a11y_click_events_have_key_events -->
   <span
     class="group flex-col flex items-center justify-center gap-0.5"
     on:click={fullscreenLayout}
@@ -164,24 +131,7 @@
     </button>
     <p class="text-xs text-black/[.4] dark:text-white">Fullscreen</p>
   </span>
-  <!--  -->
-  <!-- <span class="group flex-col flex items-center justify-center gap-0.5">
-      <button
-        class={`disabled:cursor-not-allowed text-black/[.4] h-[30px] w-[30px] rounded-full shadow-md group border-2 border-solid border-black/[.4] dark:border-white/[.4] bg-white dark:bg-black dark:text-white group-hover:text-white group-hover:bg-gradient-to-r from-[#015a62] to-[#06223A] group-hover:border-none grid place-items-center`}
-        ><Icon
-          icon="material-symbols:speed-camera-outline-rounded"
-          class="h-[22px] w-[22px]"
-        />
-      </button>
-      <p
-        class="text-xs group-hover:text-[#015a62] dark:group-hover:text-[#015a62] text-black/[.4] dark:text-white"
-      >
-        Add
-      </p>
-    </span> -->
   <span class="group flex-col flex items-center justify-center gap-0.5">
-    <!-- <button
-        disabled={!features.includes("Toggle Alerts")} -->
     <button
       class={cn(
         "text-black/[.4] h-[30px] w-[30px] rounded-full shadow-md border-2 border-solid dark:text-white group-hover:text-white group-hover:bg-[#015a62] dark:group-hover:bg-[#258d9d] group-hover:border-none grid place-items-center",
@@ -318,9 +268,6 @@
                     toast.warning("Please select a stream to screen snip.");
                   } else {
                     handleSingleSS();
-                    // addUserLog(
-                    //   "user selected option Selected Screen for screen snip",
-                    // );
                   }
                 }}
               >
@@ -347,10 +294,8 @@
     <p class="text-xs text-black/[.23] dark:text-white">Snip</p>
   </span>
   <span class="group flex-col flex items-center justify-center gap-0.5">
-    <!-- <LayoutDialog {toggleDisplayLayouts}> -->
     <Popover.Root>
       <Popover.Trigger let:builder>
-        <!-- <Button builders={[builder]} variant="outline">Open</Button> -->
         <button
           class={`disabled:cursor-not-allowed disabled:opacity-50 text-black/[.4] h-[30px] w-[30px] rounded-full shadow-md group border-2 border-solid border-black/[.4] dark:border-white/[.4] bg-white dark:bg-black dark:text-white group-hover:text-white group-hover:bg-[#015a62] dark:group-hover:bg-[#258d9d] group-hover:border-none grid place-items-center`}
           ><Icon
