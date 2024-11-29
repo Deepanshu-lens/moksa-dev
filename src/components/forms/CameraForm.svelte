@@ -12,16 +12,14 @@
   import { selectedNode } from "@/stores";
 
   import { createForm } from "felte";
-  import { validator } from "@felte/validator-zod";
   import { toast } from "svelte-sonner";
-  import { CloudCog } from "lucide-svelte";
   import { writable } from "svelte/store";
 
   export let cameraName = "";
   export let mainUrl = "";
   export let subUrl = "";
   export let doneSubmit = false;
-  let cameraMethod = writable("automatic");
+  let cameraMethod = writable("manual");
   let userName = "";
   let password = "";
   let ipAddress = "";
@@ -148,7 +146,7 @@
               hostname: row?.xaddrs[0]?.split("//")[1]?.split("/")[0],
               username: userName,
               password: password,
-              port: 443,
+              port: row?.xaddrs[0]?.includes("https") ? 443 : 80,
               timeout: 10000,
             }),
           }
@@ -171,31 +169,6 @@
 
     // Execute all promises concurrently
     await Promise.all(promises);
-    // await fetch(`${import.meta.env.PUBLIC_ONVIF_URL}/initialize`, {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify({
-    //     name: "",
-    //     hostname: ipAddress,
-    //     username: userName,
-    //     password: password,
-    //     port: 443,
-    //     timeout: 10000,
-    //   }),
-    // })
-    //   .then(async (res) => {
-    //     const data = await res.json();
-    //     await streamUri(data.index);
-    //   })
-    //   .catch((err) => {
-    //     console.log(err);
-    //     toast.error("Failed to add camera via ONVIF", {
-    //       description: "Incompatible SOAP version",
-    //     });
-    //     doneSubmit = false;
-    //   });
   };
 
   import {
@@ -211,8 +184,6 @@
     addSortBy,
     addTableFilter,
   } from "svelte-headless-table/plugins";
-  import { readable } from "svelte/store";
-  // import Actions from "./data-table/data-table-actions.svelte";
   import DataTableCheckbox from "./data-table-checkbox.svelte";
   import * as Table from "@/components/ui/table/index";
   import { cn } from "@/lib/utils";
@@ -316,7 +287,7 @@
     );
   };
 
-  const table = createTable(discoveryData||[], {
+  const table = createTable(discoveryData || [], {
     sort: addSortBy({ disableMultiSort: true }),
     page: addPagination(),
     filter: addTableFilter({
@@ -389,9 +360,9 @@
 
   const { selectedDataIds } = pluginStates.select;
 
-  onMount(()=>{
+  onMount(() => {
     getCameraDiscoveryList();
-  })
+  });
 
   const getCameraDiscoveryList = async () => {
     try {
