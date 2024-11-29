@@ -6,8 +6,8 @@
   export let data: [];
 </script>
 
-<div>
-  <div class="flex items-center justify-between p-4">
+<div class="dark:bg-neutral-600">
+  <div class="flex items-center justify-between p-4 dark:bg-neutral-600">
     <h3 class="text-lg font-semibold">Add new Person to Gallery:</h3>
     <RegisterMobileDialog>
       <button

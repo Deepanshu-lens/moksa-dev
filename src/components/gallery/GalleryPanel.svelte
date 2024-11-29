@@ -13,7 +13,7 @@
   let view: number = 1;
 </script>
 
-<section class="w-full h-full flex flex-row-reverse">
+<section class="w-full h-full flex flex-row-reverse dark:bg-neutral-900">
   <div
     class="flex-col gap-4 items-center justify-center px-4 h-[calc(100vh-75px)] my-auto hidden md:flex"
   >
@@ -75,7 +75,7 @@
       </p>
     </span>
   </div>
-  <div class="flex flex-col px-8 lg:pt-8 pt-3 h-full w-full gap-4">
+  <div class="flex flex-col px-8 lg:pt-8 pt-3 h-full w-full gap-4 ">
     <h1
       class="text-2xl font-semibold text-black/[.87] dark:text-white/[.87] hidden lg:block"
     >
@@ -124,7 +124,7 @@
           {/each}
         {:else}
           <div class="flex flex-col h-full p-4 my-auto z-10 relative">
-            <p class="text-center text-xl font-medium dark:text-black">
+            <p class="text-center text-xl font-medium dark:text-white">
               No registered people found, Register to add people to your gallery
             </p>
           </div>
