@@ -37,7 +37,7 @@
           }
         },
         {
-          filter: `node.id?="${$selectedNode}"`,
+          filter: `node?="${$selectedNode}"`,
         }
       );
     } catch (error) {
