@@ -67,16 +67,14 @@
       customElements.define("video-stream", VideoStream);
     }
     if (videoElement) {
-      videoElement.setAttribute("mode", mode);
-      videoElement.setAttribute("media", media);
-      videoElement.setAttribute("background", background.toString());
-      videoElement.setAttribute(
-        "visibilityThreshold",
-        visibilityThreshold.toString()
-      );
-      videoElement.setAttribute("visibilityCheck", visibilityCheck.toString());
-      videoElement.addEventListener("statechange", () => {
-        state = videoElement.getAttribute("state") || "LOADING";
+      videoElement.mode = mode;
+      videoElement.media = media;
+      videoElement.background = background;
+      videoElement.visibilityThreshold = visibilityThreshold;
+      videoElement.visibilityCheck = visibilityCheck;
+
+      videoElement.addEventListener("statechange", (event) => {
+        state = videoElement.state;
       });
     }
 
