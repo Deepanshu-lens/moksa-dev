@@ -19,7 +19,7 @@
   import { Plus, Upload } from "lucide-svelte";
   import { Button } from "../ui/button";
   import type { DateRange } from "bits-ui";
-  import { DateFormatter, type DateValue } from "@internationalized/date";
+  import { type DateValue } from "@internationalized/date";
   import { RangeCalendar } from "@/components/ui/range-calendar";
   import { toast } from "svelte-sonner";
   import * as Popover from "../ui/popover";
@@ -985,6 +985,7 @@
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
+
         },
       );
       const blob = await res.blob();
@@ -1044,6 +1045,7 @@
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
+
         },
       );
       const blob = await res.blob();

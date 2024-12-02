@@ -13,6 +13,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 
         const response = await fetch(`https://dev.api.moksa.ai/stream?key=${videoUri}`, {
             method: 'GET',
+
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',

@@ -1,6 +1,7 @@
 <script lang="ts">
   import PeopleCountDataTable from "./table/PeopleCountDataTable.svelte";
   import { Store, Upload } from "lucide-svelte";
+
   import { Button } from "../ui/button";
   import * as Select from "@/components/ui/select";
   import { onDestroy, onMount } from "svelte";
@@ -26,7 +27,6 @@
     value: store.id,
     label: store.name,
   }));
-
   export let curruser;
   let loadingLive = writable(false);
 
@@ -58,7 +58,7 @@
       socket.disconnect();
     }
 
-    socket = io("https://api.moksa.ai", {
+    socket = io("https://dev.api.moksa.ai", {
       withCredentials: true,
       extraHeaders: {
         Authorization: `Bearer ${token}`,
@@ -76,11 +76,21 @@
       socket.emit("joinStore", $selectedStore.value);
     });
 
-    socket.on(`people_count_store_${$selectedStore.value}`, (data) => {
+    socket.on(`people_count_store_${$selectedStore?.value}`, (data) => {
       console.log(
-        `Received live people count for store ${$selectedStore.value}:`,
+        `Received live people count for store ${$selectedStore?.value}:`,
         data,
       );
+
+      const storeExists = fruits.some((store)=>store?.value === data?.store_id);
+      console.log(data?.store_id,'store id');
+      console.log(curruser,'curr user');
+
+      if(curruser?.role !== "superAdmin" && !storeExists){
+        return;
+      }
+
+
       liveData.update((currentData) => {
         console.log(currentData);
         const existingStoreIndex = currentData.data.findIndex(

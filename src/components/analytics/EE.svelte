@@ -254,7 +254,7 @@
       socket.disconnect();
     }
 
-    socket = io("https://api.moksa.ai", {
+    socket = io("https://dev.api.moksa.ai", {
       withCredentials: true,
       extraHeaders: {
         Authorization: `Bearer ${token}`,
@@ -493,6 +493,7 @@
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
+
           },
         );
         if (!response.ok) {
@@ -530,6 +531,7 @@
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
+
           },
         );
 

@@ -50,7 +50,9 @@ export const load: PageServerLoad = async ({ fetch, cookies, locals }) => {
 
             }
         });
-        return allstoreData.json();
+
+        const data = await allstoreData.json();
+        return data;
     }
 
     const aisleData = async () => {

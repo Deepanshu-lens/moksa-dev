@@ -579,9 +579,6 @@
         ).then((res) => res.json()),
       ]);
 
-      console.log(theftD, "theftD");
-      console.log(theftT, "theftT");
-      console.log(theftL, "theftL");
       theftDataa.set(theftD);
       theftTrend.set(theftT);
       listtheft.set(theftL.data);
@@ -599,17 +596,14 @@
   }
 
   function updateBarChart(theftD) {
-    // console.log($dateRange);
-    // console.log("first");
+    console.log(theftD?.data, "theftd");
     if (barChart) {
-      // console.log("first");
-      // console.log(theftD);
-      const labels = theftD?.data.map((item) =>
+      const labels = theftD?.data?.map((item) =>
         $dateRange === "7 Days"
-          ? item.day_of_week.trim()
+          ? item?.day_of_week?.trim()
           : $dateRange === "12 Months"
-            ? item.month_name.trim()
-            : item.date.trim(),
+            ? item?.month_name?.trim()
+            : item?.date?.trim(),
       );
       const theftDetectedData = theftD?.data.map((item) =>
         parseInt(item.theft_detected),
@@ -617,6 +611,8 @@
       const theftPreventedData = theftD?.data.map((item) =>
         parseInt(item.theft_prevented),
       );
+
+      console.log(labels,'labels here')
 
       barChart.data.labels = labels;
       barChart.data.datasets[0].data = theftDetectedData;
@@ -1144,7 +1140,6 @@
     from = new Date(new Date().getTime() - 12 * 30 * 24 * 60 * 60 * 1000);
     to = new Date();
   }
-
   let tooltipVisible = false;
   let tooltipData = "";
   let tooltipX = 0;

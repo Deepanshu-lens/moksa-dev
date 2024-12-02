@@ -198,7 +198,7 @@
   //     sockets[storeId].disconnect();
   //   }
 
-  //   sockets[storeId] = io("https://api.moksa.ai", {
+  //   sockets[storeId] = io("https://dev.api.moksa.ai", {
   //     withCredentials: true,
   //     extraHeaders: {
   //       Authorization: `Bearer ${token}`,
@@ -282,7 +282,7 @@
       sockets[storeId].disconnect();
     }
 
-    sockets[storeId] = io("https://api.moksa.ai", {
+    sockets[storeId] = io("https://dev.api.moksa.ai", {
       withCredentials: true,
       extraHeaders: {
         Authorization: `Bearer ${token}`,
@@ -474,7 +474,7 @@
       <Button
         class="flex items-center gap-1 bg-[#3D81FC] text-white hover:bg-white hover:text-[#3D81FC]"
         on:click={() => {
-          const date = new Date().toLocaleDateString("en-GB", {
+          const date = new Date()?.toLocaleDateString("en-GB", {
             day: "2-digit",
             month: "2-digit",
             year: "numeric",

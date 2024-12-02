@@ -35,10 +35,10 @@
   const menuList =
     user.role === "Operators" || user.role === "adminNonPaid"
       ? [
-          {
-            text: "Live",
-            href: `/session/${sessionId}`,
-          },
+          // {
+          //   text: "Live",
+          //   href: `/session/${sessionId}`,
+          // },
           // {
           //   text: "Playback",
           //   href: `/playback/${sessionId}`,
@@ -50,10 +50,10 @@
         ]
       : user?.role === "storeManager"
         ? [
-            {
-              text: "Live",
-              href: `/session/${sessionId}`,
-            },
+            // {
+            //   text: "Live",
+            //   href: `/session/${sessionId}`,
+            // },
             // {
             //   text: "Playback",
             //   href: `/playback/${sessionId}`,
@@ -68,10 +68,10 @@
             },
           ]
         : [
-            {
-              text: "Live",
-              href: `/session/${sessionId}`,
-            },
+            // {
+            //   text: "Live",
+            //   href: `/session/${sessionId}`,
+            // },
             // {
             //   text: "Playback",
             //   href: `/playback/${sessionId}`,
@@ -91,26 +91,26 @@
           ];
 
   const menuListMob = [
-    {
-      text: "Live",
-      href: `/session/${sessionId}`,
-    },
+    // {
+    //   text: "Live",
+    //   href: `/session/${sessionId}`,
+    // },
     // {
     //   text: "Playback",
     //   href: `/playback/${sessionId}`,
     // },
-    {
-      text: "Events",
-      href: `/events/${sessionId}`,
-    },
-    {
-      text: "Reports",
-      href: `/reports/${sessionId}`,
-    },
-    {
-      text: "Configuration",
-      href: `/configuration/${sessionId}`,
-    },
+    // {
+    //   text: "Events",
+    //   href: `/events/${sessionId}`,
+    // },
+    // {
+    //   text: "Reports",
+    //   href: `/reports/${sessionId}`,
+    // },
+    // {
+    //   text: "Configuration",
+    //   href: `/configuration/${sessionId}`,
+    // },
   ];
 
   let isOpen = false;
