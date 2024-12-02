@@ -6,7 +6,7 @@
   let selected = 1;
   let firmType = 1;
   let firmOptions = [
-    { id: 1, label: "Update online using lens view server" },
+    { id: 1, label: "Update online using Cielo View server" },
     {
       id: 2,
       label: "manual update (if you have the update package available)",
