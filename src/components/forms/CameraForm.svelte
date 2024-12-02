@@ -266,10 +266,6 @@
     );
   };
 
-  onMount(() => {
-    getCameraDiscoveryList();
-  });
-
   const getCameraDiscoveryList = async () => {
     try {
       await fetch(`${import.meta.env.PUBLIC_ONVIF_URL}/discovery/start`, {
