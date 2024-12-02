@@ -178,6 +178,7 @@
             datetype: $dateRange,
             pagenumber: 1,
             pagepersize: 100,
+            dropdown: true,
           },
         },
       );

@@ -1,12 +1,11 @@
 <script lang="ts">
   import { onMount, afterUpdate } from "svelte";
+
   const dynamicId = `chart-container-${Math.floor(Math.random() * 1000)}`;
   import FusionCharts from "fusioncharts";
   export let data: any;
   export let categoriesdata: any;
   let chart: any;
-
-  // $: console.log(data, categoriesdata);
 
   function createChart() {
     const dataSource = {
@@ -21,7 +20,7 @@
         theme: "fusion",
         showlegend: "0",
         showyaxisname: "0",
-        showLabels: "1",
+        showLabels: "0",
         showShadow: "1",
         bgAlpha: "100",
         showYAxisValues: "0",

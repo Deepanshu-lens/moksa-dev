@@ -623,7 +623,6 @@
 
   function updateTheftChart(theftD) {
     if (theftChart) {
-      console.log(theftD,'theft D in tehft');
       const labels = theftD?.data.map((item) =>
         $dateRange === "7 Days"
           ? item?.day_of_week?.trim()
@@ -1141,6 +1140,21 @@
     from = new Date(new Date().getTime() - 12 * 30 * 24 * 60 * 60 * 1000);
     to = new Date();
   }
+  let tooltipVisible = false;
+  let tooltipData = "";
+  let tooltipX = 0;
+  let tooltipY = 0;
+
+  function showTooltip(event, data) {
+    tooltipVisible = true;
+    tooltipData = data;
+    tooltipX = event.clientX + 10; // Offset for better visibility
+    tooltipY = event.clientY + 10; // Offset for better visibility
+  }
+
+  function hideTooltip() {
+    tooltipVisible = false;
+  }
 </script>
 
 <section
@@ -1457,6 +1471,7 @@
           </p>
           <div class="circle-progress">
             <svg viewBox="0 0 36 36">
+              <!-- svelte-ignore a11y-no-static-element-interactions -->
               <path
                 d="M18 2.0845
             a 15.9155 15.9155 0 0 1 0 31.831
@@ -1465,7 +1480,15 @@
                 stroke="#FF007A"
                 stroke-width="4"
                 stroke-linecap="round"
+                on:mouseenter={(event) =>
+                  showTooltip(event, "Detected: " + totalThefts)}
+                on:mouseleave={hideTooltip}
+                on:mousemove={(event) => {
+                  tooltipX = event.clientX + 10;
+                  tooltipY = event.clientY + 10;
+                }}
               />
+              <!-- svelte-ignore a11y-no-static-element-interactions -->
               <path
                 d="M18 2.0845
             a 15.9155 15.9155 0 0 1 0 31.831
@@ -1474,6 +1497,13 @@
                 stroke="#02A7FD"
                 stroke-width="4"
                 stroke-dasharray="{detectionPercentage}, 100"
+                on:mouseenter={(event) =>
+                  showTooltip(event, "Prevented: " + totalPreventions)}
+                on:mouseleave={hideTooltip}
+                on:mousemove={(event) => {
+                  tooltipX = event.clientX + 10;
+                  tooltipY = event.clientY + 10;
+                }}
               />
             </svg>
             <span
@@ -1573,6 +1603,15 @@
   </div>
 </section>
 
+{#if tooltipVisible}
+  <div
+    class="tooltip"
+    style="position: absolute; left: {tooltipX}px; top: {tooltipY}px; background: white; border: 1px solid #ccc; padding: 5px; border-radius: 4px; pointer-events: none;"
+  >
+    {tooltipData}
+  </div>
+{/if}
+
 <style>
   .circle-progress {
     margin: 0 auto;
@@ -1593,5 +1632,10 @@
     transform: translate(-50%, -50%);
     font-size: 0.8rem;
     font-weight: bold;
+  }
+
+  .tooltip {
+    /* Add any additional styling for the tooltip here */
+    z-index: 1000; /* Ensure the tooltip is above other elements */
   }
 </style>

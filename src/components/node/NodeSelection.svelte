@@ -13,8 +13,8 @@
   import { page } from "$app/stores";
   import { addUserLog } from "@/lib/addUserLog";
   import { Dropdown, DropdownItem } from "flowbite-svelte";
-    import { Input } from "../ui/input";
-    import { writable } from "svelte/store";
+  import { Input } from "../ui/input";
+  import { writable } from "svelte/store";
   export let url: string;
   export let nodes: Node[];
   export let isAllFullScreen: boolean;
@@ -26,7 +26,7 @@
 
  function groupNodesRecursively(nodes) {
     const groupNodes = (nodes, level = 0) => {
-      const grouped = nodes.reduce((acc, node) => {
+      const grouped = nodes?.reduce((acc, node) => {
         const parts = node.name.split('_');  // Split only by underscore
         const baseName = parts.slice(0, level + 1).join('_');
         if (!acc[baseName]) {
@@ -36,7 +36,9 @@
         return acc;
       }, {});
 
-      return Object.keys(grouped).map((baseName) => {
+      if(!grouped) return;
+
+      return Object?.keys(grouped).map((baseName) => {
         const subNodes = grouped[baseName];
         if (
           subNodes.length > 1 &&
@@ -72,7 +74,7 @@
       }),
     }).then(() => {
       localCameraList.map((c) =>
-        document.getElementById(`stream-${c.id}`)?.remove(),
+        window.document.getElementById(`stream-${c.id}`)?.remove(),
       );
       toast("Node deleted");
       addUserLog(
@@ -125,22 +127,21 @@ let searchTerm = writable('');
       )
     : resultGroupNodes;
 
-$: console.log('user', user)
 </script>
 
 <div
   class={`flex justify-between items-center py-0.5 px-4 border-b-[1px] w-full`}
 >
   <div
-    class={`relative inline-block min-w-[85%] ${$page.route.id.includes("/session") ? "w-max" : "w-full"} ${isAllFullScreen && "bg-black"}`}
+    class={`relative inline-block min-w-[85%] ${$page?.route?.id.includes("/session") ? "w-max" : "w-full"} ${isAllFullScreen && "bg-black"}`}
   >
     <button
       class={`text-start block text-sm outline-none capitalize border-none font-semibold appearance-none w-full ${isAllFullScreen ? "bg-black" : "bg-background"} text-[#323232] dark:text-white/[.7] border py-4 leading-tight  `}
-      >{$selectedNode && $selectedNode.name.includes("_")
-        ? $selectedNode.name.substring($selectedNode.name.lastIndexOf("_") + 1)
-        : $selectedNode.name.length > 20
-          ? $selectedNode.name.substring(0, 20) + "..."
-          : $selectedNode.name}</button
+      >{$selectedNode && $selectedNode?.name.includes("_")
+        ? $selectedNode?.name.substring($selectedNode.name.lastIndexOf("_") + 1)
+        : $selectedNode?.name.length > 20
+          ? $selectedNode?.name.substring(0, 20) + "..."
+          : $selectedNode?.name}</button
     >
     <Dropdown 
     bind:open={dropdownOpen}
@@ -179,7 +180,7 @@ $: console.log('user', user)
       <ChevronDown size={20} class="text-[#727272] dark:text-white/[.7]" />
     </div>
   </div>
-  {#if url.includes(`/session/`)}
+  {#if url?.includes(`/session/`)}
     <span class="flex items-center gap-2 justify-between flex-shrink-0">
       <AddCameraDialog sNode={""} {nodes} {user}>
         <button

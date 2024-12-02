@@ -228,12 +228,10 @@
   }
 
   const openVideoDialog = async (videoUri) => {
-    const data = { key: videoUri };
     dialogOpen = true;
     try {
-      const response = await axios.post(
-        `https://dev.api.moksa.ai/stream`,
-        data,
+      const response = await axios.get(
+        `https://dev.api.moksa.ai/stream?key=${videoUri}`,
         {
           headers: {
             "Content-Type": "application/json",

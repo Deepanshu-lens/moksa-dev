@@ -2,17 +2,6 @@
   import { createTable, Render, Subscribe } from "svelte-headless-table";
   import * as Table from "@/components/ui/table";
   import { Button } from "@/components/ui/button";
-  import {
-    ArrowUpDown,
-    Edit,
-    Store,
-    StoreIcon,
-    Trash2,
-    TrendingDown,
-    TrendingUp,
-    User,
-  } from "lucide-svelte";
-  import { createEventDispatcher } from "svelte";
   import Spinner from "@/components/ui/spinner/Spinner.svelte";
   import * as Dialog from "@/components/ui/dialog";
 
@@ -106,14 +95,17 @@
     selectedImage = null; // Reset selectedImage before fetching
     console.log(imageUri);
     try {
-      const response = await fetch("https://dev.api.moksa.ai/stream", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
+      const response = await fetch(
+        `https://dev.api.moksa.ai/stream?key=${imageUri}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+
         },
-        body: JSON.stringify({ key: imageUri }),
-      });
+      );
 
       if (!response.ok) {
         throw new Error("Failed to get image");
@@ -153,10 +145,6 @@
       header: "Employee",
     }),
     table.column({
-      accessor: "masks",
-      header: "Mask",
-    }),
-    table.column({
       accessor: "gloves",
       header: "Gloves",
     }),
@@ -164,17 +152,17 @@
       accessor: "hairnet",
       header: "Hairnet",
     }),
-    // table.column({
-    //   accessor: "breakingSops",
-    //   header: "Breaking SOP's",
-    // }),
     table.column({
-      accessor: "videoLink",
-      header: "Image",
+      accessor: "masks",
+      header: "Mask",
     }),
     table.column({
       accessor: "uniform",
       header: "Uniform",
+    }),
+    table.column({
+      accessor: "videoLink",
+      header: "Image",
     }),
   ]);
 
@@ -252,9 +240,19 @@
                       </div>
                     {:else if ["masks", "gloves", "hairnet", "uniform"].includes(cell.id)}
                       {#if row.original[cell.id] === "true"}
-                        <span class="text-green-500">✓</span>
+                        <img
+                          src="/images/tick.png"
+                          alt="tick"
+                          srcset=""
+                          class="w-5 h-5"
+                        />
                       {:else if row.original[cell.id] === "false"}
-                        <span class="text-red-500">✗</span>
+                        <img
+                          src="/images/cross.png"
+                          alt="cross"
+                          srcset=""
+                          class="w-5 h-5"
+                        />
                       {:else}
                         <span>{row.original[cell.id]}</span>
                       {/if}

@@ -42,6 +42,8 @@
     value = null;
   }
 
+  console.log(currentNvr, "current nvr");
+
   $: if (selectedMode) {
     value = null;
     searchDate = null;
@@ -55,13 +57,10 @@
   }
 
   async function getList(item) {
-    console.log($selectedNode.name);
-    console.log("calling camera pocketbase collection placubacl");
     const list = await PB.collection("camera").getList(0, 100, {
       filter: `node~"${$selectedNode.id}" && save = true`,
       sort: "-created",
     });
-    console.log("camera status list", list);
     // list.items.forEach((item) => {
     // if (!$uniqueUrlList.some((uniqueItem) => uniqueItem.url === item.url)) {
     //   uniqueUrlList.update((currentList) => {
@@ -70,7 +69,7 @@
     //   });
     // }
     // });
-    uniqueUrlList.set(list.items);
+    uniqueUrlList.set(list?.items);
   }
 
   async function handleCameraChange(cam) {
