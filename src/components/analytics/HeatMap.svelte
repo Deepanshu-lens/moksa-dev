@@ -160,7 +160,7 @@
       socket.disconnect();
     }
 
-    socket = io("https://api.moksa.ai", {
+    socket = io("https://dev.api.moksa.ai", {
       withCredentials: true,
       extraHeaders: {
         Authorization: `Bearer ${token}`,
@@ -243,19 +243,24 @@
   }
 
   $: {
-    if ($selectedStore.value !== undefined && token !== "") {
+    if (
+      $selectedStore.value !== undefined &&
+      token !== "" &&
+      $dateRange === "live"
+    ) {
       setupSocket();
     }
   }
 
-  onDestroy(() => {
-    if (socket) {
-      socket.disconnect();
+  $: {
+    if ($dateRange !== "live") {
+      if (socket) {
+        socket.disconnect();
+      }
     }
-  });
+  }
 
   async function updateSelectedFloorMap() {
-    console.log("updateSelectedFloorMap called", $dateRange);
     aisleData.set(["Fetching"]);
     customDateLabel = "custom";
     value = undefined;
@@ -296,6 +301,12 @@
         }
       } else {
         aisleData.set([]);
+      }
+
+      // No live api calling for heatmap , just fetch live data from socket
+      if ($dateRange === "live") {
+        loadingFloor = false;
+        return;
       }
 
       const mapData = await fetch(
@@ -391,6 +402,12 @@
         }
       } else {
         aisleData.set([]);
+      }
+
+      // No live api calling for heatmap , just fetch live data from socket
+      if ($dateRange === "live") {
+        loadingFloor = false;
+        return;
       }
 
       const mapData = await fetch(
@@ -657,8 +674,6 @@
       customDateLabel = "Custom";
     }
   }
-
-  $: console.log("aisleData", $aisleData);
 </script>
 
 <section
@@ -670,7 +685,14 @@
         class="flex items-center border-black h-[40px] border-opacity-[18%] border-[1px] rounded-md dark:border-white"
       >
         <button
-          class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "1hr" ? "bg-[#0BA5E9] rounded-l-md text-white" : "text-black dark:text-white dark:border-white"}`}
+          class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "live" ? "bg-[#0BA5E9] rounded-l-md text-white" : "text-black dark:text-white dark:border-white"}`}
+          on:click={() => {
+            dateRange.set("live");
+            value = undefined;
+          }}>live</button
+        >
+        <button
+          class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "1hr" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
           on:click={() => {
             dateRange.set("1hr");
             value = undefined;
@@ -792,9 +814,11 @@
       >
         <p class="text-white text-lg font-semibold flex items-center gap-2">
           {$selectedStore.label}
-          <span class="text-xs text-white bg-pink-500 rounded-md p-1">
-            Live
-          </span>
+          {#if $dateRange === "live"}
+            <span class="text-xs text-white bg-pink-500 rounded-md p-1">
+              Live
+            </span>
+          {/if}
         </p>
       </span>
       {#if $aisleData.length > 0 && $aisleData[0] !== "Fetching"}
