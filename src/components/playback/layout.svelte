@@ -1,7 +1,7 @@
 <script lang="ts">
   // Imports
   import * as Tabs from "@/components/ui/tabs";
-  import { Play, Pause, ChevronRight, CalendarDaysIcon } from "lucide-svelte";
+  import { Play, Pause, ChevronRight, CalendarDaysIcon, Loader2 } from "lucide-svelte";
   import { selectedNode } from "@/stores";
   import { writable } from "svelte/store";
   import Hls from "hls.js";
@@ -13,10 +13,9 @@
   import pb from "@/lib/pb";
   import NodeSelection from "../node/NodeSelection.svelte";
   import { getCameras } from "@/managers/get-camera";
-  import {
-    toggleFullscreen,
-    updateTransform
-  } from "@/lib/video-utils";
+  import { toggleFullscreen, updateTransform } from "@/lib/video-utils";
+  import Checkbox from "../ui/checkbox/checkbox.svelte";
+  import Label from "../ui/label/label.svelte";
 
   // Variables
   let availableChannels = writable<{ id: string; label: string }[]>([]);
@@ -40,9 +39,18 @@
   let currentPage = 0;
   const videosPerPage = 8;
   let isFetching = writable<boolean>(false);
+  let selectedEvents = writable<string[]>([]);
+  let isFetchingEvents = writable<boolean>(false);
 
   //Constants
   const PLAYBACK_API_URL = "https://playback.lenscorp.cloud/generate-stream";
+  const EVENT_API_URL = "http://74.50.98.77:3333/events";
+  const EVENTS_OPTIONS = [
+    { label: "Person", value: "person", color: "#FF4764" },
+    { label: "Fire", value: "fire", color: "#FF5733" },
+    { label: "Face", value: "face", color: "#24DA8E" },
+    { label: "Vehicle", value: "alpr", color: "#8A2BE2" },
+  ];
 
   // Functions
   function updateVideoBackgroundWidth(index: number) {
@@ -58,11 +66,11 @@
   }
 
   function handlePlayed(e: any) {
-    // Remove console.log only
+    // console.log only
   }
 
   function handleEnded(e: any) {
-    // Remove console.log only
+    // console.log only
   }
 
   function syncPlayState(index: number, isPlaying: boolean) {
@@ -391,22 +399,73 @@
   }
 
   // Function to calculate positions of red strips
-  function calculateEventPositions(cameraId, eventsArray) {
-    if (!eventsArray || !eventsArray.length) return [];
+  function calculateEventPositions(eventsArray: any[], cameraId: string) {
+    if (!eventsArray || !eventsArray.length) return { person: [], fire: [], face: [], alpr: [] };
 
-    // Find events for this specific camera
-    const cameraEvents = eventsArray.find((item) => item.camera === cameraId);
-    if (!cameraEvents || !cameraEvents.events) return [];
+    const typeToColorMap = {
+      person: "#FF4764",
+      fire: "#FF5733",
+      face: "#24DA8E",
+      alpr: "#8A2BE2",
+    };
 
-    return cameraEvents.events.map((event) => {
-      const eventTime = new Date(event.created);
-      const hours = eventTime.getUTCHours();
-      const minutes = eventTime.getUTCMinutes();
+    // Initialize arrays for each event type
+    const eventPositions = {
+      person: [],
+      fire: [],
+      face: [],
+      alpr: [],
+    };
 
-      // Convert time to 10-minute interval index (0-143)
-      const intervalIndex = hours * 6 + Math.floor(minutes / 10);
-      return (intervalIndex / 144) * 100;
-    });
+    // Filter and map events for the specific camera
+    eventsArray
+      .filter((event) => event.camera === cameraId)
+      .forEach((event) => {
+        const eventTime = new Date(event.created);
+        const hours = eventTime.getUTCHours();
+        const minutes = eventTime.getUTCMinutes();
+
+        const intervalIndex = hours * 6 + Math.floor(minutes / 10);
+        const position = (intervalIndex / 144) * 100;
+        const color = typeToColorMap[event.type] || "#000000";
+
+        // Add the event to the appropriate array
+        if (eventPositions[event.type]) {
+          eventPositions[event.type].push({ position, color });
+        }
+      });
+
+    return eventPositions;
+  }
+
+  async function getEvents() {
+    isFetchingEvents.set(true);
+    try {
+      const promises = $selectedChannels.map((channel) => {
+        return fetch(EVENT_API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            cameraId: channel.id,
+            date: eventDate,
+            types: $selectedEvents,
+          }),
+        }).then(async (response) => {
+          const res = await response.json();
+          if (res.data.length === 0) {
+            toast.error(`No events found for ${channel.name}`);
+            return [];
+          }
+          return res.data;
+        });
+      });
+      const results = await Promise.all(promises);
+      events = results.flat();
+    } catch (error) {
+      console.error("Error fetching events:", error);
+    } finally {
+      isFetchingEvents.set(false);
+    }
   }
 
   let previousNode: string | null = null;
@@ -477,18 +536,40 @@
             if (video) {
               const videoRect = video.getBoundingClientRect();
               const areaRect = area.getBoundingClientRect();
-              const maxTranslateX = (videoRect.width * scale - areaRect.width) / 2;
-              const maxTranslateY = (videoRect.height * scale - areaRect.height) / 2;
-              const minTranslateX = areaRect.width / 2 - (videoRect.width * scale) / 2;
-              const minTranslateY = areaRect.height / 2 - (videoRect.height * scale) / 2;
-              translateX = Math.max(minTranslateX, Math.min(maxTranslateX, translateX));
-              translateY = Math.max(minTranslateY, Math.min(maxTranslateY, translateY));
+              const maxTranslateX =
+                (videoRect.width * scale - areaRect.width) / 2;
+              const maxTranslateY =
+                (videoRect.height * scale - areaRect.height) / 2;
+              const minTranslateX =
+                areaRect.width / 2 - (videoRect.width * scale) / 2;
+              const minTranslateY =
+                areaRect.height / 2 - (videoRect.height * scale) / 2;
+              translateX = Math.max(
+                minTranslateX,
+                Math.min(maxTranslateX, translateX)
+              );
+              translateY = Math.max(
+                minTranslateY,
+                Math.min(maxTranslateY, translateY)
+              );
               // Block panning outside the zoomable area
-              if (translateX < -areaRect.width / 2 || translateX > areaRect.width / 2) {
-                translateX = Math.max(-areaRect.width / 2, Math.min(areaRect.width / 2, translateX));
+              if (
+                translateX < -areaRect.width / 2 ||
+                translateX > areaRect.width / 2
+              ) {
+                translateX = Math.max(
+                  -areaRect.width / 2,
+                  Math.min(areaRect.width / 2, translateX)
+                );
               }
-              if (translateY < -areaRect.height / 2 || translateY > areaRect.height / 2) {
-                translateY = Math.max(-areaRect.height / 2, Math.min(areaRect.height / 2, translateY));
+              if (
+                translateY < -areaRect.height / 2 ||
+                translateY > areaRect.height / 2
+              ) {
+                translateY = Math.max(
+                  -areaRect.height / 2,
+                  Math.min(areaRect.height / 2, translateY)
+                );
               }
               updateTransform(video, scale, translateX, translateY);
             }
@@ -673,11 +754,13 @@
                 index
               ]}% 100%; background-repeat: no-repeat;"
             >
-              {#each calculateEventPositions(cam.id, events) as position}
-                <div
-                  class="absolute top-0 h-full w-[2px] bg-red-500"
-                  style="left: {position}%"
-                ></div>
+              {#each Object.values(calculateEventPositions(events, cam.id)) as markers}
+                {#each markers as { position, color }}
+                  <div
+                    class="absolute top-0 h-full w-[2px]"
+                    style="left: {position}%; background-color: {color};"
+                  ></div>
+                {/each}
               {/each}
               <input
                 type="range"
@@ -731,7 +814,7 @@
           <!-- Cameras List limit upto 8 -->
           <div class="w-full px-2 py-1 max-h-[160px] overflow-y-auto">
             {#if $isLoading}
-              <p class="text-sm text-gray-500">Loading...</p>
+              <Loader2 size={20} class="animate-spin" />
             {:else if $availableChannels.length === 0}
               <p class="text-sm text-gray-500">
                 No cameras have recordings available.
@@ -800,7 +883,12 @@
                   !searchDate ||
                   $isFetching}
               >
-                {$isFetching ? "Fetching..." : "Submit"}
+                {#if $isFetching}
+                  <Loader2 class="mr-2 h-4 w-4 animate-spin inline" />
+                  Fetching...
+                {:else}
+                  Submit
+                {/if}
               </Button>
             </div>
           </Tabs.Content>
@@ -865,10 +953,74 @@
                   !searchDate ||
                   $isFetching}
               >
-                {$isFetching ? "Fetching..." : "Submit"}
+                {#if $isFetching}
+                  <Loader2 class="mr-2 h-4 w-4 animate-spin inline" />
+                  Fetching...
+                {:else}
+                  Submit
+                {/if}
               </Button>
             </div>
           </Tabs.Content>
+          <!-- events makers -->
+          <div class="py-4">
+            <p
+              class={cn("text-sm font-semibold", {
+                hidden: videoUrls?.responses?.length === 0,
+              })}
+            >
+              Mark Events
+            </p>
+            <div
+              class={cn("flex flex-wrap gap-4 py-4", {
+                hidden: videoUrls?.responses?.length === 0,
+              })}
+            >
+              {#each EVENTS_OPTIONS as option}
+                <div class="flex items-center justify-center gap-2">
+                  <Checkbox
+                    onCheckedChange={(v) => {
+                      selectedEvents.update((events) => {
+                        if (v) {
+                          return [...events, option.value]; // Add event
+                        } else {
+                          return events.filter(
+                            (event) => event !== option.value
+                          ); // Remove event
+                        }
+                      });
+                    }}
+                    checked={$selectedEvents.includes(option.value)}
+                    class={cn({
+                      "data-[state=checked]:bg-[#8A2BE2]":
+                        option.color === "#8A2BE2",
+                      "data-[state=checked]:bg-[#FF4764]":
+                        option.color === "#FF4764",
+                      "data-[state=checked]:bg-[#24DA8E]":
+                        option.color === "#24DA8E",
+                      "data-[state=checked]:bg-[#FF5733]":
+                        option.color === "#FF5733",
+                    })}
+                  />
+                  <Label>{option.label}</Label>
+                </div>
+              {/each}
+            </div>
+            <Button
+              disabled={$selectedEvents.length < 1 || $isFetchingEvents}
+              class={cn("w-full py-2 text-sm font-medium rounded-md", {
+                hidden: videoUrls?.responses?.length === 0,
+              })}
+              on:click={getEvents}
+            >
+              {#if $isFetchingEvents}
+                <Loader2 class="mr-2 h-4 w-4 animate-spin inline" />
+                Fetching Events...
+              {:else}
+                Get Events
+              {/if}
+            </Button>
+          </div>
         </Tabs.Root>
       </div>
     </div>
