@@ -2,7 +2,7 @@ import { redirect, error } from "@sveltejs/kit";
 
 let token: string;
 
-// // Add this load function to get query parameters
+// // Add this load function to get query parameters-ihi
 export const load = ({ url }) => {
     token = url.searchParams.get('token');
 
