@@ -26,7 +26,7 @@
   let selectedEventFilter = "";
   let eventSearchQuery = "";
   const EVENT_FILTERS = [
-    { filter: "face", label: "Face" },
+    // { filter: "face", label: "Face" },
     { filter: "person", label: "Person" },
     { filter: "alpr", label: "Vehicle" },
     { filter: "heatmap", label: "Heatmap" },
