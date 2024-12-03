@@ -50,7 +50,7 @@
 {#if !user}
   <slot />
 {:else}
-  {#if !data.url.includes("login") && !data.url?.includes("register")}
+  {#if !data.url.includes("login") && !data.url?.includes("register") && !data.url?.includes("forgot-password") && !data.url?.includes("reset-password")}
     <Navbar {user} sessionId={session?.id} {session} mToken={data.mToken} />
   {/if}
   {#if session && user}
@@ -58,7 +58,7 @@
       <main
         class={cn(
           "flex items-start justify-between bg-background w-full overflow-y-hidden",
-          data.url?.includes("login") || data.url?.includes("register")
+          data.url?.includes("login") || data.url?.includes("register") && data.url?.includes("forgot-password") && data.url?.includes("reset-password")
             ? "h-screen"
             : "max-h-[calc(100vh-75px)]",
         )}
