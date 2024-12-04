@@ -37,7 +37,7 @@
     PB.autoCancellation(false);
     const res = await PB.collection("roles").getFullList();
     const allStoress = await fetch(
-      "https://dev.api.moksa.ai/store/getAllStoresForDropdown",
+      "https://api.moksa.ai/store/getAllStoresForDropdown",
       {
         method: "GET",
         headers: {

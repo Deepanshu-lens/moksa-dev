@@ -160,7 +160,7 @@
       socket.disconnect();
     }
 
-    socket = io("https://dev.api.moksa.ai", {
+    socket = io("https://api.moksa.ai", {
       withCredentials: true,
       extraHeaders: {
         Authorization: `Bearer ${token}`,

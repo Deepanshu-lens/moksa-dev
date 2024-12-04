@@ -32,7 +32,7 @@ export const load: PageServerLoad = async ({ fetch, cookies, locals }) => {
     // console.log(formatDate(oneYearAgo))
     // console.log(formatDate(today))
     const dropwdown = async () => {
-        const response = await fetch('https://dev.api.moksa.ai/store/getAllStoresForDropdown', {
+        const response = await fetch('https://api.moksa.ai/store/getAllStoresForDropdown', {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${mToken}`,

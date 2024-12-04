@@ -86,7 +86,7 @@
     // Make the API call
     try {
       const response = await fetch(
-        "https://dev.api.moksa.ai/requestfeature/create",
+        "https://api.moksa.ai/requestfeature/create",
         {
           method: "POST",
           body: JSON.stringify({ title, message }),

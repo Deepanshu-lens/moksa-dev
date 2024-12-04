@@ -99,7 +99,7 @@ export const load: PageServerLoad = async ({ locals, cookies }) => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-      const response = await fetch('https://dev.api.moksa.ai/store/getAllStoresForDropdown', {
+      const response = await fetch('https://api.moksa.ai/store/getAllStoresForDropdown', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${cookies.get('moksa-token')}`

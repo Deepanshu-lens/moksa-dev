@@ -60,7 +60,7 @@
     );
 
     const stores = await fetch(
-      "https://dev.api.moksa.ai/store/getAllStoresForDropdown",
+      "https://api.moksa.ai/store/getAllStoresForDropdown",
       {
         method: "GET",
         headers: {
