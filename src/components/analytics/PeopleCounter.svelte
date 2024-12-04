@@ -180,7 +180,7 @@
   async function getLiveData(storeId: number) {
     loadingLive.set(true);
     const response = await fetch(
-      `https://dev.api.moksa.ai/people/getPeopleCountLive/${storeId}/1/30`,
+      `https://api.moksa.ai/people/getPeopleCountLive/${storeId}/1/30`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -200,7 +200,7 @@
       .toISOString()
       .split("T")[0];
     const weekData = await fetch(
-      `https://dev.api.moksa.ai/people/getPeopleCount/${storeId}/${weekAgo}/${today}`,
+      `https://api.moksa.ai/people/getPeopleCount/${storeId}/${weekAgo}/${today}`,
       {
         headers:
           $selectedStore.value !== -1
@@ -262,7 +262,7 @@
     try {
       // Call the three APIs
       const d = await fetch(
-        `https://dev.api.moksa.ai/people/getPeopleCount/${storeId}`,
+        `https://api.moksa.ai/people/getPeopleCount/${storeId}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -301,7 +301,7 @@
       // console.log(token);
       // Call the three APIs
       const d = await fetch(
-        `https://dev.api.moksa.ai/people/getPeopleCount/${storeId}`,
+        `https://api.moksa.ai/people/getPeopleCount/${storeId}`,
         {
           method: "GET",
           headers: {

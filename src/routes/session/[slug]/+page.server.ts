@@ -24,7 +24,7 @@ export const actions = {
       ?.collection("node")
       .create({ name, session: locals.user.record.session[0], mobileLayout: 1 });
 
-    const moksaStore = await fetch(`https://dev.api.moksa.ai/store/create`, {
+    const moksaStore = await fetch(`https://api.moksa.ai/store/create`, {
       method: 'POST',
       headers: {
         "Content-Type": "application/json",

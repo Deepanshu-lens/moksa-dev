@@ -97,7 +97,7 @@
     try {
       const [response, liveResponse] = await Promise.all([
         fetch(
-          `https://dev.api.moksa.ai/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${$selectedStore.value}/1/100/${formatDate(startDate)}/${formatDate(today)}`,
+          `https://api.moksa.ai/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${$selectedStore.value}/1/100/${formatDate(startDate)}/${formatDate(today)}`,
           {
             method: "GET",
             headers: {
@@ -107,7 +107,7 @@
           },
         ),
         fetch(
-          `https://dev.api.moksa.ai/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${$selectedStore.value}/1/100/${formatDate(startDate)}/${formatDate(today)}`,
+          `https://api.moksa.ai/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${$selectedStore.value}/1/100/${formatDate(startDate)}/${formatDate(today)}`,
           {
             method: "GET",
             headers: {
@@ -148,7 +148,7 @@
 
     try {
       const response = await fetch(
-        `https://dev.api.moksa.ai/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${$selectedStore.value}/1/100/${start}/${end}`,
+        `https://api.moksa.ai/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${$selectedStore.value}/1/100/${start}/${end}`,
         {
           method: "GET",
           headers: {

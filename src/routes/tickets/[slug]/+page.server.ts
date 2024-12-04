@@ -27,7 +27,7 @@ export const load: PageServerLoad = async ({ cookies, params, fetch, locals }) =
         }));
     }
 
-    const response = await fetch(`https://dev.api.moksa.ai/customerComplaints/getAllComplaints/1/10`, {
+    const response = await fetch(`https://api.moksa.ai/customerComplaints/getAllComplaints/1/10`, {
         headers: {
             "Authorization": `Bearer ${moksaToken}`,
             "Content-Type": "application/json"
