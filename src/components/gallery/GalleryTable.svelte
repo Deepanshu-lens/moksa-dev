@@ -96,10 +96,10 @@
             </button>
           </span></Table.Head
         >
-        <Table.Head
+        <!-- <Table.Head
           class="text-[#727272] w-full h-full flex items-center justify-center"
           >Update</Table.Head
-        >
+        > -->
       </Table.Row>
     </Table.Header>
     <Table.Body>
@@ -143,21 +143,11 @@
               ></Table.Cell
             >
             <Table.Cell
-              class="text-[#727272] w-full h-full flex items-center justify-center text-sm"
+              class="text-[#727272] w-full h-full flex items-center justify-center text-sm pr-8"
               ><span>
                 {timeAgo?.format(new Date(person?.updated))}
               </span></Table.Cell
             >
-            <Table.Cell
-              class="text-[#727272] w-full h-full flex items-center justify-center text-sm"
-            >
-              <button
-                class="text-[#D28E3D] bg-[#D28E3D] bg-opacity-15 font-medium text-sm rounded-xl flex items-center p-2 gap-2"
-              >
-                <!-- svelte-ignore element_invalid_self_closing_tag -->
-                <span class="h-2 w-2 rounded-full bg-[#D28E3D]" /> updated now
-              </button>
-            </Table.Cell>
           </Table.Row>
         {/each}
       {:else}
