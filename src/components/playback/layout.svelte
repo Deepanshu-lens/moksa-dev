@@ -440,32 +440,35 @@
 
   async function getEvents() {
     isFetchingEvents.set(true);
-    try {
-      const promises = $selectedChannels.map((channel) => {
-        return fetch(EVENT_API_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            cameraId: channel.id,
-            date: eventDate,
-            types: $selectedEvents,
-          }),
-        }).then(async (response) => {
-          const res = await response.json();
-          if (res.data.length === 0) {
-            toast.error(`No events found for ${channel.name}`);
-            return [];
-          }
-          return res.data;
-        });
-      });
-      const results = await Promise.all(promises);
-      events = results.flat();
-    } catch (error) {
-      console.error("Error fetching events:", error);
-    } finally {
+    // try {
+    //   const promises = $selectedChannels.map((channel) => {
+    //     return fetch(EVENT_API_URL, {
+    //       method: "POST",
+    //       headers: { "Content-Type": "application/json" },
+    //       body: JSON.stringify({
+    //         cameraId: channel.id,
+    //         date: eventDate,
+    //         types: $selectedEvents,
+    //       }),
+    //     }).then(async (response) => {
+    //       const res = await response.json();
+    //       if (res.data.length === 0) {
+    //         toast.error(`No events found for ${channel.name}`);
+    //         return [];
+    //       }
+    //       return res.data;
+    //     });
+    //   });
+    //   const results = await Promise.all(promises);
+    //   events = results.flat();
+    // } catch (error) {
+    //   console.error("Error fetching events:", error);
+    // } finally {
+    //   isFetchingEvents.set(false);
+    // }
+    setTimeout(() => {
       isFetchingEvents.set(false);
-    }
+    }, 1000);
   }
 
   let previousNode: string | null = null;
