@@ -284,7 +284,7 @@
 
     <!-- Empoloyees Effeciency -->
   {:else if view === 4}
-    <EE {allStores} token={data.moksaToken} {moksaUserId} />
+    <EE {allStores} token={data.moksaToken} {moksaUserId} user={data?.user}/>
 
     <!-- people counter -->
   {:else if view === 5}
