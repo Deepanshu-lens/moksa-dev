@@ -43,6 +43,7 @@
   export let allStores;
   export let token;
   export let moksaUserId;
+  export let user;
 
   const stores = allStores
     // ?.filter((store: any) => store.id !== -1)
@@ -277,16 +278,82 @@
         `Received live employee efficiency data for store ${storeId}:`,
         data,
       );
-      // liveData.update((currentData) => {
-      //   return [data, ...currentData].slice(0, 100);
-      // });
+
+      efficiencyData?.update((currentData) => {
+        console.log(currentData, "current data");
+        const existingEmployeeIndex = currentData?.data?.data?.findIndex(
+          (emp) => emp?.employee_id === data?.employee_id,
+        );
+
+        console.log(existingEmployeeIndex, "existingEmployeeIndex");
+
+        const storeExists = stores?.some(
+          (store) => store?.value === data?.store_id,
+        );
+
+        // // // if store doesn't exist and user is not super-admin
+        if (user?.role !== "superAdmin" && !storeExists) {
+          return { ...currentData };
+        }
+
+        if (existingEmployeeIndex !== -1) {
+          // Update existing store data
+          const updatedData = [...currentData?.data?.data];
+          updatedData[existingEmployeeIndex] = {
+            ...updatedData[existingEmployeeIndex],
+            ...data,
+          };
+          return {
+            data: {
+              data: updatedData,
+              column: currentData?.data?.column,
+              total: currentData?.data?.total,
+            },
+          };
+        } else {
+          // add new employee data
+          const newEmployeeData = {
+            ...data,
+          };
+
+          let updatedData = [...currentData?.data?.data];
+          updatedData.push(newEmployeeData);
+          return {
+            data: {
+              data: updatedData,
+              column: currentData?.data?.column,
+              total: currentData?.data?.total,
+            },
+          };
+        }
+        // else {
+        //   // Add new store data
+        //   const newEmployeeData = {
+        //     employee_id: data?.employee_id,
+        //     employee:
+        //       data.store_name ||
+        //       allStores.find((store) => store.id === data.store_id)?.name ||
+        //       data.store_id, // Assuming the socket message includes store_name
+        //     noofcustomers: data.noofcustomers.toString(),
+        //     going_out_count: data.noofcustomersgoingout.toString(),
+        //     busyhour: data.busyhour,
+        //     predictedmean: 0,
+        //     predicted_percentage: 0,
+        //     total_count: data.going_in.toString(),
+        //   };
+        //   return { ...currentData, data: [...currentData.data, newStoreData] };
+        // }
+      });
+
+      console.log($efficiencyData, "efficiencyData in socket");
     });
 
     socket.on("disconnect", () => {
       console.log("disconnected");
-      // liveData.set([]);
     });
   }
+
+  $: console.log($efficiencyData, "efficiencyData");
 
   let loading = false;
 
@@ -382,7 +449,12 @@
     const today = new Date();
     let startDate = new Date(today);
 
+    let isLive = false;
+
     switch ($dateRange) {
+      case "live":
+        isLive = true;
+        break;
       case "7 Days":
         startDate.setDate(today.getDate() - 7);
         break;
@@ -401,9 +473,6 @@
 
     const formatDate = (date: Date) => date.toISOString().split("T")[0];
 
-    console.log(formatDate(startDate));
-    console.log(formatDate(today));
-
     try {
       loading = true;
       const response = await fetch(
@@ -413,6 +482,7 @@
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
+            live: isLive,
           },
         },
       );
@@ -551,13 +621,10 @@
   }
 
   $: {
-    if ($selectedStoreId !== undefined) {
+    if ($selectedStoreId !== undefined && $dateRange.toLowerCase() === "live") {
       setupSocket($selectedStoreId);
     }
   }
-
-  // $: console.log($employeeData);
-  // $: console.log($employeeDetails);
 </script>
 
 <section
@@ -569,7 +636,11 @@
       class="flex items-center border-black h-[40px] border-opacity-[18%] border-[1px] rounded-md dark:border-white"
     >
       <button
-        class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "7 Days" ? "rounded-l-md bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
+        class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "live" ? "rounded-l-md bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
+        on:click={() => dateRange.set("live")}>Live</button
+      >
+      <button
+        class={`2xl:py-2 2xl:px-3 h-full py-1 px-2 border-r border-black border-opacity-[18%]  text-sm ${$dateRange === "7 Days" ? "bg-[#0BA5E9] text-white" : "text-black dark:text-white dark:border-white"}`}
         on:click={() => dateRange.set("7 Days")}>7 Days</button
       >
       <button
@@ -694,7 +765,7 @@
           <span class="flex items-center justify-center h-full w-full">
             <Spinner />
           </span>
-        {:else if $efficiencyData && $efficiencyData.data && $efficiencyData?.data?.data?.length > 0}
+        {:else if $efficiencyData && $efficiencyData?.data && $efficiencyData?.data?.data.length > 0}
           <EmployeeTrackingDataTable {efficiencyData} {selectedStore} />
         {:else}
           <span class="flex items-center justify-center h-full w-full">

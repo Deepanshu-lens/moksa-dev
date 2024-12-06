@@ -25,9 +25,9 @@
   export let efficiencyData;
   export let selectedStore;
 
-  $: console.log("emp table", $efficiencyData.data);
+  $: console.log("emp table", $efficiencyData?.data?.data);
 
-  $: dbData = $efficiencyData.data.data.map((item: any) => {
+  $: dbData = $efficiencyData?.data?.data?.map((item: any) => {
     return {
       employee: `${item.first_name} ${item.last_name}`,
       storeName: item.storeName === undefined ? $selectedStore : item.storeName,
@@ -97,9 +97,9 @@
   //   }),
   // ]);
 
-  $: columns = table.createColumns(
-    $efficiencyData.data.column
-      .filter(
+  $: columns = table?.createColumns(
+    $efficiencyData?.data?.column
+      ?.filter(
         (col: any) =>
           !["store_id", "first_name", "last_name"].includes(col.key),
       )
