@@ -16,7 +16,7 @@
   import { Button } from "@/components/ui/button";
   import { toast } from "svelte-sonner";
   import * as Dialog from "../../../components/ui/dialog";
-  import { Plus } from "lucide-svelte";
+  import { Loader2, Plus } from "lucide-svelte";
   import Switch from "@/components/ui/switch/switch.svelte";
   import { user } from "@/stores";
   import pb from "@/lib/pb";
@@ -29,10 +29,12 @@
   let serverIp: string = "";
   let serverPort: string = "";
   let ssl: boolean = false;
+  let isLoading: boolean = false;
 
   // Functions
   async function handleSubmit(addPanelData?: Panel_Data) {
     try {
+      isLoading = true;
       // Use form data if addPanelData is not provided
       const panelDataToSubmit = addPanelData || {
         name,
@@ -47,12 +49,16 @@
 
       dialogOpen = false;
       toast.success("Panel added successfully");
+      setTimeout(() => {
+        location.reload();
+      }, 3000);
     } catch (error) {
       console.error("Error adding panel:", error);
       toast.error("Failed to add panel");
+    } finally {
+      isLoading = false;
     }
   }
-
 </script>
 
 <Dialog.Root bind:open={dialogOpen}>
@@ -109,10 +115,7 @@
       </div>
       <div class="col-span-2 flex items-center gap-4 py-1">
         <Label class="w-24" for="ssl">SSL</Label>
-        <Switch
-          bind:checked={ssl}
-          id="ssl"
-        />
+        <Switch bind:checked={ssl} id="ssl" />
       </div>
     </div>
 
@@ -127,9 +130,14 @@
         <Button
           on:click={() => handleSubmit()}
           class="mt-auto flex items-center gap-1 w-full"
+          disabled={isLoading}
         >
-          <Plus size={16} />
-          Add Panel
+          {#if isLoading}
+            <Loader2 class="animate-spin" /> <i>Adding Panel...</i>
+          {:else}
+            <Plus size={16} />
+            Add Panel
+          {/if}
         </Button>
       </span>
     </Dialog.Footer>

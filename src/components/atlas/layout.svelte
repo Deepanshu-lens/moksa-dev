@@ -1,7 +1,7 @@
 <script lang="ts">
   // Imports
   import { Label } from "@/components/ui/label";
-  import { ChevronRight, Plus, Search } from "lucide-svelte";
+  import { ChevronRight, Loader2, Plus, Search } from "lucide-svelte";
   import Input from "@/components/ui/input/input.svelte";
   import Button from "@/components/ui/button/button.svelte";
   import Doors from "@/components/atlas/doors.svelte";
@@ -27,10 +27,13 @@
   let userList: never[] = [];
   let name = "";
   let ssl = false;
+  let isLoading = false;
 
+  $:console.log($user)
   // Functions
   async function handleSubmit(addPanelData = null) {
     try {
+      isLoading = true;
       // Use form data if addPanelData is not provided
       const panelDataToSubmit = addPanelData || {
         name,
@@ -45,9 +48,14 @@
 
       showRightPanel = false;
       toast.success("Panel added successfully");
-      } catch (error) {
+      setTimeout(() => {
+        location.reload();
+      }, 3000);
+    } catch (error) {
       console.error("Error adding panel:", error);
       toast.error("Failed to add panel");
+    } finally {
+      isLoading = false;
     }
   }
 
@@ -217,11 +225,15 @@
         <Button
           type="button"
           on:click={() => handleSubmit()}
-          disabled={!serverIp || !serverPort || !username || !password}
+          disabled={!serverIp || !serverPort || !username || !password || isLoading}
           class="disabled:cursor-not-allowed flex items-center gap-2"
         >
-          <Plus class="size-4" />
-          Add
+          {#if isLoading}
+            <Loader2 class="animate-spin" /> <i>Adding Panel...</i>
+          {:else}
+            <Plus class="size-4" />
+            Add
+          {/if}
         </Button>
       {:else}
         <div class="flex flex-col h-[calc(100vh-75px)]">
