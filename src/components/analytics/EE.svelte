@@ -688,9 +688,11 @@
       >
         <p class="text-white flex items-center gap-2 text-xl font-bold">
           Employee Tracking
-          <span class="text-xs text-white bg-pink-500 rounded-md p-1">
-            Live
-          </span>
+          {#if $dateRange.toLowerCase() === "live"}
+            <span class="text-xs text-white bg-pink-500 rounded-md p-1">
+              Live
+            </span>
+          {/if}
         </p>
         <!-- Store Selector -->
         <Select.Root portal={null}>
