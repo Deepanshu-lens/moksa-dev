@@ -558,18 +558,37 @@
       ],
     },
   ];
-
-  const colors = [
-    "#1E40AF",
-    "#1D4ED8",
-    "#2563EB",
-    "#3B82F6",
-    "#60A5FA",
-    "#93C5FD",
-    "#BFDBFE",
-    // Add more colors if needed
-  ];
-
+const colors = [
+  // Blues
+  "#1E40AF", // Deep blue
+  "#1D4ED8", // Royal blue
+  "#2563EB", // Bright blue
+  "#3B82F6", // Primary blue
+  
+  // Greens
+  "#065F46", // Deep green
+  "#059669", // Emerald
+  "#10B981", // Bright green
+  "#34D399", // Light green
+  
+  // Purples
+  "#5B21B6", // Deep purple
+  "#7C3AED", // Bright purple
+  "#8B5CF6", // Medium purple
+  "#A78BFA", // Light purple
+  
+  // Reds/Oranges
+  "#DC2626", // Deep red
+  "#EF4444", // Bright red
+  "#F59E0B", // Orange
+  "#FBBF24", // Amber
+  
+  // Teals/Cyans
+  "#0891B2", // Deep teal
+  "#06B6D4", // Bright teal
+  "#22D3EE", // Cyan
+  "#67E8F9"  // Light cyan
+];
   function createChart() {
     if (chart) {
       chart.destroy();
