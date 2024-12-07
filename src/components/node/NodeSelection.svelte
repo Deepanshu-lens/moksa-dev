@@ -1,18 +1,13 @@
 <script lang="ts">
   import * as Select from "@/components/ui/select/index.js";
   import { nodes, selectedNode } from "@/stores";
-  let selectedValue = $nodes
-    ? {
-        value: $selectedNode,
-        label: $nodes.find((n) => n.id === $selectedNode)?.name,
-      }
-    : undefined;
   $: selectedValue = $nodes
     ? {
         value: $selectedNode,
         label: $nodes.find((n) => n.id === $selectedNode)?.name,
       }
     : undefined;
+  $: selectedValue && localStorage.setItem("selectedNode", selectedValue.value);
 </script>
 
 {#if $nodes}
