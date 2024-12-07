@@ -41,6 +41,7 @@
     // }),
     onSubmit: async (values: any) => {
       addCamera();
+      reset();
     },
     onError: (err: any) => {
       console.error("Form validation failed:", err);
