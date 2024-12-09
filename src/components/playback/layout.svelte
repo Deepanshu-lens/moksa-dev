@@ -125,6 +125,29 @@
       }
       videoElement.addEventListener("play", () => syncPlayState(index, true));
       videoElement.addEventListener("pause", () => syncPlayState(index, false));
+      
+      video.addEventListener("timeupdate", () => {
+        const currentTime = video.currentTime; // Use currentTime without offset
+        const intervalIndex = Math.floor(currentTime / 600);
+
+        const seeker = document.querySelectorAll(
+          '.video-controls input[type="range"]'
+        )[index] as HTMLInputElement;
+
+        if (seeker) {
+          seeker.value = intervalIndex.toString();
+        }
+
+        if (index === 0) {
+          const globalSeekBar = document.querySelector(
+            '.global-controls input[type="range"]'
+          ) as HTMLInputElement;
+          if (globalSeekBar) {
+            globalSeekBar.value = intervalIndex.toString();
+          }
+        }
+      });
+
 
       video.addEventListener("loadedmetadata", () => {
         updateVideoBackgroundWidth(index);
