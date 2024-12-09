@@ -26,14 +26,14 @@
   let userName = "";
   let password = "";
   let ipAddress = "";
-  let ipAddress1 = 0;
-  let ipAddress2 = 0;
-  let ipAddress3 = 0;
-  let ipAddress4 = 0;
-  let endIpAddress1 = 0;
-  let endIpAddress2 = 0;
-  let endIpAddress3 = 0;
-  let endIpAddress4 = 0;
+  let ipAddress1 = "";
+  let ipAddress2 = "";
+  let ipAddress3 = "";
+  let ipAddress4 = "";
+  let endIpAddress1 = "";
+  let endIpAddress2 = "";
+  let endIpAddress3 = "";
+  let endIpAddress4 = "";
   let httpPort = "";
   let tabValue = "onvif";
   let discoveryData = writable<[]>([]);
@@ -47,7 +47,15 @@
   }[] = [];
   let fetchingCamers: boolean = false;
   let gettingRtsp: boolean = false;
-  let selectedOnvifCameras = writable([]);
+  let clickedSubmit = writable(false);
+  interface OnvifCamera {
+    ipAddress: string;
+    cameraName: string;
+    brandName: string;
+    hardwareId: number;
+    serialNumber: string;
+  }
+  let selectedOnvifCameras = writable<OnvifCamera[]>([]);
 
   let rangeStart = 1;
   let rangeEnd = 255;
@@ -169,23 +177,34 @@
       }
       doneSubmit = true;
     } else {
-      fetchingCamers = true;
-      try {
-        const response = await fetch(
-          `${ONVIF_DEVICES_BASE_URL}/discover-cameras?startIp=${ipAddress1}.${ipAddress2}.${ipAddress3}.${ipAddress4}&endIp=${endIpAddress1}.${endIpAddress2}.${endIpAddress3}.${endIpAddress4}&username=${userName}&password=${password}&port=${httpPort}`
-        );
+      setRtspToDb();
+      // console.log(tabValue)
+    }
+  };
 
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status} ${response.statusText}`);
-        }
+  const fetchONVIFCams = async () => {
+    fetchingCamers = true;
+    try {
+      if (ipAddress4 >= endIpAddress4)
+        throw new Error("Start IP can not be less than end IP");
 
-        const data = await response.json();
-        onvifCamerasList = data.cameras || [];
-      } catch (error) {
-        console.error("Failed to fetch ONVIF cameras:", error);
-      } finally {
-        fetchingCamers = false;
+      const response = await fetch(
+        `${ONVIF_DEVICES_BASE_URL}/discover-cameras?startIp=${ipAddress1}.${ipAddress2}.${ipAddress3}.${ipAddress4}&endIp=${endIpAddress1}.${endIpAddress2}.${endIpAddress3}.${endIpAddress4}&username=${userName}&password=${password}&port=${httpPort}`
+      );
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status} ${response.statusText}`);
       }
+
+      const data = await response.json();
+
+      console.log(data);
+
+      onvifCamerasList = data.cameras || [];
+    } catch (error) {
+      console.error("Failed to fetch ONVIF cameras:", error);
+    } finally {
+      fetchingCamers = false;
     }
   };
 
@@ -265,6 +284,8 @@
 
   const setRtspToDb = async () => {
     gettingRtsp = true;
+
+    console.log(JSON.stringify($selectedOnvifCameras, null, 2));
     const promises = $selectedOnvifCameras.map(async (camera) => {
       const url = `${ONVIF_DEVICES_BASE_URL}/get-stream-uris?ip=${camera.ipAddress}&username=${userName}&password=${password}&port=${httpPort}`;
       try {
@@ -330,18 +351,16 @@
 
     await Promise.all(createPromises);
     gettingRtsp = false;
+
     location.reload();
   };
 
-  const handleIpInput = (
-    event: Event,
-    nextInputId: string
-  ) => {
+  const handleIpInput = (event: Event, nextInputId: string) => {
     const input = event.target as HTMLInputElement;
     let value = input.value;
 
     // Ensure only numbers are entered
-    value = value.replace(/[^\d]/g, '');
+    value = value.replace(/[^\d]/g, "");
 
     // Limit to 3 digits
     if (value.length > 3) {
@@ -361,7 +380,10 @@
   };
 </script>
 
-<form use:form class="space-y-4 mt-4 max-h-[80vh] overflow-auto p-4 rounded-md">
+<form
+  use:form
+  class="space-y-4 mt-4 w-full max-h-[80vh] overflow-auto p-4 rounded-md"
+>
   <!-- Manual/Automatic Mode -->
   <div
     class="flex flex-col sm:flex-row items-center justify-between border-b pb-8"
@@ -606,7 +628,7 @@
                 bind:value={ipAddress1}
                 class="text-xs"
                 placeholder="192"
-                on:input={(e) => handleIpInput(e, 'ip2')}
+                on:input={(e) => handleIpInput(e, "ip2")}
                 maxlength="3"
               />
               <span>.</span>
@@ -616,7 +638,7 @@
                 class="text-xs"
                 placeholder="168"
                 bind:value={ipAddress2}
-                on:input={(e) => handleIpInput(e, 'ip3')}
+                on:input={(e) => handleIpInput(e, "ip3")}
                 maxlength="3"
               />
               <span>.</span>
@@ -626,7 +648,7 @@
                 class="text-xs"
                 placeholder="1"
                 bind:value={ipAddress3}
-                on:input={(e) => handleIpInput(e, 'ip4')}
+                on:input={(e) => handleIpInput(e, "ip4")}
                 maxlength="3"
               />
               <span>.</span>
@@ -651,7 +673,7 @@
                 bind:value={endIpAddress1}
                 class="text-xs"
                 placeholder="192"
-                on:input={(e) => handleIpInput(e, 'endIp2')}
+                on:input={(e) => handleIpInput(e, "endIp2")}
                 maxlength="3"
               />
               <span>.</span>
@@ -661,7 +683,7 @@
                 class="text-xs"
                 placeholder="168"
                 bind:value={endIpAddress2}
-                on:input={(e) => handleIpInput(e, 'endIp3')}
+                on:input={(e) => handleIpInput(e, "endIp3")}
                 maxlength="3"
               />
               <span>.</span>
@@ -671,7 +693,7 @@
                 class="text-xs"
                 placeholder="1"
                 bind:value={endIpAddress3}
-                on:input={(e) => handleIpInput(e, 'endIp4')}
+                on:input={(e) => handleIpInput(e, "endIp4")}
                 maxlength="3"
               />
               <span>.</span>
@@ -703,51 +725,97 @@
             </div>
           </div>
         </div>
-        {#if fetchingCamers}
-          <div class="flex gap-2 items-center w-full justify-center">
-            <Loader2 class="animate-spin" size={14} />
-            <p class="text-xs">Fetching Camers...</p>
-          </div>
-        {:else}
-          <div class="flex pb-4 gap-4 w-full">
-            {#if onvifCamerasList.length > 0}
-              <Label class="text-nowrap">Select Camera</Label>
-              <div class="flex flex-col flex-wrap gap-2 w-full">
-                {#each onvifCamerasList as camera}
-                  <div class="flex gap-2 mb-6 w-full">
-                    <Checkbox
-                      id={camera.ipAddress}
-                      onCheckedChange={(v) =>
-                        v
-                          ? selectedOnvifCameras.update((current) => [
-                              ...current,
-                              camera,
-                            ])
-                          : selectedOnvifCameras.update((current) =>
-                              current.filter(
-                                (c) => c.ipAddress !== camera.ipAddress
-                              )
-                            )}
-                    />
-                    <Label>{camera.cameraName}</Label>
-                  </div>
-                {:else}
-                  <p>No Cameras Found</p>
-                {/each}
-                <Button
-                  disabled={$selectedOnvifCameras.length === 0 || gettingRtsp}
-                  on:click={setRtspToDb}
-                  class="text-end"
-                >
-                  {#if gettingRtsp}
-                    <Loader2 class="animate-spin" />
-                    Adding...
-                  {:else}
-                    Add Cameras
-                  {/if}
-                </Button>
-              </div>
+        <div class="flex items-center justify-between pb-4">
+          <Button
+            variant="brand"
+            type="button"
+            class="font-semibold w-full"
+            on:click={fetchONVIFCams}
+          >
+            {#if !fetchingCamers}
+              <p>Fetch Cameras</p>
+            {:else}
+              <Loader2 class="animate-spin" size={14} />
+              <p class="text-xs">Fetching Cameres...</p>
             {/if}
+          </Button>
+        </div>
+        {#if onvifCamerasList.length > 0}
+          <div
+            class="flex flex-col items-stretch justify pb-4 gap-4 w-full h-[15rem] overflow-auto"
+          >
+            <Table.Root>
+              <Table.Header>
+                <Table.Row>
+                  <Table.Head class="w-[50px]">
+                    <Checkbox
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          selectedOnvifCameras.set(
+                            onvifCamerasList.map((camera) => ({
+                              ipAddress: camera.ipAddress,
+                              cameraName: camera.cameraName,
+                              brandName: camera.brandName,
+                              hardwareId: camera.hardwareId,
+                              serialNumber: camera.serialNumber,
+                            }))
+                          );
+                          console.log($selectedOnvifCameras);
+                        } else {
+                          selectedOnvifCameras.set([]);
+                        }
+                      }}
+                    />
+                  </Table.Head>
+                  <Table.Head>Camera Name</Table.Head>
+                  <Table.Head>IP Address</Table.Head>
+                  <Table.Head>Brand</Table.Head>
+                  <Table.Head>Hardware ID</Table.Head>
+                  <Table.Head>Serial Number</Table.Head>
+                </Table.Row>
+              </Table.Header>
+              <Table.Body>
+                {#each onvifCamerasList as camera}
+                  <Table.Row>
+                    <Table.Cell class="font-medium">
+                      <Checkbox
+                        onCheckedChange={(v) =>
+                          v
+                            ? selectedOnvifCameras.update((current) => [
+                                ...current,
+                                camera,
+                              ])
+                            : selectedOnvifCameras.update((current) =>
+                                current.filter(
+                                  (c) => c.ipAddress !== camera.ipAddress
+                                )
+                              )}
+                        checked={$selectedOnvifCameras
+                          .map((cam) => cam.ipAddress)
+                          .includes(camera.ipAddress)}
+                      />
+                    </Table.Cell>
+                    <Table.Cell>{camera.cameraName}</Table.Cell>
+                    <Table.Cell>{camera.ipAddress}</Table.Cell>
+                    <Table.Cell>{camera.brandName}</Table.Cell>
+                    <Table.Cell>{camera.hardwareId}</Table.Cell>
+                    <Table.Cell>{camera.serialNumber}</Table.Cell>
+                  </Table.Row>
+                {/each}
+              </Table.Body>
+            </Table.Root>
+            <!-- <Button
+              disabled={$selectedOnvifCameras.length === 0 || gettingRtsp}
+              on:click={setRtspToDb}
+              class="text-end"
+            >
+              {#if gettingRtsp}
+                <Loader2 class="animate-spin" />
+                Adding...
+              {:else}
+                Add Cameras
+              {/if}
+            </Button> -->
           </div>
         {/if}
       </Tabs.Content>
@@ -862,10 +930,20 @@
       <div class="flex flex-col mx-auto">
         <Button
           variant="brand"
-          type="submit"
           class="font-semibold"
-          on:click={addCameraAutomatic}>Confirm</Button
+          on:click={() => {
+            clickedSubmit.set(true);
+            addCamera().then(() => console.log("Hey"));
+            console.log("Hey2");
+          }}
         >
+          {#if $clickedSubmit}
+            <Loader2 class="animate-spin" />
+            Adding...
+          {:else}
+            Add Cameras
+          {/if}
+        </Button>
       </div>
     </div>
   {/if}
