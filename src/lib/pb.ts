@@ -1,13 +1,19 @@
 import PocketBase from "pocketbase";
 
 const getPocketBaseURL = () => {
-    if (process.env.VERCEL || process.env.NODE_ENV === "production") {
-      return import.meta.env.PUBLIC_POCKETBASE_URL;
+    if (typeof window === "undefined") {
+        // Server-side logic
+        return process.env.PUBLIC_POCKETBASE_URL || "http://localhost:8090";
     } else {
-      const localIP = window.location.hostname;
-      return `http://${localIP}:8090`;
+        // Client-side logic
+        const hostname = window.location.hostname;
+        const isProduction = import.meta.env.PUBLIC_ENV === "production";
+        return isProduction
+            ? import.meta.env.PUBLIC_POCKETBASE_URL
+            : `http://${hostname}:8090`;
     }
-  };
-  const pb = new PocketBase(getPocketBaseURL());
-  
-  export default pb;
+};
+
+const pb = new PocketBase(getPocketBaseURL());
+
+export default pb;
