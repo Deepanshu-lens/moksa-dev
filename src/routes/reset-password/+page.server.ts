@@ -27,7 +27,7 @@ export const actions = {
         }
 
         try {
-            await fetch(`https://dev.api.moksa.ai/auth/resetPassword`, {
+            await fetch(`https://api.moksa.ai/auth/resetPassword`, {
                 method: "POST", headers: {
                     'Content-Type': 'application/json'
                 },

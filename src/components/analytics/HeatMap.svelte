@@ -55,7 +55,7 @@
   const getFloorMap = async (storeId) => {
     try {
       const res = await fetch(
-        `https://dev.api.moksa.ai/store/getFloorMapByStoreid/${storeId}`,
+        `https://api.moksa.ai/store/getFloorMapByStoreid/${storeId}`,
         {
           method: "GET",
           headers: {
@@ -160,7 +160,7 @@
       socket.disconnect();
     }
 
-    socket = io("https://dev.api.moksa.ai", {
+    socket = io("https://api.moksa.ai", {
       withCredentials: true,
       extraHeaders: {
         Authorization: `Bearer ${token}`,
@@ -214,7 +214,7 @@
       if (data?.heatmapValues) {
         heatMapData.set(data?.heatmapValues); // Update heatMapData with the received data
         const res = await fetch(
-          `https://dev.api.moksa.ai/stream?key=${selectedFloorMap}`,
+          `https://api.moksa.ai/stream?key=${selectedFloorMap}`,
           {
             method: "GET",
             headers: {
@@ -276,7 +276,7 @@
       console.log("selectedFloorMap", selectedFloorMap);
 
       const aData = await fetch(
-        `https://dev.api.moksa.ai/people/aisleCount/getAisleCountbyStoreid/${$selectedStore.value}`,
+        `https://api.moksa.ai/people/aisleCount/getAisleCountbyStoreid/${$selectedStore.value}`,
         {
           method: "GET",
           headers: {
@@ -310,7 +310,7 @@
       }
 
       const mapData = await fetch(
-        `https://dev.api.moksa.ai/heatmap/getHeatMapByTimeAndStoreId/${$dateRange}/${$selectedStore.value}`,
+        `https://api.moksa.ai/heatmap/getHeatMapByTimeAndStoreId/${$dateRange}/${$selectedStore.value}`,
         {
           method: "GET",
           headers: {
@@ -324,7 +324,7 @@
       console.log("mapData", data);
       heatMapData.set(data?.data);
       const res = await fetch(
-        `https://dev.api.moksa.ai/stream?key=${selectedFloorMap}`,
+        `https://api.moksa.ai/stream?key=${selectedFloorMap}`,
         {
           method: "GET",
           headers: {
@@ -369,7 +369,7 @@
       // console.log('selectedFloorMap',selectedFloorMap)
 
       const aData = await fetch(
-        `https://dev.api.moksa.ai/people/aisleCount/getAisleCountbyStoreid/${$selectedStore.value}`,
+        `https://api.moksa.ai/people/aisleCount/getAisleCountbyStoreid/${$selectedStore.value}`,
         {
           method: "GET",
           headers: {
@@ -411,7 +411,7 @@
       }
 
       const mapData = await fetch(
-        `https://dev.api.moksa.ai/heatmap/getHeatMapByTimeAndStoreId/custom/${$selectedStore.value}`,
+        `https://api.moksa.ai/heatmap/getHeatMapByTimeAndStoreId/custom/${$selectedStore.value}`,
         {
           method: "GET",
           headers: {
@@ -426,7 +426,7 @@
       console.log("mapData", data);
       heatMapData.set(data?.data);
       const res = await fetch(
-        `https://dev.api.moksa.ai/stream?key=${selectedFloorMap}`,
+        `https://api.moksa.ai/stream?key=${selectedFloorMap}`,
         {
           method: "GET",
           headers: {
@@ -558,37 +558,37 @@
       ],
     },
   ];
-const colors = [
-  // Blues
-  "#1E40AF", // Deep blue
-  "#1D4ED8", // Royal blue
-  "#2563EB", // Bright blue
-  "#3B82F6", // Primary blue
-  
-  // Greens
-  "#065F46", // Deep green
-  "#059669", // Emerald
-  "#10B981", // Bright green
-  "#34D399", // Light green
-  
-  // Purples
-  "#5B21B6", // Deep purple
-  "#7C3AED", // Bright purple
-  "#8B5CF6", // Medium purple
-  "#A78BFA", // Light purple
-  
-  // Reds/Oranges
-  "#DC2626", // Deep red
-  "#EF4444", // Bright red
-  "#F59E0B", // Orange
-  "#FBBF24", // Amber
-  
-  // Teals/Cyans
-  "#0891B2", // Deep teal
-  "#06B6D4", // Bright teal
-  "#22D3EE", // Cyan
-  "#67E8F9"  // Light cyan
-];
+  const colors = [
+    // Blues
+    "#1E40AF", // Deep blue
+    "#1D4ED8", // Royal blue
+    "#2563EB", // Bright blue
+    "#3B82F6", // Primary blue
+
+    // Greens
+    "#065F46", // Deep green
+    "#059669", // Emerald
+    "#10B981", // Bright green
+    "#34D399", // Light green
+
+    // Purples
+    "#5B21B6", // Deep purple
+    "#7C3AED", // Bright purple
+    "#8B5CF6", // Medium purple
+    "#A78BFA", // Light purple
+
+    // Reds/Oranges
+    "#DC2626", // Deep red
+    "#EF4444", // Bright red
+    "#F59E0B", // Orange
+    "#FBBF24", // Amber
+
+    // Teals/Cyans
+    "#0891B2", // Deep teal
+    "#06B6D4", // Bright teal
+    "#22D3EE", // Cyan
+    "#67E8F9", // Light cyan
+  ];
   function createChart() {
     if (chart) {
       chart.destroy();

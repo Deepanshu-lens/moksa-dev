@@ -37,7 +37,7 @@
     PB.autoCancellation(false);
     const res = await PB.collection("roles").getFullList();
     const allStoress = await fetch(
-      "https://dev.api.moksa.ai/store/getAllStoresForDropdown",
+      "https://api.moksa.ai/store/getAllStoresForDropdown",
       {
         method: "GET",
         headers: {
@@ -46,7 +46,7 @@
       },
     );
     const currentStores = await fetch(
-      `https://dev.api.moksa.ai/store/getUserStoreDetailsByUserId/${moksaId}`,
+      `https://api.moksa.ai/store/getUserStoreDetailsByUserId/${moksaId}`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -116,7 +116,7 @@
       // });
 
       const updateMoksaUser = await fetch(
-        `https://dev.api.moksa.ai/auth/updateUser`,
+        `https://api.moksa.ai/auth/updateUser`,
         {
           method: "POST",
           headers: {
@@ -148,7 +148,7 @@
 
       const filteredCurStores = curStores.filter((id) => id !== 0);
       const updateMoksaUserStores = await fetch(
-        `https://dev.api.moksa.ai/store/userStore/updateUserByUserId`,
+        `https://api.moksa.ai/store/userStore/updateUserByUserId`,
         {
           method: "POST",
           headers: {

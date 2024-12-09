@@ -128,7 +128,7 @@
   onMount(async () => {
     // console.log("mToken", mToken);
     const response = await fetch(
-      "https://dev.api.moksa.ai/store/getAllStoresForDropdown",
+      "https://api.moksa.ai/store/getAllStoresForDropdown",
       {
         method: "GET",
         headers: {
@@ -159,7 +159,7 @@
       sockets[storeId].disconnect();
     }
 
-    sockets[storeId] = io("https://dev.api.moksa.ai/", {
+    sockets[storeId] = io("https://api.moksa.ai/", {
       withCredentials: true,
       extraHeaders: {
         Authorization: `Bearer ${mToken}`,
