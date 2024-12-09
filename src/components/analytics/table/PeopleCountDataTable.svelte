@@ -404,7 +404,9 @@
                                   <th class=" p-2 w-full">Date</th>
                                   <th class=" p-2 w-full">Hour</th>
                                   <th class=" p-2 w-full">Customer Count</th>
-                                  <th class=" p-2 w-full">Going Out Count</th>
+                                  <th class=" p-2 w-full"
+                                    >Customer Projections</th
+                                  >
                                 </tr>
                               </thead>
                               <tbody class="w-full">
