@@ -26,37 +26,6 @@
   let zoomSpeed = writable("");
   let isPtzOpen = writable(false);
 
-  onMount(async () => {
-    try {
-      await fetch(`${import.meta.env.PUBLIC_ONVIF_URL}/initialize`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          hostname: ip,
-          username: username,
-          password: pass,
-          port: 80,
-          timeout: 1000,
-        }),
-      }).then(async (res) => {
-        const data = await res.json();
-        if (!res?.ok) {
-          throw new Error(data?.message);
-        }
-        index.set(data?.index);
-        await getStatus();
-        await getPresets();
-      });
-    } catch (error) {
-      toast.error(
-        error?.message || "Something went wrong while intializing onvif!"
-      );
-      console.log(error?.message, "err");
-    }
-  });
-
   async function getStatus() {
     await fetch(`${import.meta.env.PUBLIC_ONVIF_URL}/status/${$index}`, {
       method: "GET",

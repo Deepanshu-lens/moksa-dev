@@ -265,14 +265,15 @@
     <span class="size-2 bg-green-700 rounded-full"></span>
     {name}
   </div>
-  <div
+  <!-- commented as requested -->
+  <!-- <div
     class="absolute right-10 bottom-2 rounded-md transition-opacity duration-300 flex items-center gap-x-2 w-10"
   >
     <span class="size-2 bg-green-700 rounded-full ml-2"></span>
     <Button variant="ghost" class="text-white" on:click={() => getHeatImg(id)}
       >H</Button
     >
-  </div>
+  </div> -->
   <ImagePreviewModal {loading} {imgDialogOpen}></ImagePreviewModal>
 </div>
 
@@ -281,7 +282,7 @@
     width: 100%;
     height: 100%;
     display: block;
-    object-fit: cover;
+    object-fit: initial;
   }
 
   .camera-placeholder {
