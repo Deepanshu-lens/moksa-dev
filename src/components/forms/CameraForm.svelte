@@ -731,7 +731,7 @@
       >
         <Label class="text-left mb-2 text-nowrap">Motion Sensitivity</Label>
         <Slider value={[0]} max={255} step={1} class="text-left w-full" />
-      </div> -->
+      </div>
 
       {#if tabValue !== "onvif" && tabValue !== "rtsp"}
         <div class="flex items-center gap-x-[7rem]">

@@ -38,7 +38,7 @@
     },
   ];
 
-  const disabledPaths: string[] = [];
+  const disabledPaths: string[] = ["/reports"];
 
   export let isVertical = false;
 </script>
