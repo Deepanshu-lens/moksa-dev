@@ -15,19 +15,42 @@
   import { toast } from "svelte-sonner";
   import { writable } from "svelte/store";
   import Checkbox from "../ui/checkbox/checkbox.svelte";
+  import { Loader2 } from "lucide-svelte";
 
   export let cameraName = "";
   export let mainUrl = "";
   export let subUrl = "";
   export let doneSubmit = false;
   let cameraMethod = writable("manual");
+  let ONVIF_DEVICES_BASE_URL = "http://localhost:7890";
   let userName = "";
   let password = "";
   let ipAddress = "";
+  let ipAddress1 = 0;
+  let ipAddress2 = 0;
+  let ipAddress3 = 0;
+  let ipAddress4 = 0;
+  let endIpAddress1 = 0;
+  let endIpAddress2 = 0;
+  let endIpAddress3 = 0;
+  let endIpAddress4 = 0;
   let httpPort = "";
   let tabValue = "url";
   let discoveryData = writable<[]>([]);
   const selectedRows = writable([]);
+  let onvifCamerasList: {
+    ipAddress: string;
+    cameraName: string;
+    brandName: string;
+    hardwareId: number;
+    serialNumber: string;
+  }[] = [];
+  let fetchingCamers: boolean = false;
+  let gettingRtsp : boolean = false
+  let selectedOnvifCameras = writable([]);
+
+  let rangeStart = 1;
+  let rangeEnd = 255;
 
   const { form, errors, reset, isSubmitting } = createForm({
     initialValues: { name: "", url: "", subUrl: "" },
@@ -103,33 +126,64 @@
       } catch (error) {
         console.error("Failed to add camera:", error);
       }
+    } else if (tabValue === "spectra") {
+      if (password?.includes("@")) {
+        password = password.replace("@", "%40");
+      } else if (password?.includes("#")) {
+        password = password.replace("#", "%23");
+      } else if (password?.includes("&")) {
+        password = password.replace("&", "%26");
+      } else if (password?.includes("?")) {
+        password = password.replace("?", "%3F");
+      } else if (password?.includes("/")) {
+        password = password.replace("/", "%2F");
+      } else if (password?.includes("$")) {
+        password = password.replace("$", "%24");
+      }
+
+      for (let i = rangeStart; i <= rangeEnd; i++) {
+        let rtspUrl = `rtsp://${userName}:${password}@${ipAddress1}.${ipAddress2}.${ipAddress3}.${i}:${Number(httpPort)}/lkm/live/1/1`;
+        let rtspSubUrl = `rtsp://${userName}:${password}@${ipAddress1}.${ipAddress2}.${ipAddress3}.${i}:${Number(httpPort)}/lkm/live/1/2`;
+
+        try {
+          const data = {
+            name: `camera-${i}`,
+            hostname: ipAddress,
+            username: userName,
+            password: password,
+            port: Number(httpPort),
+            url: rtspUrl,
+            subUrl: rtspSubUrl,
+            node: $selectedNode,
+            save: true,
+          };
+
+          const record = await pb.collection("camera").create(data);
+          console.log("Camera added:", record);
+          doneSubmit = true;
+        } catch (error) {
+          console.error("Failed to add camera:", error);
+        }
+      }
+      doneSubmit = true;
     } else {
-      console.log("Details tab api called");
-      await fetch(`${import.meta.env.PUBLIC_ONVIF_URL}/initialize`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: cameraName,
-          hostname: ipAddress,
-          username: userName,
-          password: password,
-          port: Number(httpPort),
-          timeout: 10000,
-        }),
-      })
-        .then(async (res) => {
-          const data = await res.json();
-          await streamUri(data.index);
-        })
-        .catch((err) => {
-          console.log(err);
-          toast.error("Failed to add camera via ONVIF", {
-            description: "Incompatible SOAP version",
-          });
-          doneSubmit = false;
-        });
+      fetchingCamers = true;
+      try {
+        const response = await fetch(
+          `${ONVIF_DEVICES_BASE_URL}/discover-cameras?startIp=${ipAddress1}.${ipAddress2}.${ipAddress3}.${ipAddress4}&endIp=${endIpAddress1}.${endIpAddress2}.${endIpAddress3}.${endIpAddress4}&username=${userName}&password=${password}&port=${httpPort}`
+        );
+
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        onvifCamerasList = data.cameras || [];
+      } catch (error) {
+        console.error("Failed to fetch ONVIF cameras:", error);
+      } finally {
+        fetchingCamers = false;
+      }
     }
   };
 
@@ -291,6 +345,62 @@
       getCameraDiscoveryList();
     }
   }
+
+  const setRtspToDb = async () => {
+    gettingRtsp = true;
+    const promises = $selectedOnvifCameras.map(async (camera) => {
+      const url = `${ONVIF_DEVICES_BASE_URL}/get-stream-uris?ip=${camera.ipAddress}&username=${userName}&password=${password}&port=${httpPort}`;
+      try {
+        const response = await fetch(url, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        return { camera: camera.cameraName, data };
+      } catch (error) {
+        console.error(`Failed to fetch stream URIs for ${camera.cameraName}:`, error);
+        return { camera: camera.cameraName, error: error.message };
+      }
+    });
+
+    const results = await Promise.all(promises);
+
+    const transformCameraData = (cameraResults) => {
+      return cameraResults.map((cameraResult) => {
+        const streams = cameraResult.data.streams;
+        return {
+          name: cameraResult.camera,
+          url: streams[0]?.streamUri || "",
+          subUrl: streams[1]?.streamUri || "",
+          motionSensitivity: 33,
+          node: $selectedNode,
+          save: true,
+        };
+      });
+    };
+
+    const transformedData = transformCameraData(results);
+
+    // Loop over transformed data and create records
+    const createPromises = transformedData.map(async (data:any) => {
+      try {
+        const record = await pb.collection("camera").create(data);
+      } catch (error) {
+        console.error("Failed to add camera:", error);
+      }
+    });
+
+    await Promise.all(createPromises);
+    gettingRtsp = false;
+    location.reload()
+  };
 </script>
 
 <form use:form class="space-y-4 mt-4 max-h-[80vh] overflow-auto p-4 rounded-md">
@@ -338,9 +448,10 @@
     </div>
 
     <Tabs.Root bind:value={tabValue}>
-      <Tabs.List class="grid w-full grid-cols-2">
-        <Tabs.Trigger value="url">Using URL</Tabs.Trigger>
-        <Tabs.Trigger value="details">Using Details</Tabs.Trigger>
+      <Tabs.List class="grid w-full grid-cols-3">
+        <Tabs.Trigger value="rtsp">RTSP</Tabs.Trigger>
+        <Tabs.Trigger value="spectra">Custom</Tabs.Trigger>
+        <Tabs.Trigger value="onvif">ONVIF</Tabs.Trigger>
       </Tabs.List>
       <Tabs.Content value="url" class="py-2">
         <div class="flex flex-col pb-4">
@@ -372,7 +483,12 @@
           </div>
         </div>
       </Tabs.Content>
-      <Tabs.Content value="details">
+      <Tabs.Content value="spectra">
+        <div class="flex items-center space-x-2 pb-4">
+          <Checkbox id="spectra" />
+          <Label for="spectra" class="text-sm">Spectra</Label>
+        </div>
+
         <div class="flex items-center justify-between pb-4">
           <Label>User Name</Label>
           <div class="w-[75%]">
@@ -407,44 +523,178 @@
             </div>
           </div>
         </div>
-        <div class="flex items-center justify-between pb-4">
-          <Label>IP Address</Label>
-          <div class="w-[75%]">
+        <div class="flex items-center gap-x-[6.6rem] pb-4">
+          <Label>Base IP</Label>
+          <div class="flex items-center space-x-4">
             <Input
-              type="text"
-              name="ipAddress"
-              placeholder="IP associated with camera"
+              type="number"
+              bind:value={ipAddress1}
               class="text-xs"
-              bind:value={ipAddress}
+              placeholder="192"
+            />
+            <span>.</span>
+            <Input
+              type="number"
+              class="text-xs"
+              placeholder="168"
+              bind:value={ipAddress2}
+            />
+            <span>.</span>
+            <Input
+              type="number"
+              class="text-xs"
+              placeholder="1"
+              bind:value={ipAddress3}
+            />
+          </div>
+        </div>
+      </Tabs.Content>
+      <Tabs.Content value="onvif">
+        <div class="flex items-center justify-between pb-4">
+          <Label>User Name</Label>
+          <div class="w-[75%]">
+            <Input
+              type="text"
+              name="userName"
+              placeholder="Camera portal username"
+              class=" text-xs"
+              bind:value={userName}
             />
             <div class="text-rose-500 text-xs pt-2">
-              {#if $errors.ipAddress}
-                {$errors.ipAddress}
+              {#if $errors.userName}
+                {$errors.userName}
               {/if}
             </div>
           </div>
         </div>
         <div class="flex items-center justify-between pb-4">
-          <Label>HTTP Port</Label>
+          <Label>Password</Label>
           <div class="w-[75%]">
             <Input
-              type="text"
-              name="httpPort"
-              placeholder="Port"
-              class=" text-xs"
-              bind:value={httpPort}
+              type="password"
+              name="password"
+              placeholder="Camera portal password"
+              class="text-xs"
+              bind:value={password}
             />
             <div class="text-rose-500 text-xs pt-2">
-              {#if $errors.httpPort}
-                {$errors.httpPort}
+              {#if $errors.password}
+                {$errors.password}
               {/if}
             </div>
           </div>
         </div>
-        <div class="flex items-center space-x-1">
-          <Label for="ssl" class="text-xs font-normal w-[25%]">SSL</Label>
-          <Switch id="ssl" />
+        <Label class="mb-3">Base IP</Label>
+        <div class="flex items-center gap-3 pb-4 w-full">
+          <div class="flex items-center space-x-4 w-full">
+            <Input
+              type="number"
+              bind:value={ipAddress1}
+              class="text-xs"
+              placeholder="192"
+            />
+            <span>.</span>
+            <Input
+              type="number"
+              class="text-xs"
+              placeholder="168"
+              bind:value={ipAddress2}
+            />
+            <span>.</span>
+            <Input
+              type="number"
+              class="text-xs"
+              placeholder="1"
+              bind:value={ipAddress3}
+            />
+            <span>.</span>
+            <Input
+              type="number"
+              class="text-xs"
+              placeholder="1"
+              bind:value={ipAddress4}
+            />
+          </div>
         </div>
+        <Label class="mb-3">End IP</Label>
+        <div class="flex items-center gap-3 pb-4 w-full">
+          <div class="flex items-center space-x-4 w-full">
+            <Input
+              type="number"
+              bind:value={endIpAddress1}
+              class="text-xs"
+              placeholder="192"
+            />
+            <span>.</span>
+            <Input
+              type="number"
+              class="text-xs"
+              placeholder="168"
+              bind:value={endIpAddress2}
+            />
+            <span>.</span>
+            <Input
+              type="number"
+              class="text-xs"
+              placeholder="1"
+              bind:value={endIpAddress3}
+            />
+            <span>.</span>
+            <Input
+              type="number"
+              class="text-xs"
+              placeholder="1"
+              bind:value={endIpAddress4}
+            />
+          </div>
+        </div>
+        {#if fetchingCamers}
+          <div class="flex gap-2 items-center w-full justify-center">
+            <Loader2 class="animate-spin" size={14} />
+            <p class="text-xs">Fetching Camers...</p>
+          </div>
+        {:else}
+          <div class="flex pb-4 gap-4 w-full">
+            {#if onvifCamerasList.length > 0}
+              <Label class="text-nowrap">Select Camera</Label>
+              <div class="flex flex-col flex-wrap gap-2 w-full">
+                {#each onvifCamerasList as camera}
+                  <div class="flex gap-2 mb-6 w-full">
+                    <Checkbox
+                      id={camera.ipAddress}
+                      onCheckedChange={(v) =>
+                        v
+                          ? selectedOnvifCameras.update((current) => [
+                              ...current,
+                              camera,
+                            ])
+                          : selectedOnvifCameras.update((current) =>
+                              current.filter(
+                                (c) => c.ipAddress !== camera.ipAddress
+                              )
+                            )}
+                    />
+                    <Label>{camera.cameraName}</Label>
+                  </div>
+                  <Button
+                    disabled={$selectedOnvifCameras.length === 0 || gettingRtsp}
+                    on:click={setRtspToDb}
+                    class="text-end"
+                  >
+                    {#if gettingRtsp}
+                      <Loader2 class="animate-spin" />
+                      Adding...
+                    {:else}
+                      Add Cameras
+                    {/if}
+                  </Button>
+                {:else}
+                  <p>No Cameras Found</p>
+                {/each}
+              </div>
+            {/if}
+          </div>
+        {/if}
       </Tabs.Content>
     </Tabs.Root>
 
@@ -480,10 +730,74 @@
         class="flex flex-col md:flex-row items-start md:items-center justify-between md:justify-start pb-4 w-full gap-2 md:gap-1"
       >
         <Label class="text-left mb-2 text-nowrap">Motion Sensitivity</Label>
-        <Slider value={[33]} max={100} step={1} class="text-left w-full" />
-      </div>
+        <Slider value={[0]} max={255} step={1} class="text-left w-full" />
+      </div> -->
+
+      {#if tabValue !== "onvif" && tabValue !== "rtsp"}
+        <div class="flex items-center gap-x-[7rem]">
+          <Label class="text-left mb-2">Range</Label>
+          <div class="flex items-center space-x-4">
+            <div class="flex-1">
+              <Label class="text-xs mb-1">Start Host</Label>
+              <Input
+                type="number"
+                min={0}
+                max={rangeEnd}
+                bind:value={rangeStart}
+                class="text-xs w-16"
+                placeholder="Min value"
+              />
+            </div>
+            <!-- <div class="flex items-center">
+              <span class="text-sm">to</span>
+            </div> -->
+            <div class="flex-1">
+              <Label class="text-xs mb-1">End Host</Label>
+              <Input
+                type="number"
+                min={rangeStart}
+                max={255}
+                bind:value={rangeEnd}
+                class="text-xs w-16"
+                placeholder="Max value"
+              />
+            </div>
+          </div>
+          <!-- <div class="mt-2">
+            <Slider
+              value={[rangeStart, rangeEnd]}
+              min={1}
+              max={255}
+              step={1}
+              class="w-full"
+              onValueChange={(values) => {
+                [rangeStart, rangeEnd] = values;
+              }}
+            />
+          </div> -->
+        </div>
+      {/if}
     </div>
 
+    {#if tabValue !== "rtsp"}
+      <div class="flex items-center justify-between pb-4">
+        <Label>RTSP Port</Label>
+        <div class="w-[75%]">
+          <Input
+            type="text"
+            name="httpPort"
+            placeholder="Port"
+            class=" text-xs"
+            bind:value={httpPort}
+          />
+          <div class="text-rose-500 text-xs pt-2">
+            {#if $errors.httpPort}
+              {$errors.httpPort}
+            {/if}
+          </div>
+        </div>
+      </div>
+    {/if}
     <div class="flex flex-col mx-auto">
       <Button variant="brand" type="submit" class="font-semibold"
         >Confirm</Button
