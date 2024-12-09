@@ -332,6 +332,33 @@
     gettingRtsp = false;
     location.reload();
   };
+
+  const handleIpInput = (
+    event: Event,
+    nextInputId: string
+  ) => {
+    const input = event.target as HTMLInputElement;
+    let value = input.value;
+
+    // Ensure only numbers are entered
+    value = value.replace(/[^\d]/g, '');
+
+    // Limit to 3 digits
+    if (value.length > 3) {
+      value = value.slice(0, 3);
+    }
+
+    // Update the input value
+    input.value = value;
+
+    // Move to next input if we have 3 digits and the number is <= 255
+    if (value.length === 3 && parseInt(value) <= 255) {
+      const nextInput = document.getElementById(nextInputId);
+      if (nextInput) {
+        nextInput.focus();
+      }
+    }
+  };
 </script>
 
 <form use:form class="space-y-4 mt-4 max-h-[80vh] overflow-auto p-4 rounded-md">
@@ -574,31 +601,42 @@
           <div class="flex items-center gap-3 w-full">
             <div class="flex items-center space-x-3 w-full mt-3">
               <Input
-                type="number"
+                id="ip1"
+                type="text"
                 bind:value={ipAddress1}
                 class="text-xs"
                 placeholder="192"
+                on:input={(e) => handleIpInput(e, 'ip2')}
+                maxlength="3"
               />
               <span>.</span>
               <Input
-                type="number"
+                id="ip2"
+                type="text"
                 class="text-xs"
                 placeholder="168"
                 bind:value={ipAddress2}
+                on:input={(e) => handleIpInput(e, 'ip3')}
+                maxlength="3"
               />
               <span>.</span>
               <Input
-                type="number"
+                id="ip3"
+                type="text"
                 class="text-xs"
                 placeholder="1"
                 bind:value={ipAddress3}
+                on:input={(e) => handleIpInput(e, 'ip4')}
+                maxlength="3"
               />
               <span>.</span>
               <Input
-                type="number"
+                id="ip4"
+                type="text"
                 class="text-xs"
                 placeholder="1"
                 bind:value={ipAddress4}
+                maxlength="3"
               />
             </div>
           </div>
@@ -608,31 +646,42 @@
           <div class="flex items-center gap-3 pb-4 w-full">
             <div class="flex items-center space-x-4 w-full">
               <Input
-                type="number"
+                id="endIp1"
+                type="text"
                 bind:value={endIpAddress1}
                 class="text-xs"
                 placeholder="192"
+                on:input={(e) => handleIpInput(e, 'endIp2')}
+                maxlength="3"
               />
               <span>.</span>
               <Input
-                type="number"
+                id="endIp2"
+                type="text"
                 class="text-xs"
                 placeholder="168"
                 bind:value={endIpAddress2}
+                on:input={(e) => handleIpInput(e, 'endIp3')}
+                maxlength="3"
               />
               <span>.</span>
               <Input
-                type="number"
+                id="endIp3"
+                type="text"
                 class="text-xs"
                 placeholder="1"
                 bind:value={endIpAddress3}
+                on:input={(e) => handleIpInput(e, 'endIp4')}
+                maxlength="3"
               />
               <span>.</span>
               <Input
-                type="number"
+                id="endIp4"
+                type="text"
                 class="text-xs"
                 placeholder="1"
                 bind:value={endIpAddress4}
+                maxlength="3"
               />
             </div>
           </div>
