@@ -9,7 +9,7 @@
   import * as Table from "@/components/ui/table/index";
   import { onMount } from "svelte";
   import pb from "@/lib/pb";
-  import { selectedNode } from "@/stores";
+  import { selectedNode, user } from "@/stores";
 
   import { createForm } from "felte";
   import { toast } from "svelte-sonner";
@@ -35,7 +35,7 @@
   let endIpAddress3 = 0;
   let endIpAddress4 = 0;
   let httpPort = "";
-  let tabValue = "url";
+  let tabValue = "onvif";
   let discoveryData = writable<[]>([]);
   const selectedRows = writable([]);
   let onvifCamerasList: {
@@ -46,7 +46,7 @@
     serialNumber: string;
   }[] = [];
   let fetchingCamers: boolean = false;
-  let gettingRtsp : boolean = false
+  let gettingRtsp: boolean = false;
   let selectedOnvifCameras = writable([]);
 
   let rangeStart = 1;
@@ -118,6 +118,7 @@
           subUrl,
           node: $selectedNode,
           save: true,
+          session: $user?.session[0],
         };
 
         const record = await pb.collection("camera").create(data);
@@ -156,6 +157,7 @@
             subUrl: rtspSubUrl,
             node: $selectedNode,
             save: true,
+            session: $user?.session[0],
           };
 
           const record = await pb.collection("camera").create(data);
@@ -205,6 +207,7 @@
               password: password,
               port: row?.xaddrs[0]?.includes("https") ? 443 : 80,
               timeout: 10000,
+              session: $user?.session[0],
             }),
           }
         );
@@ -227,92 +230,6 @@
     // Execute all promises concurrently
     await Promise.all(promises);
   };
-
-  // let data = [
-  //   {
-  //     urn: "uuid:66f52bf6-dd69-4aa7-b50e-21617afcfcb5",
-  //     name: "CPPLUS",
-  //     hardware: "CP-UNC-DA21PL3-Y",
-  //     location: "India",
-  //     types: ["dn:NetworkVideoTransmitter", "tds:Device"],
-  //     xaddrs: ["http://10.20.30.14/onvif/device_service"],
-  //     scopes: [
-  //       "onvif://www.onvif.org/location/country/India",
-  //       "onvif://www.onvif.org/name/CPPLUS",
-  //       "onvif://www.onvif.org/hardware/CP-UNC-DA21PL3-Y",
-  //       "onvif://www.onvif.org/Profile/Streaming",
-  //       "onvif://www.onvif.org/type/Network_Video_Transmitter",
-  //       "onvif://www.onvif.org/extension/unique_identifier/1",
-  //       "onvif://www.onvif.org/Profile/T",
-  //     ],
-  //   },
-  //   {
-  //     urn: "uuid:74f7e627-c54f-49fb-84ed-6de9b7f588a5",
-  //     name: "Dahua",
-  //     hardware: "DH-IPC-HDW1230T2",
-  //     location: "china",
-  //     types: ["dn:NetworkVideoTransmitter", "tds:Device"],
-  //     xaddrs: ["http://10.20.30.11/onvif/device_service"],
-  //     scopes: [
-  //       "onvif://www.onvif.org/location/country/china",
-  //       "onvif://www.onvif.org/name/Dahua",
-  //       "onvif://www.onvif.org/hardware/DH-IPC-HDW1230T2",
-  //       "onvif://www.onvif.org/Profile/Streaming",
-  //       "onvif://www.onvif.org/type/Network_Video_Transmitter",
-  //       "onvif://www.onvif.org/extension/unique_identifier/1",
-  //       "onvif://www.onvif.org/Profile/T",
-  //     ],
-  //   },
-  //   {
-  //     urn: "uuid:801d1cdf-81f5-482c-8b0b-d4175bb79996",
-  //     name: "CP PLUS",
-  //     hardware: "CP-UNC-DA21PL3C-V3",
-  //     location: "India",
-  //     types: ["dn:NetworkVideoTransmitter", "tds:Device"],
-  //     xaddrs: ["http://10.20.30.16/onvif/device_service"],
-  //     scopes: [
-  //       "onvif://www.onvif.org/location/country/India",
-  //       "onvif://www.onvif.org/name/CP_PLUS",
-  //       "onvif://www.onvif.org/hardware/CP-UNC-DA21PL3C-V3",
-  //       "onvif://www.onvif.org/Profile/Streaming",
-  //       "onvif://www.onvif.org/type/Network_Video_Transmitter",
-  //       "onvif://www.onvif.org/extension/unique_identifier/1",
-  //     ],
-  //   },
-  //   {
-  //     urn: "uuid:ee5f9cae-3cd9-4cff-8d42-e7d129ef5489",
-  //     name: "CP PLUS",
-  //     hardware: "CP-UNC-DA21PL3C-V3",
-  //     location: "India",
-  //     types: ["dn:NetworkVideoTransmitter", "tds:Device"],
-  //     xaddrs: ["http://10.20.30.15/onvif/device_service"],
-  //     scopes: [
-  //       "onvif://www.onvif.org/location/country/India",
-  //       "onvif://www.onvif.org/name/CP_PLUS",
-  //       "onvif://www.onvif.org/hardware/CP-UNC-DA21PL3C-V3",
-  //       "onvif://www.onvif.org/Profile/Streaming",
-  //       "onvif://www.onvif.org/type/Network_Video_Transmitter",
-  //       "onvif://www.onvif.org/extension/unique_identifier/1",
-  //     ],
-  //   },
-  //   {
-  //     urn: "uuid:421ac7a7-91f8-e2c5-b5cf-eb3b46df91f8",
-  //     name: "CPPlus",
-  //     hardware: "CP-UNP-D2521L10-DP",
-  //     location: "India",
-  //     types: ["dn:NetworkVideoTransmitter", "tds:Device"],
-  //     xaddrs: ["http://10.20.30.12/onvif/device_service"],
-  //     scopes: [
-  //       "onvif://www.onvif.org/location/country/India",
-  //       "onvif://www.onvif.org/name/CPPlus",
-  //       "onvif://www.onvif.org/hardware/CP-UNP-D2521L10-DP",
-  //       "onvif://www.onvif.org/Profile/Streaming",
-  //       "onvif://www.onvif.org/type/Network_Video_Transmitter",
-  //       "onvif://www.onvif.org/extension/unique_identifier",
-  //       "onvif://www.onvif.org/Profile/T",
-  //     ],
-  //   },
-  // ];
 
   // row selection
   const toggleRowSelection = (row: any) => {
@@ -365,7 +282,10 @@
         const data = await response.json();
         return { camera: camera.cameraName, data };
       } catch (error) {
-        console.error(`Failed to fetch stream URIs for ${camera.cameraName}:`, error);
+        console.error(
+          `Failed to fetch stream URIs for ${camera.cameraName}:`,
+          error
+        );
         return { camera: camera.cameraName, error: error.message };
       }
     });
@@ -373,23 +293,34 @@
     const results = await Promise.all(promises);
 
     const transformCameraData = (cameraResults) => {
-      return cameraResults.map((cameraResult) => {
+      return cameraResults.map((cameraResult, i) => {
         const streams = cameraResult.data.streams;
-        return {
-          name: cameraResult.camera,
-          url: streams[0]?.streamUri || "",
-          subUrl: streams[1]?.streamUri || "",
-          motionSensitivity: 33,
-          node: $selectedNode,
-          save: true,
-        };
+        if (selectedOnvifCameras?.length > 1) {
+          return {
+            name: cameraName,
+            url: streams[0]?.streamUri || "",
+            subUrl: streams[1]?.streamUri || "",
+            motionSensitivity: 33,
+            node: $selectedNode,
+            save: true,
+          };
+        } else {
+          return {
+            name: cameraName + `-${i + 1}`,
+            url: streams[0]?.streamUri || "",
+            subUrl: streams[1]?.streamUri || "",
+            motionSensitivity: 33,
+            node: $selectedNode,
+            save: true,
+          };
+        }
       });
     };
 
     const transformedData = transformCameraData(results);
 
     // Loop over transformed data and create records
-    const createPromises = transformedData.map(async (data:any) => {
+    const createPromises = transformedData.map(async (data: any) => {
       try {
         const record = await pb.collection("camera").create(data);
       } catch (error) {
@@ -399,7 +330,7 @@
 
     await Promise.all(createPromises);
     gettingRtsp = false;
-    location.reload()
+    location.reload();
   };
 </script>
 
@@ -453,7 +384,7 @@
         <Tabs.Trigger value="spectra">Custom</Tabs.Trigger>
         <Tabs.Trigger value="onvif">ONVIF</Tabs.Trigger>
       </Tabs.List>
-      <Tabs.Content value="url" class="py-2">
+      <Tabs.Content value="rtsp" class="p-3">
         <div class="flex flex-col pb-4">
           <Label class="text-left mb-2">Main URL</Label>
           <Input
@@ -483,10 +414,17 @@
           </div>
         </div>
       </Tabs.Content>
-      <Tabs.Content value="spectra">
-        <div class="flex items-center space-x-2 pb-4">
-          <Checkbox id="spectra" />
-          <Label for="spectra" class="text-sm">Spectra</Label>
+      <Tabs.Content value="spectra" class="p-3">
+        <div class="flex items-center space-x-2 pb-4 gap-x-16 w-full">
+          <Label class="text-left mb-2">Select Client</Label>
+          <Select.Root>
+            <Select.Trigger class="w-full sm:w-1/3">
+              <Select.Value placeholder="Spectra" />
+            </Select.Trigger>
+            <Select.Content>
+              <Select.Item value="spectra">Spectra</Select.Item>
+            </Select.Content>
+          </Select.Root>
         </div>
 
         <div class="flex items-center justify-between pb-4">
@@ -523,7 +461,7 @@
             </div>
           </div>
         </div>
-        <div class="flex items-center gap-x-[6.6rem] pb-4">
+        <div class="flex items-center gap-x-[7rem] pb-4">
           <Label>Base IP</Label>
           <div class="flex items-center space-x-4">
             <Input
@@ -548,8 +486,55 @@
             />
           </div>
         </div>
+        <div class="flex items-center justify-between pb-4">
+          <Label>HTTP Port</Label>
+          <div class="w-[75%]">
+            <Input
+              type="text"
+              name="httpPort"
+              placeholder="Port"
+              class=" text-xs"
+              bind:value={httpPort}
+            />
+            <div class="text-rose-500 text-xs pt-2">
+              {#if $errors.httpPort}
+                {$errors.httpPort}
+              {/if}
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center gap-x-[7rem]">
+          <Label class="text-left mb-2">Range</Label>
+          <div class="flex items-center space-x-4">
+            <div class="flex-1">
+              <Label class="text-xs mb-1">Start Host</Label>
+              <Input
+                type="number"
+                min={0}
+                max={rangeEnd}
+                bind:value={rangeStart}
+                class="text-xs w-16"
+                placeholder="Min value"
+              />
+            </div>
+            <!-- <div class="flex items-center">
+              <span class="text-sm">to</span>
+            </div> -->
+            <div class="flex-1">
+              <Label class="text-xs mb-1">End Host</Label>
+              <Input
+                type="number"
+                min={rangeStart}
+                max={255}
+                bind:value={rangeEnd}
+                class="text-xs w-16"
+                placeholder="Max value"
+              />
+            </div>
+          </div>
+        </div>
       </Tabs.Content>
-      <Tabs.Content value="onvif">
+      <Tabs.Content value="onvif" class="p-3">
         <div class="flex items-center justify-between pb-4">
           <Label>User Name</Label>
           <div class="w-[75%]">
@@ -584,68 +569,89 @@
             </div>
           </div>
         </div>
-        <Label class="mb-3">Base IP</Label>
-        <div class="flex items-center gap-3 pb-4 w-full">
-          <div class="flex items-center space-x-4 w-full">
-            <Input
-              type="number"
-              bind:value={ipAddress1}
-              class="text-xs"
-              placeholder="192"
-            />
-            <span>.</span>
-            <Input
-              type="number"
-              class="text-xs"
-              placeholder="168"
-              bind:value={ipAddress2}
-            />
-            <span>.</span>
-            <Input
-              type="number"
-              class="text-xs"
-              placeholder="1"
-              bind:value={ipAddress3}
-            />
-            <span>.</span>
-            <Input
-              type="number"
-              class="text-xs"
-              placeholder="1"
-              bind:value={ipAddress4}
-            />
+        <div>
+          <Label class="mb-3">Base IP</Label>
+          <div class="flex items-center gap-3 w-full">
+            <div class="flex items-center space-x-3 w-full mt-3">
+              <Input
+                type="number"
+                bind:value={ipAddress1}
+                class="text-xs"
+                placeholder="192"
+              />
+              <span>.</span>
+              <Input
+                type="number"
+                class="text-xs"
+                placeholder="168"
+                bind:value={ipAddress2}
+              />
+              <span>.</span>
+              <Input
+                type="number"
+                class="text-xs"
+                placeholder="1"
+                bind:value={ipAddress3}
+              />
+              <span>.</span>
+              <Input
+                type="number"
+                class="text-xs"
+                placeholder="1"
+                bind:value={ipAddress4}
+              />
+            </div>
           </div>
         </div>
-        <Label class="mb-3">End IP</Label>
-        <div class="flex items-center gap-3 pb-4 w-full">
-          <div class="flex items-center space-x-4 w-full">
+        <div class="mt-3">
+          <Label class="mb-3">End IP</Label>
+          <div class="flex items-center gap-3 pb-4 w-full">
+            <div class="flex items-center space-x-4 w-full">
+              <Input
+                type="number"
+                bind:value={endIpAddress1}
+                class="text-xs"
+                placeholder="192"
+              />
+              <span>.</span>
+              <Input
+                type="number"
+                class="text-xs"
+                placeholder="168"
+                bind:value={endIpAddress2}
+              />
+              <span>.</span>
+              <Input
+                type="number"
+                class="text-xs"
+                placeholder="1"
+                bind:value={endIpAddress3}
+              />
+              <span>.</span>
+              <Input
+                type="number"
+                class="text-xs"
+                placeholder="1"
+                bind:value={endIpAddress4}
+              />
+            </div>
+          </div>
+        </div>
+        <div class="flex flex-col items-start justify-between pb-4 gap-y-3">
+          <Label>HTTP Port</Label>
+          <div class="w-full">
             <Input
-              type="number"
-              bind:value={endIpAddress1}
-              class="text-xs"
-              placeholder="192"
+              type="text"
+              name="httpPort"
+              placeholder="Port"
+              class=" text-xs"
+              bind:value={httpPort}
             />
-            <span>.</span>
-            <Input
-              type="number"
-              class="text-xs"
-              placeholder="168"
-              bind:value={endIpAddress2}
-            />
-            <span>.</span>
-            <Input
-              type="number"
-              class="text-xs"
-              placeholder="1"
-              bind:value={endIpAddress3}
-            />
-            <span>.</span>
-            <Input
-              type="number"
-              class="text-xs"
-              placeholder="1"
-              bind:value={endIpAddress4}
-            />
+            <div class="text-rose-500 text-xs pt-2">
+              {#if $errors.httpPort}
+                {$errors.httpPort}
+              {/if}
+            </div>
           </div>
         </div>
         {#if fetchingCamers}
@@ -676,21 +682,21 @@
                     />
                     <Label>{camera.cameraName}</Label>
                   </div>
-                  <Button
-                    disabled={$selectedOnvifCameras.length === 0 || gettingRtsp}
-                    on:click={setRtspToDb}
-                    class="text-end"
-                  >
-                    {#if gettingRtsp}
-                      <Loader2 class="animate-spin" />
-                      Adding...
-                    {:else}
-                      Add Cameras
-                    {/if}
-                  </Button>
                 {:else}
                   <p>No Cameras Found</p>
                 {/each}
+                <Button
+                  disabled={$selectedOnvifCameras.length === 0 || gettingRtsp}
+                  on:click={setRtspToDb}
+                  class="text-end"
+                >
+                  {#if gettingRtsp}
+                    <Loader2 class="animate-spin" />
+                    Adding...
+                  {:else}
+                    Add Cameras
+                  {/if}
+                </Button>
               </div>
             {/if}
           </div>
@@ -700,7 +706,7 @@
 
     <div class="flex flex-col pb-4">
       <Label class="text-left mb-2">Features</Label>
-      <div class="flex flex-wrap py-4 justify-between items-start gap-2">
+      <div class="flex flex-wrap py-4 justify-between gap-x-10 items-start">
         <div class="flex items-center gap-1">
           <Switch id="feedSaving" />
           <Label for="feedSaving" class="text-xs font-normal text-nowrap"
@@ -727,77 +733,12 @@
         </div>
       </div>
       <div
-        class="flex flex-col md:flex-row items-start md:items-center justify-between md:justify-start pb-4 w-full gap-2 md:gap-1"
+        class="flex flex-col items-start justify-between md:justify-start pb-4 w-full gap-4 mt-5"
       >
         <Label class="text-left mb-2 text-nowrap">Motion Sensitivity</Label>
-        <Slider value={[0]} max={255} step={1} class="text-left w-full" />
-      </div> -->
-
-      {#if tabValue !== "onvif" && tabValue !== "rtsp"}
-        <div class="flex items-center gap-x-[7rem]">
-          <Label class="text-left mb-2">Range</Label>
-          <div class="flex items-center space-x-4">
-            <div class="flex-1">
-              <Label class="text-xs mb-1">Start Host</Label>
-              <Input
-                type="number"
-                min={0}
-                max={rangeEnd}
-                bind:value={rangeStart}
-                class="text-xs w-16"
-                placeholder="Min value"
-              />
-            </div>
-            <!-- <div class="flex items-center">
-              <span class="text-sm">to</span>
-            </div> -->
-            <div class="flex-1">
-              <Label class="text-xs mb-1">End Host</Label>
-              <Input
-                type="number"
-                min={rangeStart}
-                max={255}
-                bind:value={rangeEnd}
-                class="text-xs w-16"
-                placeholder="Max value"
-              />
-            </div>
-          </div>
-          <!-- <div class="mt-2">
-            <Slider
-              value={[rangeStart, rangeEnd]}
-              min={1}
-              max={255}
-              step={1}
-              class="w-full"
-              onValueChange={(values) => {
-                [rangeStart, rangeEnd] = values;
-              }}
-            />
-          </div> -->
-        </div>
-      {/if}
-    </div>
-
-    {#if tabValue !== "rtsp"}
-      <div class="flex items-center justify-between pb-4">
-        <Label>RTSP Port</Label>
-        <div class="w-[75%]">
-          <Input
-            type="text"
-            name="httpPort"
-            placeholder="Port"
-            class=" text-xs"
-            bind:value={httpPort}
-          />
-          <div class="text-rose-500 text-xs pt-2">
-            {#if $errors.httpPort}
-              {$errors.httpPort}
-            {/if}
-          </div>
-        </div>
+        <Slider value={[0]} max={255} step={1} class="text-left w-[80%]" />
       </div>
-    {/if}
+    </div>
     <div class="flex flex-col mx-auto">
       <Button variant="brand" type="submit" class="font-semibold"
         >Confirm</Button
