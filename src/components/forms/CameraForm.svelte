@@ -23,7 +23,7 @@
   export let doneSubmit = false;
   export let modalOpen;
   let cameraMethod = writable("manual");
-  let ONVIF_DEVICES_BASE_URL = "http://localhost:7890";
+  let ONVIF_DEVICES_BASE_URL = "https://vms.lenscorp.cloud/camera";
   let userName = "";
   let password = "";
   let ipAddress = "";
