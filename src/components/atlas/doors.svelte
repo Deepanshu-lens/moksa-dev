@@ -13,7 +13,7 @@
 
   // const API_URL = `https://view.lenscorp.cloud/atlasbackend/unlock/${$activePanel}`;
 
-  const API_URL = `https://api.cieloview.com/unlock/${$activePanel}`;
+  // const API_URL = `https://api.cieloview.com/unlock/${$activePanel}`;
 
   $: filteredDoors = data?.filter((door: any) =>
     door.name.toLowerCase().includes($search.toLowerCase())
@@ -21,7 +21,7 @@
 
   async function handleUnlock(doorId: any) {
     try {
-      const res = await fetch(API_URL, {
+      const res = await fetch(import.meta.env.PUBLIC_ATLAS_BASE_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",

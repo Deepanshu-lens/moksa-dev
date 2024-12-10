@@ -43,8 +43,8 @@
   let isFetchingEvents = writable<boolean>(false);
 
   //Constants
-  const PLAYBACK_API_URL = "https://playback.lenscorp.cloud/generate-stream";
-  const EVENT_API_URL = "http://74.50.98.77:3333/events";
+  // const PLAYBACK_API_URL = "https://playback.lenscorp.cloud/generate-stream";
+  // const EVENT_API_URL = "http://74.50.98.77:3333/events";
   const EVENTS_OPTIONS = [
     { label: "Person", value: "person", color: "#FF4764" },
     { label: "Fire", value: "fire", color: "#FF5733" },
@@ -249,7 +249,7 @@
       videoUrls = { responses: [], cams: [] };
       const responses = await Promise.all(
         $selectedChannels.map(async (channel) => {
-          const response = await fetch(PLAYBACK_API_URL, {
+          const response = await fetch(import.meta.env.PUBLIC_PLAYBACK_API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -465,7 +465,7 @@
     isFetchingEvents.set(true);
     try {
       const promises = $selectedChannels.map((channel) => {
-        return fetch(EVENT_API_URL, {
+        return fetch(import.meta.env.PUBLIC_EVENTS_API_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

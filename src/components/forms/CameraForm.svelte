@@ -23,7 +23,6 @@
   export let doneSubmit = false;
   export let modalOpen;
   let cameraMethod = writable("manual");
-  let ONVIF_DEVICES_BASE_URL = "https://vms.lenscorp.cloud/camera";
   let userName = "";
   let password = "";
   let ipAddress = "";
@@ -200,11 +199,11 @@
 
       if ($isBulk) {
         response = await fetch(
-          `${ONVIF_DEVICES_BASE_URL}/discover-cameras?startIp=${ipAddress1}.${ipAddress2}.${ipAddress3}.${ipAddress4}&endIp=${endIpAddress1}.${endIpAddress2}.${endIpAddress3}.${endIpAddress4}&username=${userName}&password=${password}&port=${httpPort}`
+          `${import.meta.env.PUBLIC_ONVIF_DEVICES_BASE_URL}/discover-cameras?startIp=${ipAddress1}.${ipAddress2}.${ipAddress3}.${ipAddress4}&endIp=${endIpAddress1}.${endIpAddress2}.${endIpAddress3}.${endIpAddress4}&username=${userName}&password=${password}&port=${httpPort}`
         );
       } else {
         response = await fetch(
-          `${ONVIF_DEVICES_BASE_URL}/discover-cameras?startIp=${ipAddress1}.${ipAddress2}.${ipAddress3}.${ipAddress4}&endIp=${ipAddress1}.${ipAddress2}.${ipAddress3}.${ipAddress4}&username=${userName}&password=${password}&port=${httpPort}`
+          `${import.meta.env.PUBLIC_ONVIF_DEVICES_BASE_URL}/discover-cameras?startIp=${ipAddress1}.${ipAddress2}.${ipAddress3}.${ipAddress4}&endIp=${ipAddress1}.${ipAddress2}.${ipAddress3}.${ipAddress4}&username=${userName}&password=${password}&port=${httpPort}`
         );
       }
 
@@ -306,7 +305,7 @@
 
     console.log(JSON.stringify($selectedOnvifCameras, null, 2));
     const promises = $selectedOnvifCameras.map(async (camera) => {
-      const url = `${ONVIF_DEVICES_BASE_URL}/get-stream-uris?ip=${camera.ipAddress}&username=${userName}&password=${password}&port=${httpPort}`;
+      const url = `${import.meta.env.PUBLIC_ONVIF_DEVICES_BASE_URL}/get-stream-uris?ip=${camera.ipAddress}&username=${userName}&password=${password}&port=${httpPort}`;
       try {
         const response = await fetch(url, {
           method: "GET",
