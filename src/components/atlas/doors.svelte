@@ -21,9 +21,11 @@
 
   async function handleUnlock(doorId: any) {
     try {
-      const res = await fetch(import.meta.env.PUBLIC_ATLAS_BASE_URL, {
-        method: "POST",
-        headers: {
+      const res = await fetch(
+        `${import.meta.env.PUBLIC_ATLAS_BASE_URL}/unlock/${$activePanel}`,
+        {
+          method: "POST",
+          headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
         body: new URLSearchParams({
