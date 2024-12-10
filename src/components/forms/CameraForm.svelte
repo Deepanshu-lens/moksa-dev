@@ -191,12 +191,22 @@
   const fetchONVIFCams = async () => {
     fetchingCamers = true;
     try {
-      if (ipAddress4 >= endIpAddress4)
-        throw new Error("Start IP can not be less than end IP");
+      if ($isBulk) {
+        if (ipAddress4 >= endIpAddress4)
+          throw new Error("Start IP can not be less than end IP");
+      }
 
-      const response = await fetch(
-        `${ONVIF_DEVICES_BASE_URL}/discover-cameras?startIp=${ipAddress1}.${ipAddress2}.${ipAddress3}.${ipAddress4}&endIp=${endIpAddress1}.${endIpAddress2}.${endIpAddress3}.${endIpAddress4}&username=${userName}&password=${password}&port=${httpPort}`
-      );
+      let response;
+
+      if ($isBulk) {
+        response = await fetch(
+          `${ONVIF_DEVICES_BASE_URL}/discover-cameras?startIp=${ipAddress1}.${ipAddress2}.${ipAddress3}.${ipAddress4}&endIp=${endIpAddress1}.${endIpAddress2}.${endIpAddress3}.${endIpAddress4}&username=${userName}&password=${password}&port=${httpPort}`
+        );
+      } else {
+        response = await fetch(
+          `${ONVIF_DEVICES_BASE_URL}/discover-cameras?startIp=${ipAddress1}.${ipAddress2}.${ipAddress3}.${ipAddress4}&endIp=${ipAddress1}.${ipAddress2}.${ipAddress3}.${ipAddress4}&username=${userName}&password=${password}&port=${httpPort}`
+        );
+      }
 
       if (!response.ok) {
         throw new Error(`Error: ${response.status} ${response.statusText}`);
@@ -204,11 +214,14 @@
 
       const data = await response.json();
 
-      console.log(data);
+      if (data?.cameras?.length === 0) {
+        toast.error("No cameras found");
+      }
 
       onvifCamerasList = data.cameras || [];
     } catch (error) {
       console.error("Failed to fetch ONVIF cameras:", error);
+      toast.error(error?.message || "Failed to fetch ONVIF cameras");
     } finally {
       fetchingCamers = false;
     }
