@@ -11,10 +11,11 @@
   import { Input } from "@/components/ui/input";
   import { Label } from "@/components/ui/label";
   import { Button } from "@/components/ui/button";
+  import { writable } from "svelte/store";
 
   export let action: "add" | "edit" | "delete";
 
-  let modalOpen = false;
+  let modalOpen = writable(false);
 
   let nodeName = "";
   let cameraName = "";
@@ -38,7 +39,7 @@
       await pb.collection("camera").create(data);
     }
 
-    modalOpen = false;
+    modalOpen.set(false);
   };
 
   const editNode = async () => {
@@ -50,7 +51,7 @@
       .collection("node")
       .update($nodes.find((n) => n.id === $selectedNode)?.id, data);
     selectedNode.set(record.id);
-    modalOpen = false;
+    modalOpen.set(false);
   };
 
   const deleteNode = async () => {
@@ -61,7 +62,7 @@
 </script>
 
 {#if action === "add"}
-  <Dialog.Root bind:open={modalOpen}>
+  <Dialog.Root bind:open={$modalOpen}>
     <Dialog.Trigger><slot /></Dialog.Trigger>
     <Dialog.Content class="max-w-[95vw] md:max-w-[48rem] h-[90vh] overflow-auto">
       <Dialog.Header>
@@ -149,7 +150,7 @@
               </Card.Description>
             </Card.Header>
             <Card.Content class="space-y-2">
-              <AddCameraForm bind:cameraName bind:mainUrl bind:subUrl />
+              <AddCameraForm bind:cameraName bind:mainUrl bind:subUrl modalOpen={modalOpen}/>
             </Card.Content>
           </Card.Root>
         </Tabs.Content>
@@ -181,7 +182,7 @@
     </Dialog.Content>
   </Dialog.Root>
 {:else if action === "edit"}
-  <Dialog.Root bind:open={modalOpen}>
+  <Dialog.Root bind:open={$modalOpen}>
     <Dialog.Trigger><slot /></Dialog.Trigger>
     <Dialog.Content class="max-w-[95vw] md:max-w-[48rem]">
       <Dialog.Header>

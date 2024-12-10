@@ -166,7 +166,7 @@
   export let action: "add" | "edit" | "delete" | "ptz";
   export let camera;
 
-  let modalOpen = false;
+  let modalOpen = writable(false);
   let ptzControl = writable("");
   let openPTZ = writable(false);
   let cameraName = camera ? camera.name : "";
@@ -196,7 +196,7 @@
 
       // Push the data to Pocketbase (to the 'cameras' collection, for example)
       const record = await pb.collection("camera").update(camera.id, data);
-      modalOpen = false;
+      modalOpen.set(false);
       const streamElement = document.getElementById(`stream-${camera.id}`);
       if (streamElement) {
         streamElement.setAttribute(
@@ -217,24 +217,32 @@ wss://view.lenscorp.cloud/api/ws?src=${camera.id}`
 
   $: {
     if (doneSubmit) {
-      modalOpen = false;
+      modalOpen.set(false);
       doneSubmit = false;
     }
   }
+
+  $: console.log($modalOpen, "modalOpen");
 </script>
 
 {#if action === "add"}
-  <Dialog.Root bind:open={modalOpen}>
+  <Dialog.Root bind:open={$modalOpen}>
     <Dialog.Trigger><slot /></Dialog.Trigger>
     <Dialog.Content class="!w-2/3">
       <Dialog.Header>
         <Dialog.Title class="border-b pb-4">Add Camera</Dialog.Title>
       </Dialog.Header>
-      <AddCameraForm bind:cameraName bind:mainUrl bind:subUrl bind:doneSubmit />
+      <AddCameraForm
+        bind:cameraName
+        bind:mainUrl
+        bind:subUrl
+        bind:doneSubmit
+        modalOpen={$modalOpen}
+      />
     </Dialog.Content>
   </Dialog.Root>
 {:else if action === "edit"}
-  <Dialog.Root bind:open={modalOpen}>
+  <Dialog.Root bind:open={$modalOpen}>
     <Dialog.Trigger><slot /></Dialog.Trigger>
     <Dialog.Content>
       <Dialog.Header>

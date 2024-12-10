@@ -21,6 +21,7 @@
   export let mainUrl = "";
   export let subUrl = "";
   export let doneSubmit = false;
+  export let modalOpen;
   let cameraMethod = writable("manual");
   let ONVIF_DEVICES_BASE_URL = "http://localhost:7890";
   let userName = "";
@@ -35,7 +36,8 @@
   let endIpAddress3 = "";
   let endIpAddress4 = "";
   let httpPort = "";
-  let tabValue = "onvif";
+  let tabValue = "rtsp";
+  let isBulk = writable(true);
   let discoveryData = writable<[]>([]);
   const selectedRows = writable([]);
   let onvifCamerasList: {
@@ -117,8 +119,7 @@
   };
 
   const addCamera = async () => {
-    if (tabValue === "url") {
-      console.log("URL tab api called");
+    if (tabValue === "rtsp") {
       try {
         const data = {
           name: cameraName,
@@ -132,6 +133,8 @@
         const record = await pb.collection("camera").create(data);
         console.log("Camera added:", record);
         doneSubmit = true;
+        modalOpen.set(false);
+        toast.success("Camera added successfully");
       } catch (error) {
         console.error("Failed to add camera:", error);
       }
@@ -176,8 +179,11 @@
         }
       }
       doneSubmit = true;
+      modalOpen.set(false);
+      toast.success("Camera added successfully");
     } else {
       setRtspToDb();
+      toast.success("Camera added successfully");
       // console.log(tabValue)
     }
   };
@@ -351,7 +357,7 @@
 
     await Promise.all(createPromises);
     gettingRtsp = false;
-
+    modalOpen.set(false);
     location.reload();
   };
 
@@ -406,7 +412,11 @@
       <Label class="text-left mb-2">Insert a new camera to node</Label>
       <div class="flex items-center space-x-2">
         <Label for="single" class="text-xs font-normal">Single Upload</Label>
-        <Switch id="bulk" />
+        <Switch
+          id="bulk"
+          bind:checked={$isBulk}
+          onCheckedChange={() => isBulk.set(!$isBulk)}
+        />
         <Label for="bulk" class="text-xs font-normal">Bulk Upload</Label>
       </div>
     </div>
@@ -663,52 +673,56 @@
             </div>
           </div>
         </div>
-        <div class="mt-3">
-          <Label class="mb-3">End IP</Label>
-          <div class="flex items-center gap-3 pb-4 w-full">
-            <div class="flex items-center space-x-4 w-full">
-              <Input
-                id="endIp1"
-                type="text"
-                bind:value={endIpAddress1}
-                class="text-xs"
-                placeholder="192"
-                on:input={(e) => handleIpInput(e, "endIp2")}
-                maxlength="3"
-              />
-              <span>.</span>
-              <Input
-                id="endIp2"
-                type="text"
-                class="text-xs"
-                placeholder="168"
-                bind:value={endIpAddress2}
-                on:input={(e) => handleIpInput(e, "endIp3")}
-                maxlength="3"
-              />
-              <span>.</span>
-              <Input
-                id="endIp3"
-                type="text"
-                class="text-xs"
-                placeholder="1"
-                bind:value={endIpAddress3}
-                on:input={(e) => handleIpInput(e, "endIp4")}
-                maxlength="3"
-              />
-              <span>.</span>
-              <Input
-                id="endIp4"
-                type="text"
-                class="text-xs"
-                placeholder="1"
-                bind:value={endIpAddress4}
-                maxlength="3"
-              />
+        {#if $isBulk}
+          <div class="mt-3">
+            <Label class="mb-3">End IP</Label>
+            <div class="flex items-center gap-3 pb-4 w-full">
+              <div class="flex items-center space-x-4 w-full">
+                <Input
+                  id="endIp1"
+                  type="text"
+                  bind:value={endIpAddress1}
+                  class="text-xs"
+                  placeholder="192"
+                  on:input={(e) => handleIpInput(e, "endIp2")}
+                  maxlength="3"
+                />
+                <span>.</span>
+                <Input
+                  id="endIp2"
+                  type="text"
+                  class="text-xs"
+                  placeholder="168"
+                  bind:value={endIpAddress2}
+                  on:input={(e) => handleIpInput(e, "endIp3")}
+                  maxlength="3"
+                />
+                <span>.</span>
+                <Input
+                  id="endIp3"
+                  type="text"
+                  class="text-xs"
+                  placeholder="1"
+                  bind:value={endIpAddress3}
+                  on:input={(e) => handleIpInput(e, "endIp4")}
+                  maxlength="3"
+                />
+                <span>.</span>
+                <Input
+                  id="endIp4"
+                  type="text"
+                  class="text-xs"
+                  placeholder="1"
+                  bind:value={endIpAddress4}
+                  maxlength="3"
+                />
+              </div>
             </div>
           </div>
-        </div>
-        <div class="flex flex-col items-start justify-between pb-4 gap-y-3">
+        {/if}
+        <div
+          class="flex flex-col items-start justify-between pb-4 gap-y-3 mt-2"
+        >
           <Label>HTTP Port</Label>
           <div class="w-full">
             <Input
