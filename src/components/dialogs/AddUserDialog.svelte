@@ -30,6 +30,8 @@
   let roles: any[] = [];
   export let userRole;
 
+  console.log(roles, "roles");
+
   const PB = new PocketBase(`https://server.moksa.ai`);
   onMount(async () => {
     PB.autoCancellation(false);

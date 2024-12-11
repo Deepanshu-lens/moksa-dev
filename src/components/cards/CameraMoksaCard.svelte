@@ -9,7 +9,8 @@
     Settings,
     Trash,
     X,
-    Cctv,Bone
+    Cctv,
+    Bone,
   } from "lucide-svelte";
   import { hoveredCamera, selectedNode, cameraCounts } from "@/lib/stores";
   import { activeCamera } from "@/lib/stores";
@@ -18,10 +19,11 @@
   import CameraEditDialog from "../dialogs/CameraEditDialog.svelte";
   import { onMount } from "svelte";
   import { writable } from "svelte/store";
-    import XrayViewDialog from "../dialogs/XrayViewDialog.svelte";
+  import XrayViewDialog from "../dialogs/XrayViewDialog.svelte";
 
   export let isAllFullScreen: boolean;
   export let cameraId: string;
+  export let user: any;
   export let name: string;
   export let url: string;
   export let subUrl: string;
@@ -90,8 +92,8 @@
     //   document.getElementById(`stream-${cameraId}`)?.remove();
     // }
     setTimeout(() => {
-      console.log(showOptions.set(''))
-    }, 1000)
+      console.log(showOptions.set(""));
+    }, 1000);
     fetch("/api/camera/deleteCamera", {
       method: "delete",
       headers: {
@@ -103,7 +105,7 @@
         name,
         url,
         storeId: $selectedNode.moksaId,
-        camId: moksaId
+        camId: moksaId,
       }),
     }).then(() => {
       document.getElementById(`stream-${cameraId}`)?.remove();
@@ -123,22 +125,25 @@
 
   onMount(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if ($showOptions !== "" && 
-          optionsMenuRef && 
-          !optionsMenuRef.contains(event.target as Node) &&
-          !$isEditDialogOpen &&
-          !$isSettingsDialogOpen &&!$isXrayDialogOpen) {
-        showOptions.set('');
+      if (
+        $showOptions !== "" &&
+        optionsMenuRef &&
+        !optionsMenuRef.contains(event.target as Node) &&
+        !$isEditDialogOpen &&
+        !$isSettingsDialogOpen &&
+        !$isXrayDialogOpen
+      ) {
+        showOptions.set("");
       }
     };
 
     // Delay adding the event listener to allow for initial clicks
     setTimeout(() => {
-      window.addEventListener('click', handleClickOutside);
+      window.addEventListener("click", handleClickOutside);
     }, 0);
 
     return () => {
-      window.removeEventListener('click', handleClickOutside);
+      window.removeEventListener("click", handleClickOutside);
       hasShownToast = false;
     };
   });
@@ -211,7 +216,7 @@
   </Button>
   {#if $showOptions !== "" && $showOptions === cameraId}
     <div
-    bind:this={optionsMenuRef}
+      bind:this={optionsMenuRef}
       class=" flex flex-col h-auto w-[140px] rounded-lg shadow-2xl drop-shadow-lg z-[99999] bg-white p-0.5 gap-1 flex-shrink-0 absolute top-2 right-2"
     >
       <button
@@ -220,7 +225,15 @@
       >
         <X size={16} class="text-black" />
       </button>
-      <CameraEditDialog {name} {url} {cameraId} {role} {subUrl} {showOptions} {isEditDialogOpen}>
+      <CameraEditDialog
+        {name}
+        {url}
+        {cameraId}
+        {role}
+        {subUrl}
+        {showOptions}
+        {isEditDialogOpen}
+      >
         <span class="flex items-center gap-2 text-black font-medium">
           <span
             class="size-[24px] rounded-full bg-[#6159F030] text-[#6159F0] flex-shrink-0 grid place-items-center"
@@ -231,7 +244,8 @@
         </span>
       </CameraEditDialog>
       <CameraSettingsDialog
-      {isSettingsDialogOpen}
+        {user}
+        {isSettingsDialogOpen}
         {showOptions}
         cameraName={name}
         {save}
@@ -293,39 +307,36 @@
         Delete
       </button>
       <!-- {#if ptz} -->
-        <button
-          class="flex items-center gap-2 text-black font-medium"
-          on:click={() => {
-            ptzControl.set({
-              id: cameraId,
-              url: url,
-              preset: preset,
-              lastCords: lastCords,
-            });
-            showOptions.set("");
-          }}
-          >
+      <button
+        class="flex items-center gap-2 text-black font-medium"
+        on:click={() => {
+          ptzControl.set({
+            id: cameraId,
+            url: url,
+            preset: preset,
+            lastCords: lastCords,
+          });
+          showOptions.set("");
+        }}
+      >
+        <span
+          class="size-[24px] rounded-full bg-[#015a62]/[.2] text-[#015a62] flex-shrink-0 grid place-items-center"
+        >
+          <Cctv class="h-4 w-4" />
+        </span>
+        PTZ Control
+      </button>
+      <!-- {/if} -->
+      <XrayViewDialog {name} {url} {isXrayDialogOpen}>
+        <button class="flex items-center gap-2 text-black font-medium">
           <span
             class="size-[24px] rounded-full bg-[#015a62]/[.2] text-[#015a62] flex-shrink-0 grid place-items-center"
           >
-            <Cctv class="h-4 w-4" />
+            <Bone class="h-4 w-4" />
           </span>
-          PTZ Control
+          X-Ray view
         </button>
-        <!-- {/if} -->
-        <XrayViewDialog {name} {url} {isXrayDialogOpen}>
-<button
-class="flex items-center gap-2 text-black font-medium"
-
->
-          <span 
-          class="size-[24px] rounded-full bg-[#015a62]/[.2] text-[#015a62] flex-shrink-0 grid place-items-center"
-          >
-          <Bone class="h-4 w-4" />
-        </span>
-        X-Ray view
-      </button>
-    </XrayViewDialog>
+      </XrayViewDialog>
       <!-- {/if} -->
     </div>
   {/if}

@@ -92,10 +92,13 @@
         const storeNodes = await PB.collection("node").getFullList({
           filter: `moksaId="${store}"`,
         });
+        console.log(storeNodes, "storeNodes");
+
         if (storeNodes.length > 0) {
-          nodes.push(storeNodes[0].id);
+          nodes.push(storeNodes[0]?.id);
         }
       }
+      console.log("nodes", nodes);
       console.log("user session", U[0].session);
       console.log("user session", U[0].session[0]);
       const sessupdate = await PB.collection("session").update(
@@ -133,8 +136,6 @@
           }),
         },
       );
-
-      console.log(updateMoksaUser);
 
       if (!updateMoksaUser.ok) {
         throw new Error("Failed to update Moksa user");

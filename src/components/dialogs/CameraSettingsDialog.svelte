@@ -59,6 +59,7 @@
   export let isSettingsDialogOpen;
   export let cameraNo;
   export let moksaId;
+  export let user;
   let dialogOpen = false;
 
   $: {
@@ -163,6 +164,8 @@
     const r = await dev.json();
     console.log("updatefeature", r);
   };
+
+  console.log(user?.role, "user in dialog");
 </script>
 
 <!-- markup (zero or more items) goes here -->
@@ -187,7 +190,7 @@
             Save camera feed directly to your device
           </p>
         </div>
-        <Switch bind:checked={save} />
+        <Switch bind:checked={save} disabled={user?.role === "admin"} />
       </div>
       <div>
         {#if save}
@@ -243,7 +246,7 @@
         <p class="text-sm font-medium leading-none">Theft Detection</p>
       </div>
       <div class="flex items-center gap-4">
-        <Switch bind:checked={theft} />
+        <Switch bind:checked={theft} disabled={user?.role === "admin"} />
       </div>
     </div>
 
@@ -253,7 +256,7 @@
         <p class="text-sm font-medium leading-none">Heatmap</p>
       </div>
       <div class="flex items-center gap-4">
-        <Switch bind:checked={heatmap} />
+        <Switch bind:checked={heatmap} disabled={user?.role === "admin"} />
       </div>
     </div>
 
@@ -263,7 +266,7 @@
         <p class="text-sm font-medium leading-none">Person Count</p>
       </div>
       <div class="flex items-center gap-4">
-        <Switch bind:checked={person} />
+        <Switch bind:checked={person} disabled={user?.role === "admin"} />
       </div>
     </div>
 
@@ -273,7 +276,7 @@
         <p class="text-sm font-medium leading-none">Kitchen Safety</p>
       </div>
       <div class="flex items-center gap-4">
-        <Switch bind:checked={safety} />
+        <Switch bind:checked={safety} disabled={user?.role === "admin"} />
       </div>
     </div>
 
@@ -283,7 +286,7 @@
         <p class="text-sm font-medium leading-none">Employee Efficiency</p>
       </div>
       <div class="flex items-center gap-4">
-        <Switch bind:checked={employeEE} />
+        <Switch bind:checked={employeEE} disabled={user?.role === "admin"} />
       </div>
     </div>
 
@@ -293,7 +296,7 @@
         <p class="text-sm font-medium leading-none">Priority</p>
       </div>
       <div class="flex items-center gap-4">
-        <Switch bind:checked={priority} />
+        <Switch bind:checked={priority} disabled={user?.role === "admin"} />
       </div>
     </div>
 
@@ -304,6 +307,7 @@
       </div>
       <div class="flex items-center gap-4">
         <Slider
+          disabled={user?.role === "admin"}
           min={0}
           value={[motion === 1000 ? 0 : motion]}
           max={5000}
@@ -318,7 +322,10 @@
     </div>
 
     <Dialog.Footer>
-      <Button type="submit" on:click={editCamera}>Change Camera Settings</Button
+      <Button
+        type="submit"
+        on:click={editCamera}
+        disabled={user?.role === "admin"}>Change Camera Settings</Button
       >
     </Dialog.Footer></Dialog.Content
   >

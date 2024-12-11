@@ -16,11 +16,12 @@
 
   const dispatch = createEventDispatcher();
 
-  export let selectedStore;
-  export let storeData;
-  export let token;
-  export let dateRange;
-  export let value;
+  export let selectedStore: { value: number; label: string };
+  export let storeData: any[];
+  export let token: string;
+  export let dateRange: string;
+  export let value: any;
+  let selectedStoreId = writable(-1);
 
   $: dbData =
     $selectedStore.value !== -1
@@ -55,7 +56,17 @@
     return unsubscribe;
   });
 
-  $: table = createTable(readableData, {
+  interface StoreData {
+    storeName: string;
+    customerCount: number;
+    date?: string;
+    busyHourProjections: string | number;
+    customerProjection?: number;
+    predictedMean?: number;
+    store_id?: number;
+  }
+
+  $: table = createTable<StoreData>(readableData, {
     page: addPagination({ initialPageSize: 5 }),
     sort: addSortBy(),
     filter: addTableFilter({
@@ -139,80 +150,64 @@
   let expandedRows = new Set();
   let expandedData = {};
 
-  async function fetchExpandedData(storeId) {
-    const today = new Date();
-    let startDate = new Date(today);
-
-    switch ($dateRange) {
-      case "7":
-        startDate.setDate(today.getDate() - 7);
-        break;
-      case "30":
-        startDate.setMonth(today.getMonth() - 1);
-        break;
-      case "year":
-        startDate.setFullYear(today.getFullYear() - 1);
-        break;
-      default:
-        startDate.setDate(today.getDate() - 7);
-    }
-
-    const formatDate = (date: Date) => date.toISOString()?.split("T")[0];
-
-    console.log(formatDate(startDate));
-    console.log(formatDate(today));
-    console.log($dateRange);
-    console.log(storeId);
-    console.log(token);
+  async function fetchExpandedData(storeId: number) {
     try {
-      // Call the three APIs
-      const d = await fetch(
-        `https://api.moksa.ai/people/getPeopleCount/${storeId}`,
+      const response = await fetch(
+        `https://dev.api.moksa.ai/people/getPeopleCount/${storeId}`,
         {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
             datetype: $dateRange,
-            pagenumber: 1,
-            pagepersize: 100,
+            pagenumber: "1",
+            pagepersize: "100",
           },
         },
       );
-      const peopleCount = await d.json();
-      console.log(peopleCount);
-      return peopleCount;
+      const data = await response.json();
+      return data;
     } catch (error) {
-      console.error(error);
+      console.error("Error fetching data:", error);
       return null;
     }
   }
 
-  function toggleRow(storeId) {
+  function toggleRow(storeId: number) {
+    selectedStoreId.set(storeId);
     if (expandedRows.has(storeId)) {
       expandedRows.delete(storeId);
       expandedData = { ...expandedData, [storeId]: null };
     } else {
       expandedRows.add(storeId);
-      expandedData = { ...expandedData, [storeId]: null };
       if (!expandedData[storeId]) {
         fetchExpandedData(storeId).then((data) => {
-          console.log(data);
-          expandedData[storeId] = data?.data?.data;
-          expandedData = expandedData;
+          if (data?.data?.data) {
+            expandedData = {
+              ...expandedData,
+              [storeId]: data.data.data,
+            };
+          }
         });
       }
     }
     expandedRows = expandedRows;
   }
 
-  // $: console.log(expandedRows.size);
-  // $: console.log(expandedData);
-  // $: if ($dateRange && expandedRows.size > 0) {
-  //   console.log("clearing");
-  //   expandedRows.clear();
-  //   expandedData = {};
-  // }
-  // $: console.log(expandedData);
+  let previousDateRange = $dateRange;
+
+  $: {
+    if ($dateRange !== previousDateRange && $selectedStoreId !== -1) {
+      previousDateRange = $dateRange;
+      fetchExpandedData($selectedStoreId).then((data) => {
+        if (data?.data?.data) {
+          expandedData = {
+            ...expandedData,
+            [$selectedStoreId]: data.data.data,
+          };
+        }
+      });
+    }
+  }
 </script>
 
 <div class="m-0 flex flex-col justify-center items-center">

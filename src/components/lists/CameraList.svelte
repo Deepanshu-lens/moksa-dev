@@ -27,7 +27,6 @@
   let cameraItems: HTMLDivElement;
   let filterText: string = "";
   const PB = new PocketBase(`https://server.moksa.ai`);
-  // console.log(data.user)
 
   function handleEscape(event: KeyboardEvent) {
     if (event.key === "Escape") {
@@ -183,6 +182,7 @@
       {#each $filteredNodeCameras as camera}
         {#key $selectedNode}
           <CameraMoksaCard
+            {user}
             {ptzControl}
             {showOptions}
             cameraId={camera.id}
