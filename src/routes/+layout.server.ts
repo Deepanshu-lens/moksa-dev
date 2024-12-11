@@ -78,6 +78,8 @@ export const load: LayoutServerLoad = async ({ locals, url, cookies }) => {
           filter: `session~"${locals.user.record.session[0]}"`,
         });
 
+        console.log(nodes,"nodes")
+
         const role = await locals.pb?.collection("roles").getFullList({
           filter: `id~"${currentUser.role}"`,
         });

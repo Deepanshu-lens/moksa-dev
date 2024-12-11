@@ -3,7 +3,14 @@
   import AddCameraDialog from "@/components/dialogs/AddCameraDialog.svelte";
   import EditNodeDialog from "./../dialogs/EditNodeDialog.svelte";
   import type { Camera, Node } from "@/types";
-  import { Plus,ChevronDown, Edit, PlusCircle, Trash, Search } from "lucide-svelte";
+  import {
+    Plus,
+    ChevronDown,
+    Edit,
+    PlusCircle,
+    Trash,
+    Search,
+  } from "lucide-svelte";
   import { selectedNode } from "@/lib/stores";
   import Button from "../ui/button/button.svelte";
   import { toast } from "svelte-sonner";
@@ -20,15 +27,14 @@
   export let isAllFullScreen: boolean;
   export let user;
 
-
-  let dropdownOpen = false
+  let dropdownOpen = false;
   let showAddNode = writable(false);
 
- function groupNodesRecursively(nodes) {
+  function groupNodesRecursively(nodes) {
     const groupNodes = (nodes, level = 0) => {
       const grouped = nodes?.reduce((acc, node) => {
-        const parts = node.name.split('_');  // Split only by underscore
-        const baseName = parts.slice(0, level + 1).join('_');
+        const parts = node.name.split("_"); // Split only by underscore
+        const baseName = parts.slice(0, level + 1).join("_");
         if (!acc[baseName]) {
           acc[baseName] = [];
         }
@@ -36,23 +42,25 @@
         return acc;
       }, {});
 
-      if(!grouped) return;
+      if (!grouped) return;
 
       return Object?.keys(grouped).map((baseName) => {
         const subNodes = grouped[baseName];
         if (
           subNodes.length > 1 &&
-          subNodes.some((node) => node.name.split('_').length > level + 1)
+          subNodes.some((node) => node.name.split("_").length > level + 1)
         ) {
           return {
             name: baseName,
             nodes: groupNodes(subNodes, level + 1),
           };
         }
-        return subNodes.length === 1 ? subNodes[0] : {
-          name: baseName,
-          nodes: subNodes,
-        };
+        return subNodes.length === 1
+          ? subNodes[0]
+          : {
+              name: baseName,
+              nodes: subNodes,
+            };
       });
     };
 
@@ -90,40 +98,42 @@
 
     if (selectedOption === "Add Node +") {
       console.log("adding node");
-      showAddNode.set(true) ;
-      dropdownOpen = false; 
+      showAddNode.set(true);
+      dropdownOpen = false;
       return;
     }
 
     try {
-      dropdownOpen = false; 
-       const response = await fetch("/api/node/nodeSelect", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ nodeId: selectedOption,sessionId:$page.params.slug }),
-    });
+      dropdownOpen = false;
+      const response = await fetch("/api/node/nodeSelect", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          nodeId: selectedOption,
+          sessionId: $page.params.slug,
+        }),
+      });
 
-    if (!response.ok) {
-      throw new Error("Failed to fetch node data");
+      if (!response.ok) {
+        throw new Error("Failed to fetch node data");
+      }
+
+      const { node: formattedNode } = await response.json();
+
+      selectedNode.set(formattedNode);
+    } catch (error) {
+      console.error(error);
+      toast.error("Something went wrong. Please try again");
     }
+  };
 
-    const { node: formattedNode } = await response.json();
-
-    selectedNode.set(formattedNode);
-
-  } catch (error) {
-    console.error(error);
-    toast.error("Something went wrong. Please try again");
-  }
-};
-
-let searchTerm = writable('');
+  let searchTerm = writable("");
 
   $: filteredNodes = $searchTerm
-    ? resultGroupNodes.filter(node => 
-        node.name.toLowerCase().includes($searchTerm.toLowerCase())
+    ? resultGroupNodes.filter((node) =>
+        node.name.toLowerCase().includes($searchTerm.toLowerCase()),
       )
     : resultGroupNodes;
 
@@ -143,21 +153,32 @@ let searchTerm = writable('');
           ? $selectedNode?.name.substring(0, 20) + "..."
           : $selectedNode?.name}</button
     >
-    <Dropdown 
-    bind:open={dropdownOpen}
+    <Dropdown
+      bind:open={dropdownOpen}
       class="z-[99999999] dark:text-slate-200 dark:bg-black border dark:border-slate-300 dark:border-opacity-35 min-w-[10rem] max-h-[16rem] overflow-y-auto rounded-sm  shadow-md pb-4"
     >
-    {#if user.role !== 'Operators' && user.role !== 'admin' && user.role !== 'storeManager' && user.role !== 'storeEmployee'}
-      <DropdownItem class='flex text-[#3D81FC] items-center justify-between py-1 px-2 font-semibold'
-        on:click={() => handleNodeSelect({ target: { value: "Add Node +" } })}
-      >
-        Add Store <span class='rounded-full bg-[#3D81FC] p-1 grid place-items-center scale-75'><Plus size={20} class=' text-white'/></span>
-
-      </DropdownItem>
-      {/if} 
-      <DropdownItem class='relative px-1'>
-        <Input type='text' placeholder='Search'  bind:value={$searchTerm} class='border-[#EBEDF0] border text-xs pl-6 text-[#323232] dark:text-white/[.7]'/>
-        <Search size={14} class='text-[#323232] dark:text-white/[.7] absolute  left-2.5 top-1/2 -translate-y-1/2' />
+      {#if user.role !== "Operators" && user.role !== "admin" && user.role !== "storeManager" && user.role !== "storeEmployee"}
+        <DropdownItem
+          class="flex text-[#3D81FC] items-center justify-between py-1 px-2 font-semibold"
+          on:click={() => handleNodeSelect({ target: { value: "Add Node +" } })}
+        >
+          Add Store <span
+            class="rounded-full bg-[#3D81FC] p-1 grid place-items-center scale-75"
+            ><Plus size={20} class=" text-white" /></span
+          >
+        </DropdownItem>
+      {/if}
+      <DropdownItem class="relative px-1">
+        <Input
+          type="text"
+          placeholder="Search"
+          bind:value={$searchTerm}
+          class="border-[#EBEDF0] border text-xs pl-6 text-[#323232] dark:text-white/[.7]"
+        />
+        <Search
+          size={14}
+          class="text-[#323232] dark:text-white/[.7] absolute  left-2.5 top-1/2 -translate-y-1/2"
+        />
       </DropdownItem>
       <!-- {#if resultGroupNodes?.length !== 0}
         {#each resultGroupNodes as node}
@@ -165,12 +186,12 @@ let searchTerm = writable('');
         {/each}
       {/if} -->
       {#if filteredNodes?.length !== 0}
-      {#each filteredNodes as node}
-        <RecursiveNode {node} {handleNodeSelect} />
-      {/each}
-    {:else}
-      <DropdownItem>No Matchs</DropdownItem>
-    {/if}
+        {#each filteredNodes as node}
+          <RecursiveNode {node} {handleNodeSelect} />
+        {/each}
+      {:else}
+        <DropdownItem>No Matchs</DropdownItem>
+      {/if}
     </Dropdown>
     <div
       class={cn(

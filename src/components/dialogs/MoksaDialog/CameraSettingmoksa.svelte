@@ -182,7 +182,7 @@
 
 <!-- markup (zero or more items) goes here -->
 <!-- this is static true value and needs to be updated ****** -->
-<Dialog.Root bind:open={dialogOpen}>
+<Dialog.Root open>
   <Dialog.Trigger><slot /></Dialog.Trigger>
   <Dialog.Content
     closeButton={false}
@@ -228,7 +228,7 @@
               <h2 class="text-xl font-medium">Video Saving</h2>
               <p class="text-gray-500">Adjust video Saving settings</p>
             </div>
-            <Switch bind:checked={save} />
+            <Switch bind:checked={save} disabled />
           </div>
           <div class="w-full">
             {#if save}
@@ -280,7 +280,7 @@
             {/if}
           </div>
         {:else if currentTab === "Theft Detection"}
-         <div
+          <div
             class="rounded-md flex items-center justify-between border p-4 my-2"
           >
             <div class="flex items-center space-x-4">
@@ -303,7 +303,7 @@
               <Switch bind:checked={heatmap} />
             </div>
           </div>
-       {:else if currentTab === "Person Count"}
+        {:else if currentTab === "Person Count"}
           <div
             class="rounded-md flex items-center justify-between border p-4 my-2"
           >
@@ -315,7 +315,7 @@
               <Switch bind:checked={personCount} />
             </div>
           </div>
-       {:else if currentTab === "Kitchen Safety"}
+        {:else if currentTab === "Kitchen Safety"}
           <div
             class="rounded-md flex items-center justify-between border p-4 my-2"
           >
@@ -327,7 +327,7 @@
               <Switch bind:checked={safety} />
             </div>
           </div>
-          {:else if currentTab === "Employee Efficiency"}
+        {:else if currentTab === "Employee Efficiency"}
           <div class="rounded-md border p-4 my-2">
             <div class="flex items-center space-x-4">
               <ShieldAlert />
