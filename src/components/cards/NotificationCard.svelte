@@ -37,18 +37,18 @@
         />
       </span>
     </span>
-    <span class="flex flex-col gap-2 w-full">
+    <span class="flex flex-col gap-1 w-full">
       <span class="flex items-center justify-between"
         ><h2 class="font-medium text-black">Theft Detected!</h2>
-        <p class="text-[#686868] text-xs mr-1">
-          {formatTime(notification.createdAt)}
+        <p class="text-[#686868] text-[11px] mr-1">
+          {formatTime(notification?.createdAt)}
         </p></span
       >
-      <p class="text-[#686868] text-xs">
-        Suspecious activity detected for store {notification.store_id},<br />
-        with probability of {notification.theftProbability}% <br /> Watch clip
+      <p class="text-[#686868] text-[11px]">
+        Suspecious activity detected for store {notification?.store_id},
+        with probability of {notification?.theftProbability}% <br /> Watch clip
         <a
-          href={notification.video_uri}
+          href={notification?.video_uri}
           target="_blank"
           class="text-[#3D81FC] underline bold">here</a
         >

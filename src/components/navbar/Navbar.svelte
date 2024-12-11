@@ -123,7 +123,30 @@
   let sockets: { [key: number]: any } = {};
   let liveData = writable([]);
   let allStores = [];
-  const moksaUserId = user.moksaId;
+  const moksaUserId = user?.moksaId;
+
+  const getTheftNotifications = async () => {
+    try {
+      const response = await fetch(
+        `https://dev.api.moksa.ai/notification/getAllUnreadNotificationsByUserId/${moksaUserId}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${mToken}`,
+          },
+        },
+      );
+      const data = await response.json();
+      if (!!data?.data) {
+        liveData.set(data?.data);
+      } else {
+        liveData.set([]);
+      }
+    } catch (error) {
+      console.log(error, "error");
+      toast.error("Error fetching theft notifications");
+    }
+  };
 
   onMount(async () => {
     // console.log("mToken", mToken);
@@ -143,6 +166,8 @@
     if (res?.data?.data?.length > 0) {
       setupSocketForAllStores();
     }
+
+    getTheftNotifications();
   });
 
   function setupSocketForAllStores() {
@@ -190,7 +215,7 @@
           return [...currentData, { ...data }];
         });
       } else {
-        liveData.set(data);
+        liveData.set([data]);
       }
 
       // listtheft.update((currentData) => {
@@ -270,7 +295,7 @@
     return `https://server.moksa.ai/api/files/_pb_users_auth_/${recordId}/${fileName}?thumb=${size}`;
   }
 
-  // $: console.log(data)
+  $: console.log($liveData, "live data");
 </script>
 
 <header class="sm:flex sticky top-0 left-0 w-full z-20 h-[75px]">
