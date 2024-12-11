@@ -1,17 +1,18 @@
 import PocketBase from "pocketbase";
 
 const getPocketBaseURL = () => {
-    if (typeof window === "undefined") {
-        // Server-side logic
-        return process.env.PUBLIC_POCKETBASE_URL || "http://localhost:8090";
-    } else {
-        // Client-side logic
-        const hostname = window.location.hostname;
-        const isProduction = import.meta.env.PUBLIC_ENV === "production";
-        return isProduction
-            ? import.meta.env.PUBLIC_POCKETBASE_URL
-            : `http://${hostname}:8090`;
-    }
+  if (typeof window === "undefined") {
+    //vercel
+    return import.meta.env.PUBLIC_POCKETBASE_URL;
+  } else if (window && window.api?.navigate) {
+    //electron
+    return import.meta.env.PRIVATE_OFFLINE_DB;
+  } else {
+    const isProduction = import.meta.env.PUBLIC_ENV === "production";
+    return isProduction
+      ? import.meta.env.PUBLIC_POCKETBASE_URL
+      : import.meta.env.PRIVATE_POCKETBASE_URL;
+  }
 };
 
 const pb = new PocketBase(getPocketBaseURL());

@@ -221,8 +221,6 @@ wss://view.lenscorp.cloud/api/ws?src=${camera.id}`
       doneSubmit = false;
     }
   }
-
-  $: console.log($modalOpen, "modalOpen");
 </script>
 
 {#if action === "add"}

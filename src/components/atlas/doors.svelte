@@ -5,15 +5,14 @@
   import Separator from "@/components/ui/separator/separator.svelte";
   import Button from "@/components/ui/button/button.svelte";
   import { activePanel } from "@/stores";
+  import getAtlasURL from "@/lib/atlas";
 
   export let data;
   export let search: string;
   let showChildren = null;
   let selectedChild: any = null;
 
-  // const API_URL = `https://view.lenscorp.cloud/atlasbackend/unlock/${$activePanel}`;
-
-  // const API_URL = `https://api.cieloview.com/unlock/${$activePanel}`;
+  const ATLAS_URL = getAtlasURL();
 
   $: filteredDoors = data?.filter((door: any) =>
     door.name.toLowerCase().includes($search.toLowerCase())
@@ -21,11 +20,9 @@
 
   async function handleUnlock(doorId: any) {
     try {
-      const res = await fetch(
-        `${import.meta.env.PUBLIC_ATLAS_BASE_URL}/unlock/${$activePanel}`,
-        {
-          method: "POST",
-          headers: {
+      const res = await fetch(`${ATLAS_URL}/unlock/${$activePanel}`, {
+        method: "POST",
+        headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
         body: new URLSearchParams({

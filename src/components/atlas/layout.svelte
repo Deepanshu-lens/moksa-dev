@@ -29,7 +29,6 @@
   let ssl = false;
   let isLoading = false;
 
-  $:console.log($user)
   // Functions
   async function handleSubmit(addPanelData = null) {
     try {

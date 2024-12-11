@@ -6,8 +6,8 @@ import Camera from "@/managers/camera.svelte";
 import PageBarMobile from "@/components/bars/PageBarMobile.astro";
 import GalleryPage from "@/managers/gallery.svelte";
 import LiveLayout from "@/components/live/layout.svelte";
-const STREAM_URL = import.meta.env.STREAM_URL;
-
+import getStreamURL from "@/lib/url";
+const STREAM_URL = getStreamURL();
 ---
 
 <!-- Changed -->

@@ -7,7 +7,6 @@
   import * as Tabs from "@/components/ui/tabs";
   import { Slider } from "@/components/ui/slider";
   import * as Table from "@/components/ui/table/index";
-  import { onMount } from "svelte";
   import pb from "@/lib/pb";
   import { selectedNode, user } from "@/stores";
 
@@ -16,6 +15,8 @@
   import { writable } from "svelte/store";
   import Checkbox from "../ui/checkbox/checkbox.svelte";
   import { Loader2 } from "lucide-svelte";
+  import getOnvifUrl from "@/lib/onvif";
+  import getPlaybackURL from "@/lib/playback";
 
   export let cameraName = "";
   export let mainUrl = "";
@@ -182,10 +183,11 @@
       toast.success("Camera added successfully");
     } else {
       setRtspToDb();
-      toast.success("Camera added successfully");
       // console.log(tabValue)
     }
   };
+
+  const ONVIF_URL = getOnvifUrl();
 
   const fetchONVIFCams = async () => {
     fetchingCamers = true;
@@ -199,11 +201,11 @@
 
       if ($isBulk) {
         response = await fetch(
-          `${import.meta.env.PUBLIC_ONVIF_DEVICES_BASE_URL}/discover-cameras?startIp=${ipAddress1}.${ipAddress2}.${ipAddress3}.${ipAddress4}&endIp=${endIpAddress1}.${endIpAddress2}.${endIpAddress3}.${endIpAddress4}&username=${userName}&password=${password}&port=${httpPort}`
+          `${ONVIF_URL}/discover-cameras?startIp=${ipAddress1}.${ipAddress2}.${ipAddress3}.${ipAddress4}&endIp=${endIpAddress1}.${endIpAddress2}.${endIpAddress3}.${endIpAddress4}&username=${userName}&password=${password}&port=${httpPort}`
         );
       } else {
         response = await fetch(
-          `${import.meta.env.PUBLIC_ONVIF_DEVICES_BASE_URL}/discover-cameras?startIp=${ipAddress1}.${ipAddress2}.${ipAddress3}.${ipAddress4}&endIp=${ipAddress1}.${ipAddress2}.${ipAddress3}.${ipAddress4}&username=${userName}&password=${password}&port=${httpPort}`
+          `${ONVIF_URL}/discover-cameras?startIp=${ipAddress1}.${ipAddress2}.${ipAddress3}.${ipAddress4}&endIp=${ipAddress1}.${ipAddress2}.${ipAddress3}.${ipAddress4}&username=${userName}&password=${password}&port=${httpPort}`
         );
       }
 
@@ -305,7 +307,7 @@
 
     console.log(JSON.stringify($selectedOnvifCameras, null, 2));
     const promises = $selectedOnvifCameras.map(async (camera) => {
-      const url = `${import.meta.env.PUBLIC_ONVIF_DEVICES_BASE_URL}/get-stream-uris?ip=${camera.ipAddress}&username=${userName}&password=${password}&port=${httpPort}`;
+      const url = `${ONVIF_URL}/get-stream-uris?ip=${camera.ipAddress}&username=${userName}&password=${password}&port=${httpPort}`;
       try {
         const response = await fetch(url, {
           method: "GET",
@@ -369,11 +371,30 @@
 
     await Promise.all(createPromises);
     gettingRtsp = false;
+    toast.success("Camera added successfully");
     modalOpen.set(false);
     location.reload();
   };
 
-  const handleIpInput = (event: Event, nextInputId: string) => {
+  const handleIpInput = (event: Event | KeyboardEvent, nextInputId: string) => {
+    // Handle dot key press
+    if ("key" in event && event.key === ".") {
+      event.preventDefault();
+      const nextInput = document.getElementById(nextInputId);
+      if (nextInput) {
+        nextInput.focus();
+      }
+      return;
+    }
+
+    // Don't process further if it's a deletion
+    if (
+      "key" in event &&
+      (event.key === "Backspace" || event.key === "Delete")
+    ) {
+      return;
+    }
+
     const input = event.target as HTMLInputElement;
     let value = input.value;
 
@@ -451,9 +472,9 @@
 
     <Tabs.Root bind:value={tabValue}>
       <Tabs.List class="grid w-full grid-cols-3">
+        <Tabs.Trigger value="onvif">ONVIF</Tabs.Trigger>
         <Tabs.Trigger value="rtsp">RTSP</Tabs.Trigger>
         <Tabs.Trigger value="spectra">Custom</Tabs.Trigger>
-        <Tabs.Trigger value="onvif">ONVIF</Tabs.Trigger>
       </Tabs.List>
       <Tabs.Content value="rtsp" class="p-3">
         <div class="flex flex-col pb-4">
@@ -651,6 +672,7 @@
                 class="text-xs"
                 placeholder="192"
                 on:input={(e) => handleIpInput(e, "ip2")}
+                on:keydown={(e) => handleIpInput(e, "ip2")}
                 maxlength="3"
               />
               <span>.</span>
@@ -661,6 +683,7 @@
                 placeholder="168"
                 bind:value={ipAddress2}
                 on:input={(e) => handleIpInput(e, "ip3")}
+                on:keydown={(e) => handleIpInput(e, "ip3")}
                 maxlength="3"
               />
               <span>.</span>
@@ -671,6 +694,7 @@
                 placeholder="1"
                 bind:value={ipAddress3}
                 on:input={(e) => handleIpInput(e, "ip4")}
+                on:keydown={(e) => handleIpInput(e, "ip4")}
                 maxlength="3"
               />
               <span>.</span>
@@ -688,8 +712,8 @@
         {#if $isBulk}
           <div class="mt-3">
             <Label class="mb-3">End IP</Label>
-            <div class="flex items-center gap-3 pb-4 w-full">
-              <div class="flex items-center space-x-4 w-full">
+            <div class="flex items-center gap-3 w-full">
+              <div class="flex items-center space-x-3 w-full mt-3">
                 <Input
                   id="endIp1"
                   type="text"
@@ -697,6 +721,7 @@
                   class="text-xs"
                   placeholder="192"
                   on:input={(e) => handleIpInput(e, "endIp2")}
+                  on:keydown={(e) => handleIpInput(e, "endIp2")}
                   maxlength="3"
                 />
                 <span>.</span>
@@ -707,6 +732,7 @@
                   placeholder="168"
                   bind:value={endIpAddress2}
                   on:input={(e) => handleIpInput(e, "endIp3")}
+                  on:keydown={(e) => handleIpInput(e, "endIp3")}
                   maxlength="3"
                 />
                 <span>.</span>
@@ -717,6 +743,7 @@
                   placeholder="1"
                   bind:value={endIpAddress3}
                   on:input={(e) => handleIpInput(e, "endIp4")}
+                  on:keydown={(e) => handleIpInput(e, "endIp4")}
                   maxlength="3"
                 />
                 <span>.</span>
