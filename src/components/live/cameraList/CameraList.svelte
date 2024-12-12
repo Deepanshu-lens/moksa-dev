@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import Sortable from "sortablejs";
   import * as DropdownMenu from "@/components/ui/dropdown-menu/index.js";
-  import { cameras, nodes, selectedNode } from "@/stores";
+  import { cameras, nodes, selectedCamera } from "@/stores";
   import NodeSelection from "@/components/node/NodeSelection.svelte";
   import NodeActionButton from "@/components/node/crud/NodeActionButton.svelte";
   import { cn } from "@/lib/utils";
@@ -213,10 +213,16 @@
     </div>
     <div class="overflow-y-auto max-h-[calc(100vh-12rem)]">
       {#each currentCameras as camera, index}
+        <!-- svelte-ignore a11y_click_events_have_key_events -->
+        <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
         <article
-          class="flex items-center p-4 dark:border bg-accent my-4
-              hover:border hover:border-primary space-x-4
-              rounded-xl text-sm z-10 w-full px-4"
+          class={cn("flex items-center p-4 dark:border bg-accent my-4 hover:border hover:border-primary space-x-4 rounded-xl text-sm z-10 w-full px-4" , {"border border-white" : camera.id === $selectedCamera})}
+          on:click={()=>{
+            if($selectedCamera === camera.id)
+            selectedCamera.set("")
+            else
+            selectedCamera.set(camera.id)
+          }}
         >
           <Icon
             icon="material-symbols:menu"

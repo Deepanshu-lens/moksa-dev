@@ -1,7 +1,15 @@
 <script lang="ts">
   // Imports
   import * as Tabs from "@/components/ui/tabs";
-  import { Play, Pause, ChevronRight, CalendarDaysIcon, Loader2 } from "lucide-svelte";
+  import { fade } from "svelte/transition";
+  import {
+    Play,
+    Pause,
+    ChevronRight,
+    CalendarDaysIcon,
+    Loader2,
+    PauseCircle,
+  } from "lucide-svelte";
   import { selectedNode } from "@/stores";
   import { writable } from "svelte/store";
   import Hls from "hls.js";
@@ -13,7 +21,7 @@
   import pb from "@/lib/pb";
   import NodeSelection from "../node/NodeSelection.svelte";
   import { getCameras } from "@/managers/get-camera";
-  import { toggleFullscreen, updateTransform } from "@/lib/video-utils";
+  import { updateTransform, toggleFullscreen } from "@/lib/video-utils";
   import Checkbox from "../ui/checkbox/checkbox.svelte";
   import Label from "../ui/label/label.svelte";
 
@@ -24,7 +32,7 @@
   let showRightPanel: boolean = true;
   const videos = writable([]);
   let videoRefs: HTMLVideoElement[] = [];
-  let videoBackgroundWidths = writable<number[]>([]);
+  let videoBackgroundWidths = writable<any[]>([]);
   let showCalendar = writable<boolean>(false);
   let value: any = null;
   let searchDate = "";
@@ -41,6 +49,12 @@
   let isFetching = writable<boolean>(false);
   let selectedEvents = writable<string[]>([]);
   let isFetchingEvents = writable<boolean>(false);
+  let videoOffsets = writable<number[]>([]); //in hours
+  let playVisible = writable<any[]>([]);
+
+  selectedNode.subscribe(() => {
+    selectedChannels.set([]);
+  });
 
   //Constants
   // const PLAYBACK_API_URL = "https://playback.lenscorp.cloud/generate-stream";
@@ -57,9 +71,20 @@
     const video = videoRefs[index];
     if (video && video.duration) {
       const totalSecondsInDay = 24 * 60 * 60;
-      const width = (video.duration / totalSecondsInDay) * 100;
+      const offsetInSeconds = Math.floor($videoOffsets[index] * 3600); // Convert offset to seconds and floor
+      const durationInSeconds = Math.floor(video.duration); // floor video duration
+
+      // Calculate precise percentages for the backgfloor
+      const startPercentage = (offsetInSeconds / totalSecondsInDay) * 100;
+      const durationPercentage = Math.floor(
+        (durationInSeconds / totalSecondsInDay) * 100
+      );
+
       videoBackgroundWidths.update((widths) => {
-        widths[index] = width;
+        widths[index] = {
+          start: startPercentage,
+          width: durationPercentage,
+        };
         return widths;
       });
     }
@@ -125,32 +150,63 @@
       }
       videoElement.addEventListener("play", () => syncPlayState(index, true));
       videoElement.addEventListener("pause", () => syncPlayState(index, false));
-      
+
       video.addEventListener("timeupdate", () => {
-        const currentTime = video.currentTime; // Use currentTime without offset
-        const intervalIndex = Math.floor(currentTime / 600);
+        const seeker = document.querySelectorAll(
+          '.video-controls input[type="range"]'
+        )[index] as HTMLInputElement;
+
+        if (seeker) {
+          seeker.value = (
+            ($videoOffsets[index] * 3600 + video.currentTime) /
+            600
+          )
+            .toFixed(2)
+            .toString();
+        }
+      });
+
+      video.addEventListener("loadedmetadata", () => {
+        updateVideoBackgroundWidth(index);
 
         const seeker = document.querySelectorAll(
           '.video-controls input[type="range"]'
         )[index] as HTMLInputElement;
 
         if (seeker) {
-          seeker.value = intervalIndex.toString();
-        }
+          seeker.value = Math.floor($videoOffsets[index] * 6).toString();
+          video.currentTime =
+            parseInt(seeker.value) - $videoOffsets[index] * 3600;
+          seeker.addEventListener("input", () => {
 
+            const startInterval: string = Math.floor(
+              $videoOffsets[index] * 6
+            ).toString();
+            
+            const endInterval: string = (
+              Math.floor(video.duration / 600) + parseInt(startInterval)
+            ).toString();
+
+            if (seeker.value > endInterval){
+              seeker.value = endInterval
+              video.currentTime = video.duration
+            }else{
+              video.currentTime =
+                (parseInt(seeker.value) -
+                  Math.floor($videoOffsets[index] * 6)) *
+                600;
+            video.play();
+            }
+          });
+        }
         if (index === 0) {
           const globalSeekBar = document.querySelector(
             '.global-controls input[type="range"]'
           ) as HTMLInputElement;
           if (globalSeekBar) {
-            globalSeekBar.value = intervalIndex.toString();
+            globalSeekBar.value = (Math.min(...$videoOffsets) * 6).toString();
           }
         }
-      });
-
-
-      video.addEventListener("loadedmetadata", () => {
-        updateVideoBackgroundWidth(index);
       });
 
       if (startTime !== "")
@@ -169,64 +225,28 @@
   }
 
   function seekAllVideos(intervalIndex: number) {
-    currentTimeInterval.set(intervalIndex);
-    const timeInSeconds = intervalIndex * 10 * 60;
-
+    console.log(intervalIndex);
     videoRefs.forEach((video, index) => {
-      if (video.duration) {
-        const newTime = Math.min(timeInSeconds, video.duration);
-        video.currentTime = newTime;
-
-        if (newTime < video.duration) {
-          playVideo(index);
-        } else {
-          pauseVideo(index);
-        }
-
-        const seekBar = document.querySelectorAll(
-          '.video-controls input[type="range"]'
-        )[index] as HTMLInputElement;
-        if (seekBar) {
-          seekBar.value = intervalIndex.toString();
-          seekBar.classList.toggle(
-            "beyond-duration",
-            newTime >= video.duration
-          );
-        }
-      }
-    });
-    const globalSeekBar = document.querySelector(
-      '.global-controls input[type="range"]'
-    ) as HTMLInputElement;
-    if (globalSeekBar && startTime !== "") {
-      globalSeekBar.value = intervalIndex.toString();
-      globalSeekBar.classList.toggle("beyond-duration", timeInSeconds >= 1440);
-    }
-  }
-
-  function seekVideo(index: number, intervalIndex: number) {
-    currentTimeInterval.set(intervalIndex);
-    const timeInSeconds = intervalIndex * 10 * 60;
-    const video = videoRefs[index];
-
-    if (video.duration) {
-      const newTime = Math.min(timeInSeconds, video.duration);
-      video.currentTime = newTime;
-
-      if (newTime < video.duration) {
-        playVideo(index);
-      } else {
-        pauseVideo(index);
-      }
-
-      const seekBar = document.querySelectorAll(
+      video.pause();
+      const seeker = document.querySelectorAll(
         '.video-controls input[type="range"]'
       )[index] as HTMLInputElement;
-      if (seekBar) {
-        seekBar.value = intervalIndex.toString();
-        seekBar.classList.toggle("beyond-duration", newTime >= video.duration);
+      const startInterval: string = Math.floor(
+        $videoOffsets[index] * 6
+      ).toString();
+      const endInterval: string = (
+        Math.floor(video.duration / 600) + parseInt(startInterval)
+      ).toString();
+      if (
+        parseInt(startInterval) <= intervalIndex &&
+        intervalIndex < parseInt(endInterval)
+      ) {
+        seeker.value = intervalIndex.toString();
+        video.currentTime =
+          (intervalIndex - Math.floor($videoOffsets[index] * 6)) * 600;
+        video.play();
       }
-    }
+    });
   }
 
   async function fetchPlaybackData() {
@@ -249,15 +269,17 @@
       videoUrls = { responses: [], cams: [] };
       const responses = await Promise.all(
         $selectedChannels.map(async (channel) => {
-          const response = await fetch(import.meta.env.PUBLIC_PLAYBACK_API_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              cameraID: channel.id,
-              cameraDate: formattedDate,
-            }),
-          });
-
+          const response = await fetch(
+            import.meta.env.PUBLIC_PLAYBACK_API_URL,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                cameraID: channel.id,
+                cameraDate: formattedDate,
+              }),
+            }
+          );
           if (!response.ok) {
             const errorData = await response.json();
             toast.error(
@@ -294,10 +316,14 @@
           }
 
           const data = await response.json();
-          return data.path;
+          // let randomTime = `${String(Math.floor(Math.random() * 24)).padStart(2, "0")}:${String(Math.floor(Math.random() * 60)).padStart(2, "0")}:${String(Math.floor(Math.random() * 60)).padStart(2, "0")}`;
+          return { data, path: data.path };
         })
       );
-      videoUrls = { responses, cams: $selectedChannels };
+      const response_data = responses.map((video) => video.data);
+      const response_paths = responses.map((video) => video.path);
+      videoUrls = { responses: response_paths, cams: $selectedChannels };
+      setOffsets(response_data);
       videoPlayStates.set(new Array(responses.length).fill(true));
     } catch (error) {
       console.error("Error fetching playback data:", error);
@@ -423,7 +449,8 @@
 
   // Function to calculate positions of red strips
   function calculateEventPositions(eventsArray: any[], cameraId: string) {
-    if (!eventsArray || !eventsArray.length) return { person: [], fire: [], face: [], alpr: [] };
+    if (!eventsArray || !eventsArray.length)
+      return { person: [], fire: [], face: [], alpr: [] };
 
     const typeToColorMap = {
       person: "#FF4764",
@@ -611,6 +638,44 @@
       });
     });
   }
+
+  function parseCreatedTimestamp(created: string): number {
+    const [, time] = created.split(" "); // "HH:MM:SS"
+    const [hours, minutes, seconds] = time.split(":").map(Number);
+    const fractionalHours = hours + minutes / 60 + seconds / 3600;
+    const roundedHours = Math.floor(fractionalHours * 10) / 10;
+    return roundedHours;
+  }
+
+  // this is used to get all the offsets and can be used for mounting videos accordingly
+  function setOffsets(videoData: any[]) {
+    const offsets = videoData.map((video) =>
+      parseCreatedTimestamp(video.created)
+    );
+    videoOffsets.set(offsets);
+  }
+
+  function showPlay(index) {
+    playVisible.update((visible) => {
+      visible[index] = true;
+      return visible;
+    });
+
+    setTimeout(() => {
+      playVisible.update((visible) => {
+        visible[index] = false;
+        return visible;
+      });
+    }, 1000); // Show play icon for 1 second
+  }
+
+  // Ensure pause icon state is handled
+  function showPause(index) {
+    playVisible.update((visible) => {
+      visible[index] = false; // Ensure play icon is hidden on pause
+      return visible;
+    });
+  }
 </script>
 
 <section class="right-playback flex-1 flex w-full h-screen justify-between">
@@ -638,18 +703,51 @@
     >
       {#if videoUrls.responses && videoUrls.responses.length > 0}
         {#each videoUrls.responses as video, index}
+          <!-- svelte-ignore a11y_no_static_element_interactions -->
+          <!-- svelte-ignore a11y_click_events_have_key_events -->
           <div class="zoomable-area" id={`area-${index}`}>
             <video
               id={`video-${index}`}
               bind:this={videoRefs[index]}
-              class="w-full h-full"
+              class="w-full h-full relative"
               src={video}
               autoplay
               muted
               playsinline
-              on:play={handlePlayed}
+              on:play={(e) => {
+                handlePlayed(e);
+                showPlay(index);
+              }}
+              on:pause={() => {
+                showPause(index);
+              }}
               on:ended={handleEnded}
             ></video>
+            <div
+              class="absolute inset-0 flex items-center justify-center bg-opacity-20 z-10"
+            >
+              {#if playVisible[index]}
+                <div
+                  class="video-overlay absolute inset-0 flex items-center justify-center z-10"
+                  in:fade
+                  out:fade
+                >
+                  <Play size={46} />
+                </div>
+              {/if}
+              {#if !$videoPlayStates[index]}
+                <!-- svelte-ignore a11y_click_events_have_key_events -->
+                <!-- svelte-ignore a11y_no_static_element_interactions -->
+                <div
+                  class="video-overlay absolute inset-0 flex items-center justify-center z-10"
+                  in:fade
+                  out:fade
+                  on:click={() => videoRefs[index].play()}
+                >
+                  <PauseCircle size={46} />
+                </div>
+              {/if}
+            </div>
           </div>
         {/each}
       {:else}
@@ -686,19 +784,19 @@
       <div class="flex flex-col col-span-2 px-5 gap-1">
         <!-- Global Controls -->
         <div
-          class="global-controls flex items-center gap-3 bg-gray-800 w-full max-h-18"
+          class="global-controls flex items-center gap-3 bg-gray-400 dark:bg-gray-800 w-full max-h-18"
         >
-          <div class="flex justify-end w-[13.85%] pr-14">
+          <div class="flex justify-end w-[13.85%]">
             <button on:click={toggleAllPlayPause}>
               {#if $videoPlayStates.every((state) => state)}
                 <Pause
                   size={18}
-                  class="cursor-pointer border  border-brand rounded-full p-0.5"
+                  class="cursor-pointer border border-black dark:border-white rounded-full p-0.5"
                 />
               {:else}
                 <Play
                   size={18}
-                  class="cursor-pointer border  border-brand rounded-full p-0.5"
+                  class="cursor-pointer border border-black dark:border-white rounded-full p-0.5"
                 />
               {/if}
             </button>
@@ -708,10 +806,12 @@
               class="flex justify-between my-1 gap-0.5 2xl:text-xs text-[10px] font-thin max-w-full 2xl:min-w-full"
             >
               {#each Array(25) as _, hour}
-                <span>{hour.toString().padStart(2, "0")}:00</span>
+                <span class="text-black dark:text-white font-normal"
+                  >{hour.toString().padStart(2, "0")}:00</span
+                >
               {/each}
             </div>
-            <div class="pr-6 2xl:pr-7">
+            <div>
               <input
                 type="range"
                 min="0"
@@ -731,7 +831,7 @@
         {#each videoUrls.cams as cam, index}
           <div class="video-controls flex items-center gap-2 2xl:gap-3">
             <div
-              class="flex items-center gap-1 w-[14%] 2xl:w-[13.75%] bg-white/10 p-2 max-h-5"
+              class="flex items-center gap-1 w-[14%] 2xl:w-[13.75%] bg-black/10 dark:bg-white/10 p-2 max-h-5"
             >
               <p
                 class="text-xs 2xl:text-sm font-semibold mr-3 truncate min-w-[50px]"
@@ -742,22 +842,23 @@
                 {#if $videoPlayStates[index]}
                   <Pause
                     size={14}
-                    class="cursor-pointer bg-neutral-500 rounded-full p-0.5"
+                    class="cursor-pointer border border-black dark:bg-neutral-500 rounded-full p-0.5"
                   />
                 {:else}
                   <Play
                     size={14}
-                    class="cursor-pointer bg-neutral-500 rounded-full p-0.5"
+                    class="cursor-pointer border border-black dark:bg-neutral-500 rounded-full p-0.5"
                   />
                 {/if}
               </button>
               <button
                 aria-label="Fullscreen"
-                on:click={() => toggleFullscreen(index)}
+                on:click={() => toggleFullscreen(videoRefs[index])}
+                class="cursor-pointer border border-black dark:bg-neutral-500 rounded-full"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  class="h-4 w-4 cursor-pointer"
+                  class="size-3 cursor-pointer"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -772,10 +873,17 @@
               </button>
             </div>
             <div
-              class="bg-white/10 w-[89%] 2xl:w-[90%] h-[95%] p-0 m-0 flex gap-1 pr-6 2xl:pr-7 relative"
-              style="background: linear-gradient(to right, #3F6C1C, #3F6C1C), rgba(255, 255, 255, 0.1); background-size: {$videoBackgroundWidths[
-                index
-              ]}% 100%; background-repeat: no-repeat;"
+              class="bg-black/10 dark:bg-white/10 w-[89%] 2xl:w-[90%] h-[95%] p-0 m-0 flex gap-1 relative"
+              style="background: linear-gradient(
+                      to right,
+                      transparent {$videoBackgroundWidths[index]?.start}%,
+                      #3F6C1C {$videoBackgroundWidths[index]?.start}%,
+                      #3F6C1C {$videoBackgroundWidths[index]?.start +
+                $videoBackgroundWidths[index]?.width}%,
+                      transparent {$videoBackgroundWidths[index]?.start +
+                $videoBackgroundWidths[index]?.width}%
+                    );
+                    background-repeat: no-repeat;"
             >
               {#each Object.values(calculateEventPositions(events, cam.id)) as markers}
                 {#each markers as { position, color }}
@@ -792,11 +900,6 @@
                 step="1"
                 value="0"
                 class="custom-slider"
-                on:input={(e) =>
-                  seekVideo(
-                    index,
-                    parseInt((e.target as HTMLInputElement).value, 10)
-                  )}
               />
             </div>
           </div>
@@ -1126,5 +1229,10 @@
   /* Optional: Add transition for smooth updates */
   div {
     transition: all 0.3s ease;
+  }
+
+  .video-overlay {
+    backdrop-filter: blur(4px);
+    cursor: pointer;
   }
 </style>
