@@ -441,7 +441,7 @@
   async function openVideoDialog(videoUri) {
     dialogOpen = true;
 
-    const response = await fetch("https://dev.api.moksa.ai/stream", {
+    const response = await fetch("https://api.moksa.ai/stream", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,

@@ -59,7 +59,7 @@
     console.log(formatDate(today));
     try {
       const newData = await fetch(
-        `https://dev.api.moksa.ai/theft/theftListBasedOnStoreId/${$selectedStore.value}/${formatDate(startDate)}/${formatDate(today)}/${currentApiPage}/${apiPageSize}`,
+        `https://api.moksa.ai/theft/theftListBasedOnStoreId/${$selectedStore.value}/${formatDate(startDate)}/${formatDate(today)}/${currentApiPage}/${apiPageSize}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -231,7 +231,7 @@
     dialogOpen = true;
     try {
       const response = await axios.get(
-        `https://dev.api.moksa.ai/stream?key=${videoUri}`,
+        `https://api.moksa.ai/stream?key=${videoUri}`,
         {
           headers: {
             "Content-Type": "application/json",

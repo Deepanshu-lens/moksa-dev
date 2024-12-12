@@ -14,7 +14,7 @@ export const GET: RequestHandler = async ({ locals, cookies }: RequestEvent) => 
   });
   locals.pb?.authStore.clear();
 
-  await fetch("https://dev.api.moksa.ai/auth/logoutFromThisDevice", {
+  await fetch("https://api.moksa.ai/auth/logoutFromThisDevice", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
