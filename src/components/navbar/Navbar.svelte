@@ -171,15 +171,17 @@
   });
 
   function setupSocketForAllStores() {
-    allStores
-      .filter((store: any) => store.id !== -1)
-      .forEach((store: any) => {
-        setupSocket(store.id);
-      });
+    allStores.forEach((store: any) => {
+      setupSocket(store.id);
+    });
   }
 
   function setupSocket(storeId: number) {
-    const userID = moksaUserId;
+    let userID = moksaUserId;
+    if (user?.role === "superAdmin") {
+      userID = -1;
+    }
+
     if (sockets[storeId]) {
       sockets[storeId].disconnect();
     }
@@ -199,41 +201,28 @@
     });
 
     socket.on("connect", () => {
-      console.log(`connected for store theft in nav ${storeId}`);
+      console.log(`connected for notification in nav ${userID}`);
       socket.emit("joinUser", userID);
       socket.emit("joinStore", storeId);
     });
 
-    socket.on(`theft_store_${storeId}`, (data) => {
-      console.log(`Received theft data for store ${storeId}:`, data);
-      // toast(`Received theft data for store ${storeId}:`, {
-      //   description: `Store: ${storeId}, Theft Probability: ${data?.theftProbability}, Camera: ${data?.camera_id}`,
-      // });
+    socket.on(`notification_${userID}`, (data) => {
+      console.log(`Received notification data for store ${userID}:`, data);
 
-      if ($liveData.length > 0) {
+      if ($liveData?.length > 0) {
         liveData.update((currentData) => {
-          return [...currentData, { ...data }];
+          let istheftId = currentData.some(
+            (item: any) => item.theft_id === data?.theft_id,
+          );
+          if (!istheftId) {
+            return [...currentData, { ...data }];
+          } else {
+            return currentData;
+          }
         });
       } else {
         liveData.set([data]);
       }
-
-      // listtheft.update((currentData) => {
-      //   const dataArray = Array.isArray(currentData) ? currentData : [];
-
-      //   if (currentData && Array.isArray(currentData.data)) {
-      //     return {
-      //       ...currentData,
-      //       data: [{ storeId, ...data, live: true }, ...currentData.data].slice(
-      //         0,
-      //         100,
-      //       ),
-      //     };
-      //   }
-
-      //   return [{ storeId, ...data, live: true }, ...dataArray].slice(0, 100);
-      // });
-      // return [storeId, ...dataArray].slice(0, 100);
     });
 
     socket.on("disconnect", () => {

@@ -45,20 +45,21 @@
         </p></span
       >
       <p class="text-[#686868] text-[11px]">
-        Suspecious activity detected for store {notification?.store_id},
-        with probability of {notification?.theftProbability}% <br /> Watch clip
-        <a
-          href={notification?.video_uri}
-          target="_blank"
-          class="text-[#3D81FC] underline bold">here</a
-        >
+        Suspecious activity detected for store <strong
+          >{notification?.store_name || notification?.store_id}
+        </strong>,
+        {#if notification?.theftProbability}
+          with probability of {notification?.theftProbability}
+        {/if}
+        {#if notification?.video_uri}
+          <br /> Watch clip
+          <a
+            href={notification?.video_uri}
+            target="_blank"
+            class="text-[#3D81FC] underline bold">here</a
+          >
+        {/if}
       </p>
-      <!-- {#if actions}
-      <span class='flex items-center gap-1'>
-          <Button class="scale-90 bg-[#3D81FC] text-white" size="sm">Confirm</Button>
-          <Button class="scale-90" variant="outline" size="sm">Reject</Button>
-        </span>
-      {/if} -->
     </span>
   </Card.Content>
 </Card.Root>
