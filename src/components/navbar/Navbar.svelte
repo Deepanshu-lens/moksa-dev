@@ -128,7 +128,7 @@
   const getTheftNotifications = async () => {
     try {
       const response = await fetch(
-        `https://api.moksa.ai/notification/getAllUnreadNotificationsByUserId/${moksaUserId}`,
+        `https://dev.api.moksa.ai/notification/getAllUnreadNotificationsByUserId/${moksaUserId}`,
         {
           method: "GET",
           headers: {
@@ -151,7 +151,7 @@
   onMount(async () => {
     // console.log("mToken", mToken);
     const response = await fetch(
-      "https://api.moksa.ai/store/getAllStoresForDropdown",
+      "https://dev.api.moksa.ai/store/getAllStoresForDropdown",
       {
         method: "GET",
         headers: {
@@ -186,7 +186,7 @@
       sockets[storeId].disconnect();
     }
 
-    sockets[storeId] = io("https://api.moksa.ai/", {
+    sockets[storeId] = io("https://dev.api.moksa.ai/", {
       withCredentials: true,
       extraHeaders: {
         Authorization: `Bearer ${mToken}`,
