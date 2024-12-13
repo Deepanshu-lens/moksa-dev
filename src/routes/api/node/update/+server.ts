@@ -14,7 +14,7 @@ export const PATCH: RequestHandler = async ({
     name: data.name,
   });
 
-  await fetch(`https://dev.api.moksa.ai/store/update`, {
+  await fetch(`https://api.moksa.ai/store/update`, {
     headers: {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${cookies.get("moksa-token")}`,
