@@ -10,7 +10,6 @@ const getPocketBaseURL = () => {
   } else {
     const hostname = window.location.hostname;
     const isProduction = import.meta.env.PUBLIC_ENV === "production";
-    console.log("Check", isProduction, "----Check it ", import.meta.env.PUBLIC_POCKETBASE_URL, " ---- ", `ws://${hostname}:8090`)
     return isProduction
       ? import.meta.env.PUBLIC_POCKETBASE_URL
       : `http://${hostname}:8090`;

@@ -83,7 +83,7 @@
     {:else}
       <!-- Event Types Section -->
       <div
-        class="flex flex-row gap-4 overflow-x-auto lg:grid lg:grid-cols-5 lg:gap-x-8 lg:overflow-x-visible"
+        class="flex flex-row gap-4 overflow-x-auto lg:grid lg:grid-cols-4 lg:gap-x-8 lg:overflow-x-visible"
       >
         {#each eventTypes as { type, heading, color }}
           <div
