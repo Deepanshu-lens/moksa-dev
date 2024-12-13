@@ -6,7 +6,7 @@ const getPocketBaseURL = () => {
     return import.meta.env.PUBLIC_POCKETBASE_URL;
   } else if (window && window.api?.navigate) {
     //electron
-    return import.meta.env.PUBLIC_POCKETBASE_URL;
+    return import.meta.env.PUBLIC_OFFLINE_POCKETBASE_URL;
   } else {
     const hostname = window.location.hostname;
     const isProduction = import.meta.env.PUBLIC_ENV === "production";
