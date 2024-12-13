@@ -24,6 +24,7 @@
   import { updateTransform, toggleFullscreen } from "@/lib/video-utils";
   import Checkbox from "../ui/checkbox/checkbox.svelte";
   import Label from "../ui/label/label.svelte";
+  import getPlaybackURL from "@/lib/playback";
 
   // Variables
   let availableChannels = writable<{ id: string; label: string }[]>([]);
@@ -51,6 +52,8 @@
   let isFetchingEvents = writable<boolean>(false);
   let videoOffsets = writable<number[]>([]); //in hours
   let playVisible = writable<any[]>([]);
+
+  const PLAYBACK_API_URL = getPlaybackURL();
 
   selectedNode.subscribe(() => {
     selectedChannels.set([]);
@@ -269,12 +272,10 @@
       videoUrls = { responses: [], cams: [] };
       const responses = await Promise.all(
         $selectedChannels.map(async (channel) => {
-          const response = await fetch(
-            import.meta.env.PUBLIC_PLAYBACK_API_URL,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
+          const response = await fetch(PLAYBACK_API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
                 cameraID: channel.id,
                 cameraDate: formattedDate,
               }),
