@@ -558,37 +558,37 @@
       ],
     },
   ];
-const colors = [
-  // Blues
-  "#1E40AF", // Deep blue
-  "#1D4ED8", // Royal blue
-  "#2563EB", // Bright blue
-  "#3B82F6", // Primary blue
-  
-  // Greens
-  "#065F46", // Deep green
-  "#059669", // Emerald
-  "#10B981", // Bright green
-  "#34D399", // Light green
-  
-  // Purples
-  "#5B21B6", // Deep purple
-  "#7C3AED", // Bright purple
-  "#8B5CF6", // Medium purple
-  "#A78BFA", // Light purple
-  
-  // Reds/Oranges
-  "#DC2626", // Deep red
-  "#EF4444", // Bright red
-  "#F59E0B", // Orange
-  "#FBBF24", // Amber
-  
-  // Teals/Cyans
-  "#0891B2", // Deep teal
-  "#06B6D4", // Bright teal
-  "#22D3EE", // Cyan
-  "#67E8F9"  // Light cyan
-];
+  const colors = [
+    // Blues
+    "#1E40AF", // Deep blue
+    "#1D4ED8", // Royal blue
+    "#2563EB", // Bright blue
+    "#3B82F6", // Primary blue
+
+    // Greens
+    "#065F46", // Deep green
+    "#059669", // Emerald
+    "#10B981", // Bright green
+    "#34D399", // Light green
+
+    // Purples
+    "#5B21B6", // Deep purple
+    "#7C3AED", // Bright purple
+    "#8B5CF6", // Medium purple
+    "#A78BFA", // Light purple
+
+    // Reds/Oranges
+    "#DC2626", // Deep red
+    "#EF4444", // Bright red
+    "#F59E0B", // Orange
+    "#FBBF24", // Amber
+
+    // Teals/Cyans
+    "#0891B2", // Deep teal
+    "#06B6D4", // Bright teal
+    "#22D3EE", // Cyan
+    "#67E8F9", // Light cyan
+  ];
   function createChart() {
     if (chart) {
       chart.destroy();
@@ -897,7 +897,10 @@ const colors = [
                   class=" capitalize flex-shrink-0 size-2 rounded-full"
                   style="background-color: {colors[index % colors.length]};"
                 />{aisle}
-                <span class="bg-blue-500 text-white text-sm px-2 rounded">
+                <span
+                  class="text-white text-sm px-2 rounded"
+                  style="background-color: {colors[index % colors.length]};"
+                >
                   {details.percentage.toFixed(2)}%
                 </span>
               </p>
