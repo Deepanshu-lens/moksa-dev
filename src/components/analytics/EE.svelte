@@ -255,7 +255,7 @@
       socket.disconnect();
     }
 
-    socket = io("https://dev.api.moksa.ai", {
+    socket = io("https://api.moksa.ai", {
       withCredentials: true,
       extraHeaders: {
         Authorization: `Bearer ${token}`,
@@ -414,7 +414,7 @@
     try {
       loading = true;
       const response = await fetch(
-        `https://dev.api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/${$selectedStoreId}/${start}/1/100/${end}`,
+        `https://api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/${$selectedStoreId}/${start}/1/100/${end}`,
         {
           method: "GET",
           headers: {
@@ -476,7 +476,7 @@
     try {
       loading = true;
       const response = await fetch(
-        `https://dev.api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/${$selectedStoreId}/${formatDate(startDate)}/1/100/${formatDate(today)}`,
+        `https://api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/${$selectedStoreId}/${formatDate(startDate)}/1/100/${formatDate(today)}`,
         {
           method: "GET",
           headers: {
@@ -556,7 +556,7 @@
     if (!!id) {
       try {
         const response = await fetch(
-          `https://dev.api.moksa.ai/employeeEfficiency/getEmployeeEfficiencyByEmpid/${id}/${formatDate(startDate)}/${formatDate(today)}`,
+          `https://api.moksa.ai/employeeEfficiency/getEmployeeEfficiencyByEmpid/${id}/${formatDate(startDate)}/${formatDate(today)}`,
           {
             method: "GET",
             headers: {
@@ -593,7 +593,7 @@
     if (!!id) {
       try {
         const response = await fetch(
-          `https://dev.api.moksa.ai/employeeEfficiency/getEmployeeEfficiencyByEmpid/${id}/${start}/${end}`,
+          `https://api.moksa.ai/employeeEfficiency/getEmployeeEfficiencyByEmpid/${id}/${start}/${end}`,
           {
             method: "GET",
             headers: {

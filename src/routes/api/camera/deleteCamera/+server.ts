@@ -10,7 +10,7 @@
 //   const data = await request.json();
 //   const tokenToUse = cookies.get('moksa-token')
 //   await locals.pb?.collection("camera").delete(data.cameraId);
-//   await fetch(`https://dev.api.moksa.ai/camera/deleteByStoreIdAndCameraId/${data.storeId}/${data.camId}`, {
+//   await fetch(`https://api.moksa.ai/camera/deleteByStoreIdAndCameraId/${data.storeId}/${data.camId}`, {
 //     method: 'POST', headers: {
 //       'Content-Type': 'application/json',
 //       'Authorization': `Bearer ${tokenToUse}`,
@@ -40,7 +40,7 @@ export const DELETE: RequestHandler = async ({ locals, request, cookies }: Reque
   try {
     await Promise.all([
       locals.pb?.collection("camera").delete(data.cameraId),
-      fetch(`https://dev.api.moksa.ai/camera/deleteByStoreIdAndCameraId/${data.storeId}/${data.camId}`, {
+      fetch(`https://api.moksa.ai/camera/deleteByStoreIdAndCameraId/${data.storeId}/${data.camId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
