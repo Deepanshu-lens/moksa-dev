@@ -897,7 +897,10 @@
                   class=" capitalize flex-shrink-0 size-2 rounded-full"
                   style="background-color: {colors[index % colors.length]};"
                 />{aisle}
-                <span class="bg-blue-500 text-white text-sm px-2 rounded">
+                <span
+                  class="text-white text-sm px-2 rounded"
+                  style="background-color: {colors[index % colors.length]};"
+                >
                   {details.percentage.toFixed(2)}%
                 </span>
               </p>

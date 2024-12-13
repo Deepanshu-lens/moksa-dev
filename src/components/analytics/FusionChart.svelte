@@ -54,7 +54,11 @@
         valuePadding: "5",
       },
       categories: categoriesdata,
-      dataset: data,
+      dataset: data?.map((dataset, index) => ({
+        ...dataset,
+        // Hide values for the "RemainingData" dataset
+        showValues: index === 1 ? "0" : "1",
+      })),
     };
 
     if (chart) {
