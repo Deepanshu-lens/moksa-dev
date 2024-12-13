@@ -37,7 +37,7 @@
           }
         },
         {
-          filter: `node?="${$selectedNode}"`,
+          filter: `node?="${$selectedNode}" && type!="face"`,
         }
       );
     } catch (error) {

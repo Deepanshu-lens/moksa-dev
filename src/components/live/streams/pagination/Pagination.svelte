@@ -13,7 +13,7 @@
 
   $: MAX_CAMERAS_PER_PAGE =
     $selectedLayout * $selectedLayout ||
-    parseInt(localStorage.getItem("selectedLayout") || "1") ** 2;
+    parseInt(localStorage.getItem("selectedLayout") || "3") ** 2;
   let initialPage = 1;
 
   const currentPage = writable(initialPage); // Tracks the current page

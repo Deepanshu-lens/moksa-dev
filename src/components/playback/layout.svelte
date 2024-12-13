@@ -516,7 +516,7 @@
       console.error("Error fetching events:", error);
     } finally {
       isFetchingEvents.set(false);
-    }
+    }, 1000);
   }
 
   let previousNode: string | null = null;

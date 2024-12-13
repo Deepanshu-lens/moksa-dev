@@ -54,7 +54,7 @@
   const eventTypes = [
     { type: "person", heading: "Person Detection", color: "#FF4764" },
     { type: "fire", heading: "Fire Detection", color: "#FF5733" },
-    { type: "face", heading: "Face Detection", color: "#24DA8E" },
+    // { type: "face", heading: "Face Detection", color: "#24DA8E" },
     // { type: 'heatmap', heading: 'Heatmap Detection', color: '#FFB347' },
     { type: "alpr", heading: "Vehicle Detection", color: "#8A2BE2" },
   ];
