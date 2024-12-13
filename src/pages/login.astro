@@ -4,6 +4,6 @@ import LoginForm from "@/components/forms/LoginForm.svelte";
 export const prerender = true;
 ---
 
-<AuthShell title="Login to LENS View">
+<AuthShell title={import.meta.env.PUBLIC_BRAND_NAME + " | Login"}>
   <LoginForm client:only="svelte" />
 </AuthShell>

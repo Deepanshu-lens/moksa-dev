@@ -16,7 +16,8 @@
   import Input from "../ui/input/input.svelte";
   import { onMount } from 'svelte'; 
   import { ChevronDown } from "lucide-svelte";
-  export let STREAM_URL;
+  import getStreamURL from "@/lib/url";
+  const STREAM_URL = getStreamURL();
 
   let currentPanel = 1;
   let isPaneCollapsed = false;

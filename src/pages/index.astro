@@ -6,12 +6,10 @@ import Camera from "@/managers/camera.svelte";
 import PageBarMobile from "@/components/bars/PageBarMobile.astro";
 import GalleryPage from "@/managers/gallery.svelte";
 import LiveLayout from "@/components/live/layout.svelte";
-import getStreamURL from "@/lib/url";
-const STREAM_URL = getStreamURL();
 ---
 
 <!-- Changed -->
-<Layout title="LENS View">
+<Layout title={import.meta.env.PUBLIC_BRAND_NAME}>
   <Camera client:only="svelte" />
   <div class="block lg:hidden">
     {(<PageBarMobile location="top" />)}
@@ -20,6 +18,6 @@ const STREAM_URL = getStreamURL();
     <EventsManager client:only="svelte" />
     <PersonCountManager client:only="svelte" />
     <GalleryPage client:only="svelte" />
-    <LiveLayout client:only="svelte" {STREAM_URL} />
+    <LiveLayout client:only="svelte" />
   </div>
 </Layout>

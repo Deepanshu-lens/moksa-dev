@@ -9,7 +9,7 @@ const getPlaybackURL = () => {
     const hostname = window.location.hostname;
     const isProduction = import.meta.env.PUBLIC_ENV === "production";
     return isProduction
-      ? import.meta.env.PUBLIC_POCKETBASE_URL
+      ? import.meta.env.PUBLIC_PLAYBACK_API_URL
       : `http://${hostname}:1432/generate-stream`;
   }
 };

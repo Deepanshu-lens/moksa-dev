@@ -5,7 +5,7 @@ import Camera from "@/managers/camera.svelte";
 import Node from "@/managers/node.svelte";
 ---
 
-<Layout title="LENS View | Playback" topbar> 
+<Layout title={import.meta.env.PUBLIC_BRAND_NAME + " | Playback"} topbar> 
   <Node client:only="svelte" />
   <Camera client:only="svelte" />
   <PlaybackLayout client:only="svelte" />

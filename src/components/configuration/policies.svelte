@@ -5,7 +5,7 @@
 <div class="w-full p-4 max-h-[78vh] overflow-y-auto lg:pb-0 pb-[20vh]">
     <h2 class="font-semibold px-6 mb-4">Privacy Policy</h2>
     <Separator class="mb-4 w-[96%] ml-2"/>
-      <p class="px-8">This privacy policy applies to the View app (hereby referred to as "Application") for mobile devices that was created by Cieloview (hereby referred to as "Service Provider") as a Free service. This service is intended for use "AS IS".</p>
+      <p class="px-8">This privacy policy applies to the View app (hereby referred to as "Application") for mobile devices that was created by {import.meta.env.PUBLIC_BRAND_NAME} (hereby referred to as "Service Provider") as a Free service. This service is intended for use "AS IS".</p>
       <p class="px-8 py-4 font-semibold">Information Collection and Use</p>
       <p class="px-8 py-2">The Application collects information when you download and use it. This information may include information such as</p>   
       <ul class="px-12 list-disc pb-8">

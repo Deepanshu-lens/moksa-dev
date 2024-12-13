@@ -20,7 +20,7 @@
     return currentPath === href;
   };
 
-  const data = [
+  let data = [
     { name: "Live", link: "/", icon: "live-icon" },
     { name: "Playback", link: "/playback", icon: "playback-icon" },
     { name: "Events", link: "/events", icon: "events-icon" },
@@ -37,6 +37,10 @@
       icon: "configuration-icon",
     },
   ];
+
+  if (import.meta.env.PUBLIC_ENV === "production") {
+    data = data.filter((item) => item.name !== "Reports");
+  }
 
   const disabledPaths: string[] = ["/reports"];
 
