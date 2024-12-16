@@ -8,7 +8,7 @@ export const actions = {
     const email = data.get("email")?.toString() || "";
 
     try {
-      await fetch(`https://api.moksa.ai/auth/requestResetPassword`, {
+      await fetch(`https://dev.api.moksa.ai/auth/requestResetPassword`, {
         method: "POST", headers: {
           'Content-Type': 'application/json'
         },

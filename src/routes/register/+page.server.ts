@@ -84,7 +84,7 @@ export const actions = {
 
       // console.log(create)
 
-      const moksa_api = await fetch(`https://api.moksa.ai/auth/register`, {
+      const moksa_api = await fetch(`https://dev.api.moksa.ai/auth/register`, {
         method: "POST", headers: {
           'Content-Type': 'application/json'
         }, body: JSON.stringify({

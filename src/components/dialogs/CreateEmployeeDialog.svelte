@@ -40,20 +40,23 @@
       return;
     }
 
-    const res = await fetch(`https://api.moksa.ai/store/storeEmployee/create`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
+    const res = await fetch(
+      `https://dev.api.moksa.ai/store/storeEmployee/create`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          store_id: storeId,
+          first_name: firstName,
+          last_name: lastName,
+          role: role,
+          photo: "",
+        }),
       },
-      body: JSON.stringify({
-        store_id: storeId,
-        first_name: firstName,
-        last_name: lastName,
-        role: role,
-        photo: "",
-      }),
-    });
+    );
     const data = await res.json();
     console.log(data);
     if (res.ok) {

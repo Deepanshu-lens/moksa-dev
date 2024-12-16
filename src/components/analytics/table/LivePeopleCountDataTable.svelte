@@ -170,7 +170,7 @@
     try {
       // Call the three APIs
       const d = await fetch(
-        `https://api.moksa.ai/people/getPeopleCountLive/${storeId}/1/100`,
+        `https://dev.api.moksa.ai/people/getPeopleCountLive/${storeId}/1/100`,
         {
           headers: {
             "Content-Type": "application/json",
