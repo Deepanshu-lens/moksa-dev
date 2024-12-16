@@ -75,11 +75,11 @@
 >
   {#if $panels?.length > 0 && $activePanel}
   <div class="w-full h-[calc(100vh-75px)] relative">
-    <Tabs.Root value="users" class="px-4">
+    <Tabs.Root value="doors" class="px-4">
       <Tabs.List class="flex items-center justify-center gap-4 max-w-[500px] mx-auto mt-4 rounded-lg">
-        <Tabs.Trigger value="users" class="w-1/3 rounded-lg">Users</Tabs.Trigger>
-        <Tabs.Trigger value="doors" class="w-1/3 rounded-lg">Doors</Tabs.Trigger>
-        <Tabs.Trigger value="events" class="w-1/3 rounded-lg">Events</Tabs.Trigger>
+        <!-- <Tabs.Trigger value="users" class="w-1/3 rounded-lg">Users</Tabs.Trigger> -->
+        <Tabs.Trigger value="doors" class="w-1/2 rounded-lg">Doors</Tabs.Trigger>
+        <Tabs.Trigger value="events" class="w-1/2 rounded-lg">Events</Tabs.Trigger>
       </Tabs.List>
       <Tabs.Content value="users">
           <UserTable data={userList || []} />
