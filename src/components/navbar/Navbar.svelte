@@ -215,7 +215,10 @@
             (item: any) => item.theft_id === data?.theft_id,
           );
           if (!istheftId) {
-            return [...currentData, { ...data }];
+            toast.warning("theft detected!");
+            let newData = [...currentData];
+            newData.unshift(data);
+            return newData;
           } else {
             return currentData;
           }
