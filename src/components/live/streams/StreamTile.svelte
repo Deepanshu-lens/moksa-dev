@@ -285,7 +285,7 @@
     width: 100%;
     height: 100%;
     display: block;
-    object-fit: initial;
+    object-fit: fill;
   }
 
   .camera-placeholder {
