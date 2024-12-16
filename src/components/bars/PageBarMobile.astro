@@ -31,12 +31,17 @@ const isVertical = location === "left" || location === "right";
   <div class="flex items-start justify-between w-full">
     <div class="w-[50%]">
       <div class="flex items-center">
-        <img
-          src={import.meta.env.PUBLIC_LIGHT_LOGO}
-          alt="Logo"
-          class="h-8 w-auto"
-        />
         <div class={`flex flex-col justify-between items-center gap-4 w-full`}>
+          <img
+            src={import.meta.env.PUBLIC_LIGHT_LOGO}
+            alt="Logo"
+            class="h-8 w-auto dark:hidden block"
+          />
+          <img
+            src={import.meta.env.PUBLIC_DARK_LOGO}
+            alt="Logo"
+            class="h-8 w-auto hidden dark:block"
+          />
           <div class={cn("flex justify-end ml-20", "gap-1")}>
             <NodeActionButton action="add" client:only="svelte" />
             <NodeActionButton action="edit" client:only="svelte" />
