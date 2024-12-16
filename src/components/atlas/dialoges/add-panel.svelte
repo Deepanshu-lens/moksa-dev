@@ -89,12 +89,12 @@
       </div>
       <div class="col-span-2 flex items-center gap-4">
         <Label class="w-24" for="password">Password</Label>
-          <div class="relative">
+          <div class="relative w-full">
             <Input
             class="text-base"
             id="password"
             name="password"
-            placeholder="password"
+            placeholder="Password"
             type={isPassVisible ? "text" : "password"}
             bind:value={password}
             autocapitalize="off"
