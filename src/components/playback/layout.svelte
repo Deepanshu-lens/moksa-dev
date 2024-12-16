@@ -701,7 +701,7 @@
             <video
               id={`video-${index}`}
               bind:this={videoRefs[index]}
-              class="w-full h-full relative"
+              class="w-full h-full relative !object-fill rounded-md"
               src={video}
               autoplay
               muted

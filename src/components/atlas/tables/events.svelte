@@ -114,7 +114,7 @@
       <Table.Body
         class="overflow-y-scroll max-h-[calc(100vh-285px)] hide-scrollbar pb-10"
       >
-        {#each $filteredData as event, i}
+        {#each $filteredData.reverse() as event, i}
           {@const event_typed = event as any}
           {@const color = event_typed.bgColor}
           {@const eventSelected = $selectedEvents.includes(event_typed.id)}
