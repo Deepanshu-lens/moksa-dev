@@ -16,7 +16,7 @@
   import { Button } from "@/components/ui/button";
   import { toast } from "svelte-sonner";
   import * as Dialog from "../../../components/ui/dialog";
-  import { Loader2, Plus } from "lucide-svelte";
+  import { Eye, EyeClosed, Loader2, Plus } from "lucide-svelte";
   import Switch from "@/components/ui/switch/switch.svelte";
   import { user } from "@/stores";
   import pb from "@/lib/pb";
@@ -30,6 +30,7 @@
   let serverPort: string = "";
   let ssl: boolean = false;
   let isLoading: boolean = false;
+  let isPassVisible = false
 
   // Functions
   async function handleSubmit(addPanelData?: Panel_Data) {
@@ -88,12 +89,27 @@
       </div>
       <div class="col-span-2 flex items-center gap-4">
         <Label class="w-24" for="password">Password</Label>
-        <Input
-          bind:value={password}
-          class="text-base"
-          placeholder="Password"
-          type="password"
-        />
+          <div class="relative">
+            <Input
+            class="text-base"
+            id="password"
+            name="password"
+            placeholder="password"
+            type={isPassVisible ? "text" : "password"}
+            bind:value={password}
+            autocapitalize="off"
+            autocomplete="off"
+            />
+            <!-- svelte-ignore a11y_click_events_have_key_events -->
+            <!-- svelte-ignore a11y_no_static_element_interactions -->
+            <span class="text-white/60 absolute inset-y-3 right-2" on:click={()=>{isPassVisible = !isPassVisible}}>
+              {#if isPassVisible}
+              <Eye size={16} class="transition-all ease-in-out"/>
+              {:else}
+              <EyeClosed size={16} class="transition-all ease-in-out"/>
+              {/if}
+              </span>
+          </div>
       </div>
       <div class="col-span-2 flex items-center gap-4">
         <Label class="w-24" for="server-ip">Server IP</Label>
