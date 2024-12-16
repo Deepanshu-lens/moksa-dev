@@ -181,24 +181,23 @@
           video.currentTime =
             parseInt(seeker.value) - $videoOffsets[index] * 3600;
           seeker.addEventListener("input", () => {
-
             const startInterval: string = Math.floor(
               $videoOffsets[index] * 6
             ).toString();
-            
+
             const endInterval: string = (
               Math.floor(video.duration / 600) + parseInt(startInterval)
             ).toString();
 
-            if (seeker.value > endInterval){
-              seeker.value = endInterval
-              video.currentTime = video.duration
-            }else{
+            if (seeker.value > endInterval) {
+              seeker.value = endInterval;
+              video.currentTime = video.duration;
+            } else {
               video.currentTime =
                 (parseInt(seeker.value) -
                   Math.floor($videoOffsets[index] * 6)) *
                 600;
-            video.play();
+              video.play();
             }
           });
         }
@@ -253,85 +252,77 @@
   }
 
   async function fetchPlaybackData() {
-    if ($selectedChannels.length === 0 || !searchDate) {
-      toast.error("No data to fetch");
-      return;
-    }
+  if ($selectedChannels.length === 0 || !searchDate) {
+    toast.error("No data to fetch");
+    return;
+  }
 
-    isFetching.set(true);
+  isFetching.set(true);
 
-    const dateParts = searchDate.split(" ");
-    const day = dateParts[0].padStart(2, "0");
-    const month =
-      new Date(Date.parse(dateParts[1] + " 1, 2020")).getMonth() + 1;
-    const year = dateParts[2];
-    const formattedDate = `${year}_${month.toString().padStart(2, "0")}_${day}`;
+  const dateParts = searchDate.split(" ");
+  const day = dateParts[0].padStart(2, "0");
+  const month =
+    new Date(Date.parse(dateParts[1] + " 1, 2020")).getMonth() + 1;
+  const year = dateParts[2];
+  const formattedDate = `${year}_${month.toString().padStart(2, "0")}_${day}`;
 
-    try {
-      events = [];
-      videoUrls = { responses: [], cams: [] };
-      const responses = await Promise.all(
-        $selectedChannels.map(async (channel) => {
+  try {
+    events = [];
+    videoUrls = { responses: [], cams: [] };
+
+    const responses = await Promise.allSettled(
+      $selectedChannels.map(async (channel) => {
+        try {
           const response = await fetch(PLAYBACK_API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                cameraID: channel.id,
-                cameraDate: formattedDate,
-              }),
-            }
-          );
-          if (!response.ok) {
-            const errorData = await response.json();
-            toast.error(
-              `Playback not available for ${channel.name}` ||
-                "Unknown error occurred"
-            );
-          }
-          pb.autoCancellation(false);
-          const localEvents = await pb
-            .collection("atlas_events")
-            .getFullList<any>({
-              filter: `camera="${channel.id}"`,
-              sort: "-created",
-              expand: "user",
-            });
-          const filteredEvents = localEvents.filter((event: any) => {
-            const eventUnixTime = new Date(event.created).getTime();
-            const startOfDay = new Date(eventDate).getTime();
-            const endOfDay = startOfDay + 24 * 60 * 60 * 1000;
-            return eventUnixTime >= startOfDay && eventUnixTime < endOfDay;
+              cameraID: channel.id,
+              cameraDate: formattedDate,
+            }),
           });
 
-          const existingCameraIndex = events.findIndex(
-            (event) => event.camera === channel.id
-          );
-          if (existingCameraIndex !== -1) {
-            events[existingCameraIndex].events = filteredEvents;
-            events = [...events];
-          } else {
-            events = [
-              ...events,
-              { events: filteredEvents, camera: channel.id },
-            ];
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(
+              `Playback not available for ${channel.name}: ${errorData.message || "Unknown error"}`
+            );
           }
 
           const data = await response.json();
-          // let randomTime = `${String(Math.floor(Math.random() * 24)).padStart(2, "0")}:${String(Math.floor(Math.random() * 60)).padStart(2, "0")}:${String(Math.floor(Math.random() * 60)).padStart(2, "0")}`;
-          return { data, path: data.path };
-        })
-      );
-      const response_data = responses.map((video) => video.data);
-      const response_paths = responses.map((video) => video.path);
-      videoUrls = { responses: response_paths, cams: $selectedChannels };
-      setOffsets(response_data);
-      videoPlayStates.set(new Array(responses.length).fill(true));
-    } catch (error) {
-      console.error("Error fetching playback data:", error);
-    } finally {
-      isFetching.set(false);
-    }
+          return { data, path: data.path, channel };
+        } catch (error) {
+          return { error, channel }; // Return the error along with channel info
+        }
+      })
+    );
+
+    // Separate fulfilled and rejected results
+    const fulfilled = responses.filter((result) => result.status === "fulfilled" && !result.value.error);
+    const rejected = responses.filter((result) => result.status === "rejected" || result.value?.error);
+
+    // Prepare final arrays based on successful results
+    const successfulResponses = fulfilled.map((res) => res.value.data);
+    const successfulPaths = fulfilled.map((res) => res.value.path);
+    const successfulChannels = fulfilled.map((res) => res.value.channel);
+
+    // Update `videoUrls` and offsets only with successful results
+    videoUrls = { responses: successfulPaths, cams: successfulChannels };
+    setOffsets(successfulResponses);
+    videoPlayStates.set(new Array(fulfilled.length).fill(true));
+
+    // Handle rejected results
+    rejected.forEach((res) => {
+      const channelName = res?.value?.channel?.name || "Unknown channel";
+      toast.error(`Playback not available for ${channelName}`);
+    });
+  } catch (error) {
+    console.error("Error fetching playback data:", error);
+  } finally {
+    isFetching.set(false);
   }
+}
+
 
   function toggleCalendar() {
     showCalendar.update((currentValue) => !currentValue);

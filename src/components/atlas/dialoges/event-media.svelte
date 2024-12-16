@@ -33,10 +33,6 @@
           class="flex items-center justify-evenly rounded-lg border-black/[.13] border-solid border-[1px] p-1 w-[250px] mx-auto mt-4 dark:border-white/[.13] dark:bg-white/10"
         >
           <button
-            on:click={() => (view = "images")}
-            class={`rounded-lg text-xs leading-[18px] px-[10px] py-[3px] font-medium w-1/2 h-full  ${view === "images" ? "text-white bg-brand-foreground dark:bg-black" : "bg-transparent"}`}
-            >Images</button>
-          <button
             on:click={() => (view = "videos")}
             class={`rounded-lg text-xs leading-[18px] px-[10px] py-[3px] font-medium w-1/2 h-full ${view === "videos" ? "text-white bg-brand-foreground dark:bg-black" : "bg-transparent"}`}
             >Videos</button>

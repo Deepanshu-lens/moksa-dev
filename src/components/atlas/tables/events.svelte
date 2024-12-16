@@ -103,7 +103,7 @@
           >
           <Table.Head
             class="text-[#727272] dark:text-[#FFFFFF]/70 h-full text-sm text-medium w-full"
-            >Event images</Table.Head
+            >Media</Table.Head
           >
           <Table.Head
             class="text-[#727272] dark:text-[#FFFFFF]/70 h-full text-sm text-medium w-full"
@@ -155,7 +155,7 @@
             <Table.Cell
               class="text-[#727272] dark:text-white h-full w-full text-sm pl-6"
             >
-              {#if event_typed?.imageUrl && typeof event_typed.imageUrl === 'object' && Object.keys(event_typed.imageUrl).length > 0}
+              {#if ((event_typed?.imageUrl && typeof event_typed.imageUrl === 'object' && Object.keys(event_typed.imageUrl).length > 0)|| event_typed?.videoPath)}
               <EventMedia imageUrls={Object.values(event_typed.imageUrl)} videoPath={event_typed.videoPath}
                 >View</EventMedia
               >

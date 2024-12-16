@@ -12,6 +12,8 @@
   import { writable } from "svelte/store";
   import { updateTransform } from "@/lib/video-utils";
 
+  const isProduction = import.meta.env.PUBLIC_ENV === "production";
+
   // Props
   export let url: string = "";
   export let id: string = "";
@@ -251,7 +253,7 @@
     </div>
   {/if}
 
-  {#if $personCount.find((item) => item.camera === id)?.count > 0}
+  {#if ($personCount.find((item) => item.camera === id)?.count > 0 && isProduction)}
     <div
       class="absolute left-4 bottom-2 rounded-md bg-neutral-600 bg-opacity-50 transition-opacity duration-300 text-white flex items-center gap-x-2 w-10"
     >
@@ -265,15 +267,16 @@
     <span class="size-2 bg-green-700 rounded-full"></span>
     {name}
   </div>
-  <!-- commented as requested -->
-  <!-- <div
+  {#if isProduction}
+  <div
     class="absolute right-10 bottom-2 rounded-md transition-opacity duration-300 flex items-center gap-x-2 w-10"
   >
     <span class="size-2 bg-green-700 rounded-full ml-2"></span>
     <Button variant="ghost" class="text-white" on:click={() => getHeatImg(id)}
       >H</Button
     >
-  </div> -->
+  </div>
+  {/if}
   <ImagePreviewModal {loading} {imgDialogOpen}></ImagePreviewModal>
 </div>
 
