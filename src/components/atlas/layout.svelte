@@ -1,7 +1,7 @@
 <script lang="ts">
   // Imports
   import { Label } from "@/components/ui/label";
-  import { ChevronRight, Loader2, Plus, Search } from "lucide-svelte";
+  import { ChevronRight, Eye, EyeClosed, Loader2, Plus, Search } from "lucide-svelte";
   import Input from "@/components/ui/input/input.svelte";
   import Button from "@/components/ui/button/button.svelte";
   import Doors from "@/components/atlas/doors.svelte";
@@ -28,6 +28,7 @@
   let name = "";
   let ssl = false;
   let isLoading = false;
+  let isPassVisible = false
 
   // Functions
   async function handleSubmit(addPanelData = null) {
@@ -189,16 +190,27 @@
         </Label>
         <Label class="flex flex-col gap-2">
           Password
+          <div class="relative">
           <Input
             id="password"
             name="password"
             placeholder="password"
-            type="password"
+            type={isPassVisible ? "text" : "password"}
             bind:value={password}
             autocapitalize="off"
             autocomplete="off"
-          />
-        </Label>
+            />
+            <!-- svelte-ignore a11y_click_events_have_key_events -->
+            <!-- svelte-ignore a11y_no_static_element_interactions -->
+            <span class="text-white/60 absolute inset-y-3 right-2" on:click={()=>{isPassVisible = !isPassVisible}}>
+              {#if isPassVisible}
+              <Eye size={16} class="transition-all ease-in-out"/>
+              {:else}
+              <EyeClosed size={16} class="transition-all ease-in-out"/>
+              {/if}
+              </span>
+          </div>
+          </Label>
         <Label class="flex flex-col gap-2">
           Server IP
           <Input
