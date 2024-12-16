@@ -39,7 +39,7 @@
   const fetchStoreData = async () => {
     console.log("fetching store data");
     await fetch(
-      `https://dev.api.moksa.ai/store/getStoreByStoreIdWithAllDetails/${id}/${oneYearAgo}/${today}`,
+      `https://api.moksa.ai/store/getStoreByStoreIdWithAllDetails/${id}/${oneYearAgo}/${today}`,
       {
         headers: {
           "Content-Type": "application/json",

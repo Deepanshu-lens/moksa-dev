@@ -232,7 +232,7 @@
           });
         }
         const updateMoksaUserStores = await fetch(
-          `https://dev.api.moksa.ai/store/userStore/updateUserByUserId`,
+          `https://api.moksa.ai/store/userStore/updateUserByUserId`,
           {
             method: "POST",
             headers: {
@@ -250,7 +250,7 @@
       }
 
       const allUsers = await fetch(
-        `https://dev.api.moksa.ai/auth/getAllUsers/1/100`,
+        `https://api.moksa.ai/auth/getAllUsers/1/100`,
         {
           method: "GET",
           headers: {

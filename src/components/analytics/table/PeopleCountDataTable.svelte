@@ -153,7 +153,7 @@
   async function fetchExpandedData(storeId: number) {
     try {
       const response = await fetch(
-        `https://dev.api.moksa.ai/people/getPeopleCount/${storeId}`,
+        `https://api.moksa.ai/people/getPeopleCount/${storeId}`,
         {
           headers: {
             "Content-Type": "application/json",
