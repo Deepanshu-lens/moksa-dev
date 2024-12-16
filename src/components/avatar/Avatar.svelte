@@ -67,7 +67,7 @@
             if (onBrand === "LENS VIEW") {
               fileUrl.set("");
               toast.info("App coming soon!");
-            } else if (onBrand === "Cielo VIEW") {
+            } else if (onBrand === "Cielo View") {
               fileUrl.set(
                 "https://build-download.s3.ap-south-1.amazonaws.com/CieloView+ThinClient-1.0.0.dmg"
               );
@@ -80,7 +80,7 @@
             if (onBrand === "LENS VIEW") {
               fileUrl.set("");
               toast.info("App coming soon!");
-            } else if (onBrand === "Cielo VIEW") {
+            } else if (onBrand === "Cielo View") {
               fileUrl.set(
                 "https://build-download.s3.ap-south-1.amazonaws.com/CieloView+ThinClient+Setup+1.0.0.exe"
               );
@@ -93,7 +93,7 @@
             if (onBrand === "LENS VIEW") {
               fileUrl.set("");
               toast.info("App coming soon!");
-            } else if (onBrand === "Cielo VIEW") {
+            } else if (onBrand === "Cielo View") {
               fileUrl.set(
                 "https://build-download.s3.ap-south-1.amazonaws.com/cielo-view_1.0.0_amd64.deb"
               );
@@ -116,7 +116,7 @@
             if (offBrand === "LENS VIEW") {
               fileUrl.set("");
               toast.info("App coming soon!");
-            } else if (offBrand === "Cielo VIEW") {
+            } else if (offBrand === "Cielo View") {
               fileUrl.set(
                 "https://build-download.s3.ap-south-1.amazonaws.com/Offline/CieloView+ThinClient-1.0.0.dmg"
               );
@@ -129,7 +129,7 @@
             if (offBrand === "LENS VIEW") {
               fileUrl.set("");
               toast.info("App coming soon!");
-            } else if (offBrand === "Cielo VIEW") {
+            } else if (offBrand === "Cielo View") {
               fileUrl.set(
                 "https://build-download.s3.ap-south-1.amazonaws.com/Offline/CieloView+ThinClient+Setup+1.0.0.exe"
               );
@@ -142,7 +142,7 @@
             if (offBrand === "LENS VIEW") {
               fileUrl.set("");
               toast.info("App coming soon!");
-            } else if (offBrand === "Cielo VIEW") {
+            } else if (offBrand === "Cielo View") {
               fileUrl.set(
                 "https://build-download.s3.ap-south-1.amazonaws.com/Offline/cielo-view_1.0.0_amd64.deb"
               );
