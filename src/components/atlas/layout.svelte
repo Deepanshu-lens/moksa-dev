@@ -1,7 +1,7 @@
 <script lang="ts">
   // Imports
   import { Label } from "@/components/ui/label";
-  import { ChevronRight, Loader2, Plus, Search } from "lucide-svelte";
+  import { ChevronRight, Eye, EyeClosed, Loader2, Plus, Search } from "lucide-svelte";
   import Input from "@/components/ui/input/input.svelte";
   import Button from "@/components/ui/button/button.svelte";
   import Doors from "@/components/atlas/doors.svelte";
@@ -28,6 +28,7 @@
   let name = "";
   let ssl = false;
   let isLoading = false;
+  let isPassVisible = false
 
   // Functions
   async function handleSubmit(addPanelData = null) {
@@ -74,11 +75,11 @@
 >
   {#if $panels?.length > 0 && $activePanel}
   <div class="w-full h-[calc(100vh-75px)] relative">
-    <Tabs.Root value="users" class="px-4">
+    <Tabs.Root value="doors" class="px-4">
       <Tabs.List class="flex items-center justify-center gap-4 max-w-[500px] mx-auto mt-4 rounded-lg">
-        <Tabs.Trigger value="users" class="w-1/3 rounded-lg">Users</Tabs.Trigger>
-        <Tabs.Trigger value="doors" class="w-1/3 rounded-lg">Doors</Tabs.Trigger>
-        <Tabs.Trigger value="events" class="w-1/3 rounded-lg">Events</Tabs.Trigger>
+        <!-- <Tabs.Trigger value="users" class="w-1/3 rounded-lg">Users</Tabs.Trigger> -->
+        <Tabs.Trigger value="doors" class="w-1/2 rounded-lg">Doors</Tabs.Trigger>
+        <Tabs.Trigger value="events" class="w-1/2 rounded-lg">Events</Tabs.Trigger>
       </Tabs.List>
       <Tabs.Content value="users">
           <UserTable data={userList || []} />
@@ -189,16 +190,27 @@
         </Label>
         <Label class="flex flex-col gap-2">
           Password
+          <div class="relative">
           <Input
             id="password"
             name="password"
             placeholder="password"
-            type="password"
+            type={isPassVisible ? "text" : "password"}
             bind:value={password}
             autocapitalize="off"
             autocomplete="off"
-          />
-        </Label>
+            />
+            <!-- svelte-ignore a11y_click_events_have_key_events -->
+            <!-- svelte-ignore a11y_no_static_element_interactions -->
+            <span class="text-white/60 absolute inset-y-3 right-2" on:click={()=>{isPassVisible = !isPassVisible}}>
+              {#if isPassVisible}
+              <Eye size={16} class="transition-all ease-in-out"/>
+              {:else}
+              <EyeClosed size={16} class="transition-all ease-in-out"/>
+              {/if}
+              </span>
+          </div>
+          </Label>
         <Label class="flex flex-col gap-2">
           Server IP
           <Input
