@@ -16,8 +16,8 @@
 
   // Reactive value for MAX_CAMERAS_PER_PAGE
   $: MAX_CAMERAS_PER_PAGE =
-    $selectedLayout * $selectedLayout ||
-    parseInt(localStorage.getItem("selectedLayout") || "3") ** 2;
+  ($selectedLayout > 0 ? $selectedLayout : 3) ** 2 ||
+  parseInt(localStorage.getItem("selectedLayout") || "3") ** 2;
 
   // Function to update the displayCameras store based on current page
   const fetchDisplayCameras = (page: number) => {

@@ -44,6 +44,8 @@
     }
 
     switch (cameraCount) {
+      case 0 :
+        return "grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);"
       case 1:
         return "grid-template-columns: repeat(1, 1fr); grid-template-rows: repeat(1, 1fr);";
       case 2:
@@ -132,7 +134,7 @@
     <div class="flex flex-col flex-grow mt-4">
       <div
         bind:this={localCaptureRef}
-        class="grid grid-cols-1 gap-4 p-4 w-full lg:grid-cols-4 camera-grid pb-[35vh] lg:pb-4"
+        class="grid grid-cols-1 gap-4 p-4 w-full lg:grid-cols-4 camera-grid pb-[30vh] lg:pb-5"
         style={gridStyle + " height: calc(100vh - 7rem); overflow-y: auto;"}
       >
         {#key $displayCameras}
@@ -147,8 +149,10 @@
       </div>
 
       {#if $totalCameras > 0}
-        <Pagination />
+        <Pagination/>
       {/if}
     </div>
   {/if}
 {/if}
+
+

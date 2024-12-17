@@ -122,6 +122,7 @@ export const eventSchema = z.lazy(() =>
     matchScore: z.number().optional(),
     sparshID: z.string().optional(),
     boxes: z.record(z.any()).optional(),
+    videoUrl:z.string().optional()
   })
 );
 

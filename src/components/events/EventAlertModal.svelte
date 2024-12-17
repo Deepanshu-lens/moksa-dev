@@ -29,15 +29,16 @@
         <img
           src={"data:image/jpeg;base64," + event.frameImage}
           alt={event.title || "Event Image"}
-          class="w-full lg:h-96 h-52 rounded-lg object-cover mb-4"
+          class="w-full lg:h-96 h-52 rounded-lg object-fill mb-4"
         />
       </Tabs.Content>
       <Tabs.Content value="videos">
         <!-- svelte-ignore a11y_media_has_caption -->
         <video
-          src={event.videoPath}
-          class="w-full h-auto rounded-lg object-cover mb-4"
+          src={event.videoUrl}
+          class="w-full h-auto rounded-lg object-fill mb-4"
           controls
+          autoplay
         ></video>
       </Tabs.Content>
     </Tabs.Root>
