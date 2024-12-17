@@ -22,6 +22,7 @@
     ShieldAlert,
     TabletSmartphone,
     Heater,
+    Plus,
   } from "lucide-svelte";
 
   export let cameraName = "";
@@ -61,6 +62,22 @@
   export let moksaId;
   export let user;
   let dialogOpen = false;
+
+  let activeTab = "video-saving";
+
+  const tabs = [
+    { id: "video-saving", label: "Video Saving", icon: FileVideo2 },
+    { id: "face-scanning", label: "Face Scanning", icon: ScanFace },
+    { id: "running-detection", label: "Running Detection", icon: Activity },
+    {
+      id: "intrusion-detection",
+      label: "Intrusion Detection",
+      icon: ShieldAlert,
+    },
+    { id: "line-crossing", label: "Line Crossing", icon: PersonStanding },
+    { id: "priority", label: "Priority", icon: Siren },
+    { id: "motion-sensitivity", label: "Motion Sensitivity", icon: Activity },
+  ];
 
   $: {
     if (dialogOpen) {
@@ -170,163 +187,135 @@
 
 <!-- markup (zero or more items) goes here -->
 <Dialog.Root bind:open={dialogOpen}>
-  <Dialog.Trigger class="flex items-center gap-2"><slot /></Dialog.Trigger>
+  <Dialog.Trigger><slot /></Dialog.Trigger>
   <Dialog.Content
-    class="sm:max-w-[720px] scale-90 2xl:scale-100 max-h-[90%] overflow-y-scroll"
+    class="sm:max-w-[900px] scale-90 2xl:scale-100 max-h-[90%] overflow-y-scroll"
   >
-    <Dialog.Header>
-      <Dialog.Title>Camera Settings</Dialog.Title>
-      <Dialog.Description>
-        Change settings for <span class="font-semibold">{cameraName}</span>
-        camera
+    <!-- Header -->
+    <div class="bg-[#000B40] text-white p-6">
+      <Dialog.Title class="text-xl font-semibold">Camera Settings</Dialog.Title>
+      <Dialog.Description class="text-gray-300">
+        Change settings for {cameraName} camera
       </Dialog.Description>
-    </Dialog.Header>
-    <div class="rounded-md border p-4 my-2">
-      <div class="flex items-center space-x-4">
-        <FileVideo2 />
-        <div class="flex-1 space-y-1">
-          <p class="text-sm font-medium leading-none">Video Saving</p>
-          <p class="text-sm text-muted-foreground">
-            Save camera feed directly to your device
-          </p>
-        </div>
-        <Switch bind:checked={save} disabled={user?.role === "admin"} />
+    </div>
+
+    <div class="flex h-[400px]">
+      <!-- Sidebar -->
+      <div class="w-64 bg-gray-100 p-2 space-y-1">
+        {#each tabs as tab}
+          <button
+            class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm
+            {activeTab === tab.id
+              ? 'bg-blue-500 text-white'
+              : 'hover:bg-gray-200'}"
+            on:click={() => (activeTab = tab.id)}
+          >
+            <svelte:component this={tab.icon} class="w-5 h-5" />
+            {tab.label}
+          </button>
+        {/each}
       </div>
-      <div>
-        {#if save}
-          <div class="flex items-center space-x-4 pt-3">
-            <FolderSearch />
-            <div class="flex-1 space-y-1">
-              <p class="text-sm font-medium leading-none">Save Here</p>
-              <p class="text-sm text-muted-foreground">
-                Point your video to its future home.
-              </p>
+
+      <!-- Content Area -->
+      <div class="flex-1 p-6">
+        {#if activeTab === "video-saving"}
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="text-lg font-semibold">Video Saving</h3>
+                <p class="text-gray-500">
+                  Save camera feed directly to your device
+                </p>
+              </div>
+              <Switch bind:checked={save} />
             </div>
-            <Input
-              id="picture"
-              type="text"
-              class="w-[180px]"
-              disabled
-              placeholder="./PlayBack"
-            />
-          </div>
-          <div class="flex items-center space-x-4 pt-3">
-            <Merge />
-            <div class="flex-1 space-y-1">
-              <p class="text-sm font-medium leading-none">Overwrite Interval</p>
-              <p class="text-sm text-muted-foreground">
-                Duration until the saved video is overwritten.
-              </p>
-            </div>
-            <Select.Root onSelectedChange={(e) => (saveDuration = e.value)}>
-              <Select.Trigger class="w-[180px]">
-                <Select.Value
-                  placeholder={items.find((m) => m.value === saveDuration)
-                    ?.label || "Select Duration"}
-                />
-              </Select.Trigger>
-              <Select.Content>
-                <Select.Group>
-                  {#each items as fruit}
-                    <Select.Item value={fruit.value} label={fruit.label}
-                      >{fruit.label}</Select.Item
-                    >
-                  {/each}
-                </Select.Group>
-              </Select.Content>
-              <Select.Input name="favoriteFruit" />
-            </Select.Root>
+
+            {#if save}
+              <div class="mt-8">
+                <div class="flex items-center space-x-4 pt-3">
+                  <FolderSearch />
+                  <div class="flex-1 space-y-1">
+                    <p class="text-sm font-medium leading-none">Save Here</p>
+                    <p class="text-sm text-muted-foreground">
+                      Point your video to its future home.
+                    </p>
+                  </div>
+                  <Input
+                    id="picture"
+                    type="text"
+                    class="w-[180px]"
+                    disabled
+                    placeholder="./PlayBack"
+                  />
+                </div>
+                <div class="flex items-center space-x-4 pt-3">
+                  <Merge />
+                  <div class="flex-1 space-y-1">
+                    <p class="text-sm font-medium leading-none">
+                      Overwrite Interval
+                    </p>
+                    <p class="text-sm text-muted-foreground">
+                      Duration until the saved video is overwritten.
+                    </p>
+                  </div>
+                  <Select.Root
+                    onSelectedChange={(e) => (saveDuration = e.value)}
+                  >
+                    <Select.Trigger class="w-[180px]">
+                      <Select.Value
+                        placeholder={items.find((m) => m.value === saveDuration)
+                          ?.label || "Select Duration"}
+                      />
+                    </Select.Trigger>
+                    <Select.Content>
+                      <Select.Group>
+                        {#each items as fruit}
+                          <Select.Item value={fruit.value} label={fruit.label}
+                            >{fruit.label}</Select.Item
+                          >
+                        {/each}
+                      </Select.Group>
+                    </Select.Content>
+                    <Select.Input name="favoriteFruit" />
+                  </Select.Root>
+                </div>
+              </div>
+            {:else}
+              <div
+                class="border-2 border-dashed border-gray-200 rounded-lg p-8 mt-8"
+              >
+                <div class="text-center text-gray-500">
+                  <p>Get started by adding your first label</p>
+                  <button
+                    class="mt-4 flex items-center gap-2 mx-auto text-blue-500"
+                  >
+                    <Plus class="w-5 h-5" />
+                    Add new
+                  </button>
+                </div>
+              </div>
+            {/if}
           </div>
         {/if}
-      </div>
-    </div>
-    <div class="rounded-md flex items-center justify-between border p-4 my-2">
-      <div class="flex items-center space-x-4">
-        <Drama />
-        <p class="text-sm font-medium leading-none">Theft Detection</p>
-      </div>
-      <div class="flex items-center gap-4">
-        <Switch bind:checked={theft} disabled={user?.role === "admin"} />
+        <!-- Add similar blocks for other tabs -->
       </div>
     </div>
 
-    <div class="rounded-md flex items-center justify-between border p-4 my-2">
-      <div class="flex items-center space-x-4">
-        <Heater />
-        <p class="text-sm font-medium leading-none">Heatmap</p>
-      </div>
-      <div class="flex items-center gap-4">
-        <Switch bind:checked={heatmap} disabled={user?.role === "admin"} />
-      </div>
+    <!-- Footer -->
+    <div class="flex justify-end gap-3 p-4 border-t">
+      <Button variant="outline" on:click={() => (dialogOpen = false)}>
+        Cancel
+      </Button>
+      <Button on:click={editCamera} disabled={user?.role === "admin"}>
+        Save
+      </Button>
     </div>
-
-    <div class="rounded-md flex items-center justify-between border p-4 my-2">
-      <div class="flex items-center space-x-4">
-        <PersonStanding />
-        <p class="text-sm font-medium leading-none">Person Count</p>
-      </div>
-      <div class="flex items-center gap-4">
-        <Switch bind:checked={person} disabled={user?.role === "admin"} />
-      </div>
-    </div>
-
-    <div class="rounded-md flex items-center justify-between border p-4 my-2">
-      <div class="flex items-center space-x-4">
-        <FireExtinguisher />
-        <p class="text-sm font-medium leading-none">Kitchen Safety</p>
-      </div>
-      <div class="flex items-center gap-4">
-        <Switch bind:checked={safety} disabled={user?.role === "admin"} />
-      </div>
-    </div>
-
-    <div class="rounded-md flex items-center justify-between border p-4 my-2">
-      <div class="flex items-center space-x-4">
-        <ShieldAlert />
-        <p class="text-sm font-medium leading-none">Employee Efficiency</p>
-      </div>
-      <div class="flex items-center gap-4">
-        <Switch bind:checked={employeEE} disabled={user?.role === "admin"} />
-      </div>
-    </div>
-
-    <div class="rounded-md flex items-center justify-between border p-4 my-2">
-      <div class="flex items-center space-x-4">
-        <Siren />
-        <p class="text-sm font-medium leading-none">Priority</p>
-      </div>
-      <div class="flex items-center gap-4">
-        <Switch bind:checked={priority} disabled={user?.role === "admin"} />
-      </div>
-    </div>
-
-    <div class="rounded-md border p-4 my-2 flex items-center justify-between">
-      <div class="flex items-center space-x-4">
-        <Activity />
-        <p class="text-sm font-medium leading-none">Motion Sensitivity</p>
-      </div>
-      <div class="flex items-center gap-4">
-        <Slider
-          disabled={user?.role === "admin"}
-          min={0}
-          value={[motion === 1000 ? 0 : motion]}
-          max={5000}
-          step={2500}
-          class="w-32"
-          onValueChange={(e) => {
-            motion = e[0];
-          }}
-        />
-        {motion === 5000 ? "High" : motion === 2500 ? "Mid" : "Low"}
-      </div>
-    </div>
-
-    <Dialog.Footer>
-      <Button
-        type="submit"
-        on:click={editCamera}
-        disabled={user?.role === "admin"}>Change Camera Settings</Button
-      >
-    </Dialog.Footer></Dialog.Content
-  >
+  </Dialog.Content>
 </Dialog.Root>
+
+<style>
+  /* Add if needed for custom scrollbar or other styles */
+  :global(.dialog-content) {
+    max-height: 90vh;
+  }
+</style>

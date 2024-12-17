@@ -91,19 +91,19 @@
         image.src = `data:image/jpeg;base64,${base64Data}`;
     }
 
-    onMount(() => {
-        setTimeout(() => {
-            console.log('dialogopen')
-            if (canvasElement) {
-                console.log('canvas found')
-                context = canvasElement.getContext('2d');
-            }
-            if (dialogOpen) {
-                console.log('called socket')
-                connectWebSocket();
-            }
-        }, 3000);
-    });
+    // onMount(() => {
+    //     setTimeout(() => {
+    //         console.log('dialogopen')
+    //         if (canvasElement) {
+    //             console.log('canvas found')
+    //             context = canvasElement.getContext('2d');
+    //         }
+    //         if (dialogOpen) {
+    //             console.log('called socket')
+    //             connectWebSocket();
+    //         }
+    //     }, 3000);
+    // });
 
     onDestroy(() => {
         if (socket && socket.readyState === WebSocket.OPEN) {
