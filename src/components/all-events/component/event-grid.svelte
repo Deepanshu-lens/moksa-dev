@@ -54,7 +54,7 @@
   const eventTypes = [
     { type: "person", heading: "Person Detection", color: "#FF4764" },
     { type: "fire", heading: "Fire Detection", color: "#FF5733" },
-    // { type: "face", heading: "Face Detection", color: "#24DA8E" },
+    { type: "face", heading: "Face Detection", color: "#24DA8E" },
     // { type: 'heatmap', heading: 'Heatmap Detection', color: '#FFB347' },
     { type: "alpr", heading: "Vehicle Detection", color: "#8A2BE2" },
   ];
@@ -83,7 +83,7 @@
     {:else}
       <!-- Event Types Section -->
       <div
-        class="flex flex-row gap-4 overflow-x-auto lg:grid lg:grid-cols-4 lg:gap-x-8 lg:overflow-x-visible"
+        class="flex flex-row gap-5 overflow-x-auto lg:grid lg:grid-cols-5 lg:gap-x-8 lg:overflow-x-visible"
       >
         {#each eventTypes as { type, heading, color }}
           <div
