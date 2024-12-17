@@ -2,11 +2,10 @@
   import {
     Clock,
     Edit,
-    ListFilter,
+    Store,
     LucideContact2,
     LucideXOctagon,
     Plus,
-    Upload,
     User,
   } from "lucide-svelte";
   import { Button } from "../ui/button";
@@ -255,7 +254,7 @@
       socket.disconnect();
     }
 
-    socket = io("https://api.moksa.ai", {
+    socket = io("https://dev.api.moksa.ai", {
       withCredentials: true,
       extraHeaders: {
         Authorization: `Bearer ${token}`,
@@ -344,16 +343,12 @@
         //   return { ...currentData, data: [...currentData.data, newStoreData] };
         // }
       });
-
-      console.log($efficiencyData, "efficiencyData in socket");
     });
 
     socket.on("disconnect", () => {
       console.log("disconnected");
     });
   }
-
-  $: console.log($efficiencyData, "efficiencyData");
 
   let loading = false;
 
@@ -414,7 +409,7 @@
     try {
       loading = true;
       const response = await fetch(
-        `https://api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/${$selectedStoreId}/${start}/1/100/${end}`,
+        `https://dev.api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/${$selectedStoreId}/${start}/1/100/${end}`,
         {
           method: "GET",
           headers: {
@@ -476,7 +471,7 @@
     try {
       loading = true;
       const response = await fetch(
-        `https://api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/${$selectedStoreId}/${formatDate(startDate)}/1/100/${formatDate(today)}`,
+        `https://dev.api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/${$selectedStoreId}/${formatDate(startDate)}/1/100/${formatDate(today)}`,
         {
           method: "GET",
           headers: {
@@ -556,7 +551,7 @@
     if (!!id) {
       try {
         const response = await fetch(
-          `https://api.moksa.ai/employeeEfficiency/getEmployeeEfficiencyByEmpid/${id}/${formatDate(startDate)}/${formatDate(today)}`,
+          `https://dev.api.moksa.ai/employeeEfficiency/getEmployeeEfficiencyByEmpid/${id}/${formatDate(startDate)}/${formatDate(today)}`,
           {
             method: "GET",
             headers: {
@@ -593,7 +588,7 @@
     if (!!id) {
       try {
         const response = await fetch(
-          `https://api.moksa.ai/employeeEfficiency/getEmployeeEfficiencyByEmpid/${id}/${start}/${end}`,
+          `https://dev.api.moksa.ai/employeeEfficiency/getEmployeeEfficiencyByEmpid/${id}/${start}/${end}`,
           {
             method: "GET",
             headers: {
@@ -904,6 +899,12 @@
                     ? 0
                     : $employeeDetails?.data?.[0]?.hours_worked}</span
                 >
+              </span>
+              <span class="flex items-center gap-2">
+                <Store size={20} class="text-[#000065]" />
+                <p class="text-sm text-[#727272]">
+                  {`${$employeeDetails?.data?.[0]?.store_name}, ${$employeeDetails?.data?.[0]?.address}, ${$employeeDetails?.data?.[0]?.locality}-${$employeeDetails?.data?.[0]?.pincode}`}
+                </p>
               </span>
             </span>
           </span>

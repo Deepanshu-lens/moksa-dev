@@ -2,15 +2,7 @@
   import { createTable, Render, Subscribe } from "svelte-headless-table";
   import * as Table from "@/components/ui/table";
   import { Button } from "@/components/ui/button";
-  import {
-    ArrowUpDown,
-    Edit,
-    Store,
-    StoreIcon,
-    Trash2,
-    TrendingDown,
-    TrendingUp,
-  } from "lucide-svelte";
+  import { ArrowUpDown, Store } from "lucide-svelte";
   import { createEventDispatcher } from "svelte";
   import {
     addPagination,
@@ -25,19 +17,19 @@
   export let efficiencyData;
   export let selectedStore;
 
-  $: console.log("emp table", $efficiencyData?.data?.data);
-
   $: dbData = $efficiencyData?.data?.data?.map((item: any) => {
-    return {
-      employee: `${item.first_name} ${item.last_name}`,
-      storeName: item.storeName === undefined ? $selectedStore : item.storeName,
-      role: item.role,
-      customer: item.customer,
-      mobile: item.mobile,
-      idle: item.idle,
-      fillingShelves: item.fillingShelves,
-      efficiency_score: item.efficiency_score + "%",
-    };
+    const mappedData = {};
+    $efficiencyData?.data?.column?.forEach((col) => {
+      if (col.key === "employee") {
+        mappedData[col.key] = `${item.employee}`;
+      } else if (col.key === "store_name") {
+        mappedData[col.key] =
+          item?.store_name === undefined ? $selectedStore : item.store_name;
+      } else {
+        mappedData[col.key] = item[col.key];
+      }
+    });
+    return mappedData;
   });
 
   $: data = writable(dbData);
@@ -57,46 +49,6 @@
     select: addSelectedRows(),
   });
 
-  // $: columns = table.createColumns([
-  //   // table.column({
-  //   //   id: 'select',
-  //   //   header: '',
-  //   //   cell: ({ row }) => row.select,
-  //   // }),
-  //   table.column({
-  //     accessor: "employee",
-  //     header: "Employee",
-  //   }),
-  //   table.column({
-  //     accessor: "storeName",
-  //     header: "Store Name",
-  //   }),
-  //   table.column({
-  //     accessor: "role",
-  //     header: "Role",
-  //   }),
-  //   table.column({
-  //     accessor: "withCustomers",
-  //     header: "With Customers",
-  //   }),
-  //   table.column({
-  //     accessor: "onMobile",
-  //     header: "On Mobile",
-  //   }),
-  //   table.column({
-  //     accessor: "sittingIdle",
-  //     header: "Sitting Idle",
-  //   }),
-  //   table.column({
-  //     accessor: "fillingShelf",
-  //     header: "Filling Shelves",
-  //   }),
-  //   table.column({
-  //     accessor: "efficiencyScore",
-  //     header: "Efficiency Score",
-  //   }),
-  // ]);
-
   $: columns = table?.createColumns(
     $efficiencyData?.data?.column
       ?.filter(
@@ -105,7 +57,7 @@
       )
       .map((col: any) =>
         table.column({
-          accessor: col.key === "employee_id" ? "employee" : col.key,
+          accessor: col.key,
           header: col.header,
         }),
       ),
@@ -180,10 +132,10 @@
                       </div>
                       <span>{row.original.employee}</span>
                     </div>
-                  {:else if cell.id === "storeName"}
+                  {:else if cell.id === "store_name"}
                     <div class="flex items-center justify-center gap-2">
                       <Store class="w-4 h-4" />
-                      <span>{row.original.storeName}</span>
+                      <span>{row?.original?.store_name}</span>
                     </div>
                     <!-- {:else if cell.id === 'efficiencyScore'} -->
                     <!-- <div class="relative w-10 h-10">
