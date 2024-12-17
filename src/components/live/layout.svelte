@@ -2,7 +2,7 @@
   import StreamLayout from "./streams/StreamLayout.svelte";
   import * as Resizable from "@/components/ui/resizable";
   import Icon from "@iconify/svelte";
-  import { isAlertPanelOpen, isRoiPanelOpen, cameras, selectedCamera } from "@/stores";
+  import { isAlertPanelOpen, isRoiPanelOpen, cameras, selectedCamera, user } from "@/stores";
   import CameraList from "@/components/live/cameraList/CameraList.svelte";
   import { nodes, liveEvents, gallery } from "@/stores";
   import SidePannel from "./side-pannel.svelte";
@@ -17,6 +17,7 @@
   import { onMount } from 'svelte'; 
   import { ChevronDown } from "lucide-svelte";
   import getStreamURL from "@/lib/url";
+  import { addAuthLogs } from "@/lib/logs/authLogs";
   const STREAM_URL = getStreamURL();
 
   let currentPanel = 1;
@@ -77,11 +78,14 @@
   onMount(() => {
     checkIfMobile(); // Initial check
     window.addEventListener('resize', checkIfMobile); // Update on resize
+    // addAuthLogs("login", $user?.email || "");
+    console.log($user, 'user');
 
     return () => {
       window.removeEventListener('resize', checkIfMobile); // Clean up
     };
   });
+
 </script>
 
 <div class="hidden lg:block w-full">

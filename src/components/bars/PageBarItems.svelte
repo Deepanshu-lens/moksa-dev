@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { addUserLogs } from "@/lib/logs/userLogs";
   import { cn } from "@/lib/utils";
   import { user } from "@/stores";
   import Icon from "@iconify/svelte";
@@ -59,11 +60,16 @@
       <!-- svelte-ignore a11y_click_events_have_key_events -->
       <!-- svelte-ignore a11y_missing_attribute -->
       <a
-        on:click={(e) => {
+        on:click={async (e) => {
           if (disabledPaths.includes(link.link)) {
             e.preventDefault();
             return;
           }
+          await addUserLogs(
+            `User visited ${link?.name} page`,
+            $user?.email || "",
+            $user?.id || ""
+          );
           currentPath = link.link;
           if (window.api) {
             if (link.link === "/") {

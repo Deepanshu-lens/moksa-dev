@@ -8,6 +8,7 @@
   import Icon from "@iconify/svelte";
   import { z } from "zod";
   import Button from "../ui/button/button.svelte";
+  import { addAuthLogs } from "@/lib/logs/authLogs";
 
   const registerSchema = userSchema
     .pick({
@@ -39,6 +40,7 @@
       );
       //   if (!response) reset();
       if (response) {
+        await addAuthLogs("register", values.email);
         toast.success(`${values.name.split(" ")[0]}, welcome to ${import.meta.env.PUBLIC_BRAND_NAME}.`);
         reset();
         if (window.api) {

@@ -3,6 +3,7 @@
   export let isVertical = false;
   import pb from "@/lib/pb";
   import * as Popover from "@/components/ui/popover";
+  import { addAuthLogs } from "@/lib/logs/authLogs";
 
   const MAX_NAME_LENGTH = 20;
   const MAX_EMAIL_LENGTH = 30;
@@ -11,6 +12,7 @@
   let displayEmail = "";
 
   async function logout() {
+    await addAuthLogs("logout", $user?.email || "");
     pb.authStore.clear();
     user.set(undefined);
 

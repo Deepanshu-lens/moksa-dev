@@ -8,6 +8,7 @@
   import { createForm } from "felte";
   import { user } from "@/stores";
   import Button from "../ui/button/button.svelte";
+  import { addAuthLogs } from "@/lib/logs/authLogs";
 
   if (pb.authStore.token) {
     console.log("HAVE IT");
@@ -32,6 +33,8 @@
         reset();
         return;
       }
+      await addAuthLogs("login", values.email);
+
       if (window.api) {
         window.api.navigate("/index");
       } else {
