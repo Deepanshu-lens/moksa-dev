@@ -4,6 +4,9 @@
   import pb from "@/lib/pb";
   import * as Popover from "@/components/ui/popover";
   import { addAuthLogs } from "@/lib/logs/authLogs";
+  import { writable } from "svelte/store";
+  import * as DropdownMenu from "@/components/ui/dropdown-menu/index.js";
+  import Button from "../ui/button/button.svelte";
 
   const MAX_NAME_LENGTH = 20;
   const MAX_EMAIL_LENGTH = 30;
