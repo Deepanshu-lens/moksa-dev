@@ -6,7 +6,6 @@
   import { selectedNode } from "@/lib/stores";
   import { Switch } from "@/components/ui/switch";
   import * as Select from "@/components/ui/select";
-  import { Slider } from "@/components/ui/slider";
 
   import {
     FileVideo2,
@@ -17,11 +16,7 @@
     Activity,
     Siren,
     PersonStanding,
-    Drama,
-    FireExtinguisher,
     ShieldAlert,
-    TabletSmartphone,
-    Heater,
     Plus,
   } from "lucide-svelte";
 
@@ -183,6 +178,8 @@
   };
 
   console.log(user?.role, "user in dialog");
+
+  let labels = [];
 </script>
 
 <!-- markup (zero or more items) goes here -->
@@ -232,67 +229,47 @@
 
             {#if save}
               <div class="mt-8">
-                <div class="flex items-center space-x-4 pt-3">
-                  <FolderSearch />
-                  <div class="flex-1 space-y-1">
-                    <p class="text-sm font-medium leading-none">Save Here</p>
-                    <p class="text-sm text-muted-foreground">
-                      Point your video to its future home.
-                    </p>
+                {#if labels.length === 0}
+                  <!-- Empty state when no labels -->
+                  <div class="border-2 border-dashed border-gray-200 rounded-lg p-8">
+                    <div class="text-center text-gray-500">
+                      <button 
+                        class="flex items-center gap-2 mx-auto text-blue-500"
+                        on:click={() => labels = [...labels, { name: '', value: '' }]}
+                      >
+                        <Plus class="w-5 h-5" />
+                        Get started by adding your first label
+                      </button>
+                    </div>
                   </div>
-                  <Input
-                    id="picture"
-                    type="text"
-                    class="w-[180px]"
-                    disabled
-                    placeholder="./PlayBack"
-                  />
-                </div>
-                <div class="flex items-center space-x-4 pt-3">
-                  <Merge />
-                  <div class="flex-1 space-y-1">
-                    <p class="text-sm font-medium leading-none">
-                      Overwrite Interval
-                    </p>
-                    <p class="text-sm text-muted-foreground">
-                      Duration until the saved video is overwritten.
-                    </p>
+                {:else}
+                  <!-- Show inputs when we have labels -->
+                  <div class="flex flex-col gap-4">
+                    {#each labels as label}
+                      <div class="flex items-center gap-4">
+                        <input 
+                          type="text" 
+                          placeholder="Name of the label"
+                          class="flex-1 p-2 border rounded-md"
+                        />
+                        <input 
+                          type="text" 
+                          placeholder="Input field"
+                          class="flex-1 p-2 border rounded-md"
+                        />
+                      </div>
+                    {/each}
+                    
+                    <!-- Add new button -->
+                    <button 
+                      class="flex items-center gap-2 text-blue-500 hover:bg-gray-50 p-2 rounded"
+                      on:click={() => labels = [...labels, { name: '', value: '' }]}
+                    >
+                      <Plus class="w-4 h-4" />
+                      Add new
+                    </button>
                   </div>
-                  <Select.Root
-                    onSelectedChange={(e) => (saveDuration = e.value)}
-                  >
-                    <Select.Trigger class="w-[180px]">
-                      <Select.Value
-                        placeholder={items.find((m) => m.value === saveDuration)
-                          ?.label || "Select Duration"}
-                      />
-                    </Select.Trigger>
-                    <Select.Content>
-                      <Select.Group>
-                        {#each items as fruit}
-                          <Select.Item value={fruit.value} label={fruit.label}
-                            >{fruit.label}</Select.Item
-                          >
-                        {/each}
-                      </Select.Group>
-                    </Select.Content>
-                    <Select.Input name="favoriteFruit" />
-                  </Select.Root>
-                </div>
-              </div>
-            {:else}
-              <div
-                class="border-2 border-dashed border-gray-200 rounded-lg p-8 mt-8"
-              >
-                <div class="text-center text-gray-500">
-                  <p>Get started by adding your first label</p>
-                  <button
-                    class="mt-4 flex items-center gap-2 mx-auto text-blue-500"
-                  >
-                    <Plus class="w-5 h-5" />
-                    Add new
-                  </button>
-                </div>
+                {/if}
               </div>
             {/if}
           </div>
