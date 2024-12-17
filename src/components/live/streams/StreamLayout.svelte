@@ -13,6 +13,7 @@
   import Pagination from "./pagination/Pagination.svelte";
   import { onMount } from "svelte";
   import { writable } from "svelte/store";
+  import { displayCameras } from "@/stores/camera";
 
   export let STREAM_URL;
   const isMobile = writable(false);
@@ -34,7 +35,6 @@
 
   function getGridStyle(cameraCount, layoutIndex) {
     if (layoutIndex > 0) {
-      console.log("selectedlayout", layoutIndex);
       return layoutConfigs[layoutIndex];
     }
 
@@ -132,11 +132,11 @@
     <div class="flex flex-col flex-grow mt-4">
       <div
         bind:this={localCaptureRef}
-        class="grid grid-cols-1 gap-4 p-4 w-full lg:grid-cols-4 camera-grid pb-[30vh] lg:pb-5"
+        class="grid grid-cols-1 gap-4 p-4 w-full lg:grid-cols-4 camera-grid pb-[35vh] lg:pb-4"
         style={gridStyle + " height: calc(100vh - 7rem); overflow-y: auto;"}
       >
-        {#key $cameras}
-          {#each $cameras as camera}
+        {#key $displayCameras}
+          {#each $displayCameras as camera}
             <StreamTile
               name={camera?.name}
               id={camera?.id}
@@ -147,10 +147,8 @@
       </div>
 
       {#if $totalCameras > 0}
-        <Pagination/>
+        <Pagination />
       {/if}
     </div>
   {/if}
 {/if}
-
-

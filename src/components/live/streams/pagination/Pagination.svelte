@@ -2,73 +2,87 @@
   import * as Pagination from "@/components/ui/pagination/index.js";
   import ChevronLeft from "lucide-svelte/icons/chevron-left";
   import ChevronRight from "lucide-svelte/icons/chevron-right";
-  import { writable } from "svelte/store";
-  import pb from "@/lib/pb";
+  import { writable, get } from "svelte/store";
   import {
     cameras,
     totalCameras,
-    selectedNode,
     selectedLayout,
+    displayCameras
   } from "@/stores";
 
+  // Writable store to keep track of the current page
+  const initialPage = 1;
+  const currentPage = writable(initialPage);
+
+  // Reactive value for MAX_CAMERAS_PER_PAGE
   $: MAX_CAMERAS_PER_PAGE =
     $selectedLayout * $selectedLayout ||
     parseInt(localStorage.getItem("selectedLayout") || "3") ** 2;
-  let initialPage = 1;
 
-  const currentPage = writable(initialPage); // Tracks the current page
+  // Function to update the displayCameras store based on current page
+  const fetchDisplayCameras = (page: number) => {
+    const start = (page - 1) * MAX_CAMERAS_PER_PAGE;
+    const end = start + MAX_CAMERAS_PER_PAGE;
 
-  // Function to fetch cameras for the current page
-  const fetchCameras = async (page: number) => {
-    try {
-      const response = await pb
-        .collection("camera")
-        .getList(page, MAX_CAMERAS_PER_PAGE, {
-          fields: "id,name,url,subUrl,save,created",
-          filter: `node.id ?= "${$selectedNode}"`,
-          sort: "-created",
-        });
-      cameras.set(response.items); // Update the cameras store with new data
-    } catch (error) {
-      console.error("Error fetching cameras:", error);
-    }
+    displayCameras.set(get(cameras).slice(start, end));
   };
 
-  // Handle pagination navigation
+  // Handle next page
   const nextPage = () => {
     currentPage.update((page) => {
-      const totalPages = Math.ceil($totalCameras / MAX_CAMERAS_PER_PAGE);
-      if (page + 1 < totalPages) {
-        fetchCameras(page + 1);
+      const totalPages = Math.ceil(get(totalCameras) / MAX_CAMERAS_PER_PAGE);
+      if (page < totalPages) {
+        fetchDisplayCameras(page + 1);
         return page + 1;
       }
       return page;
     });
   };
 
-  const goToPage = (page: any) => {
-    currentPage.update((current) => {
-      if (page >= 0) {
-        fetchCameras(page);
-        return page;
-      }
-      return current; // Return current page if the requested page is out of bounds
-    });
-  };
-
+  // Handle previous page
   const prevPage = () => {
     currentPage.update((page) => {
-      if (page > 0) {
-        fetchCameras(page - 1);
+      if (page > 1) {
+        fetchDisplayCameras(page - 1);
         return page - 1;
       }
       return page;
     });
   };
 
-  $: if (MAX_CAMERAS_PER_PAGE) {
-    fetchCameras(1);
+  // Go to a specific page
+  const goToPage = (page: number) => {
+    const totalPages = Math.ceil(get(totalCameras) / MAX_CAMERAS_PER_PAGE);
+    if (page >= 1 && page <= totalPages) {
+      currentPage.set(page);
+      fetchDisplayCameras(page);
+    }
+  };
+
+  // Fetch initial data
+  $: if (get(cameras).length > 0 && MAX_CAMERAS_PER_PAGE) {
+    fetchDisplayCameras(get(currentPage));
   }
+
+  cameras.subscribe((value) => {
+    const previousPage = get(currentPage);
+    const totalPages = Math.ceil(value.length / MAX_CAMERAS_PER_PAGE);
+
+    totalCameras.set(value.length);
+
+    // If on the last page and a new camera is added, move to the next page
+    if (previousPage < totalPages) {
+      currentPage.set(totalPages);
+    } else if (previousPage > totalPages && totalPages > 0) {
+      // If the current page becomes invalid due to deletions, move to the previous page
+      currentPage.set(totalPages);
+    } else if (totalPages === 0) {
+      // If no cameras are left, reset to page 1
+      currentPage.set(1);
+    }
+
+    fetchDisplayCameras(get(currentPage));
+  });
 </script>
 
 <Pagination.Root
@@ -76,13 +90,12 @@
   perPage={MAX_CAMERAS_PER_PAGE || 9}
   siblingCount={1}
   let:pages
-  let:currentPage
 >
   <Pagination.Content>
     <Pagination.Item>
       <Pagination.PrevButton
         on:click={() => prevPage()}
-        disabled={currentPage === 1}
+        disabled={get(currentPage) === 1}
       >
         <ChevronLeft class="h-4 w-4" />
         <span class="hidden sm:block">Previous</span>
@@ -97,10 +110,8 @@
         <Pagination.Item>
           <Pagination.Link
             {page}
-            isActive={currentPage === page.value}
-            on:click={() => {
-              goToPage(page.value);
-            }}
+            isActive={get(currentPage) === page.value}
+            on:click={() => goToPage(page.value)}
           >
             {page.value}
           </Pagination.Link>
@@ -110,7 +121,7 @@
     <Pagination.Item>
       <Pagination.NextButton
         on:click={() => nextPage()}
-        disabled={currentPage * MAX_CAMERAS_PER_PAGE >= $totalCameras}
+        disabled={get(currentPage) * MAX_CAMERAS_PER_PAGE >= $totalCameras}
       >
         <span class="hidden sm:block">Next</span>
         <ChevronRight class="h-4 w-4" />
