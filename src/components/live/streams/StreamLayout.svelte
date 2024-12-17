@@ -44,6 +44,8 @@
     }
 
     switch (cameraCount) {
+      case 0 :
+        return "grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);"
       case 1:
         return "grid-template-columns: repeat(1, 1fr); grid-template-rows: repeat(1, 1fr);";
       case 2:
