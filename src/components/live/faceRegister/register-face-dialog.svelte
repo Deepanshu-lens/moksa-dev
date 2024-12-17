@@ -7,6 +7,7 @@
   import { ChevronDown, X } from "lucide-svelte";
   import { cn } from "@/lib/utils";
   import { user } from "@/stores";
+  import { addUserLogs } from "@/lib/logs/userLogs";
 
   let dialogOpen = false;
   let captureMode = 1;
@@ -87,6 +88,11 @@
         loading = false;
         return;
       }
+      await addUserLogs(
+        "User captured photo",
+        $user?.email || "",
+        $user?.id || ""
+      );
       const croppedImage = await result.json();
       loading = false;
 
@@ -193,7 +199,12 @@
           session: $user?.session[0],
         }),
       })
-        .then(() => {
+        .then(async () => {
+          await addUserLogs(
+            "User added person to gallery",
+            $user?.email || "",
+            $user?.id || ""
+          );
           toast.success(`${username} successfully added to gallery`);
           registrationImages.set([]);
           imposterImages.set([]);

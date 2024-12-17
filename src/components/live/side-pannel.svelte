@@ -7,6 +7,7 @@
     cameras,
     selectedCamera,
     captureRef,
+    user,
   } from "@/stores";
   import { cn } from "@/lib/utils";
   import * as Popover from "@/components/ui/popover";
@@ -15,6 +16,7 @@
   import { toast } from "svelte-sonner";
   import JSZip from "jszip";
   import RegisterFaceDialog from "./faceRegister/register-face-dialog.svelte";
+  import { addUserLogs } from "@/lib/logs/userLogs";
 
   const maxStreamsPerPage = 36;
   let selected = 0;
@@ -40,7 +42,12 @@
     }
   }
 
-  function fullscreenLayout() {
+  async function fullscreenLayout() {
+    await addUserLogs(
+      "User clicked on fullscreen layout",
+      $user?.email || "",
+      $user?.id || ""
+    );
     const container = document.getElementsByClassName(`camera-grid`);
     if (
       container.length > 0 &&
@@ -141,7 +148,12 @@
             !$isAlertPanelOpen,
         }
       )}
-      on:click={() => {
+      on:click={async () => {
+        await addUserLogs(
+          "User clicked on alerts",
+          $user?.email || "",
+          $user?.id || ""
+        );
         isAlertPanelOpen.update((value) => !value);
         isRoiPanelOpen.set(false);
       }}
@@ -159,6 +171,13 @@
   <RegisterFaceDialog>
     <span class="group flex-col flex items-center justify-center gap-0.5">
       <button
+        on:click={async () => {
+          await addUserLogs(
+            "User clicked on register face",
+            $user?.email || "",
+            $user?.id || ""
+          );
+        }}
         class={`disabled:cursor-not-allowed text-black/[.4] h-[30px] w-[30px] disabled:opacity-50 rounded-full shadow-md group border-2 border-solid border-black/[.4] dark:border-white/[.4] bg-white dark:bg-black dark:text-white group-hover:text-white group-hover:bg-[#015a62] dark:group-hover:bg-[#258d9d] group-hover:border-none grid place-items-center`}
       >
         <Icon
@@ -177,6 +196,13 @@
   >
     <span class="group flex-col flex items-center justify-center gap-0.5">
       <button
+        on:click={async () => {
+          await addUserLogs(
+            "User clicked on extend",
+            $user?.email || "",
+            $user?.id || ""
+          );
+        }}
         disabled
         class={`disabled:cursor-not-allowed disabled:opacity-50 text-black/[.4] h-[30px] w-[30px] rounded-full shadow-md group border-2 border-solid border-black/[.4] dark:border-white/[.4] bg-white dark:bg-black dark:text-white group-hover:text-white group-hover:bg-[#015a62] dark:group-hover:bg-[#258d9d] group-hover:border-none grid place-items-center`}
         ><Icon
@@ -200,7 +226,12 @@
             !$isRoiPanelOpen,
         }
       )}
-      on:click={() => {
+      on:click={async () => {
+        await addUserLogs(
+          "User clicked on mark ROI",
+          $user?.email || "",
+          $user?.id || ""
+        );
         isRoiPanelOpen.update((value) => !value);
         isAlertPanelOpen.set(false);
       }}><ScanSearch class="h-[22px] w-[22px]" /></button
@@ -224,7 +255,12 @@
   </span>
   <span class="group flex-col flex items-center justify-center gap-0.5">
     <button
-      on:click={() => {
+      on:click={async () => {
+        await addUserLogs(
+          "User clicked on screen snip",
+          $user?.email || "",
+          $user?.id || ""
+        );
         snipDropDownOpen = !snipDropDownOpen;
         recordDropdownOpen = false;
       }}
@@ -297,6 +333,13 @@
     <Popover.Root>
       <Popover.Trigger let:builder>
         <button
+          on:click={async () => {
+            await addUserLogs(
+              "User clicked on screen layout",
+              $user?.email || "",
+              $user?.id || ""
+            );
+          }}
           class={`disabled:cursor-not-allowed disabled:opacity-50 text-black/[.4] h-[30px] w-[30px] rounded-full shadow-md group border-2 border-solid border-black/[.4] dark:border-white/[.4] bg-white dark:bg-black dark:text-white group-hover:text-white group-hover:bg-[#015a62] dark:group-hover:bg-[#258d9d] group-hover:border-none grid place-items-center`}
           ><Icon
             icon="material-symbols:grid-view-outline-rounded"
