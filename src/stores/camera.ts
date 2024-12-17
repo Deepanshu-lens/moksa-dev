@@ -19,6 +19,7 @@ const createCameraStore = () => {
 };
 
 export const cameras = createCameraStore();
+export const displayCameras = createCameraStore();
 export const totalCameras = writable<number>(0);
 export const selectedCamera = writable<string>("");
 export const captureRef = writable<HTMLElement | null>(null);
