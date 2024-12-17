@@ -19,7 +19,15 @@
     Check,
   } from "lucide-svelte";
 
+  
   let cameraItems: HTMLDivElement;
+  let sortCriteria: string | null = null; // No sort criteria by default
+  let sortDirection = "asc"; // Default sort direction
+  let searchCriteria = "name"; // Default search criteria
+  let isSortingEnabled = false; // Flag to track if sorting is active
+
+  let currentCameras = $cameras;
+
   onMount(() => {
     if (cameraItems) {
       Sortable.create(cameraItems, {
@@ -30,22 +38,41 @@
       });
     }
   });
-  let sortCriteria = "name"; // Default sort criteria
-  let sortDirection = "asc"; // Default sort direction
-  let searchCriteria = "name"; // Default search criteria
 
-  let currentCameras = $cameras;
-  $: currentCameras = sortCameras($cameras, sortCriteria, sortDirection);
+  $: {
+    // Only sort cameras if sorting is enabled
+    currentCameras = isSortingEnabled
+      ? sortCameras($cameras, sortCriteria, sortDirection)
+      : $cameras;
+  }
 
   function sortCameras(cameras, criteria, direction) {
     return [...cameras].sort((a, b) => {
       let comparison = 0;
 
       if (criteria === "created") {
-        comparison =
-          new Date(b.created).getTime() - new Date(a.created).getTime(); // Sort by created date
+        // Sort by created date
+        comparison = new Date(b.created).getTime() - new Date(a.created).getTime();
       } else {
-        comparison = a.name.localeCompare(b.name); // Sort by name
+        // Sort by name with natural sorting
+        const extractNumbers = (str) =>
+          str.match(/\d+/g) ? parseInt(str.match(/\d+/g)[0], 10) : 0;
+
+        const nameA = a.name.toLowerCase();
+        const nameB = b.name.toLowerCase();
+
+        if (nameA === nameB) {
+          comparison = 0;
+        } else {
+          const numA = extractNumbers(nameA);
+          const numB = extractNumbers(nameB);
+
+          if (nameA.replace(/\d+/g, '') === nameB.replace(/\d+/g, '')) {
+            comparison = numA - numB; // Compare numeric parts
+          } else {
+            comparison = nameA.localeCompare(nameB); // Compare alphabetic parts
+          }
+        }
       }
 
       return direction === "asc" ? comparison : -comparison; // Toggle direction
@@ -61,11 +88,9 @@
       sortCriteria = selectedSort;
       sortDirection = "asc";
     }
-    searchCriteria = selectedSort; // Update search criteria based on selection
-    selectedIcon =
-      selectedSort === "name" ? "material-symbols:search-rounded" : "mdi:link"; // Update icon based on selection
-    // Reapply the sort with the current criteria and direction
-    currentCameras = sortCameras($cameras, sortCriteria, sortDirection);
+
+    isSortingEnabled = true; // Enable sorting
+    searchCriteria = selectedSort; // Update search criteria
   }
 
   function handleInput(event) {
@@ -79,6 +104,9 @@
       // Filter based on selected search criteria
       return searchCriteria === "name" ? nameMatch : urlMatch || subUrlMatch;
     });
+
+    // Disable sorting when filtering
+    isSortingEnabled = false;
     currentCameras = filteredCameras;
   }
 </script>
