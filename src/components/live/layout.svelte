@@ -79,7 +79,6 @@
     checkIfMobile(); // Initial check
     window.addEventListener('resize', checkIfMobile); // Update on resize
     // addAuthLogs("login", $user?.email || "");
-    console.log($user, 'user');
 
     return () => {
       window.removeEventListener('resize', checkIfMobile); // Clean up

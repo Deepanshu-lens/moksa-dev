@@ -227,7 +227,6 @@
   }
 
   function seekAllVideos(intervalIndex: number) {
-    console.log(intervalIndex);
     videoRefs.forEach((video, index) => {
       video.pause();
       const seeker = document.querySelectorAll(
