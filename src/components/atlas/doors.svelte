@@ -1,16 +1,18 @@
 <script lang="ts">
-  import { Camera, LockKeyhole } from "lucide-svelte";
+  import { Camera, LockKeyhole, LockKeyholeOpen } from "lucide-svelte";
   import { toast } from "svelte-sonner";
   import CameraDoor from "@/components/atlas/dialoges/camera-door.svelte";
   import Separator from "@/components/ui/separator/separator.svelte";
   import Button from "@/components/ui/button/button.svelte";
   import { activePanel } from "@/stores";
   import getAtlasURL from "@/lib/atlas";
+  import { writable } from "svelte/store";
 
   export let data;
   export let search: string;
   let showChildren = null;
   let selectedChild: any = null;
+  let unlockedDoors = writable<string[]>([]);
 
   const ATLAS_URL = getAtlasURL();
 
@@ -29,10 +31,28 @@
           unId: doorId,
         }),
       });
-      if (res.ok) toast(`Door with unid:${doorId} unlocked successfully!`);
+
+      if (res.ok) {
+        unlockedDoors.update((currentLockedDoors) => {
+          return [...currentLockedDoors, doorId];
+        });
+        toast(`Door with unId:${doorId} unlocked successfully!`);
+
+        // Schedule re-locking the door after one minute
+        setTimeout(() => {
+          unlockedDoors.update((currentLockedDoors) => {
+            if (!currentLockedDoors.includes(doorId)) {
+              return currentLockedDoors;
+            }
+            return currentLockedDoors.filter((id) => id !== doorId);
+          });
+          toast(`Door with unId:${doorId} locked automatically.`);
+        }, 60000);
+      } else {
+        toast.error("Failed to unlock the door. Please try again.");
+      }
     } catch (error) {
       console.error("Error unlocking door:", error);
-      // toast.error("Error unlocking door!");
     }
   }
 </script>
@@ -84,12 +104,18 @@
                 </Button>
               </CameraDoor>
               <Button
-                class="py-1 bg-[#111C09] dark:bg-black dark:text-white flex gap-1.5 items-center"
+                disabled={$unlockedDoors.includes(door.unid)}
+                class="py-1 bg-[#111C09] dark:bg-black dark:text-white flex gap-1.5 items-center disabled:cursor-not-allowed"
                 size="sm"
                 on:click={() => handleUnlock(door.unid)}
               >
-                <LockKeyhole size={18} class="dark:text-white" />
-                Unlock Door
+                {#if $unlockedDoors.includes(door.unid)}
+                  <LockKeyholeOpen size={18} class="dark:text-white" />
+                  Unlocked...
+                {:else}
+                  <LockKeyhole size={18} class="dark:text-white" />
+                  Unlock Door
+                {/if}
               </Button>
             </div>
           </div>

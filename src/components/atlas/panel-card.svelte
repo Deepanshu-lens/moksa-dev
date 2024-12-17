@@ -2,6 +2,7 @@
   import { Menu, Trash } from "lucide-svelte";
   import DeletePanel from "@/components/atlas/dialoges/delete-panel.svelte";
   import { activePanel } from "@/stores";
+  import { cn } from "@/lib/utils";
 
   export let panelData;
 </script>
@@ -10,7 +11,7 @@
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 <article
-  class={`flex  items-center gap-4 p-4 dark:border hover:border hover:border-brand-foreground dark:hover:border-brand rounded-xl shadow-md text-base z-10 w-full px-4 ${panelData?.id === $activePanel ? ` border animate-gradient-border bg-[#f9f9f9] dark:bg-black` : "bg-[#f9f9f9] dark:bg-black"}`}
+  class={cn("flex items-center gap-4 p-4 dark:border hover:border hover:border-brand-foreground dark:hover:border-brand rounded-xl shadow-md text-base z-10 w-full px-4 bg-[#f9f9f9] dark:bg-white/20",{"border border-black dark:border-white" : panelData.id === $activePanel})}
   on:click={() => {
     activePanel.update((previous) =>
       previous === panelData.id ? "" : panelData.id

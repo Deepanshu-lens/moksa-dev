@@ -1,5 +1,5 @@
 import { user } from "./user";
-import { cameras, totalCameras, selectedCamera, captureRef } from "./camera";
+import { cameras, totalCameras, selectedCamera, captureRef, displayCameras } from "./camera";
 import { selectedNode, nodes } from "./node";
 import { activePanel, panels } from "./panels";
 import { events } from "./events";
@@ -35,4 +35,5 @@ export {
   gallery,
   totalFaceRegistered,
   isGalleryLoading,
+  displayCameras
 };

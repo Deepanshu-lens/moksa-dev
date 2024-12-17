@@ -5,26 +5,21 @@
     cameras,
     selectedNode,
     totalCameras,
-    selectedLayout,
   } from "@/stores";
   import { validateCamera, type Camera } from "@/types";
-
-  let MAX_CAMERAS_PER_PAGE =
-    $selectedLayout * $selectedLayout ||
-    parseInt(localStorage.getItem("selectedLayout") || "1") ** 2;
 
   const getInitialCameras = async (nodeId: string) => {
     try {
       const localCameras = await pb
         .collection("camera")
-        .getList<Camera>(1, MAX_CAMERAS_PER_PAGE, {
+        .getFullList<Camera>({
           fields: "id,name,url,subUrl,save,created",
           filter: `node.id ?= "${nodeId}"`,
-          sort: "-created",
+          sort: "created",
         });
 
-      cameras.set(localCameras.items);
-      totalCameras.set(localCameras.totalItems);
+      cameras.set(localCameras);
+      totalCameras.set(localCameras.length);
     } catch (error) {
       console.error("Error initializing Camera Manager:", error);
     }
@@ -37,12 +32,6 @@
       pb.collection("camera").subscribe(
         "*",
         (e) => {
-          console.log(
-            "Camera collection updated!! ",
-            e.action,
-            e.record,
-            $selectedNode
-          );
           if (e.action === "create") {
             const validated = validateCamera(e.record);
             if (validated) cameras.update((current) => [...current, validated]);

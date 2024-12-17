@@ -13,6 +13,7 @@
   import Pagination from "./pagination/Pagination.svelte";
   import { onMount } from "svelte";
   import { writable } from "svelte/store";
+  import { displayCameras } from "@/stores/camera";
 
   export let STREAM_URL;
   const isMobile = writable(false);
@@ -34,7 +35,6 @@
 
   function getGridStyle(cameraCount, layoutIndex) {
     if (layoutIndex > 0) {
-      console.log("selectedlayout", layoutIndex);
       return layoutConfigs[layoutIndex];
     }
 
@@ -44,6 +44,8 @@
     }
 
     switch (cameraCount) {
+      case 0 :
+        return "grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);"
       case 1:
         return "grid-template-columns: repeat(1, 1fr); grid-template-rows: repeat(1, 1fr);";
       case 2:
@@ -135,8 +137,8 @@
         class="grid grid-cols-1 gap-4 p-4 w-full lg:grid-cols-4 camera-grid pb-[30vh] lg:pb-5"
         style={gridStyle + " height: calc(100vh - 7rem); overflow-y: auto;"}
       >
-        {#key $cameras}
-          {#each $cameras as camera}
+        {#key $displayCameras}
+          {#each $displayCameras as camera}
             <StreamTile
               name={camera?.name}
               id={camera?.id}

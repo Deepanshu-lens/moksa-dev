@@ -8,7 +8,7 @@
         pb.autoCancellation(false);
         const localpanels = await pb.collection("atlas").getFullList<any>({
             expand:"users,doors",
-            filter: `session = "${$user?.session[0]}"`
+            filter: `session.id = "${$user?.session[0]}"`
         });
         panels.set(localpanels);
         localpanels.length > 0 && activePanel.set(localpanels[0].id);
