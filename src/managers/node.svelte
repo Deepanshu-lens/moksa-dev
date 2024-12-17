@@ -11,10 +11,10 @@
       filter: `session.id?="${pb.authStore.model?.session[0]}"`,
       sort: "-created",
     });
-    nodes.set(localNodes);
+    nodes.set([{ id: "all", name: "All" }, ...localNodes]);
     localNodes.length > 0 &&
       (localStorage.getItem("selectedNode") &&
-      localNodes.filter((l) => l.id === localStorage.getItem("selectedNode"))
+      [{id:"all",name:"All"},...localNodes].filter((l) => l.id === localStorage.getItem("selectedNode"))
         .length > 0
         ? selectedNode.set(localStorage.getItem("selectedNode") ?? "")
         : selectedNode.set(localNodes[0].id));

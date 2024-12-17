@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import Sortable from "sortablejs";
   import * as DropdownMenu from "@/components/ui/dropdown-menu/index.js";
-  import { cameras, nodes, selectedCamera } from "@/stores";
+  import { cameras, nodes, selectedCamera, selectedNode } from "@/stores";
   import NodeSelection from "@/components/node/NodeSelection.svelte";
   import NodeActionButton from "@/components/node/crud/NodeActionButton.svelte";
   import { cn } from "@/lib/utils";
@@ -19,7 +19,6 @@
     Check,
   } from "lucide-svelte";
 
-  
   let cameraItems: HTMLDivElement;
   let sortCriteria: string | null = null; // No sort criteria by default
   let sortDirection = "asc"; // Default sort direction
@@ -52,7 +51,8 @@
 
       if (criteria === "created") {
         // Sort by created date
-        comparison = new Date(b.created).getTime() - new Date(a.created).getTime();
+        comparison =
+          new Date(b.created).getTime() - new Date(a.created).getTime();
       } else {
         // Sort by name with natural sorting
         const extractNumbers = (str) =>
@@ -67,7 +67,7 @@
           const numA = extractNumbers(nameA);
           const numB = extractNumbers(nameB);
 
-          if (nameA.replace(/\d+/g, '') === nameB.replace(/\d+/g, '')) {
+          if (nameA.replace(/\d+/g, "") === nameB.replace(/\d+/g, "")) {
             comparison = numA - numB; // Compare numeric parts
           } else {
             comparison = nameA.localeCompare(nameB); // Compare alphabetic parts
@@ -244,12 +244,13 @@
         <!-- svelte-ignore a11y_click_events_have_key_events -->
         <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
         <article
-          class={cn("flex items-center p-4 dark:border bg-accent my-4 hover:border hover:border-primary space-x-4 rounded-xl text-sm z-10 w-full px-4" , {"border border-white" : camera.id === $selectedCamera})}
-          on:click={()=>{
-            if($selectedCamera === camera.id)
-            selectedCamera.set("")
-            else
-            selectedCamera.set(camera.id)
+          class={cn(
+            "flex items-center p-4 dark:border bg-accent my-4 hover:border hover:border-primary space-x-4 rounded-xl text-sm z-10 w-full px-4 relative",
+            { "border border-white": camera.id === $selectedCamera }
+          )}
+          on:click={() => {
+            if ($selectedCamera === camera.id) selectedCamera.set("");
+            else selectedCamera.set(camera.id);
           }}
         >
           <Icon
@@ -272,6 +273,13 @@
             <CameraActionButton {camera} action="edit" />
             <CameraActionButton {camera} action="delete" />
           </div>
+          {#if $selectedNode === "all" && $nodes?.find((node) => node.id === camera?.node[0])?.name}
+            <span
+              class="absolute left-0 -top-2 z-10 py-0.5 px-2 bg-purple-200 rounded-2xl text-xs text-black"
+            >
+              {$nodes.find((node) => node.id === camera?.node[0])?.name}
+            </span>
+          {/if}
         </article>
       {/each}
     </div>

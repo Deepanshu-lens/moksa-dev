@@ -1,20 +1,26 @@
 <script lang="ts">
-  import { onMount } from "svelte";
   import pb from "@/lib/pb";
   import {
     cameras,
     selectedNode,
     totalCameras,
+    user,
   } from "@/stores";
   import { validateCamera, type Camera } from "@/types";
 
   const getInitialCameras = async (nodeId: string) => {
+    let filter;
+    if(nodeId === "all")
+    filter = `session ?= "${$user?.session}"`
+     else
+    filter = `node.id ?= "${nodeId}"`
+
     try {
       const localCameras = await pb
         .collection("camera")
         .getFullList<Camera>({
-          fields: "id,name,url,subUrl,save,created",
-          filter: `node.id ?= "${nodeId}"`,
+          fields: "id,name,url,subUrl,save,created,node",
+          filter,
           sort: "created",
         });
 
@@ -28,6 +34,12 @@
   $: if ($selectedNode) {
     getInitialCameras($selectedNode);
     pb.collection("camera").unsubscribe("*");
+    let filter;
+    if($selectedNode === "all")
+    filter = `session ?= "${$user?.session}"`
+     else
+    filter = `node.id ?= "${$selectedNode}"`
+
     try {
       pb.collection("camera").subscribe(
         "*",
@@ -50,7 +62,7 @@
           }
         },
         {
-          filter: `node.id?="${$selectedNode}"`,
+          filter,
         }
       );
     } catch (error) {

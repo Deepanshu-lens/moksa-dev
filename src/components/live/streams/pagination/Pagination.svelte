@@ -7,7 +7,8 @@
     cameras,
     totalCameras,
     selectedLayout,
-    displayCameras
+    displayCameras,
+    selectedNode,
   } from "@/stores";
 
   // Writable store to keep track of the current page
@@ -16,8 +17,8 @@
 
   // Reactive value for MAX_CAMERAS_PER_PAGE
   $: MAX_CAMERAS_PER_PAGE =
-  ($selectedLayout > 0 ? $selectedLayout : 3) ** 2 ||
-  parseInt(localStorage.getItem("selectedLayout") || "3") ** 2;
+    ($selectedLayout > 0 ? $selectedLayout : 3) ** 2 ||
+    parseInt(localStorage.getItem("selectedLayout") || "3") ** 2;
 
   // Function to update the displayCameras store based on current page
   const fetchDisplayCameras = (page: number) => {
@@ -71,16 +72,18 @@
     totalCameras.set(value.length);
 
     // If on the last page and a new camera is added, move to the next page
-    if (previousPage < totalPages) {
-      currentPage.set(totalPages);
-    } else if (previousPage > totalPages && totalPages > 0) {
-      // If the current page becomes invalid due to deletions, move to the previous page
-      currentPage.set(totalPages);
-    } else if (totalPages === 0) {
-      // If no cameras are left, reset to page 1
-      currentPage.set(1);
+    if ($selectedNode) currentPage.set(1);
+    else {
+      if (previousPage < totalPages) {
+        currentPage.set(totalPages);
+      } else if (previousPage > totalPages && totalPages > 0) {
+        // If the current page becomes invalid due to deletions, move to the previous page
+        currentPage.set(totalPages);
+      } else if (totalPages === 0) {
+        // If no cameras are left, reset to page 1
+        currentPage.set(1);
+      }
     }
-
     fetchDisplayCameras(get(currentPage));
   });
 </script>

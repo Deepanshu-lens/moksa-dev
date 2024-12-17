@@ -18,13 +18,13 @@
   import Button from "@/components/ui/button/button.svelte";
   import { cn } from "@/lib/utils";
   import * as Pagination from "@/components/ui/pagination";
-  import pb from "@/lib/pb";
   import NodeSelection from "../node/NodeSelection.svelte";
   import { getCameras } from "@/managers/get-camera";
   import { updateTransform, toggleFullscreen } from "@/lib/video-utils";
   import Checkbox from "../ui/checkbox/checkbox.svelte";
   import Label from "../ui/label/label.svelte";
   import getPlaybackURL from "@/lib/playback";
+  import {user} from "@/stores"
 
   // Variables
   let availableChannels = writable<{ id: string; label: string }[]>([]);
@@ -511,9 +511,9 @@
   }
 
   let previousNode: string | null = null;
-  $: if ($selectedNode && $selectedNode !== previousNode) {
+  $: if ($selectedNode && $selectedNode !== previousNode && $user) {
     isLoading.set(true);
-    getCameras($selectedNode).then((cameras) => {
+    getCameras($selectedNode,$user.session[0]).then((cameras) => {
       availableChannels.set(cameras);
       isLoading.set(false);
       previousNode = $selectedNode;

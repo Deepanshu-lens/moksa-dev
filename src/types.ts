@@ -82,7 +82,8 @@ export const cameraSchema = z.lazy(() =>
     url: z.string().url("Invalid URL"),
     subUrl: z.any(),
     save: z.boolean(),
-    created:z.string()
+    created:z.string(),
+    node:z.array(z.string())
     // subUrl: z.string().url("Invalid URL").nullable().optional(),
     // node: nodeSchema,
   })
