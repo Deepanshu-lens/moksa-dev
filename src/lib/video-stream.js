@@ -218,7 +218,7 @@ export class VideoStream extends VideoRTC {
         position: "absolute",
         top: "0",
         left: "0",
-        objectFit: "cover",
+        objectFit: "fill",
         margin: "0",
         padding: "0",
       });
