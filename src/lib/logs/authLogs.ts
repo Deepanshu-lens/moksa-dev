@@ -1,6 +1,33 @@
 import pb from "../pb";
 
+// Add these type declarations at the top of the file
+interface NavigatorWithConnection extends Navigator {
+  connection?: {
+    effectiveType: string;
+    downlink: number;
+    rtt: number;
+    saveData: boolean;
+    type: string;
+  };
+  mozConnection?: any;
+  webkitConnection?: any;
+}
+
+interface NavigatorWithBattery extends Navigator {
+  getBattery?: () => Promise<{
+    level: number;
+    charging: boolean;
+    chargingTime: number;
+    dischargingTime: number;
+  }>;
+}
+
+interface NavigatorWithMemory extends Navigator {
+  deviceMemory?: number;
+}
+
 async function getUserSystemDetails() {
+  if (!navigator) return null;
   const systemInfo = {
     // Screen & Display Info
     screen: {
@@ -15,8 +42,10 @@ async function getUserSystemDetails() {
 
     // Hardware & Memory Info
     hardware: {
-      cores: navigator.hardwareConcurrency || 'Not available',
-      memory: navigator.deviceMemory ? `${navigator.deviceMemory} GB` : 'Not available',
+      cores: navigator.hardwareConcurrency || "Not available",
+      memory: (navigator as NavigatorWithMemory)?.deviceMemory 
+        ? `${(navigator as NavigatorWithMemory).deviceMemory} GB`
+        : "Not available",
       platform: navigator.platform,
     },
 
@@ -28,7 +57,9 @@ async function getUserSystemDetails() {
 
     // Locale, Language & Timezone
     locale: {
-      languages: navigator.languages ? navigator.languages : [navigator.language],
+      languages: navigator.languages
+        ? navigator.languages
+        : [navigator.language],
       primaryLanguage: navigator.language,
       timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     },
@@ -42,7 +73,7 @@ async function getUserSystemDetails() {
 
     // Page Info
     page: {
-      referrer: document.referrer || 'No referrer or direct access',
+      referrer: document.referrer || "No referrer or direct access",
       url: window.location.href,
       title: document.title,
     },
@@ -59,7 +90,9 @@ async function getUserSystemDetails() {
 
 // Helper function for network details
 async function getNetworkDetails() {
-  const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  const nav = navigator as NavigatorWithConnection;
+  const connection =
+    nav.connection || nav.mozConnection || nav.webkitConnection;
   if (connection) {
     return {
       effectiveType: connection.effectiveType,
@@ -67,41 +100,42 @@ async function getNetworkDetails() {
       rtt: connection.rtt,
       saveData: connection.saveData,
       type: connection.type,
-      online: navigator.onLine
+      online: navigator.onLine,
     };
   }
   return {
     online: navigator.onLine,
-    details: 'Network API not supported'
+    details: "Network API not supported",
   };
 }
 
 // Helper function for battery details
 async function getBatteryDetails() {
-  if (navigator.getBattery) {
+  const nav = navigator as NavigatorWithBattery;
+  if (nav.getBattery) {
     try {
-      const battery = await navigator.getBattery();
+      const battery = await nav.getBattery();
       return {
-        level: (battery.level * 100) + '%',
+        level: battery.level * 100 + "%",
         charging: battery.charging,
         chargingTime: battery.chargingTime,
-        dischargingTime: battery.dischargingTime
+        dischargingTime: battery.dischargingTime,
       };
     } catch (error) {
-      return 'Battery API failed';
+      return "Battery API failed";
     }
   }
-  return 'Battery API not supported';
+  return "Battery API not supported";
 }
 
 // Helper function for IP address
 async function getIPAddress() {
   try {
-    const response = await fetch('https://api.ipify.org?format=json');
+    const response = await fetch("https://api.ipify.org?format=json");
     const data = await response.json();
     return data.ip;
   } catch (error) {
-    return 'Unable to fetch IP';
+    return "Unable to fetch IP";
   }
 }
 
@@ -156,7 +190,7 @@ export const addAuthLogs = async (eventString: string, email: string) => {
 
   try {
     const userDetails = await getUserSystemDetails();
-    
+
     const res = await pb.collection("loginEvents").create({
       events: event,
       email: email,
@@ -165,6 +199,5 @@ export const addAuthLogs = async (eventString: string, email: string) => {
     });
   } catch (error) {
     console.log("Error logging auth event:", error);
-    toast.error("Something went wrong. Please try again.");
   }
 };

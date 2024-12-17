@@ -1,6 +1,5 @@
 import type { Camera } from "@/types";
 import pb from "@/lib/pb";
-import { cameras, totalCameras } from "@/stores";
 
 export const getCameras = async (nodeId: string) => {
   try {

@@ -3,7 +3,7 @@ import pb from "../pb";
 export const addUserLogs = async (eventString: string, email: string, userId: string) => {
 
   try {
-    const res = await pb.collection("userLogs").create({
+    await pb.collection("userLogs").create({
       event: eventString,
       email: email,
       userId: userId,
