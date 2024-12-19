@@ -3,7 +3,7 @@ import PocketBase from 'pocketbase';
 
 export const load: PageServerLoad = async ({ fetch, cookies, locals }) => {
     // if (!cookies.get('moksa-token')) {
-    //     await fetch(`https://api.moksa.ai/auth/login`, {
+    //     await fetch(`https://dev.api.moksa.ai/auth/login`, {
     //         method: "POST", headers: {
     //             'Content-Type': 'application/json'
     //         },
@@ -38,7 +38,7 @@ export const load: PageServerLoad = async ({ fetch, cookies, locals }) => {
     oneWeekAgo.setDate(today.getDate() - 7);
 
     const allUsers = async () => {
-        const allUsers = await fetch(`https://api.moksa.ai/auth/getAllUsers/1/100`, {
+        const allUsers = await fetch(`https://dev.api.moksa.ai/auth/getAllUsers/1/100`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${cookies.get('moksa-token')}`

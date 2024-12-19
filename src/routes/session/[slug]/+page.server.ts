@@ -24,7 +24,7 @@ export const actions = {
       ?.collection("node")
       .create({ name, session: locals.user.record.session[0], mobileLayout: 1 });
 
-    const moksaStore = await fetch(`https://api.moksa.ai/store/create`, {
+    const moksaStore = await fetch(`https://dev.api.moksa.ai/store/create`, {
       method: 'POST',
       headers: {
         "Content-Type": "application/json",
@@ -99,7 +99,7 @@ export const load: PageServerLoad = async ({ locals, cookies }) => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-      const response = await fetch('https://api.moksa.ai/store/getAllStoresForDropdown', {
+      const response = await fetch('https://dev.api.moksa.ai/store/getAllStoresForDropdown', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${cookies.get('moksa-token')}`
