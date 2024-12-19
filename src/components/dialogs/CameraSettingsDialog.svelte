@@ -5,13 +5,8 @@
   import { Button } from "@/components/ui/button";
   import { selectedNode } from "@/lib/stores";
   import { Switch } from "@/components/ui/switch";
-  import * as Select from "@/components/ui/select";
 
   import {
-    FileVideo2,
-    Merge,
-    FolderSearch,
-    Pipette,
     ScanFace,
     Activity,
     Siren,
@@ -58,20 +53,18 @@
   export let user;
   let dialogOpen = false;
 
-  let activeTab = "video-saving";
+  let activeTab = "theft-detection";
 
   const tabs = [
-    { id: "video-saving", label: "Video Saving", icon: FileVideo2 },
-    { id: "face-scanning", label: "Face Scanning", icon: ScanFace },
-    { id: "running-detection", label: "Running Detection", icon: Activity },
+    { id: "theft-detection", label: "Theft Detection", icon: ScanFace },
+    { id: "heatmap", label: "Heatmap", icon: Activity },
     {
-      id: "intrusion-detection",
-      label: "Intrusion Detection",
+      id: "person-count",
+      label: "Person Count",
       icon: ShieldAlert,
     },
-    { id: "line-crossing", label: "Line Crossing", icon: PersonStanding },
-    { id: "priority", label: "Priority", icon: Siren },
-    { id: "motion-sensitivity", label: "Motion Sensitivity", icon: Activity },
+    { id: "kitchen-safety", label: "Kitchen Safety", icon: PersonStanding },
+    { id: "employee-safety", label: "Employee Safety", icon: Siren },
   ];
 
   $: {
@@ -177,8 +170,6 @@
     console.log("updatefeature", r);
   };
 
-  console.log(user?.role, "user in dialog");
-
   let labels = [];
 </script>
 
@@ -215,66 +206,71 @@
 
       <!-- Content Area -->
       <div class="flex-1 p-6">
-        {#if activeTab === "video-saving"}
-          <div class="space-y-4">
-            <div class="flex items-center justify-between">
-              <div>
-                <h3 class="text-lg font-semibold">Video Saving</h3>
-                <p class="text-gray-500">
-                  Save camera feed directly to your device
-                </p>
+        {#each tabs as tab}
+          {#if activeTab === tab.id}
+            <div class="space-y-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h3 class="text-lg font-semibold">{tab.label}</h3>
+                  <p class="text-gray-500">
+                    Save camera feed directly to your device
+                  </p>
+                </div>
+                <Switch bind:checked={save} />
               </div>
-              <Switch bind:checked={save} />
-            </div>
 
-            {#if save}
-              <div class="mt-8">
-                {#if labels.length === 0}
-                  <!-- Empty state when no labels -->
-                  <div class="border-2 border-dashed border-gray-200 rounded-lg p-8">
-                    <div class="text-center text-gray-500">
-                      <button 
-                        class="flex items-center gap-2 mx-auto text-blue-500"
-                        on:click={() => labels = [...labels, { name: '', value: '' }]}
+              {#if save}
+                <div class="mt-8">
+                  {#if labels.length === 0}
+                    <!-- Empty state when no labels -->
+                    <div
+                      class="border-2 border-dashed border-gray-200 rounded-lg p-8"
+                    >
+                      <div class="text-center text-gray-500">
+                        <button
+                          class="flex items-center gap-2 mx-auto text-blue-500"
+                          on:click={() =>
+                            (labels = [...labels, { name: "", value: "" }])}
+                        >
+                          <Plus class="w-5 h-5" />
+                          Get started by adding your first label
+                        </button>
+                      </div>
+                    </div>
+                  {:else}
+                    <!-- Show inputs when we have labels -->
+                    <div class="flex flex-col gap-4">
+                      {#each labels as label}
+                        <div class="flex items-center gap-4">
+                          <input
+                            type="text"
+                            placeholder="Name of the label"
+                            class="flex-1 p-2 border rounded-md"
+                          />
+                          <input
+                            type="text"
+                            placeholder="Input field"
+                            class="flex-1 p-2 border rounded-md"
+                          />
+                        </div>
+                      {/each}
+
+                      <!-- Add new button -->
+                      <button
+                        class="flex items-center gap-2 text-blue-500 hover:bg-gray-50 p-2 rounded"
+                        on:click={() =>
+                          (labels = [...labels, { name: "", value: "" }])}
                       >
-                        <Plus class="w-5 h-5" />
-                        Get started by adding your first label
+                        <Plus class="w-4 h-4" />
+                        Add new
                       </button>
                     </div>
-                  </div>
-                {:else}
-                  <!-- Show inputs when we have labels -->
-                  <div class="flex flex-col gap-4">
-                    {#each labels as label}
-                      <div class="flex items-center gap-4">
-                        <input 
-                          type="text" 
-                          placeholder="Name of the label"
-                          class="flex-1 p-2 border rounded-md"
-                        />
-                        <input 
-                          type="text" 
-                          placeholder="Input field"
-                          class="flex-1 p-2 border rounded-md"
-                        />
-                      </div>
-                    {/each}
-                    
-                    <!-- Add new button -->
-                    <button 
-                      class="flex items-center gap-2 text-blue-500 hover:bg-gray-50 p-2 rounded"
-                      on:click={() => labels = [...labels, { name: '', value: '' }]}
-                    >
-                      <Plus class="w-4 h-4" />
-                      Add new
-                    </button>
-                  </div>
-                {/if}
-              </div>
-            {/if}
-          </div>
-        {/if}
-        <!-- Add similar blocks for other tabs -->
+                  {/if}
+                </div>
+              {/if}
+            </div>
+          {/if}
+        {/each}
       </div>
     </div>
 
