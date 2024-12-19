@@ -98,79 +98,169 @@
     },
   ];
 
-  const editCamera = async () => {
-    setTimeout(() => {
-      console.log(showOptions.set(""));
-    }, 1000);
-    await fetch("/api/camera/editCamera", {
-      method: "put",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        cameraId,
-        nodeId: $selectedNode.id,
-        name: cameraName,
-        url: cameraURL,
-        subUrl,
-        face,
-        save,
-        running,
-        faceDetectionThreshold,
-        faceSearchThreshold,
-        runningThresh: runningDetectionThreshold,
-        saveDuration,
-        saveFolder,
-        motionThresh: motion === 0 ? 1000 : motion,
-        priority: priority === true ? 1 : 0,
-        intrusionDetection,
-        intrusionPerson,
-        intrusionVehicle,
-        intrusionPersonThresh,
-        intrusionVehicleThresh,
-        lineCrossing,
-        linePerson,
-        lineVehicle,
-        linePersonThresh,
-        lineVehicleThresh,
-        personCount,
-        theft,
-        safety,
-        person,
-        theftDetectionThresh,
-        employeEE,
-        heatmap,
-      }),
-    }).then(() => {
-      toast("Camera settings updated.");
-      dialogOpen = false;
-    });
-    const enabledFeatures = {
-      heat: heatmap || false,
-      count: person || false,
-      theft: theft || false,
-      kitchenhygiene: safety || false,
-      rtsp: false,
-    };
-    console.log("features", enabledFeatures);
-    console.log("storeid", $selectedNode.moksaId);
-    console.log("moksaid camid", moksaId);
-    const dev = await fetch(`/api/camera/updateFeatures`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        storeId: $selectedNode.moksaId,
-        camId: moksaId,
-        feature: enabledFeatures,
-      }),
-    });
-    const r = await dev.json();
-    console.log("updatefeature", r);
+  let labels = {
+    "employee-safety": [],
+    "theft-detection": [],
+    heatmap: [],
+    "person-count": [],
+    "kitchen-safety": [],
   };
 
-  let labels = [];
+  const editCamera = async () => {
+    // setTimeout(() => {
+    //   console.log(showOptions.set(""));
+    // }, 1000);
+    // await fetch("/api/camera/editCamera", {
+    //   method: "put",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //   },
+    //   body: JSON.stringify({
+    //     cameraId,
+    //     nodeId: $selectedNode.id,
+    //     name: cameraName,
+    //     url: cameraURL,
+    //     subUrl,
+    //     face,
+    //     save,
+    //     running,
+    //     faceDetectionThreshold,
+    //     faceSearchThreshold,
+    //     runningThresh: runningDetectionThreshold,
+    //     saveDuration,
+    //     saveFolder,
+    //     motionThresh: motion === 0 ? 1000 : motion,
+    //     priority: priority === true ? 1 : 0,
+    //     intrusionDetection,
+    //     intrusionPerson,
+    //     intrusionVehicle,
+    //     intrusionPersonThresh,
+    //     intrusionVehicleThresh,
+    //     lineCrossing,
+    //     linePerson,
+    //     lineVehicle,
+    //     linePersonThresh,
+    //     lineVehicleThresh,
+    //     personCount,
+    //     theft,
+    //     safety,
+    //     person,
+    //     theftDetectionThresh,
+    //     employeEE,
+    //     heatmap,
+    //   }),
+    // }).then(() => {
+    //   toast("Camera settings updated.");
+    //   dialogOpen = false;
+    // });
+    // const enabledFeatures = {
+    //   heat: heatmap || false,
+    //   count: person || false,
+    //   theft: theft || false,
+    //   kitchenhygiene: safety || false,
+    //   rtsp: false,
+    // };
+    // console.log("features", enabledFeatures);
+    // console.log("storeid", $selectedNode.moksaId);
+    // console.log("moksaid camid", moksaId);
+    // const dev = await fetch(`/api/camera/updateFeatures`, {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //   },
+    //   body: JSON.stringify({
+    //     storeId: $selectedNode.moksaId,
+    //     camId: moksaId,
+    //     feature: enabledFeatures,
+    //   }),
+    // });
+    // const r = await dev.json();
+    // console.log("updatefeature", r);
+
+    // Initialize customer variable objects
+    const mobileCustomerVars = {};
+    const theftCustomerVars = {};
+    const heatmapCustomerVars = {};
+    const peopleCustomerVars = {};
+    const kitchenCustomerVars = {};
+
+    // Populate the customer variable objects based on the labels for the active tab
+    labels[activeTab].forEach((label) => {
+      if (label.name && label.value) {
+        if (activeTab === "employee-safety") {
+          mobileCustomerVars[label.name] = label.value;
+        } else if (activeTab === "theft-detection") {
+          theftCustomerVars[label.name] = label.value;
+        } else if (activeTab === "heatmap") {
+          heatmapCustomerVars[label.name] = label.value;
+        } else if (activeTab === "person-count") {
+          peopleCustomerVars[label.name] = label.value;
+        } else if (activeTab === "kitchen-safety") {
+          kitchenCustomerVars[label.name] = label.value;
+        }
+      }
+    });
+
+    // Construct the payload based on which customer vars are populated
+    const customerVarsPayload = {
+      lensCameraId: cameraId,
+      triggerDeployment: true,
+    };
+
+    // Add customer vars to the payload only if they have values
+    if (Object.keys(mobileCustomerVars).length > 0) {
+      customerVarsPayload.mobileCustomerVars = {
+        isEnabled: "True",
+        ...mobileCustomerVars,
+      };
+    }
+    if (Object.keys(theftCustomerVars).length > 0) {
+      customerVarsPayload.theftCustomerVars = {
+        isEnabled: "True",
+        ...theftCustomerVars,
+      };
+    }
+    if (Object.keys(heatmapCustomerVars).length > 0) {
+      customerVarsPayload.heatmapCustomerVars = {
+        isEnabled: "True",
+        ...heatmapCustomerVars,
+      };
+    }
+    if (Object.keys(peopleCustomerVars).length > 0) {
+      customerVarsPayload.peopleCustomerVars = {
+        isEnabled: "True",
+        ...peopleCustomerVars,
+      };
+    }
+    if (Object.keys(kitchenCustomerVars).length > 0) {
+      customerVarsPayload.kitchenCustomerVars = {
+        isEnabled: "True",
+        ...kitchenCustomerVars,
+      };
+    }
+
+    console.log(customerVarsPayload, "customersvarpayload");
+
+    // await fetch(`http://dev.api.moksa.ai/store/updateCustomerVars/${$selectedNode?.moksaId}`, {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //   },
+    //   body: JSON.stringify(customerVarsPayload),
+    // })
+    //   .then((response) => {
+    //     if (!response.ok) {
+    //       throw new Error("Failed to update customer variables");
+    //     }
+    //     return response.json();
+    //   })
+    //   .then((data) => {
+    //     console.log("Customer variables updated:", data);
+    //   })
+    //   .catch((error) => {
+    //     console.error("Error updating customer variables:", error);
+    //   });
+  };
 </script>
 
 <!-- markup (zero or more items) goes here -->
@@ -221,7 +311,7 @@
 
               {#if save}
                 <div class="mt-8">
-                  {#if labels.length === 0}
+                  {#if labels[activeTab].length === 0}
                     <!-- Empty state when no labels -->
                     <div
                       class="border-2 border-dashed border-gray-200 rounded-lg p-8"
@@ -230,7 +320,10 @@
                         <button
                           class="flex items-center gap-2 mx-auto text-blue-500"
                           on:click={() =>
-                            (labels = [...labels, { name: "", value: "" }])}
+                            (labels[activeTab] = [
+                              ...labels[activeTab],
+                              { name: "", value: "" },
+                            ])}
                         >
                           <Plus class="w-5 h-5" />
                           Get started by adding your first label
@@ -240,17 +333,19 @@
                   {:else}
                     <!-- Show inputs when we have labels -->
                     <div class="flex flex-col gap-4">
-                      {#each labels as label}
+                      {#each labels[activeTab] as label, index}
                         <div class="flex items-center gap-4">
                           <input
                             type="text"
                             placeholder="Name of the label"
                             class="flex-1 p-2 border rounded-md"
+                            bind:value={label.name}
                           />
                           <input
                             type="text"
                             placeholder="Input field"
                             class="flex-1 p-2 border rounded-md"
+                            bind:value={label.value}
                           />
                         </div>
                       {/each}
@@ -259,7 +354,10 @@
                       <button
                         class="flex items-center gap-2 text-blue-500 hover:bg-gray-50 p-2 rounded"
                         on:click={() =>
-                          (labels = [...labels, { name: "", value: "" }])}
+                          (labels[activeTab] = [
+                            ...labels[activeTab],
+                            { name: "", value: "" },
+                          ])}
                       >
                         <Plus class="w-4 h-4" />
                         Add new
