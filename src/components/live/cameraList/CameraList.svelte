@@ -246,7 +246,7 @@
         <article
           class={cn(
             "flex items-center p-4 dark:border bg-accent my-4 hover:border hover:border-primary space-x-4 rounded-xl text-sm z-10 w-full px-4 relative",
-            { "border border-white": camera.id === $selectedCamera }
+            { "border dark:border-white border-green-400": camera.id === $selectedCamera }
           )}
           on:click={() => {
             if ($selectedCamera === camera.id) selectedCamera.set("");
@@ -270,8 +270,9 @@
           <div
             class="flex flex-row gap-0 xl:ml-auto space-x-2 list-none cursor-pointer items-end"
           >
-            <CameraActionButton {camera} action="edit" />
-            <CameraActionButton {camera} action="delete" />
+            <CameraActionButton {camera} action="edit" icon={true}/>
+            <CameraActionButton {camera} action="settings" icon={true}/>
+            <CameraActionButton {camera} action="delete" icon={true} />
           </div>
           {#if $selectedNode === "all" && $nodes?.find((node) => node.id === camera?.node[0])?.name}
             <span

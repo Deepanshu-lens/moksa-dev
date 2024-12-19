@@ -1,31 +1,19 @@
 <script lang="ts">
   let dialogOpen = false;
-  export let save: boolean;
+  export let save: boolean = true;
   export let face: boolean;
-  export let running: boolean;
-  export let faceDetectionThreshold: number = 0.6;
+  export let faceDetectionThreshold: number = 0.9;
+  export let personDetectionThreshold: number = 0.6;
   export let faceSearchThreshold: number = 0.3;
-  export let runningDetectionThreshold: number = 0.75;
   export let saveDuration: number;
-  export let saveFolder: string;
-  export let motion: number = 1000;
-  export let priority: boolean;
-  export let intrusionDetection: boolean;
-  export let intrusionPerson: boolean;
-  export let intrusionVehicle: boolean;
-  export let intrusionPersonThresh: number = 0.7;
-  export let intrusionVehicleThresh: number = 0.7;
-  export let lineCrossing: boolean;
-  export let linePerson: boolean;
-  export let lineVehicle: boolean;
-  export let linePersonThresh: number = 0.7;
-  export let lineVehicleThresh: number = 0.7;
-  export let personCount: boolean;
+  export let camera: any;
+  export let motionThresh: number = 1000;
+  export let fps: number = 1;
+  export let person: boolean;
   import * as Dialog from "@/components/ui/dialog";
   import { Label } from "@/components/ui/label";
   import { Switch } from "@/components/ui/switch";
   import { Input } from "@/components/ui/input";
-  import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
   import * as Select from "@/components/ui/select";
   import { Slider } from "@/components/ui/slider";
   import { Button } from "@/components/ui/button";
@@ -37,17 +25,15 @@
   } from "@/components/ui/tabs";
   import {
     Activity,
-    Construction,
     FileVideo2,
+    TrendingUp,
     FolderSearch,
-    Footprints,
     Merge,
     PersonStanding,
-    Pipette,
     ScanFace,
-    Siren,
-    ToggleLeftIcon,
   } from "lucide-svelte";
+  import pb from "@/lib/pb";
+  import { toast } from "svelte-sonner";
   const items = [
     {
       value: 30 * 24 * 60,
@@ -71,6 +57,96 @@
     },
   ];
   let activeTab = "video-saving";
+  const isProd = import.meta.env.PUBLIC_ENV === "production";
+  let timeZone = ""; // Variable to hold the selected timezone
+  const timeZones = [
+    { value: "Pacific/Midway", label: "(GMT-11:00) Midway Island" },
+    { value: "Pacific/Niue", label: "(GMT-11:00) Niue" },
+    { value: "Pacific/Pago_Pago", label: "(GMT-11:00) Pago Pago" },
+    { value: "America/Adak", label: "(GMT-10:00) Adak" },
+    {
+      value: "America/Los_Angeles",
+      label: "(GMT-08:00) Pacific Time (US & Canada)",
+    },
+    {
+      value: "America/Denver",
+      label: "(GMT-07:00) Mountain Time (US & Canada)",
+    },
+    {
+      value: "America/Chicago",
+      label: "(GMT-06:00) Central Time (US & Canada)",
+    },
+    {
+      value: "America/New_York",
+      label: "(GMT-05:00) Eastern Time (US & Canada)",
+    },
+    { value: "America/Halifax", label: "(GMT-04:00) Atlantic Time (Canada)" },
+    {
+      value: "America/Argentina/Buenos_Aires",
+      label: "(GMT-03:00) Buenos Aires",
+    },
+    { value: "America/Sao_Paulo", label: "(GMT-03:00) São Paulo" },
+    { value: "Atlantic/Azores", label: "(GMT-01:00) Azores" },
+    { value: "Europe/London", label: "(GMT+00:00) London" },
+    { value: "Europe/Berlin", label: "(GMT+01:00) Berlin" },
+    { value: "Europe/Paris", label: "(GMT+01:00) Paris" },
+    { value: "Europe/Moscow", label: "(GMT+03:00) Moscow" },
+    { value: "Asia/Dubai", label: "(GMT+04:00) Dubai" },
+    { value: "Asia/Kabul", label: "(GMT+04:30) Kabul" },
+    { value: "Asia/Tehran", label: "(GMT+03:30) Tehran" },
+    { value: "Asia/Karachi", label: "(GMT+05:00) Karachi" },
+    { value: "Asia/Calcutta", label: "(GMT+05:30) Kolkata" },
+    { value: "Asia/Dhaka", label: "(GMT+06:00) Dhaka" },
+    { value: "Asia/Bangkok", label: "(GMT+07:00) Bangkok" },
+    { value: "Asia/Hong_Kong", label: "(GMT+08:00) Hong Kong" },
+    { value: "Asia/Tokyo", label: "(GMT+09:00) Tokyo" },
+    { value: "Australia/Sydney", label: "(GMT+10:00) Sydney" },
+    { value: "Australia/Adelaide", label: "(GMT+09:30) Adelaide" },
+    { value: "Australia/Perth", label: "(GMT+08:00) Perth" },
+    { value: "Pacific/Auckland", label: "(GMT+13:00) Auckland" },
+    { value: "Pacific/Fiji", label: "(GMT+12:00) Fiji" },
+    { value: "Pacific/Chatham", label: "(GMT+13:45) Chatham Islands" },
+  ];
+
+  // Function to save camera settings
+  const saveCameraSettings = async () => {
+    // Log all values before sending
+    console.log("Saving camera settings with the following values:", {
+      save,
+      face,
+      faceDetectionThreshold,
+      personDetectionThreshold,
+      faceSearchThreshold,
+      motionThresh,
+      fps,
+      person,
+      timeZone,
+    });
+
+    try {
+      await pb.collection("camera").update(camera?.id, {
+        // Replace "cameraId" with the actual ID or reference
+        save,
+        face,
+        faceDetThresh: faceDetectionThreshold,
+        personDetThreshold: personDetectionThreshold,
+        faceMatchThresh: faceSearchThreshold,
+        saveDuration,
+        motionThresh,
+        fps,
+        person,
+        timeZone,
+      });
+      // Optionally, you can close the dialog or show a success message
+      dialogOpen = false; // Close the dialog after saving
+    } catch (error) {
+      toast.error(
+        error?.message || "something went wrong while updating camera settings"
+      );
+      console.error("Error updating camera settings:", error);
+      // Optionally, show an error message to the user
+    }
+  };
 </script>
 
 <Dialog.Root bind:open={dialogOpen}>
@@ -78,9 +154,7 @@
   <Dialog.Content class="sm:max-w-[800px] pl-0 pb-0 gap-0">
     <Dialog.Header class="border-b pb-2 pl-6 mb-0">
       <Dialog.Title>Camera Settings</Dialog.Title>
-      <Dialog.Description>
-        <!-- Change settings for <span class="font-semibold">{cameraName}</span> camera -->
-      </Dialog.Description>
+      <Dialog.Description></Dialog.Description>
     </Dialog.Header>
 
     <!-- Dialog Content -->
@@ -88,7 +162,7 @@
       <Tabs
         value={activeTab}
         onValueChange={(value) => (activeTab = value)}
-        class="w-full flex "
+        class="w-full flex"
       >
         <!-- Right Side tabs -->
         <div class="h-[30rem] bg-neutral-100 dark:bg-black dark:text-white">
@@ -105,37 +179,25 @@
               value="face-scanning"
               class="w-full flex items-center justify-start dark:hover:bg-neutral-700"
             >
-              <ScanFace size={16} class="mr-2" />Face Scanning
+              <ScanFace size={16} class="mr-2" />Face Detection
             </TabsTrigger>
             <TabsTrigger
-              value="running-detection"
+              value="person-detection"
               class="w-full flex items-center justify-start dark:hover:bg-neutral-700"
             >
-              <Footprints size={16} class="mr-2" />Running Detection
+              <PersonStanding size={16} class="mr-2" />Person Detection
             </TabsTrigger>
-            <TabsTrigger
-              value="intrusion-detection"
-              class="w-full flex items-center justify-start dark:hover:bg-neutral-700"
-            >
-              <PersonStanding size={16} class="mr-2" />Intrusion Detection
-            </TabsTrigger>
-            <TabsTrigger
-              value="line-crossing"
-              class="w-full flex items-center justify-start dark:hover:bg-neutral-700"
-            >
-              <Pipette size={16} class="mr-2" />Line Crossing
-            </TabsTrigger>
-            <!-- <TabsTrigger
-              value="priority"
-              class="w-full flex items-center justify-start dark:hover:bg-neutral-700"
-            >
-              <Siren size={16} class="mr-2" />Priority
-            </TabsTrigger> -->
             <TabsTrigger
               value="motion-sensitivity"
               class="w-full flex items-center justify-start dark:hover:bg-neutral-700"
             >
               <Activity size={16} class="mr-2" />Motion Sensitivity
+            </TabsTrigger>
+            <TabsTrigger
+              value="fps"
+              class="w-full flex items-center justify-start dark:hover:bg-neutral-700"
+            >
+              <TrendingUp size={16} class="mr-2" />AI Frame Ratio
             </TabsTrigger>
           </TabsList>
         </div>
@@ -155,22 +217,24 @@
 
               {#if save}
                 <!-- Add other video saving options here -->
-                <div class="flex items-center space-x-4 pt-3">
-                  <FolderSearch />
-                  <div class="flex-1 space-y-1">
-                    <p class="text-sm font-medium leading-none">Save Here</p>
-                    <p class="text-sm text-muted-foreground">
-                      Point your video to its future home.
-                    </p>
+                {#if !isProd}
+                  <div class="flex items-center space-x-4 pt-3">
+                    <FolderSearch />
+                    <div class="flex-1 space-y-1">
+                      <p class="text-sm font-medium leading-none">Save Here</p>
+                      <p class="text-sm text-muted-foreground">
+                        Point your video to its future home.
+                      </p>
+                    </div>
+                    <Input
+                      id="picture"
+                      type="text"
+                      class="w-[180px] placeholder:dark:text-gray-400"
+                      disabled
+                      placeholder="./PlayBack"
+                    />
                   </div>
-                  <Input
-                    id="picture"
-                    type="text"
-                    class="w-[180px] placeholder:dark:text-gray-400"
-                    disabled
-                    placeholder="./PlayBack"
-                  />
-                </div>
+                {/if}
                 <div class="flex items-center space-x-4 pt-3">
                   <Merge />
                   <div class="flex-1 space-y-1">
@@ -202,6 +266,36 @@
                     <Select.Input name="favoriteFruit" />
                   </Select.Root>
                 </div>
+
+                <!-- Timezone Selector -->
+                <div class="mt-4">
+                  <Label
+                    for="timezone"
+                    class="block text-sm font-medium text-gray-700 my-3"
+                    >Select Timezone</Label
+                  >
+                  <Select.Root
+                    bind:value={timeZone}
+                    onSelectedChange={(e) => (timeZone = e.value)}
+                  >
+                    <Select.Trigger class="w-[280px] my-3">
+                      <Select.Value
+                        placeholder={items.find((m) => m.value === timeZone)
+                          ?.label || "Select Duration"}
+                      />
+                    </Select.Trigger>
+                    <Select.Content class="h-60 overflow-y-auto">
+                      <Select.Group>
+                        {#each timeZones as zone}
+                          <Select.Item value={zone.value} label={zone.label}
+                            >{zone.label}</Select.Item
+                          >
+                        {/each}
+                      </Select.Group>
+                    </Select.Content>
+                    <Select.Input name="favoriteFruit" />
+                  </Select.Root>
+                </div>
               {/if}
             </div>
           </TabsContent>
@@ -216,156 +310,279 @@
                 <Switch bind:checked={face} />
               </div>
               {#if face}
-                <div>
-                  <Label>Face Detection Threshold</Label>
-                  <p class="text-sm text-muted-foreground mt-1 mb-4">
-                    Adjust the threshold to accomodate smaller or larger faces
-                  </p>
+                <Label>Face Detection Threshold</Label>
+                <p class="text-sm text-muted-foreground mt-1 mb-4">
+                  Adjust the threshold to accommodate smaller or larger faces
+                </p>
+                <div class="flex items-center gap-x-2">
                   <Slider
                     min={0}
-                    max={100}
-                    step={1}
-                    value={[faceDetectionThreshold * 100]}
-                    onValueChange={(e) => (faceDetectionThreshold = e[0] / 100)}
+                    max={1}
+                    step={0.01}
+                    value={[faceDetectionThreshold]}
+                    onValueChange={(e) => (faceDetectionThreshold = e[0])}
                     class="w-[60%]"
                   />
+                  <div class="relative flex items-center max-w-[8rem] ml-2">
+                    <!-- svelte-ignore a11y_consider_explicit_label -->
+                    <button
+                      type="button"
+                      id="decrement-button"
+                      class="bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-600 hover:bg-gray-200 border border-gray-300 rounded-s-lg p-2 h-8 focus:ring-gray-100 dark:focus:ring-gray-700 focus:ring-2 focus:outline-none"
+                      on:click={() => {
+                        faceDetectionThreshold = Math.max(
+                          0,
+                          faceDetectionThreshold - 0.1
+                        ); // Step of 0.01
+                      }}
+                    >
+                      <svg
+                        class="w-3 h-3 text-gray-900 dark:text-white"
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 18 2"
+                      >
+                        <path
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M1 1h16"
+                        />
+                      </svg>
+                    </button>
+                    <input
+                      type="text"
+                      id="quantity-input"
+                      class="bg-gray-50 border-x-0 border-gray-300 h-11 text-center text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                      value={faceDetectionThreshold}
+                      on:input={(e) => {
+                        const value = Math.min(Math.max(e.target.value, 0), 10);
+                        faceDetectionThreshold = value / 10;
+                      }}
+                      placeholder="0"
+                      required
+                    />
+                    <!-- svelte-ignore a11y_consider_explicit_label -->
+                    <button
+                      type="button"
+                      id="increment-button"
+                      class="bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-600 hover:bg-gray-200 border border-gray-300 rounded-e-lg p-2 h-8 focus:ring-gray-100 dark:focus:ring-gray-700 focus:ring-2 focus:outline-none"
+                      on:click={() => {
+                        faceDetectionThreshold = Math.min(
+                          1,
+                          faceDetectionThreshold + 0.1
+                        ); // Step of 0.01
+                      }}
+                    >
+                      <svg
+                        class="w-3 h-3 text-gray-900 dark:text-white"
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 18 18"
+                      >
+                        <path
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M9 1v16M1 9h16"
+                        />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
                 <div>
-                  <Label>Face Search Threshold</Label>
+                  <Label>Face Matching Threshold</Label>
                   <p class="text-sm text-muted-foreground mt-1 mb-4">
                     Adjust the threshold to accomodate smaller or larger faces
                   </p>
-                  <Slider
-                    min={0}
-                    max={100}
-                    step={1}
-                    value={[faceSearchThreshold * 100]}
-                    onValueChange={(e) => (faceSearchThreshold = e[0] / 100)}
-                    class="w-[60%]"
-                  />
+                  <div class="flex items-center gap-x-2">
+                    <Slider
+                      min={0}
+                      max={1}
+                      step={0.1}
+                      value={[faceSearchThreshold]}
+                      onValueChange={(e) => (faceSearchThreshold = e[0])}
+                      class="w-[60%]"
+                    />
+                    <div class="relative flex items-center max-w-[8rem] ml-2">
+                      <button
+                        type="button"
+                        id="decrement-button"
+                        class="bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-600 hover:bg-gray-200 border border-gray-300 rounded-s-lg p-2 h-8 focus:ring-gray-100 dark:focus:ring-gray-700 focus:ring-2 focus:outline-none"
+                        on:click={() => {
+                          faceSearchThreshold = Math.max(
+                            0,
+                            faceSearchThreshold - 0.1
+                          ); // Step of 0.01
+                        }}
+                      >
+                        <svg
+                          class="w-3 h-3 text-gray-900 dark:text-white"
+                          aria-hidden="true"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 18 2"
+                        >
+                          <path
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M1 1h16"
+                          />
+                        </svg>
+                      </button>
+                      <input
+                        type="text"
+                        id="quantity-input"
+                        class="bg-gray-50 border-x-0 border-gray-300 h-11 text-center text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                        value={faceSearchThreshold}
+                        on:input={(e) => {
+                          const value = Math.min(
+                            Math.max(e.target.value, 0),
+                            10
+                          );
+                          faceSearchThreshold = value / 10;
+                        }}
+                        placeholder="0"
+                        required
+                      />
+                      <button
+                        type="button"
+                        id="increment-button"
+                        class="bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-600 hover:bg-gray-200 border border-gray-300 rounded-e-lg p-2 h-8 focus:ring-gray-100 dark:focus:ring-gray-700 focus:ring-2 focus:outline-none"
+                        on:click={() => {
+                          faceSearchThreshold = Math.min(
+                            1,
+                            faceSearchThreshold + 0.1
+                          ); // Step of 0.01
+                        }}
+                      >
+                        <svg
+                          class="w-3 h-3 text-gray-900 dark:text-white"
+                          aria-hidden="true"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 18 18"
+                        >
+                          <path
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 1v16M1 9h16"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
                 </div>
               {/if}
             </div>
           </TabsContent>
 
-          <!-- Running detection -->
-          <TabsContent value="running-detection">
-            <div class="space-y-4 w-full">
-              <div
-                class="flex items-center justify-between p-2 gap-x-[23rem] border-b pb-2"
-              >
-                <Label class="text-nowrap">Running Detection</Label>
-                <Switch bind:checked={face} />
-              </div>
-              {#if face}
-                <div>
-                  <Label>Running Detection Threshold</Label>
-                  <p class="text-sm text-muted-foreground mt-1 mb-4">
-                    Adjust the threshold to accommodate different running speeds
-                  </p>
-                  <Slider
-                    min={0}
-                    max={100}
-                    step={1}
-                    value={[faceDetectionThreshold * 100]}
-                    onValueChange={(e) => (faceDetectionThreshold = e[0] / 100)}
-                    class="w-[60%]"
-                  />
-                </div>
-              {/if}
-            </div>
-          </TabsContent>
-
-          <!-- intrusion detection -->
-          <TabsContent value="intrusion-detection">
+          <!-- person detection -->
+          <TabsContent value="person-detection">
             <div class="space-y-4 w-full">
               <div class="border-b pb-2 p-2">
                 <div class="flex items-center justify-between gap-x-[20rem]">
                   <Label
                     class="text-nowrap text-base
-                    ">Intrusion Detection</Label
+                    ">Person Detection</Label
                   >
-                  <Switch bind:checked={intrusionDetection} />
+                  <Switch bind:checked={person} />
                 </div>
                 <p class="text-sm text-muted-foreground mt-1">
-                  Parameters for identifying intrusions
+                  Parameters for identifying persons
                 </p>
               </div>
-              {#if intrusionDetection}
-                <div class="px-3">Select mode of Intrusion</div>
-                <RadioGroup class="flex gap-y-2 gap-x-40 px-3">
-                  <div class="flex items-center space-x-2">
-                    <Label for="vehicle">Vehicle Mode</Label>
-                    <RadioGroupItem
-                      value="vehicle"
-                      id="vehicle"
-                      bind:checked={intrusionVehicle}
-                      class="border border-orange-500 text-orange-500 focus:ring-orange-500"
-                    />
-                  </div>
-                  <div class="flex items-center space-x-2">
-                    <Label for="human">Human Mode</Label>
-                    <RadioGroupItem
-                      value="human"
-                      id="human"
-                      bind:checked={intrusionPerson}
-                      class="border border-orange-500 text-orange-500 focus:ring-orange-500"
-                    />
-                  </div>
-                </RadioGroup>
-              {/if}
-            </div>
-          </TabsContent>
-
-          <!-- Line Crossing -->
-          <TabsContent value="line-crossing">
-            <div class="rounded-md p-2">
-              <div
-                class="flex items-start space-x-48 border-b pb-2 justify-between"
-              >
-                <div class="space-y-1">
-                  <p class="text-base font-medium">Line Crossing</p>
-                  <p class="text-sm text-muted-foreground text-nowrap">
-                    Parameters for creating region of Interest
-                  </p>
-                </div>
-                <Switch bind:checked={lineCrossing} />
-              </div>
-              <div>
-                {#if lineCrossing}
-                  <div class="">
-                    <!-- <div class="my-3">Select mode of Line Crossing</div> -->
-                    <div class="flex-col gap-y-6 px-3">
-                      <div>
-                        <Label>Line Detection Threshold</Label>
-                        <p class="text-sm text-muted-foreground mt-1 mb-4">
-                          Adjust the threshold to accommodate smaller or larger
-                          objects crossing the line
-                        </p>
-                        <Slider
-                          min={0}
-                          max={100}
-                          step={1}
-                          value={[faceDetectionThreshold * 100]}
-                          onValueChange={(e) =>
-                            (faceDetectionThreshold = e[0] / 100)}
-                          class="w-[60%]"
+              {#if person}
+                <div class="flex items-center gap-x-2">
+                  <Label class="my-3">Person Detection Threshold</Label>
+                  <Slider
+                    min={0}
+                    max={1}
+                    step={0.01}
+                    value={[personDetectionThreshold]}
+                    onValueChange={(e) => (personDetectionThreshold = e[0])}
+                    class="w-[60%]"
+                  />
+                  <div class="relative flex items-center max-w-[8rem] ml-2">
+                    <!-- svelte-ignore a11y_consider_explicit_label -->
+                    <button
+                      type="button"
+                      id="decrement-button"
+                      class="bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-600 hover:bg-gray-200 border border-gray-300 rounded-s-lg p-2 h-8 focus:ring-gray-100 dark:focus:ring-gray-700 focus:ring-2 focus:outline-none"
+                      on:click={() => {
+                        personDetectionThreshold = Math.max(
+                          0,
+                          personDetectionThreshold - 0.1
+                        ); // Step of 0.01
+                      }}
+                    >
+                      <svg
+                        class="w-3 h-3 text-gray-900 dark:text-white"
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 18 2"
+                      >
+                        <path
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M1 1h16"
                         />
-                      </div>
-                    </div>
+                      </svg>
+                    </button>
+                    <input
+                      type="text"
+                      id="quantity-input"
+                      class="bg-gray-50 border-x-0 border-gray-300 h-11 text-center text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                      value={personDetectionThreshold}
+                      on:input={(e) => {
+                        const value = Math.min(Math.max(e.target.value, 0), 10);
+                        personDetectionThreshold = value;
+                      }}
+                      placeholder="0"
+                      required
+                    />
+                    <!-- svelte-ignore a11y_consider_explicit_label -->
+                    <button
+                      type="button"
+                      id="increment-button"
+                      class="bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-600 hover:bg-gray-200 border border-gray-300 rounded-e-lg p-2 h-8 focus:ring-gray-100 dark:focus:ring-gray-700 focus:ring-2 focus:outline-none"
+                      on:click={() => {
+                        personDetectionThreshold = Math.min(
+                          1,
+                          personDetectionThreshold + 0.1
+                        ); // Step of 0.01
+                      }}
+                    >
+                      <svg
+                        class="w-3 h-3 text-gray-900 dark:text-white"
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 18 18"
+                      >
+                        <path
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M9 1v16M1 9h16"
+                        />
+                      </svg>
+                    </button>
                   </div>
-                {/if}
-              </div>
-            </div>
-          </TabsContent>
-
-          <!-- Priority -->
-          <TabsContent value="priority">
-            <div class="flex items-center space-x-[26rem] border-b pb-2 p-2">
-              <div class="flex-1 space-y-1">
-                <p class="text-sm font-medium leading-none">Priority</p>
-              </div>
-              <Switch bind:checked={priority} />
+                </div>
+              {/if}
             </div>
           </TabsContent>
 
@@ -383,22 +600,189 @@
               <div class="flex items-center gap-8 w-52">
                 <Slider
                   min={0}
-                  value={[motion === 1000 ? 0 : motion]}
-                  max={5000}
-                  step={2500}
+                  max={10}
+                  step={1}
+                  value={[motionThresh]}
                   class="w-32"
                   onValueChange={(e) => {
-                    motion = e[0];
+                    motionThresh = e[0];
                   }}
                 />
-                {motion === 5000 ? "High" : motion === 2500 ? "Mid" : "Low"}
+                <div class="relative flex items-center max-w-[8rem] ml-2">
+                  <button
+                    type="button"
+                    id="decrement-button"
+                    class="bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-600 hover:bg-gray-200 border border-gray-300 rounded-s-lg p-2 h-8 focus:ring-gray-100 dark:focus:ring-gray-700 focus:ring-2 focus:outline-none"
+                    on:click={() => {
+                      if (motionThresh > 0) {
+                        motionThresh = Math.max(0, motionThresh - 1); // Step of 1
+                      }
+                    }}
+                  >
+                    <svg
+                      class="w-3 h-3 text-gray-900 dark:text-white"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 18 2"
+                    >
+                      <path
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M1 1h16"
+                      />
+                    </svg>
+                  </button>
+                  <input
+                    type="text"
+                    id="quantity-input"
+                    class="bg-gray-50 border-x-0 border-gray-300 h-11 text-center text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    value={motionThresh}
+                    on:input={(e) => {
+                      const value = Math.min(Math.max(e.target.value, 0), 10);
+                      motionThresh = value;
+                    }}
+                    placeholder="0"
+                    required
+                  />
+                  <button
+                    type="button"
+                    id="increment-button"
+                    class="bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-600 hover:bg-gray-200 border border-gray-300 rounded-e-lg p-2 h-8 focus:ring-gray-100 dark:focus:ring-gray-700 focus:ring-2 focus:outline-none"
+                    on:click={() => {
+                      if (motionThresh < 10) {
+                        motionThresh = Math.min(10, motionThresh + 1); // Step of 1
+                      }
+                    }}
+                  >
+                    <svg
+                      class="w-3 h-3 text-gray-900 dark:text-white"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 18 18"
+                    >
+                      <path
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 1v16M1 9h16"
+                      />
+                    </svg>
+                  </button>
+                </div>
               </div>
             </div>
+            <p class="text-sm text-muted-foreground mt-2 p-2 mx-4">
+              {`Increase in Motion Sensitivity might cause decrease in ${isProd ? "cost" : "CPU Usage"}.`}
+            </p>
+          </TabsContent>
+
+          <!-- frames performance settings -->
+          <TabsContent value="fps">
+            <div
+              class="rounded-md p-2 my-2 flex items-center justify-between w-[33rem]"
+            >
+              <div class="flex items-center space-x-4 mx-4">
+                <TrendingUp />
+                <p class="text-sm font-medium leading-none">
+                  Frames Per Second
+                </p>
+              </div>
+              <div class="flex items-center gap-8 w-52">
+                <Slider
+                  min={0}
+                  max={25}
+                  step={1}
+                  value={[fps]}
+                  class="w-32"
+                  onValueChange={(e) => {
+                    fps = e[0];
+                  }}
+                />
+                <div class="relative flex items-center max-w-[8rem] ml-2">
+                  <button
+                    type="button"
+                    id="decrement-button"
+                    class="bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-600 hover:bg-gray-200 border border-gray-300 rounded-s-lg p-2 h-8 focus:ring-gray-100 dark:focus:ring-gray-700 focus:ring-2 focus:outline-none"
+                    on:click={() => {
+                      if (fps > 0) {
+                        fps = Math.max(0, fps - 1); // Step of 1
+                      }
+                    }}
+                  >
+                    <svg
+                      class="w-3 h-3 text-gray-900 dark:text-white"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 18 2"
+                    >
+                      <path
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M1 1h16"
+                      />
+                    </svg>
+                  </button>
+                  <input
+                    type="text"
+                    id="quantity-input"
+                    class="bg-gray-50 border-x-0 border-gray-300 h-11 text-center text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    value={fps}
+                    on:input={(e) => {
+                      const value = Math.min(Math.max(e.target.value, 0), 25);
+                      fps = value;
+                    }}
+                    placeholder="0"
+                    required
+                  />
+                  <button
+                    type="button"
+                    id="increment-button"
+                    class="bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-600 hover:bg-gray-200 border border-gray-300 rounded-e-lg p-2 h-8 focus:ring-gray-100 dark:focus:ring-gray-700 focus:ring-2 focus:outline-none"
+                    on:click={() => {
+                      if (fps < 25) {
+                        fps = Math.min(25, fps + 1); // Step of 1
+                      }
+                    }}
+                  >
+                    <svg
+                      class="w-3 h-3 text-gray-900 dark:text-white"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 18 18"
+                    >
+                      <path
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 1v16M1 9h16"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <p class="text-sm text-muted-foreground mt-2 p-2 mx-4">
+              {`Increase in FPS might cause high ${isProd ? "cost" : "CPU Usage"}.`}
+            </p>
           </TabsContent>
 
           <div class="flex justify-end items-end absolute bottom-0 w-full">
             <div class="border-t pt-4 w-full text-right">
-              <Button variant="brand" type="submit">Save Changes</Button>
+              <Button
+                variant="brand"
+                type="button"
+                on:click={saveCameraSettings}>Save Changes</Button
+              >
             </div>
           </div>
         </div>

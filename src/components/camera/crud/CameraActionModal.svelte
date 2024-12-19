@@ -20,6 +20,7 @@
   import { toast } from "svelte-sonner";
   import { Dot, Minus, Plus, X } from "lucide-svelte";
   import Slider from "@/components/ui/slider/slider.svelte";
+  import CameraSettingModal from "@/components/ui/modal/CameraSettingModal.svelte";
   let index = writable(null);
   let status = writable(null);
   let presets = writable([]);
@@ -163,7 +164,7 @@
   });
   // end
 
-  export let action: "add" | "edit" | "delete" | "ptz";
+  export let action: "add" | "edit" | "delete" | "ptz" | "settings";
   export let camera;
 
   let modalOpen = writable(false);
@@ -447,6 +448,10 @@ wss://view.lenscorp.cloud/api/ws?src=${camera.id}`
       </article>
     </Popover.Content>
   </Popover.Root>
+{:else if action === "settings"}
+  <CameraSettingModal {camera}>
+    <slot/>
+  </CameraSettingModal> 
 {:else}
   <AlertDialog.Root>
     <AlertDialog.Trigger><slot /></AlertDialog.Trigger>

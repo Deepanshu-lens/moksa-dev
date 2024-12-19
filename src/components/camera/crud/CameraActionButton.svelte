@@ -4,9 +4,14 @@
   import Icon from "@iconify/svelte";
   import { cameras } from "@/stores";
   import type { Camera } from "@/types";
+  import { Pencil, Settings, Settings2, Trash } from "lucide-svelte";
   type Props =
     | { action: "add"; icon?: boolean; camera?: undefined }
-    | { action: "edit" | "delete" | "ptz"; icon?: boolean; camera: Camera };
+    | {
+        action: "edit" | "settings" | "delete" | "ptz";
+        icon?: boolean;
+        camera: Camera;
+      };
 
   export let action: Props["action"];
   export let icon: Props["icon"] = false;
@@ -17,18 +22,22 @@
 <CameraActionModal {action} {camera}>
   {#if icon}
     <Button
-      class={`text-xs h-10 ${action === "add" && $cameras.length === 0 && showTooltip && "bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white px-4 py-2 rounded-lg focus:outline-none shadow-lg hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 transition-all duration-300"}`}
+      class={`text-xs ${action === "add" && $cameras.length === 0 && showTooltip && "bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white px-4 py-2 rounded-lg focus:outline-none shadow-lg hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 transition-all duration-300"}`}
       variant="outline"
+      title={action}
       size="sm"
       on:click={() => {
         if (showTooltip && action === "add" && $cameras.length === 0)
           showTooltip = false;
       }}
     >
-      <Icon
-        icon={`${action === "add" && "solar:videocamera-add-outline"}`}
-        class="w-5 h-5"
-      />
+      {#if action === "edit"}
+        <Pencil size={12} />
+      {:else if action === "settings"}
+        <Settings size={13} />
+      {:else}
+        <Trash size={13} />
+      {/if}
     </Button>
   {:else}
     <Button
