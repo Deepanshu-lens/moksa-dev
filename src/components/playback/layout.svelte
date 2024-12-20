@@ -10,7 +10,7 @@
     Loader2,
     PauseCircle,
   } from "lucide-svelte";
-  import { selectedNode } from "@/stores";
+  import { selectedNode,nodes } from "@/stores";
   import { writable } from "svelte/store";
   import Hls from "hls.js";
   import { toast } from "svelte-sonner";
@@ -25,6 +25,7 @@
   import Label from "../ui/label/label.svelte";
   import getPlaybackURL from "@/lib/playback";
   import {user} from "@/stores"
+  import Camera from "../configuration/camera.svelte";
 
   // Variables
   let availableChannels = writable<{ id: string; label: string }[]>([]);
@@ -116,9 +117,9 @@
       const videoElement = videoRefs[index];
       if (Hls.isSupported()) {
         const hls = new Hls();
-        hls.loadSource(videoUrls.responses[index]);
-        hls.attachMedia(videoElement);
-        hls.on(Hls.Events.MANIFEST_PARSED, function () {
+        hls?.loadSource(videoUrls.responses[index]);
+        hls?.attachMedia(videoElement);
+        hls?.on(Hls.Events.MANIFEST_PARSED, function () {
           // Simulate minor interaction to initialize the video to tackle the bug
           // where the video is not responding to pause button initially
           videoElement.currentTime = 0.01;
@@ -321,7 +322,6 @@
     isFetching.set(false);
   }
 }
-
 
   function toggleCalendar() {
     showCalendar.update((currentValue) => !currentValue);
@@ -715,6 +715,12 @@
               on:ended={handleEnded}
             ></video>
             <div
+            class="absolute left-4 top-2 rounded-md bg-neutral-600 bg-opacity-50 transition-opacity duration-300 text-white flex items-center gap-x-2 text-nowrap p-1"
+          >
+            <span class="size-2 bg-green-700 rounded-full"></span>
+            {videoUrls?.cams?.[index]?.name}
+          </div>
+            <div
               class="absolute inset-0 flex items-center justify-center bg-opacity-20 z-10"
             >
               {#if playVisible[index]}
@@ -938,7 +944,8 @@
               </p>
             {:else}
               {#each $availableChannels as channel}
-                <div class="flex items-center mb-2">
+              <!-- <span>{$nodes?.find((node) => node?.id === channel?.node?.[0])?.name}</span> -->
+                <div class="flex items-center mb-2 border dark:border my-4 hover:border hover:border-primary space-x-4 rounded-xl text-sm z-10 w-[90%] py-1.5 px-4 relative">
                   <input
                     disabled={$selectedChannels.length === 8 &&
                       !$selectedChannels.includes(channel)}
@@ -958,6 +965,13 @@
                         "text-gray-400"
                     )}>{channel.name}</label
                   >
+                  {#if $selectedNode === "all" && $nodes?.find((node) => node?.id === channel?.node?.[0])?.name}
+                  <span
+                    class="absolute right-0 -top-2 z-10 py-0 px-2 bg-purple-200 rounded-2xl text-[9px] text-black"
+                  >
+                    {$nodes?.find((node) => node?.id === channel?.node?.[0])?.name}
+                  </span>
+                {/if}
                 </div>
               {/each}
             {/if}

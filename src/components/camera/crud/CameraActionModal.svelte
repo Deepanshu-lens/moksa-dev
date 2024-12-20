@@ -227,7 +227,7 @@ wss://view.lenscorp.cloud/api/ws?src=${camera.id}`
 {#if action === "add"}
   <Dialog.Root bind:open={$modalOpen}>
     <Dialog.Trigger><slot /></Dialog.Trigger>
-    <Dialog.Content class="!w-2/3">
+    <Dialog.Content class="!w-2/3 h-92">
       <Dialog.Header>
         <Dialog.Title class="border-b pb-4">Add Camera</Dialog.Title>
       </Dialog.Header>
@@ -243,7 +243,7 @@ wss://view.lenscorp.cloud/api/ws?src=${camera.id}`
 {:else if action === "edit"}
   <Dialog.Root bind:open={$modalOpen}>
     <Dialog.Trigger><slot /></Dialog.Trigger>
-    <Dialog.Content>
+    <Dialog.Content class="lg:!w-1/2 xl:!w-1/3">
       <Dialog.Header>
         <Dialog.Title class="border-b pb-4">Edit Camera</Dialog.Title>
       </Dialog.Header>
@@ -450,8 +450,8 @@ wss://view.lenscorp.cloud/api/ws?src=${camera.id}`
   </Popover.Root>
 {:else if action === "settings"}
   <CameraSettingModal {camera}>
-    <slot/>
-  </CameraSettingModal> 
+    <slot />
+  </CameraSettingModal>
 {:else}
   <AlertDialog.Root>
     <AlertDialog.Trigger><slot /></AlertDialog.Trigger>

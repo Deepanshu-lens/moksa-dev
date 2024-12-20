@@ -421,7 +421,7 @@
 
 <form
   use:form
-  class="space-y-4 mt-4 w-full max-h-[80vh] overflow-auto p-4 rounded-md"
+  class="space-y-4 mt-4 w-full h-96 overflow-y-auto p-4 rounded-md"
 >
   <!-- Manual/Automatic Mode -->
   <div

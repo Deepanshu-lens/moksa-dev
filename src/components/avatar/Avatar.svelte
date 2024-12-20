@@ -3,13 +3,15 @@
   export let isVertical = false;
   import pb from "@/lib/pb";
   import * as Popover from "@/components/ui/popover";
+  import * as DropdownMenu from "@/components/ui/dropdown-menu/index.js";
+  import Button from "../ui/button/button.svelte";
+  import { addAuthLogs } from "@/lib/logs/authLogs";
 
   const MAX_NAME_LENGTH = 20;
   const MAX_EMAIL_LENGTH = 30;
 
   let displayName = "";
   let displayEmail = "";
-  let fileUrl = writable("");
 
   async function logout() {
     await addAuthLogs("logout", $user?.email || "");
@@ -89,6 +91,9 @@
         >
       </div>
       <div class="py-1.5" role="none">
+        <span class="opacity-50 block py-1.5 px-3.5 cursor-not-allowed"
+          >User Manual</span
+        >
         <span
           class="opacity-50 block py-1.5 px-3.5 hover:bg-accent cursor-not-allowed"
           >Account Settings</span

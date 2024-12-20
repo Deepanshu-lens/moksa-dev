@@ -64,7 +64,7 @@
 {#if action === "add"}
   <Dialog.Root bind:open={$modalOpen}>
     <Dialog.Trigger><slot /></Dialog.Trigger>
-    <Dialog.Content class="max-w-[95vw] md:max-w-[48rem] h-[90vh] overflow-auto">
+    <Dialog.Content class="max-w-[95vw] md:max-w-[48rem] overflow-y-auto">
       <Dialog.Header>
         <Dialog.Title class="border-b pb-4 text-left"
           >{action.charAt(0).toUpperCase() + action.slice(1)} Node</Dialog.Title
