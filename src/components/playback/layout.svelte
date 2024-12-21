@@ -16,18 +16,18 @@
   import Hls from "hls.js";
   import { toast } from "svelte-sonner";
   import { Calendar } from "@/components/ui/calendar";
+  import * as Accordion from "@/components/ui/accordion/index.js";
+  import * as Select from "@/components/ui/select/index.js";
   import Button from "@/components/ui/button/button.svelte";
   import { cn } from "@/lib/utils";
   import * as Pagination from "@/components/ui/pagination";
   import NodeSelection from "../node/NodeSelection.svelte";
   import { getCameras } from "@/managers/get-camera";
   import { updateTransform, toggleFullscreen } from "@/lib/video-utils";
-  import Checkbox from "../ui/checkbox/checkbox.svelte";
-  import Label from "../ui/label/label.svelte";
   import getPlaybackURL from "@/lib/playback";
   import {user} from "@/stores"
-  import Camera from "../configuration/camera.svelte";
-  import { hasRestParameter } from "typescript";
+  import JSZip from 'jszip';
+  import Label from "../ui/label/label.svelte";
 
   // Variables
   let availableChannels = writable<{ id: string; label: string }[]>([]);
@@ -55,6 +55,7 @@
   let isFetchingEvents = writable<boolean>(false);
   let videoOffsets = writable<number[]>([]); //in hours
   let playVisible = writable<any[]>([]);
+  let selectedFileType = writable<string>("mp4");
 
   const PLAYBACK_API_URL = getPlaybackURL();
 
@@ -134,6 +135,10 @@
                         throw new Error('Network response was not ok');
                     }
                     const blob = await response.blob();
+                       // Create a new File object for the MP4 format
+                let convertedBlob = new File([blob], `video_${name}.mp4`, {
+                  type: 'video/mp4',
+                });
                     const blobUrl = URL.createObjectURL(blob);
 
                     // Create a temporary anchor element for download
@@ -152,6 +157,125 @@
             }
         });
     }
+  }
+
+  // multiple download
+  async function handleDownloadAllVideos() {
+    const zip = new JSZip();
+    const folder = zip.folder("videos"); // Create a folder in the ZIP
+
+    const downloadPromises = videoUrls.responses.map((url, index) => {
+      return new Promise(async (resolve) => {
+        const { name } = videoUrls.cams[index];
+        const videoElement = videoRefs[index];
+        const hls = new Hls();
+        hls.loadSource(videoUrls.responses[index]);
+        hls.attachMedia(videoElement);
+
+        // Add this event listener to get the current chunk path
+        hls.on(Hls.Events.FRAG_CHANGED, async function (event, data) {
+          const currentFragment = data.frag;
+          if (currentFragment) {
+            console.log("Current chunk path:", currentFragment.url);
+
+            // Fetch the .ts file as a Blob
+            try {
+              const response = await fetch(currentFragment.url);
+              if (!response.ok) {
+                throw new Error('Network response was not ok');
+              }
+              const tsBlob = await response.blob();
+
+              // Determine the file type based on user selection
+              const fileType = $selectedFileType; // Get the selected file type
+              let convertedBlob;
+
+              if (fileType === 'mp4') {
+                // Create a new File object for the MP4 format
+                convertedBlob = new File([tsBlob], `video_${name}.mp4`, {
+                  type: 'video/mp4',
+                });
+              } else if (fileType === 'wav') {
+                // Create a new File object for the WAV format
+                convertedBlob = new File([tsBlob], `video_${name}.wav`, {
+                  type: 'video/wav',
+                });
+              }
+
+              folder.file(convertedBlob.name, convertedBlob); // Add the converted file to the ZIP folder
+              resolve(); // Resolve the promise after adding the file
+            } catch (error) {
+              console.error(`Error downloading video ${index}:`, error);
+              resolve(); // Resolve even on error to continue with other downloads
+            }
+          } else {
+            resolve(); // Resolve if no current fragment
+          }
+        });
+      });
+    });
+
+    Promise.all(downloadPromises).then(() => {
+      // Generate the ZIP file
+      zip.generateAsync({ type: "blob" }).then((content) => {
+        // Create a temporary anchor element for download
+        const a = document.createElement('a');
+        const blobUrl = URL.createObjectURL(content);
+        a.href = blobUrl;
+        a.download = "all_videos.zip"; // Set the desired file name for the ZIP
+        document.body.appendChild(a);
+        a.click(); // Trigger the download
+        document.body.removeChild(a); // Remove the anchor from the document
+
+        // Clean up the Blob URL
+        URL.revokeObjectURL(blobUrl);
+      });
+    });
+  }
+
+  // single download
+  async function handleDownloadVideo(index: number) {
+    const { name } = videoUrls.cams[index];
+    const videoElement = videoRefs[index];
+    const hls = new Hls();
+    hls.loadSource(videoUrls.responses[index]);
+    hls.attachMedia(videoElement);
+
+    // Add this event listener to get the current chunk path
+    hls.on(Hls.Events.FRAG_CHANGED, async function (event, data) {
+      const currentFragment = data.frag;
+      if (currentFragment) {
+        console.log("Current chunk path:", currentFragment.url);
+
+        // Fetch the .ts file as a Blob
+        try {
+          const response = await fetch(currentFragment.url);
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          const tsBlob = await response.blob();
+
+          // Create a new File object for the MP4 format
+          const mp4File = new File([tsBlob], `video_${name}.mp4`, {
+            type: 'video/mp4',
+          });
+
+          // Create a temporary anchor element for download
+          const a = document.createElement('a');
+          const blobUrl = URL.createObjectURL(mp4File);
+          a.href = blobUrl;
+          a.download = mp4File.name; // Set the desired file name for download
+          document.body.appendChild(a);
+          a.click(); // Trigger the download
+          document.body.removeChild(a); // Remove the anchor from the document
+
+          // Clean up the Blob URL
+          URL.revokeObjectURL(blobUrl);
+        } catch (error) {
+          console.error(`Error downloading video ${index}:`, error);
+        }
+      }
+    });
   }
 
   const videoPlayer = () => {
@@ -712,6 +836,9 @@
       return visible;
     });
   }
+
+  // Example usage: Call this function to download a specific video
+  // handleDownloadVideo(0); // Replace 0 with the index of the video you want to download
 </script>
 
 <section class="right-playback flex-1 flex w-full h-screen justify-between">
@@ -915,7 +1042,7 @@
               </button>
               <button
               style="cursor: pointer;"
-              on:click={() => {handleDownload(index)}}
+              on:click={() => {handleDownloadVideo(index)}}
               class="cursor-pointer border border-black dark:bg-neutral-500 rounded-full"
             >
              <Download size={14}/>
@@ -1206,6 +1333,30 @@
           </div> -->
         </Tabs.Root>
       </div>
+    </div>
+
+    <div class="download-all w-[90%] mx-auto">
+      <Accordion.Root class="w-full">
+        <Accordion.Item value="item-1">
+          <Accordion.Trigger class="text-sm py-2">Export All Videos</Accordion.Trigger>
+          <Accordion.Content>
+            <!-- Replace the select with Shadcn Select -->
+            <div class="mb-2">
+              <Label for="fileType" class="mr-2 mb-2">Select File Type:</Label>
+              <Select.Root bind:value={selectedFileType} onSelectedChange={(v)=>selectedFileType.set(v?.value)} class="border rounded-md p-1 mt-2">
+                <Select.Trigger class="border rounded-md p-1">
+                  <Select.Value placeholder="Select file type" />
+                </Select.Trigger>
+                <Select.Content>
+                  <Select.Item value="mp4">MP4</Select.Item>
+                  <Select.Item value="wav">WAV</Select.Item>
+                </Select.Content>
+              </Select.Root>
+            </div>
+            <Button size="sm" variant="outline" class="text-xs" disabled={!videoUrls?.responses?.length} on:click={handleDownloadAllVideos}>Download All</Button>
+          </Accordion.Content>
+        </Accordion.Item>
+      </Accordion.Root>
     </div>
   </div>
 </section>
