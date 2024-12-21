@@ -874,46 +874,48 @@
       </Tabs.Content>
     </Tabs.Root>
 
-    <div class="flex flex-col pb-4">
-      <Label class="text-left mb-2">Features</Label>
-      <div class="flex flex-wrap py-4 justify-between gap-x-10 items-start">
-        <div class="flex items-center gap-1">
-          <Switch id="feedSaving" />
-          <Label for="feedSaving" class="text-xs font-normal text-nowrap"
-            >Feed Saving</Label
-          >
+    {#if onvifCamerasList?.length > 0}
+      <div class="flex flex-col pb-4">
+        <Label class="text-left mb-2">Features</Label>
+        <div class="flex flex-wrap py-4 justify-between gap-x-10 items-start">
+          <div class="flex items-center gap-1">
+            <Switch id="feedSaving" />
+            <Label for="feedSaving" class="text-xs font-normal text-nowrap"
+              >Feed Saving</Label
+            >
+          </div>
+          <div class="flex items-center gap-1">
+            <Switch id="vehicleScan" />
+            <Label for="vehicleScan" class="text-xs font-normal text-nowrap"
+              >Vehicle Scan</Label
+            >
+          </div>
+          <div class="flex items-center gap-1">
+            <Switch id="faceScan" />
+            <Label for="faceScan" class="text-xs font-normal text-nowrap"
+              >Face Scan</Label
+            >
+          </div>
+          <div class="flex items-center gap-1 mr-6 md:mr-auto">
+            <Switch id="priority" />
+            <Label for="priority" class="text-xs font-normal text-nowrap"
+              >Priority</Label
+            >
+          </div>
         </div>
-        <div class="flex items-center gap-1">
-          <Switch id="vehicleScan" />
-          <Label for="vehicleScan" class="text-xs font-normal text-nowrap"
-            >Vehicle Scan</Label
-          >
-        </div>
-        <div class="flex items-center gap-1">
-          <Switch id="faceScan" />
-          <Label for="faceScan" class="text-xs font-normal text-nowrap"
-            >Face Scan</Label
-          >
-        </div>
-        <div class="flex items-center gap-1 mr-6 md:mr-auto">
-          <Switch id="priority" />
-          <Label for="priority" class="text-xs font-normal text-nowrap"
-            >Priority</Label
-          >
+        <div
+          class="flex flex-col items-start justify-between md:justify-start pb-4 w-full gap-4 mt-5"
+        >
+          <Label class="text-left mb-2 text-nowrap">Motion Sensitivity</Label>
+          <Slider value={[0]} max={255} step={1} class="text-left w-[80%]" />
         </div>
       </div>
-      <div
-        class="flex flex-col items-start justify-between md:justify-start pb-4 w-full gap-4 mt-5"
-      >
-        <Label class="text-left mb-2 text-nowrap">Motion Sensitivity</Label>
-        <Slider value={[0]} max={255} step={1} class="text-left w-[80%]" />
+      <div class="flex flex-col mx-auto">
+        <Button variant="brand" type="submit" class="font-semibold"
+          >Confirm</Button
+        >
       </div>
-    </div>
-    <div class="flex flex-col mx-auto">
-      <Button variant="brand" type="submit" class="font-semibold"
-        >Confirm</Button
-      >
-    </div>
+    {/if}
   {:else}
     <div>
       <h4 class="mb-5">Select the cameras you want to register</h4>

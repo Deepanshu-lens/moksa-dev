@@ -170,7 +170,7 @@
   let modalOpen = writable(false);
   let ptzControl = writable("");
   let openPTZ = writable(false);
-  let cameraName = camera ? camera.name : "";
+  let cameraName = writable(camera ? camera.name : "");
   let mainUrl = camera ? camera.url : "";
   let subUrl = camera ? camera.subUrl : "";
   let doneSubmit = false;
@@ -182,13 +182,13 @@
   let lastCords = $ptzControl.lastCords;
 
   const { form, errors, reset, isSubmitting } = createForm({
-    initialValues: { name: cameraName, url: mainUrl, subUrl: subUrl },
+    initialValues: { name: $cameraName, url: mainUrl, subUrl: subUrl },
     // extend: validator({ schema: cameraSchema.schema.omit({ id: true }) }),
     onSubmit: async (values) => {
       console.log(cameraSchema.schema.omit({ id: true }).safeParse(values));
       console.log("Form submitted with:", values);
       const data = {
-        name: cameraName,
+        name: $cameraName,
         url: mainUrl,
         subUrl,
         motionSensitivity: 33, // Example value
@@ -217,6 +217,12 @@ wss://view.lenscorp.cloud/api/ws?src=${camera.id}`
   };
 
   $: {
+    if ($modalOpen && camera) {
+      cameraName.set(camera?.name || "");
+    }
+  }
+
+  $: {
     if (doneSubmit) {
       modalOpen.set(false);
       doneSubmit = false;
@@ -232,7 +238,7 @@ wss://view.lenscorp.cloud/api/ws?src=${camera.id}`
         <Dialog.Title class="border-b pb-4">Add Camera</Dialog.Title>
       </Dialog.Header>
       <AddCameraForm
-        bind:cameraName
+        bind:$cameraName
         bind:mainUrl
         bind:subUrl
         bind:doneSubmit
@@ -256,7 +262,7 @@ wss://view.lenscorp.cloud/api/ws?src=${camera.id}`
               name="name"
               placeholder="Home-Garage"
               class=""
-              bind:value={cameraName}
+              bind:value={$cameraName}
             />
             <div class="text-rose-500 text-xs pt-2">
               {#if $errors.name}

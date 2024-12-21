@@ -8,6 +8,7 @@
     selectedCamera,
     captureRef,
     user,
+    nodes,
   } from "@/stores";
   import { cn } from "@/lib/utils";
   import * as Popover from "@/components/ui/popover";
@@ -17,12 +18,15 @@
   import JSZip from "jszip";
   import RegisterFaceDialog from "./faceRegister/register-face-dialog.svelte";
   import { addUserLogs } from "@/lib/logs/userLogs";
+  import { onMount } from "svelte";
+  import { getCameras } from "@/managers/get-camera";
+  import { writable } from "svelte/store";
 
   const maxStreamsPerPage = 36;
   let selected = 0;
   let snipDropDownOpen = false;
   let recordDropdownOpen = false;
-
+  
   // Load the persisted selectedLayout from local storage if it exists
   if (typeof localStorage !== "undefined") {
     const savedSelected = localStorage.getItem("selectedLayout");

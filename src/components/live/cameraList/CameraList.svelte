@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import Sortable from "sortablejs";
   import * as DropdownMenu from "@/components/ui/dropdown-menu/index.js";
-  import { cameras, nodes, selectedCamera, selectedNode } from "@/stores";
+  import { cameras, nodes, selectedCamera, selectedNode, user } from "@/stores";
   import NodeSelection from "@/components/node/NodeSelection.svelte";
   import NodeActionButton from "@/components/node/crud/NodeActionButton.svelte";
   import { cn } from "@/lib/utils";
@@ -18,8 +18,9 @@
     ArrowDownWideNarrow,
     Check,
   } from "lucide-svelte";
+  import { writable } from "svelte/store";
+  import { getCameras } from "@/managers/get-heathmap";
 
-  
   let cameraItems: HTMLDivElement;
   let sortCriteria: string | null = null; // No sort criteria by default
   let sortDirection = "asc"; // Default sort direction
@@ -27,6 +28,15 @@
   let isSortingEnabled = false; // Flag to track if sorting is active
 
   let currentCameras = $cameras;
+  let totalCamNodes={};
+  
+  
+  $:{
+    totalCamNodes = {
+    cameras: currentCameras?.length||0,
+    nodes: $nodes?.length,
+  };
+}
 
   onMount(() => {
     if (cameraItems) {
@@ -110,6 +120,7 @@
     isSortingEnabled = false;
     currentCameras = filteredCameras;
   }
+
 </script>
 
 <section class="border-l overflow-y-auto w-full">
@@ -239,6 +250,16 @@
         </DropdownMenu.Root>
         <CameraActionButton action="add" icon />
       </div>
+
+      <div class="item-count text-xs text-gray-500 flex items-center gap-x-2 w-full justify-center">
+        <span>
+          Total Cameras: {totalCamNodes?.cameras}
+        </span>
+        |
+        <span>
+          Total Nodes: {totalCamNodes?.nodes}
+        </span>
+      </div>
     </div>
     <div class="overflow-y-auto max-h-[calc(100vh-12rem)]">
       {#each currentCameras as camera, index}
@@ -247,7 +268,10 @@
         <article
           class={cn(
             "flex items-center p-4 dark:border bg-accent my-4 hover:border hover:border-primary space-x-4 rounded-xl text-sm z-10 w-full px-4 relative",
-            { "border dark:border-white border-green-400": camera.id === $selectedCamera }
+            {
+              "border dark:border-white border-green-400":
+                camera.id === $selectedCamera,
+            }
           )}
           on:click={() => {
             if ($selectedCamera === camera.id) selectedCamera.set("");
@@ -271,8 +295,8 @@
           <div
             class="flex flex-row gap-0 xl:ml-auto space-x-2 list-none cursor-pointer items-end"
           >
-            <CameraActionButton {camera} action="edit" icon={true}/>
-            <CameraActionButton {camera} action="settings" icon={true}/>
+            <CameraActionButton {camera} action="edit" icon={true} />
+            <CameraActionButton {camera} action="settings" icon={true} />
             <CameraActionButton {camera} action="delete" icon={true} />
           </div>
           {#if $selectedNode === "all" && $nodes?.find((node) => node.id === camera?.node[0])?.name}

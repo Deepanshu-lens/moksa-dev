@@ -69,4 +69,8 @@
       console.error("Failed realtime camera");
     }
   }
+
+  export const getTotalCamerasCount = async()=>{
+    console.log(user,'user');
+  }
 </script>

@@ -9,6 +9,7 @@
     CalendarDaysIcon,
     Loader2,
     PauseCircle,
+    Download
   } from "lucide-svelte";
   import { selectedNode,nodes } from "@/stores";
   import { writable } from "svelte/store";
@@ -26,6 +27,7 @@
   import getPlaybackURL from "@/lib/playback";
   import {user} from "@/stores"
   import Camera from "../configuration/camera.svelte";
+  import { hasRestParameter } from "typescript";
 
   // Variables
   let availableChannels = writable<{ id: string; label: string }[]>([]);
@@ -110,6 +112,48 @@
     });
   }
 
+  function handleDownload(index: number) {
+    const videoElement = videoRefs[index];
+    const {name} = videoUrls.cams[index];
+
+    if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls?.loadSource(videoUrls.responses[index]);
+        hls?.attachMedia(videoElement);
+
+        // Add this event listener to get the current chunk path
+        hls.on(Hls.Events.FRAG_CHANGED, async function (event, data) {
+            const currentFragment = data.frag;
+            if (currentFragment) {
+                console.log("Current chunk path:", currentFragment.url);
+                
+                // Fetch the .ts file as a Blob
+                try {
+                    const response = await fetch(currentFragment.url);
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    const blob = await response.blob();
+                    const blobUrl = URL.createObjectURL(blob);
+
+                    // Create a temporary anchor element for download
+                    const a = document.createElement('a');
+                    a.href = blobUrl; // Set the href to the Blob URL
+                    a.download = `video_${name}.ts`; // Set the desired file name for download
+                    document.body.appendChild(a); // Append the anchor to the body
+                    a.click(); // Trigger the download
+                    document.body.removeChild(a); // Remove the anchor from the document
+
+                    // Clean up the Blob URL
+                    URL.revokeObjectURL(blobUrl);
+                } catch (error) {
+                    console.error('Error downloading the .ts file:', error);
+                }
+            }
+        });
+    }
+  }
+
   const videoPlayer = () => {
     videoPlayStates.set(new Array(videoUrls.responses.length).fill(true));
 
@@ -135,6 +179,7 @@
               syncPlayState(index, false);
             });
         });
+
       } else if (videoElement.canPlayType("application/vnd.apple.mpegurl")) {
         videoElement.src = videoUrls.responses[index];
         videoElement.addEventListener("loadedmetadata", () => {
@@ -868,6 +913,13 @@
                   />
                 </svg>
               </button>
+              <button
+              style="cursor: pointer;"
+              on:click={() => {handleDownload(index)}}
+              class="cursor-pointer border border-black dark:bg-neutral-500 rounded-full"
+            >
+             <Download size={14}/>
+            </button>
             </div>
             <div
               class="bg-black/10 dark:bg-white/10 w-[89%] 2xl:w-[90%] h-[95%] p-0 m-0 flex gap-1 relative"
@@ -1094,7 +1146,7 @@
             </div>
           </Tabs.Content>
           <!-- events makers -->
-          <div class="py-4">
+          <!-- <div class="py-4">
             <p
               class={cn("text-sm font-semibold", {
                 hidden: videoUrls?.responses?.length === 0,
@@ -1151,7 +1203,7 @@
                 Get Events
               {/if}
             </Button>
-          </div>
+          </div> -->
         </Tabs.Root>
       </div>
     </div>

@@ -2,7 +2,6 @@ import type { Camera } from "@/types";
 import pb from "@/lib/pb";
 
 export const getCameras = async (nodeId: string,session:string) => {
-  console.log("nodeId", nodeId)
   let filter;
     if(nodeId === "all")
     filter = `session ?= "${session}" && save = true`
@@ -21,3 +20,10 @@ export const getCameras = async (nodeId: string,session:string) => {
     console.error("Error initializing Camera Manager:", error);
   }
 };
+
+// export const getTotalCameraNodeCount = async(session:string)=>{
+//   const res  = await pb.collection("camera").getFullList<Camera>({
+//     fields:"",
+//     filter: `session ?= "${session}" && save = true`
+//   })
+// }
