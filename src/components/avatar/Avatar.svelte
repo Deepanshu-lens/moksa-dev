@@ -6,7 +6,10 @@
   import * as DropdownMenu from "@/components/ui/dropdown-menu/index.js";
   import Button from "../ui/button/button.svelte";
   import { addAuthLogs } from "@/lib/logs/authLogs";
-
+  import { onMount } from "svelte";
+  import { writable } from "svelte/store";
+  import { cn } from "@/lib/utils";
+  let pendingDays = writable(5);
   const MAX_NAME_LENGTH = 20;
   const MAX_EMAIL_LENGTH = 30;
 
@@ -48,6 +51,20 @@
       displayEmail = displayEmail.slice(0, MAX_EMAIL_LENGTH - 3) + "...";
     }
   }
+
+  onMount(async () => {
+    if (import.meta.env.PUBLIC_ENV !== "production") {
+      try {
+        const res = await fetch(`http://localhost:4432/license/status`);
+        const data = await res?.json();
+        if (data?.pendingDays) {
+          pendingDays.set(data?.remainingDays || 0);
+        }
+      } catch (error) {
+        console.log("error fetching license status");
+      }
+    }
+  });
 </script>
 
 {#if $user}
@@ -77,8 +94,24 @@
     >
       <p class="truncate px-3.5 py-3" role="none">
         <span class="block text-xs text-gray-500" role="none">Signed in as</span
-        ><span class="mt-0.5 font-semibold" role="none">{$user?.email}</span>
+        >
+        <span class="mt-0.5 font-semibold" role="none">{$user?.email}</span>
+        {#if import.meta.env.PUBLIC_ENV !== "production"}
+          <span
+            class={cn(
+              "block mt-1 text-xs font-semibold",
+              $pendingDays >= 30
+                ? "text-green-500"
+                : $pendingDays > 7 && $pendingDays <= 20
+                  ? "text-yellow-600"
+                  : "text-red-600"
+            )}
+          >
+            License Expires in {$pendingDays} days
+          </span>
+        {/if}
       </p>
+
       <div class="py-1.5" role="none">
         <span class="opacity-50 block py-1.5 px-3.5 cursor-not-allowed"
           >Changelog</span
