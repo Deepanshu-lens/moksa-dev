@@ -14,9 +14,11 @@
   import { onMount } from "svelte";
   import { writable } from "svelte/store";
   import { displayCameras } from "@/stores/camera";
+  import { PictureInPicture2 } from "lucide-svelte";
 
   export let STREAM_URL;
   const isMobile = writable(false);
+  const priorityIndex = writable(0);
   let localCaptureRef;
   // // Function to determine the grid style based on the number of cameras
   const layoutConfigs = {
@@ -26,11 +28,41 @@
     3: "grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);", // 3x3
     2: "grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr);", // 2x2
     1: "grid-template-columns: repeat(1, 1fr); grid-template-rows: repeat(1, 1fr);", // 1x1
-    // 6: "grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);", // Automatic (default to 3x3)
-    7: "grid-template-columns: 3fr 1fr; grid-template-rows: repeat(2, 1fr);", // 1+5 layout
-    8: "grid-template-columns: 3fr 1fr; grid-template-rows: repeat(3, 1fr);", // 1+7 layout
-    9: "grid-template-columns: 3fr 1fr; grid-template-rows: repeat(4, 1fr);", // 1+12 layout
-    10: "grid-template-columns: 2fr 1fr; grid-template-rows: repeat(3, 1fr);", // 2+8 layout
+    7: `
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      grid-template-areas:
+        "bigCell1 bigCell1 ."
+        "bigCell1 bigCell1 ."
+        ". . .";
+    `, // 1+5 layout
+    8: `
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(4, 1fr);
+      grid-template-areas:
+        "bigCell1 bigCell1 bigCell1 ."
+        "bigCell1 bigCell1 bigCell1 ."
+        "bigCell1 bigCell1 bigCell1 ."
+        ". . . .";
+    `, // 1+7 layout
+    9: `
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(4, 1fr);
+      grid-template-areas:
+        "bigCell1 bigCell1 . ."
+        "bigCell1 bigCell1 . ."
+        ". . . ."
+        ". . . .";
+    `, // 1+12 layout
+    10: `
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(4, 1fr);
+      grid-template-areas:
+        "bigCell1 bigCell1 bigCell2 bigCell2"
+        "bigCell1 bigCell1 bigCell2 bigCell2"
+        ". . . ."
+        ". . . .";
+    `, // 2+8 layout
   };
 
   function getGridStyle(cameraCount, layoutIndex) {
@@ -44,8 +76,8 @@
     }
 
     switch (cameraCount) {
-      case 0 :
-        return "grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);"
+      case 0:
+        return "grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);";
       case 1:
         return "grid-template-columns: repeat(1, 1fr); grid-template-rows: repeat(1, 1fr);";
       case 2:
@@ -89,6 +121,7 @@
   });
 
   $: captureRef.set(localCaptureRef);
+  displayCameras.subscribe(()=>priorityIndex.set(0))
 </script>
 
 {#if $nodes && $user}
@@ -138,21 +171,35 @@
         style={gridStyle + " height: calc(100vh - 7rem); overflow-y: auto;"}
       >
         {#key $displayCameras}
-          {#each $displayCameras as camera}
-            <StreamTile
-              name={camera?.name}
-              id={camera?.id}
-              url={`${STREAM_URL}/api/ws?src=${camera?.id}`}
-            ></StreamTile>
+          {#each $displayCameras as camera, index}
+            <div
+              class="relative"
+              style={$selectedLayout > 6 && $selectedLayout < 10
+                ? index === $priorityIndex && "grid-area: bigCell1;"
+                : $selectedLayout === 10
+                  ? index === $priorityIndex
+                    ? "grid-area: bigCell1;"
+                    : index === 1 && "grid-area:bigCell2;"
+                  : ""}
+            >
+              <StreamTile
+                name={camera?.name}
+                id={camera?.id}
+                url={`${STREAM_URL}/api/ws?src=${camera?.id}`}
+              ></StreamTile>
+              {#if (index !== $priorityIndex && $selectedLayout > 6 && $selectedLayout < 10)}
+                <button class="absolute bottom-4 left-4" on:click={()=>{priorityIndex.set(index)}}>
+                  <PictureInPicture2 size={16}/>
+                </button>
+              {/if}
+            </div>
           {/each}
         {/key}
       </div>
 
       {#if $totalCameras > 0}
-        <Pagination/>
+        <Pagination />
       {/if}
     </div>
   {/if}
 {/if}
-
-

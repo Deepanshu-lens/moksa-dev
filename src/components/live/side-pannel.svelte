@@ -26,7 +26,7 @@
   let selected = 0;
   let snipDropDownOpen = false;
   let recordDropdownOpen = false;
-  
+
   // Load the persisted selectedLayout from local storage if it exists
   if (typeof localStorage !== "undefined") {
     const savedSelected = localStorage.getItem("selectedLayout");
@@ -437,22 +437,22 @@
               </button>
             </div>
           {/each}
-          <!-- <button
+          <button
             class={cn(
               "flex flex-col items-center justify-evenly py-4 mt-2 w-1/3 gap-1 hover:border-[#015a62] hover:border hover:border-solid rounded-md",
-              selected === 9 &&
+              selected === 7 &&
                 "px-2 border border-solid border-[#015a62] rounded-md text-primary"
             )}
             on:click={(e) => {
               e.preventDefault();
-              selected = 9;
+              selected = 7;
             }}
           >
             <svg
               width="60"
               height="60"
               class={cn(
-                selected === 9 ? "text-primary" : "text-muted-foreground"
+                selected === 7 ? "text-primary" : "text-muted-foreground"
               )}
               id="Layer_2"
               data-name="Layer 2"
@@ -525,18 +525,18 @@
           <button
             class={cn(
               "flex flex-col items-center justify-evenly py-4 mt-2 w-1/3 gap-1 hover:border-[#015a62] hover:border hover:border-solid rounded-md",
-              selected === 10 &&
+              selected === 8 &&
                 "px-2 border border-solid border-[#015a62] rounded-md text-primary"
             )}
             on:click={(e) => {
               e.preventDefault();
-              selected = 10;
+              selected = 8;
             }}
           >
             <svg
               width="60"
               class={cn(
-                selected === 10 ? "text-primary" : "text-muted-foreground"
+                selected === 8 ? "text-primary" : "text-muted-foreground"
               )}
               height="60"
               id="Layer_2"
@@ -629,22 +629,22 @@
             </svg>
             <span>1 + 7</span>
           </button>
-          <button
+         <button
             class={cn(
               "flex flex-col items-center justify-evenly py-4 mt-2 w-1/3 gap-1 hover:border-[#015a62] hover:border hover:border-solid rounded-md",
-              selected === 7 &&
+              selected === 9 &&
                 "px-2 border border-solid border-[#015a62] rounded-md text-primary"
             )}
             on:click={(e) => {
               e.preventDefault();
-              selected = 7;
+              selected = 9;
             }}
           >
             <svg
               width="60"
               height="60"
               class={cn(
-                selected === 7 ? "text-primary" : "text-muted-foreground"
+                selected === 9 ? "text-primary" : "text-muted-foreground"
               )}
               id="Layer_2"
               data-name="Layer 2"
@@ -791,18 +791,18 @@
           <button
             class={cn(
               "flex flex-col items-center justify-evenly py-4 mt-2 w-1/3 gap-1 hover:border-[#015a62] hover:border hover:border-solid rounded-md",
-              selected === 8 &&
+              selected === 10 &&
                 "px-2 border border-solid border-[#015a62] rounded-md text-primary"
             )}
             on:click={(e) => {
               e.preventDefault();
-              selected = 8;
+              selected = 10;
             }}
           >
             <svg
               width="60"
               class={cn(
-                selected === 8 ? "text-primary" : "text-muted-foreground"
+                selected === 10 ? "text-primary" : "text-muted-foreground"
               )}
               height="60"
               id="Layer_2"
@@ -913,7 +913,7 @@
               </g>
             </svg>
             <span>2 + 8</span>
-          </button> -->
+          </button>
         </div>
       </Popover.Content>
     </Popover.Root>
