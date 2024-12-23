@@ -21,6 +21,8 @@
   import { Dot, Minus, Plus, X } from "lucide-svelte";
   import Slider from "@/components/ui/slider/slider.svelte";
   import CameraSettingModal from "@/components/ui/modal/CameraSettingModal.svelte";
+  import EditCameraForm from "@/components/forms/EditCameraForm.svelte";
+
   let index = writable(null);
   let status = writable(null);
   let presets = writable([]);
@@ -182,7 +184,7 @@
   let lastCords = $ptzControl.lastCords;
 
   const { form, errors, reset, isSubmitting } = createForm({
-    initialValues: { name: $cameraName, url: mainUrl, subUrl: subUrl },
+    // initialValues: { name: $cameraName, url: mainUrl, subUrl: subUrl },
     // extend: validator({ schema: cameraSchema.schema.omit({ id: true }) }),
     onSubmit: async (values) => {
       console.log(cameraSchema.schema.omit({ id: true }).safeParse(values));
@@ -253,63 +255,7 @@ wss://view.lenscorp.cloud/api/ws?src=${camera.id}`
       <Dialog.Header>
         <Dialog.Title class="border-b pb-4">Edit Camera</Dialog.Title>
       </Dialog.Header>
-      <form use:form class="space-y-4 mt-4">
-        <div class="flex items-center justify-between pb-4">
-          <Label>Camera Name</Label>
-          <div class="w-full">
-            <Input
-              type="text"
-              name="name"
-              placeholder="Home-Garage"
-              class=""
-              bind:value={$cameraName}
-            />
-            <div class="text-rose-500 text-xs pt-2">
-              {#if $errors.name}
-                {$errors.name}
-              {/if}
-            </div>
-          </div>
-        </div>
-
-        <div class="flex items-center justify-between pb-4">
-          <Label>Main URL</Label>
-          <div class="w-full">
-            <Input
-              type="text"
-              name="url"
-              placeholder="rtsp://admin:password@123.123.123.123/stream/1"
-              class="text-xs"
-              bind:value={mainUrl}
-            />
-            <div class="text-rose-500 text-xs pt-2">
-              {#if $errors.url}
-                {$errors.url}
-              {/if}
-            </div>
-          </div>
-        </div>
-        <div class="flex items-center justify-between pb-4">
-          <Label>Sub URL</Label>
-          <div class="w-full">
-            <Input
-              type="text"
-              name="subUrl"
-              placeholder="rtsp://admin:password@123.123.123.123/stream/2"
-              class=" text-xs"
-              bind:value={subUrl}
-            />
-            <div class="text-rose-500 text-xs pt-2">
-              {#if $errors.subUrl}
-                {$errors.subUrl}
-              {/if}
-            </div>
-          </div>
-        </div>
-        <div class="flex flex-1 flex-col mx-auto">
-          <Button type="submit" variant="brand">Confirm</Button>
-        </div>
-      </form>
+      <EditCameraForm {camera}  modalOpen={modalOpen}/>
     </Dialog.Content>
   </Dialog.Root>
 {:else if action === "ptz"}
