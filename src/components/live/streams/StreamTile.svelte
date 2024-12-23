@@ -210,7 +210,7 @@
 <div
   id={`grid-cell-${id}`}
   class={cn(
-    "zoomable-area",
+    "zoomable-area h-[100%]",
     state === "LOADING"
       ? "camera-placeholder"
       : "relative overflow-hidden group"

@@ -11,14 +11,24 @@
     selectedNode,
   } from "@/stores";
 
-  // Writable store to keep track of the current page
-  const initialPage = 1;
-  const currentPage = writable(initialPage);
+  const currentPage = writable(1);
+  let MAX_CAMERAS_PER_PAGE = 0
 
   // Reactive value for MAX_CAMERAS_PER_PAGE
-  $: MAX_CAMERAS_PER_PAGE =
-    ($selectedLayout > 0 ? $selectedLayout : 3) ** 2 ||
+  $:{
+    if($selectedLayout < 7){
+     MAX_CAMERAS_PER_PAGE = ($selectedLayout > 0 ? $selectedLayout : 3) ** 2 ||
     parseInt(localStorage.getItem("selectedLayout") || "3") ** 2;
+    } else if($selectedLayout === 7 ){
+      MAX_CAMERAS_PER_PAGE = 6
+    } else if($selectedLayout === 8 ){
+      MAX_CAMERAS_PER_PAGE = 8
+    }else if($selectedLayout === 9 ){
+      MAX_CAMERAS_PER_PAGE = 13
+    }else if($selectedLayout === 10 ){
+      MAX_CAMERAS_PER_PAGE = 10
+    }
+  }
 
   // Function to update the displayCameras store based on current page
   const fetchDisplayCameras = (page: number) => {
@@ -86,6 +96,9 @@
     }
     fetchDisplayCameras(get(currentPage));
   });
+  selectedLayout.subscribe(()=>{
+    currentPage.set(1)
+  })
 </script>
 
 <Pagination.Root
