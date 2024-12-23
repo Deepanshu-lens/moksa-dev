@@ -122,6 +122,10 @@
       console.log("ref unavailable");
     }
   };
+
+  onMount(async()=>{
+    const res = await getCameras("all", $user?.session[0]);
+  })
 </script>
 
 <div
