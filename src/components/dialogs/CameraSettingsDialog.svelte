@@ -5,23 +5,14 @@
   import { Button } from "@/components/ui/button";
   import { selectedNode } from "@/lib/stores";
   import { Switch } from "@/components/ui/switch";
-  import * as Select from "@/components/ui/select";
-  import { Slider } from "@/components/ui/slider";
 
   import {
-    FileVideo2,
-    Merge,
-    FolderSearch,
-    Pipette,
     ScanFace,
     Activity,
     Siren,
     PersonStanding,
-    Drama,
-    FireExtinguisher,
     ShieldAlert,
-    TabletSmartphone,
-    Heater,
+    Plus,
   } from "lucide-svelte";
 
   export let cameraName = "";
@@ -62,6 +53,20 @@
   export let user;
   let dialogOpen = false;
 
+  let activeTab = "theft-detection";
+
+  const tabs = [
+    { id: "theft-detection", label: "Theft Detection", icon: ScanFace },
+    { id: "heatmap", label: "Heatmap", icon: Activity },
+    {
+      id: "person-count",
+      label: "Person Count",
+      icon: ShieldAlert,
+    },
+    { id: "kitchen-safety", label: "Kitchen Safety", icon: PersonStanding },
+    { id: "employee-safety", label: "Employee Safety", icon: Siren },
+  ];
+
   $: {
     if (dialogOpen) {
       isSettingsDialogOpen.set(true);
@@ -92,6 +97,14 @@
       label: "Every minute",
     },
   ];
+
+  let labels = {
+    "employee-safety": [],
+    "theft-detection": [],
+    heatmap: [],
+    "person-count": [],
+    "kitchen-safety": [],
+  };
 
   const editCamera = async () => {
     setTimeout(() => {
@@ -147,9 +160,6 @@
       kitchenhygiene: safety || false,
       rtsp: false,
     };
-    console.log("features", enabledFeatures);
-    console.log("storeid", $selectedNode.moksaId);
-    console.log("moksaid camid", moksaId);
     const dev = await fetch(`/api/camera/updateFeatures`, {
       method: "POST",
       headers: {
@@ -162,171 +172,217 @@
       }),
     });
     const r = await dev.json();
-    console.log("updatefeature", r);
-  };
 
-  console.log(user?.role, "user in dialog");
+    // New Camera settings modal api
+
+    // Initialize customer variable objects
+    const mobileCustomerVars = {};
+    const theftCustomerVars = {};
+    const heatmapCustomerVars = {};
+    const peopleCustomerVars = {};
+    const kitchenCustomerVars = {};
+
+    // Populate the customer variable objects based on the labels for all tabs
+    for (const tab of tabs) {
+      labels[tab.id].forEach((label) => {
+        if (label.name && label.value) {
+          if (tab.id === "employee-safety") {
+            mobileCustomerVars[label.name] = label.value;
+          } else if (tab.id === "theft-detection") {
+            theftCustomerVars[label.name] = label.value;
+          } else if (tab.id === "heatmap") {
+            heatmapCustomerVars[label.name] = label.value;
+          } else if (tab.id === "person-count") {
+            peopleCustomerVars[label.name] = label.value;
+          } else if (tab.id === "kitchen-safety") {
+            kitchenCustomerVars[label.name] = label.value;
+          }
+        }
+      });
+    }
+
+    // Construct the payload based on which customer vars are populated
+    const customerVarsPayload = {
+      lensCameraId: cameraId,
+      triggerDeployment: true,
+      storeId: $selectedNode?.moksaId,
+    };
+
+    // Add customer vars to the payload only if they have values
+    if (Object.keys(mobileCustomerVars).length > 0) {
+      customerVarsPayload.mobileCustomerVars = {
+        isEnabled: "True",
+        ...mobileCustomerVars,
+      };
+    }
+    if (Object.keys(theftCustomerVars).length > 0) {
+      customerVarsPayload.theftCustomerVars = {
+        isEnabled: "True",
+        ...theftCustomerVars,
+      };
+    }
+    if (Object.keys(heatmapCustomerVars).length > 0) {
+      customerVarsPayload.heatmapCustomerVars = {
+        isEnabled: "True",
+        ...heatmapCustomerVars,
+      };
+    }
+    if (Object.keys(peopleCustomerVars).length > 0) {
+      customerVarsPayload.peopleCustomerVars = {
+        isEnabled: "True",
+        ...peopleCustomerVars,
+      };
+    }
+    if (Object.keys(kitchenCustomerVars).length > 0) {
+      customerVarsPayload.kitchenCustomerVars = {
+        isEnabled: "True",
+        ...kitchenCustomerVars,
+      };
+    }
+
+    await fetch(`/api/camera/updateCameraSettings`, {
+      method: "POST",
+      body: JSON.stringify(customerVarsPayload),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to update customer variables");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log("Customer variables updated:", data);
+      })
+      .catch((error) => {
+        console.error("Error updating customer variables:", error);
+      });
+  };
 </script>
 
 <!-- markup (zero or more items) goes here -->
 <Dialog.Root bind:open={dialogOpen}>
-  <Dialog.Trigger class="flex items-center gap-2"><slot /></Dialog.Trigger>
+  <Dialog.Trigger><slot /></Dialog.Trigger>
   <Dialog.Content
-    class="sm:max-w-[720px] scale-90 2xl:scale-100 max-h-[90%] overflow-y-scroll"
+    class="sm:max-w-[900px] scale-90 2xl:scale-100 max-h-[90%] overflow-y-scroll"
   >
-    <Dialog.Header>
-      <Dialog.Title>Camera Settings</Dialog.Title>
-      <Dialog.Description>
-        Change settings for <span class="font-semibold">{cameraName}</span>
-        camera
+    <!-- Header -->
+    <div class="bg-[#000B40] text-white p-6">
+      <Dialog.Title class="text-xl font-semibold">Camera Settings</Dialog.Title>
+      <Dialog.Description class="text-gray-300">
+        Change settings for {cameraName} camera
       </Dialog.Description>
-    </Dialog.Header>
-    <div class="rounded-md border p-4 my-2">
-      <div class="flex items-center space-x-4">
-        <FileVideo2 />
-        <div class="flex-1 space-y-1">
-          <p class="text-sm font-medium leading-none">Video Saving</p>
-          <p class="text-sm text-muted-foreground">
-            Save camera feed directly to your device
-          </p>
-        </div>
-        <Switch bind:checked={save} disabled={user?.role === "admin"} />
+    </div>
+
+    <div class="flex h-[400px]">
+      <!-- Sidebar -->
+      <div class="w-64 bg-gray-100 p-2 space-y-1">
+        {#each tabs as tab}
+          <button
+            class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm
+            {activeTab === tab.id
+              ? 'bg-blue-500 text-white'
+              : 'hover:bg-gray-200'}"
+            on:click={() => (activeTab = tab.id)}
+          >
+            <svelte:component this={tab.icon} class="w-5 h-5" />
+            {tab.label}
+          </button>
+        {/each}
       </div>
-      <div>
-        {#if save}
-          <div class="flex items-center space-x-4 pt-3">
-            <FolderSearch />
-            <div class="flex-1 space-y-1">
-              <p class="text-sm font-medium leading-none">Save Here</p>
-              <p class="text-sm text-muted-foreground">
-                Point your video to its future home.
-              </p>
-            </div>
-            <Input
-              id="picture"
-              type="text"
-              class="w-[180px]"
-              disabled
-              placeholder="./PlayBack"
-            />
-          </div>
-          <div class="flex items-center space-x-4 pt-3">
-            <Merge />
-            <div class="flex-1 space-y-1">
-              <p class="text-sm font-medium leading-none">Overwrite Interval</p>
-              <p class="text-sm text-muted-foreground">
-                Duration until the saved video is overwritten.
-              </p>
-            </div>
-            <Select.Root onSelectedChange={(e) => (saveDuration = e.value)}>
-              <Select.Trigger class="w-[180px]">
-                <Select.Value
-                  placeholder={items.find((m) => m.value === saveDuration)
-                    ?.label || "Select Duration"}
-                />
-              </Select.Trigger>
-              <Select.Content>
-                <Select.Group>
-                  {#each items as fruit}
-                    <Select.Item value={fruit.value} label={fruit.label}
-                      >{fruit.label}</Select.Item
+
+      <!-- Content Area -->
+      <div class="flex-1 p-6">
+        {#each tabs as tab}
+          {#if activeTab === tab.id}
+            <div class="space-y-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h3 class="text-lg font-semibold">{tab.label}</h3>
+                  <p class="text-gray-500">
+                    Save camera feed directly to your device
+                  </p>
+                </div>
+                <Switch bind:checked={save} />
+              </div>
+
+              {#if save}
+                <div class="mt-8">
+                  {#if labels[activeTab].length === 0}
+                    <!-- Empty state when no labels -->
+                    <div
+                      class="border-2 border-dashed border-gray-200 rounded-lg p-8"
                     >
-                  {/each}
-                </Select.Group>
-              </Select.Content>
-              <Select.Input name="favoriteFruit" />
-            </Select.Root>
-          </div>
-        {/if}
-      </div>
-    </div>
-    <div class="rounded-md flex items-center justify-between border p-4 my-2">
-      <div class="flex items-center space-x-4">
-        <Drama />
-        <p class="text-sm font-medium leading-none">Theft Detection</p>
-      </div>
-      <div class="flex items-center gap-4">
-        <Switch bind:checked={theft} disabled={user?.role === "admin"} />
+                      <div class="text-center text-gray-500">
+                        <button
+                          class="flex items-center gap-2 mx-auto text-blue-500"
+                          on:click={() =>
+                            (labels[activeTab] = [
+                              ...labels[activeTab],
+                              { name: "", value: "" },
+                            ])}
+                        >
+                          <Plus class="w-5 h-5" />
+                          Get started by adding your first label
+                        </button>
+                      </div>
+                    </div>
+                  {:else}
+                    <!-- Show inputs when we have labels -->
+                    <div class="flex flex-col gap-4">
+                      {#each labels[activeTab] as label, index}
+                        <div class="flex items-center gap-4">
+                          <input
+                            type="text"
+                            placeholder="Name of the label"
+                            class="flex-1 p-2 border rounded-md"
+                            bind:value={label.name}
+                          />
+                          <input
+                            type="text"
+                            placeholder="Input field"
+                            class="flex-1 p-2 border rounded-md"
+                            bind:value={label.value}
+                          />
+                        </div>
+                      {/each}
+
+                      <!-- Add new button -->
+                      <button
+                        class="flex items-center gap-2 text-blue-500 hover:bg-gray-50 p-2 rounded"
+                        on:click={() =>
+                          (labels[activeTab] = [
+                            ...labels[activeTab],
+                            { name: "", value: "" },
+                          ])}
+                      >
+                        <Plus class="w-4 h-4" />
+                        Add new
+                      </button>
+                    </div>
+                  {/if}
+                </div>
+              {/if}
+            </div>
+          {/if}
+        {/each}
       </div>
     </div>
 
-    <div class="rounded-md flex items-center justify-between border p-4 my-2">
-      <div class="flex items-center space-x-4">
-        <Heater />
-        <p class="text-sm font-medium leading-none">Heatmap</p>
-      </div>
-      <div class="flex items-center gap-4">
-        <Switch bind:checked={heatmap} disabled={user?.role === "admin"} />
-      </div>
+    <!-- Footer -->
+    <div class="flex justify-end gap-3 p-4 border-t">
+      <Button variant="outline" on:click={() => (dialogOpen = false)}>
+        Cancel
+      </Button>
+      <Button on:click={editCamera} disabled={user?.role === "admin"}>
+        Save
+      </Button>
     </div>
-
-    <div class="rounded-md flex items-center justify-between border p-4 my-2">
-      <div class="flex items-center space-x-4">
-        <PersonStanding />
-        <p class="text-sm font-medium leading-none">Person Count</p>
-      </div>
-      <div class="flex items-center gap-4">
-        <Switch bind:checked={person} disabled={user?.role === "admin"} />
-      </div>
-    </div>
-
-    <div class="rounded-md flex items-center justify-between border p-4 my-2">
-      <div class="flex items-center space-x-4">
-        <FireExtinguisher />
-        <p class="text-sm font-medium leading-none">Kitchen Safety</p>
-      </div>
-      <div class="flex items-center gap-4">
-        <Switch bind:checked={safety} disabled={user?.role === "admin"} />
-      </div>
-    </div>
-
-    <div class="rounded-md flex items-center justify-between border p-4 my-2">
-      <div class="flex items-center space-x-4">
-        <ShieldAlert />
-        <p class="text-sm font-medium leading-none">Employee Efficiency</p>
-      </div>
-      <div class="flex items-center gap-4">
-        <Switch bind:checked={employeEE} disabled={user?.role === "admin"} />
-      </div>
-    </div>
-
-    <div class="rounded-md flex items-center justify-between border p-4 my-2">
-      <div class="flex items-center space-x-4">
-        <Siren />
-        <p class="text-sm font-medium leading-none">Priority</p>
-      </div>
-      <div class="flex items-center gap-4">
-        <Switch bind:checked={priority} disabled={user?.role === "admin"} />
-      </div>
-    </div>
-
-    <div class="rounded-md border p-4 my-2 flex items-center justify-between">
-      <div class="flex items-center space-x-4">
-        <Activity />
-        <p class="text-sm font-medium leading-none">Motion Sensitivity</p>
-      </div>
-      <div class="flex items-center gap-4">
-        <Slider
-          disabled={user?.role === "admin"}
-          min={0}
-          value={[motion === 1000 ? 0 : motion]}
-          max={5000}
-          step={2500}
-          class="w-32"
-          onValueChange={(e) => {
-            motion = e[0];
-          }}
-        />
-        {motion === 5000 ? "High" : motion === 2500 ? "Mid" : "Low"}
-      </div>
-    </div>
-
-    <Dialog.Footer>
-      <Button
-        type="submit"
-        on:click={editCamera}
-        disabled={user?.role === "admin"}>Change Camera Settings</Button
-      >
-    </Dialog.Footer></Dialog.Content
-  >
+  </Dialog.Content>
 </Dialog.Root>
+
+<style>
+  /* Add if needed for custom scrollbar or other styles */
+  :global(.dialog-content) {
+    max-height: 90vh;
+  }
+</style>

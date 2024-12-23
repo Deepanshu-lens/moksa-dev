@@ -151,9 +151,15 @@
   let expandedData = {};
 
   async function fetchExpandedData(storeId: number) {
+    const start = value?.start
+      ? `${value.start.year}-${String(value.start.month).padStart(2, "0")}-${String(value.start.day).padStart(2, "0")}`
+      : "";
+    const end = value?.end
+      ? `${value.end.year}-${String(value.end.month).padStart(2, "0")}-${String(value.end.day).padStart(2, "0")}`
+      : "";
     try {
       const response = await fetch(
-        `https://api.moksa.ai/people/getPeopleCount/${storeId}`,
+        `https://dev.api.moksa.ai/people/getPeopleCount/${storeId}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -161,6 +167,8 @@
             datetype: $dateRange,
             pagenumber: "1",
             pagepersize: "100",
+            startdate: start,
+            enddate: end,
           },
         },
       );
@@ -173,6 +181,10 @@
   }
 
   function toggleRow(storeId: number) {
+    if (expandedRows.size > 0 && !expandedRows.has(storeId)) {
+      expandedRows.clear();
+    }
+
     selectedStoreId.set(storeId);
     if (expandedRows.has(storeId)) {
       expandedRows.delete(storeId);

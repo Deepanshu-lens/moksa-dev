@@ -1,5 +1,4 @@
-import { redirect, error } from "@sveltejs/kit";
-import os from "os";
+import { redirect } from "@sveltejs/kit";
 import { toast } from "svelte-sonner";
 export const actions = {
   forgotpassword: async ({ locals, request, cookies }) => {
@@ -8,14 +7,13 @@ export const actions = {
     const email = data.get("email")?.toString() || "";
 
     try {
-      await fetch(`https://api.moksa.ai/auth/requestResetPassword`, {
+      await fetch(`https://dev.api.moksa.ai/auth/sendOtp`, {
         method: "POST", headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ email: email }),
       }).then(async (res) => {
         const data = await res.json();
-        console.log(data, 'data here');
         if (data?.status === 200) {
           toast.success(data?.message);
         } else {
@@ -23,7 +21,7 @@ export const actions = {
           throw redirect(303, `/forgot-password?message=send link failed,`);
         }
       }).catch((err) => {
-        console.log(err);
+        console.log(err, 'error in forgot password');
         throw redirect(303, `/forgot-password?message=send link failed,`);
       });
 

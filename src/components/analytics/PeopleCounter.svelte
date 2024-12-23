@@ -58,7 +58,7 @@
       socket.disconnect();
     }
 
-    socket = io("https://api.moksa.ai", {
+    socket = io("https://dev.api.moksa.ai", {
       withCredentials: true,
       extraHeaders: {
         Authorization: `Bearer ${token}`,
@@ -180,7 +180,7 @@
   async function getLiveData(storeId: number) {
     loadingLive.set(true);
     const response = await fetch(
-      `https://api.moksa.ai/people/getPeopleCountLive/${storeId}/1/30`,
+      `https://dev.api.moksa.ai/people/getPeopleCountLive/${storeId}/1/30`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -200,7 +200,7 @@
       .toISOString()
       .split("T")[0];
     const weekData = await fetch(
-      `https://api.moksa.ai/people/getPeopleCount/${storeId}/${weekAgo}/${today}`,
+      `https://dev.api.moksa.ai/people/getPeopleCount/${storeId}/${weekAgo}/${today}`,
       {
         headers:
           $selectedStore.value !== -1
@@ -228,9 +228,8 @@
   }
 
   async function fetchDataForDateRange() {
+    console.log('called it instead')
     customDateLabel = "Custom";
-    console.log(token);
-    console.log("called date range function");
     const today = new Date();
     let startDate = new Date(today);
 
@@ -262,7 +261,7 @@
     try {
       // Call the three APIs
       const d = await fetch(
-        `https://api.moksa.ai/people/getPeopleCount/${storeId}`,
+        `https://dev.api.moksa.ai/people/getPeopleCount/${storeId}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -301,7 +300,7 @@
       // console.log(token);
       // Call the three APIs
       const d = await fetch(
-        `https://api.moksa.ai/people/getPeopleCount/${storeId}`,
+        `https://dev.api.moksa.ai/people/getPeopleCount/${storeId}`,
         {
           method: "GET",
           headers: {
@@ -382,6 +381,8 @@
 
     return stringValue;
   }
+
+  $:console.log(startValue,'start value')
 </script>
 
 <section

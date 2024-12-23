@@ -93,7 +93,7 @@ export const POST: RequestHandler = async ({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       }),
-      fetch(`https://api.moksa.ai/camera/addCamera`, {
+      fetch(`https://dev.api.moksa.ai/camera/addCamera`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

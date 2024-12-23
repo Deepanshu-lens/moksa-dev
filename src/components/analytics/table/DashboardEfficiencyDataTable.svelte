@@ -69,7 +69,7 @@
     const formatDate = (date: Date) => date.toISOString().split("T")[0];
     // console.log(currentpage);
     const efficiency = await fetch(
-      `https://api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/${$selectedStore.value}/${$dateRange === "custom" ? start : formatDate(startDate)}/${currentpage}/100/${$dateRange === "custom" ? end : formatDate(today)}`,
+      `https://dev.api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/${$selectedStore.value}/${$dateRange === "custom" ? start : formatDate(startDate)}/${currentpage}/100/${$dateRange === "custom" ? end : formatDate(today)}`,
       {
         method: "GET",
         headers: {
