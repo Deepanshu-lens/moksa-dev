@@ -35,6 +35,11 @@
         <Pencil size={12} />
       {:else if action === "settings"}
         <Settings size={13} />
+      {:else if action === "add"}
+      <Icon
+      icon={`${action === "add" && "solar:videocamera-add-outline"}`}
+      class="w-5 h-5"
+    />
       {:else}
         <Trash size={13} />
       {/if}
