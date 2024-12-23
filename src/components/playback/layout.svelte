@@ -9,9 +9,10 @@
     CalendarDaysIcon,
     Loader2,
     PauseCircle,
-    Download
+    Download,
+    FastForward,
   } from "lucide-svelte";
-  import { selectedNode,nodes } from "@/stores";
+  import { selectedNode, nodes } from "@/stores";
   import { writable } from "svelte/store";
   import Hls from "hls.js";
   import { toast } from "svelte-sonner";
@@ -25,8 +26,8 @@
   import { getCameras } from "@/managers/get-camera";
   import { updateTransform, toggleFullscreen } from "@/lib/video-utils";
   import getPlaybackURL from "@/lib/playback";
-  import {user} from "@/stores"
-  import JSZip from 'jszip';
+  import { user } from "@/stores";
+  import JSZip from "jszip";
   import Label from "../ui/label/label.svelte";
 
   // Variables
@@ -56,6 +57,7 @@
   let videoOffsets = writable<number[]>([]); //in hours
   let playVisible = writable<any[]>([]);
   let selectedFileType = writable<string>("mp4");
+  let selectedVideo = writable<number | null>();
 
   const PLAYBACK_API_URL = getPlaybackURL();
 
@@ -115,47 +117,45 @@
 
   function handleDownload(index: number) {
     const videoElement = videoRefs[index];
-    const {name} = videoUrls.cams[index];
+    const { name } = videoUrls.cams[index];
 
     if (Hls.isSupported()) {
-        const hls = new Hls();
-        hls?.loadSource(videoUrls.responses[index]);
-        hls?.attachMedia(videoElement);
+      const hls = new Hls();
+      hls?.loadSource(videoUrls.responses[index]);
+      hls?.attachMedia(videoElement);
 
-        // Add this event listener to get the current chunk path
-        hls.on(Hls.Events.FRAG_CHANGED, async function (event, data) {
-            const currentFragment = data.frag;
-            if (currentFragment) {
-                console.log("Current chunk path:", currentFragment.url);
-                
-                // Fetch the .ts file as a Blob
-                try {
-                    const response = await fetch(currentFragment.url);
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    const blob = await response.blob();
-                       // Create a new File object for the MP4 format
-                let convertedBlob = new File([blob], `video_${name}.mp4`, {
-                  type: 'video/mp4',
-                });
-                    const blobUrl = URL.createObjectURL(blob);
-
-                    // Create a temporary anchor element for download
-                    const a = document.createElement('a');
-                    a.href = blobUrl; // Set the href to the Blob URL
-                    a.download = `video_${name}.ts`; // Set the desired file name for download
-                    document.body.appendChild(a); // Append the anchor to the body
-                    a.click(); // Trigger the download
-                    document.body.removeChild(a); // Remove the anchor from the document
-
-                    // Clean up the Blob URL
-                    URL.revokeObjectURL(blobUrl);
-                } catch (error) {
-                    console.error('Error downloading the .ts file:', error);
-                }
+      // Add this event listener to get the current chunk path
+      hls.on(Hls.Events.FRAG_CHANGED, async function (event, data) {
+        const currentFragment = data.frag;
+        if (currentFragment) {
+          // Fetch the .ts file as a Blob
+          try {
+            const response = await fetch(currentFragment.url);
+            if (!response.ok) {
+              throw new Error("Network response was not ok");
             }
-        });
+            const blob = await response.blob();
+            // Create a new File object for the MP4 format
+            let convertedBlob = new File([blob], `video_${name}.mp4`, {
+              type: "video/mp4",
+            });
+            const blobUrl = URL.createObjectURL(blob);
+
+            // Create a temporary anchor element for download
+            const a = document.createElement("a");
+            a.href = blobUrl; // Set the href to the Blob URL
+            a.download = `video_${name}.ts`; // Set the desired file name for download
+            document.body.appendChild(a); // Append the anchor to the body
+            a.click(); // Trigger the download
+            document.body.removeChild(a); // Remove the anchor from the document
+
+            // Clean up the Blob URL
+            URL.revokeObjectURL(blobUrl);
+          } catch (error) {
+            console.error("Error downloading the .ts file:", error);
+          }
+        }
+      });
     }
   }
 
@@ -176,13 +176,12 @@
         hls.on(Hls.Events.FRAG_CHANGED, async function (event, data) {
           const currentFragment = data.frag;
           if (currentFragment) {
-            console.log("Current chunk path:", currentFragment.url);
 
             // Fetch the .ts file as a Blob
             try {
               const response = await fetch(currentFragment.url);
               if (!response.ok) {
-                throw new Error('Network response was not ok');
+                throw new Error("Network response was not ok");
               }
               const tsBlob = await response.blob();
 
@@ -190,15 +189,15 @@
               const fileType = $selectedFileType; // Get the selected file type
               let convertedBlob;
 
-              if (fileType === 'mp4') {
+              if (fileType === "mp4") {
                 // Create a new File object for the MP4 format
                 convertedBlob = new File([tsBlob], `video_${name}.mp4`, {
-                  type: 'video/mp4',
+                  type: "video/mp4",
                 });
-              } else if (fileType === 'wav') {
+              } else if (fileType === "wav") {
                 // Create a new File object for the WAV format
                 convertedBlob = new File([tsBlob], `video_${name}.wav`, {
-                  type: 'video/wav',
+                  type: "video/wav",
                 });
               }
 
@@ -219,7 +218,7 @@
       // Generate the ZIP file
       zip.generateAsync({ type: "blob" }).then((content) => {
         // Create a temporary anchor element for download
-        const a = document.createElement('a');
+        const a = document.createElement("a");
         const blobUrl = URL.createObjectURL(content);
         a.href = blobUrl;
         a.download = "all_videos.zip"; // Set the desired file name for the ZIP
@@ -245,23 +244,21 @@
     hls.on(Hls.Events.FRAG_CHANGED, async function (event, data) {
       const currentFragment = data.frag;
       if (currentFragment) {
-        console.log("Current chunk path:", currentFragment.url);
-
         // Fetch the .ts file as a Blob
         try {
           const response = await fetch(currentFragment.url);
           if (!response.ok) {
-            throw new Error('Network response was not ok');
+            throw new Error("Network response was not ok");
           }
           const tsBlob = await response.blob();
 
           // Create a new File object for the MP4 format
           const mp4File = new File([tsBlob], `video_${name}.mp4`, {
-            type: 'video/mp4',
+            type: "video/mp4",
           });
 
           // Create a temporary anchor element for download
-          const a = document.createElement('a');
+          const a = document.createElement("a");
           const blobUrl = URL.createObjectURL(mp4File);
           a.href = blobUrl;
           a.download = mp4File.name; // Set the desired file name for download
@@ -303,7 +300,6 @@
               syncPlayState(index, false);
             });
         });
-
       } else if (videoElement.canPlayType("application/vnd.apple.mpegurl")) {
         videoElement.src = videoUrls.responses[index];
         videoElement.addEventListener("loadedmetadata", () => {
@@ -323,6 +319,9 @@
       }
       videoElement.addEventListener("play", () => syncPlayState(index, true));
       videoElement.addEventListener("pause", () => syncPlayState(index, false));
+      videoElement.addEventListener("loadedmetadata", () => {
+        video.playbackRate = 1;
+      });
 
       video.addEventListener("timeupdate", () => {
         const seeker = document.querySelectorAll(
@@ -421,76 +420,80 @@
   }
 
   async function fetchPlaybackData() {
-  if ($selectedChannels.length === 0 || !searchDate) {
-    toast.error("No data to fetch");
-    return;
-  }
+    if ($selectedChannels.length === 0 || !searchDate) {
+      toast.error("No data to fetch");
+      return;
+    }
 
-  isFetching.set(true);
+    isFetching.set(true);
 
-  const dateParts = searchDate.split(" ");
-  const day = dateParts[0].padStart(2, "0");
-  const month =
-    new Date(Date.parse(dateParts[1] + " 1, 2020")).getMonth() + 1;
-  const year = dateParts[2];
-  const formattedDate = `${year}_${month.toString().padStart(2, "0")}_${day}`;
+    const dateParts = searchDate.split(" ");
+    const day = dateParts[0].padStart(2, "0");
+    const month =
+      new Date(Date.parse(dateParts[1] + " 1, 2020")).getMonth() + 1;
+    const year = dateParts[2];
+    const formattedDate = `${year}_${month.toString().padStart(2, "0")}_${day}`;
 
-  try {
-    events = [];
-    videoUrls = { responses: [], cams: [] };
+    try {
+      events = [];
+      videoUrls = { responses: [], cams: [] };
 
-    const responses = await Promise.allSettled(
-      $selectedChannels.map(async (channel) => {
-        try {
-          const response = await fetch(PLAYBACK_API_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              cameraID: channel.id,
-              cameraDate: formattedDate,
-            }),
-          });
+      const responses = await Promise.allSettled(
+        $selectedChannels.map(async (channel) => {
+          try {
+            const response = await fetch(PLAYBACK_API_URL, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                cameraID: channel.id,
+                cameraDate: formattedDate,
+              }),
+            });
 
-          if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(
-              `Playback not available for ${channel.name}: ${errorData.message || "Unknown error"}`
-            );
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(
+                `Playback not available for ${channel.name}: ${errorData.message || "Unknown error"}`
+              );
+            }
+
+            const data = await response.json();
+            return { data, path: data.path, channel };
+          } catch (error) {
+            return { error, channel }; // Return the error along with channel info
           }
+        })
+      );
 
-          const data = await response.json();
-          return { data, path: data.path, channel };
-        } catch (error) {
-          return { error, channel }; // Return the error along with channel info
-        }
-      })
-    );
+      // Separate fulfilled and rejected results
+      const fulfilled = responses.filter(
+        (result) => result.status === "fulfilled" && !result.value.error
+      );
+      const rejected = responses.filter(
+        (result) => result.status === "rejected" || result.value?.error
+      );
 
-    // Separate fulfilled and rejected results
-    const fulfilled = responses.filter((result) => result.status === "fulfilled" && !result.value.error);
-    const rejected = responses.filter((result) => result.status === "rejected" || result.value?.error);
+      // Prepare final arrays based on successful results
+      const successfulResponses = fulfilled.map((res) => res.value.data);
+      const successfulPaths = fulfilled.map((res) => res.value.path);
+      const successfulChannels = fulfilled.map((res) => res.value.channel);
 
-    // Prepare final arrays based on successful results
-    const successfulResponses = fulfilled.map((res) => res.value.data);
-    const successfulPaths = fulfilled.map((res) => res.value.path);
-    const successfulChannels = fulfilled.map((res) => res.value.channel);
+      // Update `videoUrls` and offsets only with successful results
+      videoUrls = { responses: successfulPaths, cams: successfulChannels };
+      setOffsets(successfulResponses);
+      videoPlayStates.set(new Array(fulfilled.length).fill(true));
 
-    // Update `videoUrls` and offsets only with successful results
-    videoUrls = { responses: successfulPaths, cams: successfulChannels };
-    setOffsets(successfulResponses);
-    videoPlayStates.set(new Array(fulfilled.length).fill(true));
-
-    // Handle rejected results
-    rejected.forEach((res) => {
-      const channelName = res?.value?.channel?.name || "Unknown channel";
-      toast.error(`Playback not available for ${channelName}`);
-    });
-  } catch (error) {
-    console.error("Error fetching playback data:", error);
-  } finally {
-    isFetching.set(false);
+      // Handle rejected results
+      rejected.forEach((res) => {
+        const channelName = res?.value?.channel?.name || "Unknown channel";
+        toast.error(`Playback not available for ${channelName}`);
+      });
+    } catch (error) {
+      console.error("Error fetching playback data:", error);
+    } finally {
+      isFetching.set(false);
+    }
   }
-}
 
   function toggleCalendar() {
     showCalendar.update((currentValue) => !currentValue);
@@ -681,7 +684,7 @@
   let previousNode: string | null = null;
   $: if ($selectedNode && $selectedNode !== previousNode && $user) {
     isLoading.set(true);
-    getCameras($selectedNode,$user.session[0]).then((cameras) => {
+    getCameras($selectedNode, $user.session[0]).then((cameras) => {
       availableChannels.set(cameras);
       isLoading.set(false);
       previousNode = $selectedNode;
@@ -815,7 +818,7 @@
     videoOffsets.set(offsets);
   }
 
-  function showPlay(index) {
+  function showPlay(index: number) {
     playVisible.update((visible) => {
       visible[index] = true;
       return visible;
@@ -830,15 +833,17 @@
   }
 
   // Ensure pause icon state is handled
-  function showPause(index) {
+  function showPause(index: number) {
     playVisible.update((visible) => {
       visible[index] = false; // Ensure play icon is hidden on pause
       return visible;
     });
   }
 
-  // Example usage: Call this function to download a specific video
-  // handleDownloadVideo(0); // Replace 0 with the index of the video you want to download
+  const handlePlaybackRate = (index: number, rate: number) => {
+    const video = videoRefs[index];
+    video.playbackRate = rate;
+  };
 </script>
 
 <section class="right-playback flex-1 flex w-full h-screen justify-between">
@@ -868,7 +873,12 @@
         {#each videoUrls.responses as video, index}
           <!-- svelte-ignore a11y_no_static_element_interactions -->
           <!-- svelte-ignore a11y_click_events_have_key_events -->
-          <div class="zoomable-area" id={`area-${index}`}>
+          <div
+            class="zoomable-area"
+            id={`area-${index}`}
+            on:mouseenter={()=>{selectedVideo.set(index)}}
+            on:mouseleave={()=>{selectedVideo.set(null)}}
+          >
             <video
               id={`video-${index}`}
               bind:this={videoRefs[index]}
@@ -887,11 +897,50 @@
               on:ended={handleEnded}
             ></video>
             <div
-            class="absolute left-4 top-2 rounded-md bg-neutral-600 bg-opacity-50 transition-opacity duration-300 text-white flex items-center gap-x-2 text-nowrap p-1"
-          >
-            <span class="size-2 bg-green-700 rounded-full"></span>
-            {videoUrls?.cams?.[index]?.name}
-          </div>
+              class="absolute left-4 top-2 rounded-md bg-neutral-600 bg-opacity-50 transition-opacity duration-300 text-white flex items-center gap-x-2 text-nowrap p-1"
+            >
+              {videoUrls?.cams?.[index]?.name}
+            </div>
+
+            <div
+              class={cn(
+                "absolute bottom-10 left-[25%] hidden items-center justify-between w-auto h-16 backdrop-blur-sm rounded-md border z-[100] px-4 gap-3",
+                { flex: $selectedVideo === index }
+              )}
+            >
+              <div
+                on:click={() => {
+                  handlePlaybackRate(index, 1);
+                }}
+                class="cursor-pointer z-50"
+              >
+                <span class="text-sm">1x<Play class="inline-block ml-0.5" size={14}/></span>
+              </div>
+              <div
+                on:click={() => {
+                  handlePlaybackRate(index, 2);
+                }}
+                class="cursor-pointer z-50"
+              >
+                <span class="text-sm">2x<FastForward class="inline-block ml-0.5" size={14} /></span>
+              </div>
+              <div
+                on:click={() => {
+                  handlePlaybackRate(index, 4);
+                }}
+                class="cursor-pointer z-50"
+              >
+                <span class="text-sm">4x<FastForward class="inline-block ml-0.5" size={14} /></span>
+              </div>
+              <div
+                on:click={() => {
+                  handlePlaybackRate(index, 8);
+                }}
+                class="cursor-pointer z-50"
+              >
+                <span class="text-sm">8x<FastForward class="inline-block ml-0.5" size={14} /></span>
+              </div>
+            </div>
             <div
               class="absolute inset-0 flex items-center justify-center bg-opacity-20 z-10"
             >
@@ -1041,12 +1090,14 @@
                 </svg>
               </button>
               <button
-              style="cursor: pointer;"
-              on:click={() => {handleDownloadVideo(index)}}
-              class="cursor-pointer border border-black dark:bg-neutral-500 rounded-full"
-            >
-             <Download size={14}/>
-            </button>
+                style="cursor: pointer;"
+                on:click={() => {
+                  handleDownloadVideo(index);
+                }}
+                class="cursor-pointer border border-black dark:bg-neutral-500 rounded-full"
+              >
+                <Download size={14} />
+              </button>
             </div>
             <div
               class="bg-black/10 dark:bg-white/10 w-[89%] 2xl:w-[90%] h-[95%] p-0 m-0 flex gap-1 relative"
@@ -1123,8 +1174,10 @@
               </p>
             {:else}
               {#each $availableChannels as channel}
-              <!-- <span>{$nodes?.find((node) => node?.id === channel?.node?.[0])?.name}</span> -->
-                <div class="flex items-center mb-2 border dark:border my-4 hover:border hover:border-primary space-x-4 rounded-xl text-sm z-10 w-[90%] py-1.5 px-4 relative">
+                <!-- <span>{$nodes?.find((node) => node?.id === channel?.node?.[0])?.name}</span> -->
+                <div
+                  class="flex items-center mb-2 border dark:border my-4 hover:border hover:border-primary space-x-4 rounded-xl text-sm z-10 w-[90%] py-1.5 px-4 relative"
+                >
                   <input
                     disabled={$selectedChannels.length === 8 &&
                       !$selectedChannels.includes(channel)}
@@ -1145,12 +1198,13 @@
                     )}>{channel.name}</label
                   >
                   {#if $selectedNode === "all" && $nodes?.find((node) => node?.id === channel?.node?.[0])?.name}
-                  <span
-                    class="absolute right-0 -top-2 z-10 py-0 px-2 bg-purple-200 rounded-2xl text-[9px] text-black"
-                  >
-                    {$nodes?.find((node) => node?.id === channel?.node?.[0])?.name}
-                  </span>
-                {/if}
+                    <span
+                      class="absolute right-0 -top-2 z-10 py-0 px-2 bg-purple-200 rounded-2xl text-[9px] text-black"
+                    >
+                      {$nodes?.find((node) => node?.id === channel?.node?.[0])
+                        ?.name}
+                    </span>
+                  {/if}
                 </div>
               {/each}
             {/if}
@@ -1335,15 +1389,26 @@
       </div>
     </div>
 
-    <div class="download-all w-[90%] mx-auto">
+    <!-- video exporter [download all] -->
+    <div
+      class={cn("w-[90%] mx-auto", {
+        hidden: videoUrls?.responses?.length === 0,
+      })}
+    >
       <Accordion.Root class="w-full">
         <Accordion.Item value="item-1">
-          <Accordion.Trigger class="text-sm py-2">Export All Videos</Accordion.Trigger>
+          <Accordion.Trigger class="text-sm py-2"
+            >Export All Videos</Accordion.Trigger
+          >
           <Accordion.Content>
             <!-- Replace the select with Shadcn Select -->
             <div class="mb-2">
               <Label for="fileType" class="mr-2 mb-2">Select File Type:</Label>
-              <Select.Root bind:value={selectedFileType} onSelectedChange={(v)=>selectedFileType.set(v?.value)} class="border rounded-md p-1 mt-2">
+              <Select.Root
+                bind:value={selectedFileType}
+                onSelectedChange={(v) => selectedFileType.set(v?.value)}
+                class="border rounded-md p-1 mt-2"
+              >
                 <Select.Trigger class="border rounded-md p-1">
                   <Select.Value placeholder="Select file type" />
                 </Select.Trigger>
@@ -1353,7 +1418,13 @@
                 </Select.Content>
               </Select.Root>
             </div>
-            <Button size="sm" variant="outline" class="text-xs" disabled={!videoUrls?.responses?.length} on:click={handleDownloadAllVideos}>Download All</Button>
+            <Button
+              size="sm"
+              variant="outline"
+              class="text-xs"
+              disabled={!videoUrls?.responses?.length}
+              on:click={handleDownloadAllVideos}>Download All</Button
+            >
           </Accordion.Content>
         </Accordion.Item>
       </Accordion.Root>
