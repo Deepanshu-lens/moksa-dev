@@ -30,3 +30,4 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
     return json({ error: 'Failed to update camera features' }, { status: 500 });
   }
 };
+

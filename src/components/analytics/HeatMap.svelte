@@ -859,7 +859,7 @@
       {/if}
     </div>
     <div
-      class="col-span-4 row-span-3 border rounded-md flex flex-col dark:border-white/[.7] min-h-[300px]"
+      class="col-span-4 row-span-3 border rounded-md flex flex-col dark:border-white/[.7] min-h-[300px] max-h-[500px]"
     >
       <span
         class="rounded-t-xl w-full h-[50px] flex items-center justify-between px-4 flex-shrink-0"

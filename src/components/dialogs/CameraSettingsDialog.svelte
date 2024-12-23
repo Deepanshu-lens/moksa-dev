@@ -107,75 +107,73 @@
   };
 
   const editCamera = async () => {
-    // setTimeout(() => {
-    //   console.log(showOptions.set(""));
-    // }, 1000);
-    // await fetch("/api/camera/editCamera", {
-    //   method: "put",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify({
-    //     cameraId,
-    //     nodeId: $selectedNode.id,
-    //     name: cameraName,
-    //     url: cameraURL,
-    //     subUrl,
-    //     face,
-    //     save,
-    //     running,
-    //     faceDetectionThreshold,
-    //     faceSearchThreshold,
-    //     runningThresh: runningDetectionThreshold,
-    //     saveDuration,
-    //     saveFolder,
-    //     motionThresh: motion === 0 ? 1000 : motion,
-    //     priority: priority === true ? 1 : 0,
-    //     intrusionDetection,
-    //     intrusionPerson,
-    //     intrusionVehicle,
-    //     intrusionPersonThresh,
-    //     intrusionVehicleThresh,
-    //     lineCrossing,
-    //     linePerson,
-    //     lineVehicle,
-    //     linePersonThresh,
-    //     lineVehicleThresh,
-    //     personCount,
-    //     theft,
-    //     safety,
-    //     person,
-    //     theftDetectionThresh,
-    //     employeEE,
-    //     heatmap,
-    //   }),
-    // }).then(() => {
-    //   toast("Camera settings updated.");
-    //   dialogOpen = false;
-    // });
-    // const enabledFeatures = {
-    //   heat: heatmap || false,
-    //   count: person || false,
-    //   theft: theft || false,
-    //   kitchenhygiene: safety || false,
-    //   rtsp: false,
-    // };
-    // console.log("features", enabledFeatures);
-    // console.log("storeid", $selectedNode.moksaId);
-    // console.log("moksaid camid", moksaId);
-    // const dev = await fetch(`/api/camera/updateFeatures`, {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify({
-    //     storeId: $selectedNode.moksaId,
-    //     camId: moksaId,
-    //     feature: enabledFeatures,
-    //   }),
-    // });
-    // const r = await dev.json();
-    // console.log("updatefeature", r);
+    setTimeout(() => {
+      console.log(showOptions.set(""));
+    }, 1000);
+    await fetch("/api/camera/editCamera", {
+      method: "put",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        cameraId,
+        nodeId: $selectedNode.id,
+        name: cameraName,
+        url: cameraURL,
+        subUrl,
+        face,
+        save,
+        running,
+        faceDetectionThreshold,
+        faceSearchThreshold,
+        runningThresh: runningDetectionThreshold,
+        saveDuration,
+        saveFolder,
+        motionThresh: motion === 0 ? 1000 : motion,
+        priority: priority === true ? 1 : 0,
+        intrusionDetection,
+        intrusionPerson,
+        intrusionVehicle,
+        intrusionPersonThresh,
+        intrusionVehicleThresh,
+        lineCrossing,
+        linePerson,
+        lineVehicle,
+        linePersonThresh,
+        lineVehicleThresh,
+        personCount,
+        theft,
+        safety,
+        person,
+        theftDetectionThresh,
+        employeEE,
+        heatmap,
+      }),
+    }).then(() => {
+      toast("Camera settings updated.");
+      dialogOpen = false;
+    });
+    const enabledFeatures = {
+      heat: heatmap || false,
+      count: person || false,
+      theft: theft || false,
+      kitchenhygiene: safety || false,
+      rtsp: false,
+    };
+    const dev = await fetch(`/api/camera/updateFeatures`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        storeId: $selectedNode.moksaId,
+        camId: moksaId,
+        feature: enabledFeatures,
+      }),
+    });
+    const r = await dev.json();
+
+    // New Camera settings modal api
 
     // Initialize customer variable objects
     const mobileCustomerVars = {};
@@ -184,27 +182,30 @@
     const peopleCustomerVars = {};
     const kitchenCustomerVars = {};
 
-    // Populate the customer variable objects based on the labels for the active tab
-    labels[activeTab].forEach((label) => {
-      if (label.name && label.value) {
-        if (activeTab === "employee-safety") {
-          mobileCustomerVars[label.name] = label.value;
-        } else if (activeTab === "theft-detection") {
-          theftCustomerVars[label.name] = label.value;
-        } else if (activeTab === "heatmap") {
-          heatmapCustomerVars[label.name] = label.value;
-        } else if (activeTab === "person-count") {
-          peopleCustomerVars[label.name] = label.value;
-        } else if (activeTab === "kitchen-safety") {
-          kitchenCustomerVars[label.name] = label.value;
+    // Populate the customer variable objects based on the labels for all tabs
+    for (const tab of tabs) {
+      labels[tab.id].forEach((label) => {
+        if (label.name && label.value) {
+          if (tab.id === "employee-safety") {
+            mobileCustomerVars[label.name] = label.value;
+          } else if (tab.id === "theft-detection") {
+            theftCustomerVars[label.name] = label.value;
+          } else if (tab.id === "heatmap") {
+            heatmapCustomerVars[label.name] = label.value;
+          } else if (tab.id === "person-count") {
+            peopleCustomerVars[label.name] = label.value;
+          } else if (tab.id === "kitchen-safety") {
+            kitchenCustomerVars[label.name] = label.value;
+          }
         }
-      }
-    });
+      });
+    }
 
     // Construct the payload based on which customer vars are populated
     const customerVarsPayload = {
       lensCameraId: cameraId,
       triggerDeployment: true,
+      storeId: $selectedNode?.moksaId,
     };
 
     // Add customer vars to the payload only if they have values
@@ -239,27 +240,22 @@
       };
     }
 
-    console.log(customerVarsPayload, "customersvarpayload");
-
-    // await fetch(`http://dev.api.moksa.ai/store/updateCustomerVars/${$selectedNode?.moksaId}`, {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify(customerVarsPayload),
-    // })
-    //   .then((response) => {
-    //     if (!response.ok) {
-    //       throw new Error("Failed to update customer variables");
-    //     }
-    //     return response.json();
-    //   })
-    //   .then((data) => {
-    //     console.log("Customer variables updated:", data);
-    //   })
-    //   .catch((error) => {
-    //     console.error("Error updating customer variables:", error);
-    //   });
+    await fetch(`/api/camera/updateCameraSettings`, {
+      method: "POST",
+      body: JSON.stringify(customerVarsPayload),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to update customer variables");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log("Customer variables updated:", data);
+      })
+      .catch((error) => {
+        console.error("Error updating customer variables:", error);
+      });
   };
 </script>
 

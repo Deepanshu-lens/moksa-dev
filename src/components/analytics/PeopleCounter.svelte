@@ -228,9 +228,8 @@
   }
 
   async function fetchDataForDateRange() {
+    console.log('called it instead')
     customDateLabel = "Custom";
-    console.log(token);
-    console.log("called date range function");
     const today = new Date();
     let startDate = new Date(today);
 
@@ -382,6 +381,8 @@
 
     return stringValue;
   }
+
+  $:console.log(startValue,'start value')
 </script>
 
 <section
