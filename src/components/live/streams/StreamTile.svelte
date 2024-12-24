@@ -23,6 +23,7 @@
   export let visibilityThreshold: number = 0;
   export let visibilityCheck: boolean = true;
   export let name: string;
+  let zoomableAreas: HTMLElement[] = [];
 
   // State Variables
   let videoElement: HTMLVideoElement;
@@ -39,23 +40,30 @@
       cell.requestFullscreen({ navigationUI: "show" });
       isFullScreen.set(true);
       document.addEventListener("fullscreenchange", handleFullscreenChange);
-
-      const mainStream = document.createElement("video-stream");
-      mainStream.mode = mode;
-      mainStream.id = id + "_FULL";
-      mainStream.className = "video-player rounded-md";
-      mainStream.src = url + "_FULL";
-      mainStream.wsURL = url + "_FULL";
-      mainStream.addEventListener("statechange", (event) => {
-        if (event.detail.state === "PLAYING") {
-          const existingStream = document.getElementById(id);
-          if (existingStream) {
-            existingStream.parentNode?.insertBefore(mainStream, existingStream);
-            existingStream.remove();
+      if (!document.getElementById(id)?.parentNode.id.includes("_FULL")) {
+        const mainStream = document.createElement("video-stream");
+        mainStream.mode = mode;
+        mainStream.id = id + "_FULL";
+        mainStream.className = "video-player rounded-md zoomable-area";
+        mainStream.src = url + "_FULL";
+        mainStream.wsURL = url + "_FULL";
+        mainStream.addEventListener("statechange", (event) => {
+          if (event.detail.state === "PLAYING" && $isFullScreen) {
+            console.log("Adding main ", event.detail.state);
+            const existingStream = document.getElementById(id);
+            if (existingStream) {
+              setupZoomAndPan();
+              existingStream.parentNode?.insertBefore(
+                mainStream,
+                existingStream
+              );
+              console.log("REMOVING ", existingStream);
+              existingStream.remove();
+            }
           }
-        }
-      });
-      document.getElementById(`grid-cell-${id}`)?.appendChild(mainStream);
+        });
+        document.getElementById(`grid-cell-${id}`)?.appendChild(mainStream);
+      }
     }
   }
 
@@ -63,6 +71,32 @@
     if (document.fullscreenElement) {
       document.exitFullscreen();
       isFullScreen.set(false);
+      if (
+        !document.getElementById(id + "_FULL")?.parentNode.id.includes("_FULL")
+      ) {
+        const subStream = document.createElement("video-stream");
+        subStream.mode = mode;
+        subStream.id = id.replace("_FULL", "");
+        subStream.className = "video-player rounded-md zoomable-area";
+        subStream.src = url.replace("_FULL", "");
+        subStream.wsURL = url.replace("_FULL", "");
+        const mainStream = document.getElementById(`${id}_FULL`);
+        mainStream?.removeEventListener("statechange", () => {});
+        console.log(mainStream, subStream);
+        subStream.addEventListener("statechange", (event) => {
+          if (event.detail.state === "PLAYING") {
+            console.log("Adding main-sub ", event.detail.state);
+            if (mainStream) {
+              // setupZoomAndPan();
+              mainStream.parentNode?.insertBefore(subStream, mainStream);
+              mainStream.remove();
+            }
+          }
+        });
+        document
+          .getElementById(id + "_FULL")
+          .parentNode?.appendChild(subStream);
+      }
     }
   }
 
@@ -70,28 +104,6 @@
     if (!document.fullscreenElement) {
       isFullScreen.set(false);
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
-
-      const subStream = document.createElement("video-stream");
-      subStream.mode = mode;
-      subStream.id = id;
-      subStream.className = "video-player rounded-md";
-      subStream.src = url;
-      subStream.wsURL = url;
-      const mainStream = document.getElementById(`${id}_FULL`);
-      console.log(mainStream, subStream);
-      subStream.addEventListener("statechange", (event) => {
-        if (event.detail.state === "PLAYING") {
-          if (mainStream) {
-            mainStream.parentNode?.insertBefore(subStream, mainStream);
-            mainStream.remove();
-          }
-        }
-      });
-      // if (mainStream) {
-      //   mainStream.parentNode?.insertBefore(subStream, mainStream);
-      //   mainStream.remove();
-      // }
-      document.getElementById(`grid-cell-${id}`)?.appendChild(subStream);
     }
   }
 
@@ -136,8 +148,7 @@
 
   // Zoom and Pan Setup
   function setupZoomAndPan() {
-    const zoomableAreas =
-      document.querySelectorAll<HTMLElement>(".zoomable-area");
+    zoomableAreas = document.querySelectorAll<HTMLElement>(".zoomable-area");
     let scale: number = 1;
     const zoomStep: number = 0.2;
     const maxScale: number = 3;

@@ -82,16 +82,23 @@ export const cameraSchema = z.lazy(() =>
     url: z.string().url("Invalid URL"),
     subUrl: z.any(),
     save: z.boolean(),
+    saveDuration: z.number().optional(),
     created: z.string(),
     node: z.array(z.string()),
+    fps: z.number().optional(),
+    motionThresh: z.number().optional(),
+    face: z.boolean().optional(),
+    person: z.boolean().optional(),
+    faceDetThresh: z.number().optional(),
+    faceMatchThresh: z.number().optional(),
+    personDetThreshold: z.number().optional(),
+    timeZone: z.string().optional(),
     streamType: z
       .enum(["", "Default", "Mainstream", "Substream"])
       .transform((val) => (val === "" ? "Default" : val)),
     recordQuality: z
       .enum(["", "Default", "Mainstream", "Substream"])
       .transform((val) => (val === "" ? "Default" : val)),
-    // subUrl: z.string().url("Invalid URL").nullable().optional(),
-    // node: nodeSchema,
   })
 );
 

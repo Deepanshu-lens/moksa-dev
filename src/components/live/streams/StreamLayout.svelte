@@ -186,7 +186,13 @@
             >
               <StreamTile
                 name={camera?.name}
-                id={camera?.id}
+                id={camera?.streamType !== "Default"
+                  ? camera?.streamType === "Mainstream"
+                    ? `${camera?.id}_FULL`
+                    : `${camera?.id}`
+                  : $displayCameras.length > 4
+                    ? `${camera?.id}`
+                    : `${camera?.id}_FULL`}
                 url={camera?.streamType !== "Default"
                   ? camera?.streamType === "Mainstream"
                     ? `${STREAM_URL}/api/ws?src=${camera?.id}_FULL`

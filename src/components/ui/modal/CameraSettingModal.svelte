@@ -1,19 +1,22 @@
 <script lang="ts">
   let dialogOpen = false;
   export let camera: any;
-  export let save: boolean = true;
-  export let face: boolean;
-  export let faceDetectionThreshold: number = 0.9;
-  export let personDetectionThreshold: number = 0.6;
-  export let faceSearchThreshold: number = 0.3;
-  export let saveDuration: number;
-  export let streamType: "Default" | "Mainstream" | "Substream" =
+  let save: boolean = camera.save ?? true;
+  let face: boolean = camera.face ?? false;
+  let faceDetectionThreshold: number = camera.faceDetThresh ?? 0.92;
+  let personDetectionThreshold: number = camera.personDetThreshold ?? 0.6;
+  let faceSearchThreshold: number = camera.faceMatchThresh ?? 0.3;
+  let saveDuration: number =
+    camera.saveDuration === 0 ? 7 : camera.saveDuration;
+  console.log("saveDuration", saveDuration);
+  let streamType: "Default" | "Mainstream" | "Substream" =
     camera.streamType ?? "Default";
-  export let recordQuality: "Mainstream" | "Substream" =
+  let recordQuality: "Mainstream" | "Substream" =
     camera.recordQuality ?? "Substream";
-  export let motionThresh: number = 1000;
-  export let fps: number = 1;
-  export let person: boolean;
+  let motionThresh: number = camera.motionThresh ?? 1000;
+  let fps: number = camera.fps ?? 1;
+  let person: boolean = camera.person ?? false;
+  let timeZone: string = camera.timeZone ?? "America/New_York";
   import * as Dialog from "@/components/ui/dialog";
   import { Label } from "@/components/ui/label";
   import { Switch } from "@/components/ui/switch";
@@ -56,29 +59,21 @@
   );
   const items = [
     {
-      value: 30 * 24 * 60,
-      label: "Every month",
+      value: 30,
+      label: "Monthly",
     },
     {
-      value: 7 * 24 * 60,
-      label: "Every week",
-    },
-    {
-      value: 24 * 60,
-      label: "Every day",
-    },
-    {
-      value: 60,
-      label: "Every hour",
+      value: 7,
+      label: "Weekly",
     },
     {
       value: 1,
-      label: "Every minute",
+      label: "Daily",
     },
   ];
+  let selectedOverwriteInterval = items.find((m) => m.value === saveDuration);
   let activeTab = "display-settings";
   const isProd = import.meta.env.PUBLIC_ENV === "production";
-  let timeZone = ""; // Variable to hold the selected timezone
   const timeZones = [
     { value: "Pacific/Midway", label: "(GMT-11:00) Midway Island" },
     { value: "Pacific/Niue", label: "(GMT-11:00) Niue" },
@@ -127,7 +122,7 @@
     { value: "Pacific/Fiji", label: "(GMT+12:00) Fiji" },
     { value: "Pacific/Chatham", label: "(GMT+13:45) Chatham Islands" },
   ];
-
+  let selectedTimezone = timeZones.find((m) => m.value === timeZone);
   // Function to save camera settings
   const saveCameraSettings = async () => {
     // Log all values before sending
@@ -362,6 +357,8 @@
                   </div>
                   <Select.Root
                     onSelectedChange={(e) => (saveDuration = e.value)}
+                    {items}
+                    bind:selected={selectedOverwriteInterval}
                   >
                     <Select.Trigger class="w-[180px]">
                       <Select.Value
@@ -390,7 +387,8 @@
                     >Select Timezone</Label
                   >
                   <Select.Root
-                    bind:value={timeZone}
+                    bind:selected={selectedTimezone}
+                    items={timeZones}
                     onSelectedChange={(e) => (timeZone = e.value)}
                   >
                     <Select.Trigger class="w-[280px] my-3">
