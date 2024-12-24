@@ -3,6 +3,7 @@ import { cameras, totalCameras, selectedCamera, captureRef, displayCameras } fro
 import { selectedNode, nodes } from "./node";
 import { activePanel, panels } from "./panels";
 import { events } from "./events";
+import { roiCamera } from "./roi-camera";
 import { liveEvents } from "./live-events";
 import { isAlertPanelOpen, selectedLayout, isRoiPanelOpen } from "./ui";
 import { personCount } from "./person-counter";
@@ -12,6 +13,7 @@ import { allEvents, totalAllEvent, isEventsLoading } from "./all-events";
 import { gallery, totalFaceRegistered, isGalleryLoading } from "./gallery";
 
 export {
+  roiCamera,
   user,
   cameras,
   totalCameras,

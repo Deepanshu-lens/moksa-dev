@@ -1,8 +1,9 @@
 <script lang="ts">
   import StreamLayout from "./streams/StreamLayout.svelte";
   import * as Resizable from "@/components/ui/resizable";
+  import * as Dialog from "@/components/ui/dialog";
   import Icon from "@iconify/svelte";
-  import { isAlertPanelOpen, isRoiPanelOpen, cameras, selectedCamera, user } from "@/stores";
+  import { isAlertPanelOpen, isRoiPanelOpen, cameras, roiCamera } from "@/stores";
   import CameraList from "@/components/live/cameraList/CameraList.svelte";
   import { nodes, liveEvents, gallery } from "@/stores";
   import SidePannel from "./side-pannel.svelte";
@@ -15,12 +16,16 @@
   import Button from "../ui/button/button.svelte";
   import Input from "../ui/input/input.svelte";
   import { onMount } from 'svelte'; 
-  import { ChevronDown } from "lucide-svelte";
   import getStreamURL from "@/lib/url";
-  import { addAuthLogs } from "@/lib/logs/authLogs";
+  import Label from "../ui/label/label.svelte";
+  import * as Select from "@/components/ui/select";
+  import StreamTile from "./streams/StreamTile.svelte";
+  import { PenTool,X } from "lucide-svelte";
+  import { writable } from "svelte/store";
   const STREAM_URL = getStreamURL();
 
-  let currentPanel = 1;
+  let currentPanel = 2;
+  let view = writable(1);
   let isPaneCollapsed = false;
   let paneOne: PaneAPI;
   let shouldUpdateContainer = false;
@@ -41,7 +46,316 @@
     fire: "mdi:fire",
     alpr: "mdi:car",
   };
+
+  let draw = false;
+  let canvas, ctx, rect;
+  let canvasCoordinates=writable({});
+  function toggleDraw() {
+    draw = !draw;
+    if (draw) {
+      setTimeout(() => {
+        if ($view === 2) {
+          setupCanvas();
+        } else {
+          setupCanvasForLine();
+        }
+      }, 0);
+    }
+  }
+
+  function setupCanvas() {
+    canvas = document.getElementById("roicanvas");
+    ctx = canvas.getContext("2d");
+    rect = canvas.getBoundingClientRect();
+
+    const points = [
+      { x: 50, y: 50, isDragging: false, color: "red" },
+      { x: 150, y: 50, isDragging: false, color: "red" },
+      { x: 150, y: 150, isDragging: false, color: "red" },
+      { x: 50, y: 150, isDragging: false, color: "red" },
+    ];
+
+    let shapeIsDragging = false;
+    let dragOffsetX = 0;
+    let dragOffsetY = 0;
+
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+
+    function updateCanvasCoordinates() {
+      const videoResolution = { width: 640, height: 640 };
+      canvasCoordinates.set(
+        points.map((point) => ({
+          x: Math.round((point.x / rect.width) * videoResolution.width),
+          y: Math.round((point.y / rect.height) * videoResolution.height),
+        })),
+      );
+    }
+
+    function drawPoints() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.beginPath();
+      ctx.moveTo(points[0].x, points[0].y);
+      for (let i = 1; i < points.length; i++) {
+        ctx.lineTo(points[i].x, points[i].y);
+      }
+      ctx.closePath();
+      ctx.fillStyle = "rgba(255, 0, 0, 0.3)";
+      ctx.fill();
+      ctx.strokeStyle = "red";
+      ctx.stroke();
+      points.forEach((point) => {
+        ctx.beginPath();
+        ctx.arc(point.x, point.y, 5, 0, Math.PI * 2);
+        ctx.fillStyle = point.color;
+        ctx.fill();
+      });
+    }
+
+    function pointInShape(x, y) {
+      ctx.beginPath();
+      ctx.moveTo(points[0].x, points[0].y);
+      for (let i = 1; i < points.length; i++) {
+        ctx.lineTo(points[i].x, points[i].y);
+      }
+      ctx.closePath();
+      return ctx.isPointInPath(x, y);
+    }
+
+    function isWithinBounds(point) {
+      return (
+        point.x >= 0 &&
+        point.x <= rect.width &&
+        point.y >= 0 &&
+        point.y <= rect.height
+      );
+    }
+
+    canvas.addEventListener("mousedown", (e) => {
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+      let onPoint = false;
+
+      points.forEach((point) => {
+        if (
+          Math.abs(mouseX - point.x) < 10 &&
+          Math.abs(mouseY - point.y) < 10
+        ) {
+          point.isDragging = true;
+          onPoint = true;
+        }
+      });
+
+      if (!onPoint && pointInShape(mouseX, mouseY)) {
+        shapeIsDragging = true;
+        dragOffsetX = mouseX;
+        dragOffsetY = mouseY;
+      }
+    });
+
+    canvas.addEventListener("mousemove", (e) => {
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      if (shapeIsDragging) {
+        const dx = mouseX - dragOffsetX;
+        const dy = mouseY - dragOffsetY;
+        let allWithinBounds = true;
+        points.forEach((point) => {
+          const newX = point.x + dx;
+          const newY = point.y + dy;
+          if (!isWithinBounds({ x: newX, y: newY })) {
+            allWithinBounds = false;
+          }
+        });
+
+        if (allWithinBounds) {
+          points.forEach((point) => {
+            point.x += dx;
+            point.y += dy;
+          });
+          dragOffsetX = mouseX;
+          dragOffsetY = mouseY;
+          drawPoints();
+          updateCanvasCoordinates();
+        }
+      } else if (points.some((p) => p.isDragging)) {
+        const point = points.find((p) => p.isDragging);
+        const newX = mouseX;
+        const newY = mouseY;
+        if (isWithinBounds({ x: newX, y: newY })) {
+          point.x = newX;
+          point.y = newY;
+          drawPoints();
+          updateCanvasCoordinates();
+        }
+      }
+
+      if (pointInShape(mouseX, mouseY) || points.some((p) => p.isDragging)) {
+        canvas.style.cursor = "move";
+      } else {
+        canvas.style.cursor = "default";
+      }
+    });
+
+    canvas.addEventListener("mouseup", () => {
+      shapeIsDragging = false;
+      points.forEach((point) => {
+        point.isDragging = false;
+      });
+    });
+
+    canvas.addEventListener("mouseout", () => {
+      shapeIsDragging = false;
+      points.forEach((point) => {
+        point.isDragging = false;
+      });
+      canvas.style.cursor = "default";
+    });
+
+    drawPoints();
+    updateCanvasCoordinates();
+  }
+
+  function setupCanvasForLine() {
+    canvas = document.getElementById("roicanvas");
+    ctx = canvas.getContext("2d");
+    rect = canvas.getBoundingClientRect();
+
+    const points = [
+      { x: 150, y: 150, isDragging: false, color: "blue" },
+      { x: 250, y: 250, isDragging: false, color: "blue" },
+    ];
+
+    let lineIsDragging = false;
+    let dragOffsetX = 0;
+    let dragOffsetY = 0;
+
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+
+    function updateCanvasCoordinates() {
+      const videoResolution = { width: 640, height: 640 };
+      canvasCoordinates.set(
+        points.map((point) => ({
+          x: Math.round((point.x / rect.width) * videoResolution.width),
+          y: Math.round((point.y / rect.height) * videoResolution.height),
+        })),
+      );
+    }
+
+    function drawLinePoints() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.beginPath();
+      ctx.moveTo(points[0].x, points[0].y);
+      ctx.lineTo(points[1].x, points[1].y);
+      ctx.strokeStyle = "blue";
+      ctx.stroke();
+      points.forEach((point) => {
+        ctx.beginPath();
+        ctx.arc(point.x, point.y, 5, 0, Math.PI * 2);
+        ctx.fillStyle = point.color;
+        ctx.fill();
+      });
+    }
+
+    function isWithinBounds(point) {
+      return (
+        point.x >= 0 &&
+        point.x <= rect.width &&
+        point.y >= 0 &&
+        point.y <= rect.height
+      );
+    }
+
+    canvas.addEventListener("mousedown", (e) => {
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+      let onPoint = false;
+
+      points.forEach((point) => {
+        if (
+          Math.abs(mouseX - point.x) < 10 &&
+          Math.abs(mouseY - point.y) < 10
+        ) {
+          point.isDragging = true;
+          onPoint = true;
+        }
+      });
+
+      if (!onPoint) {
+        lineIsDragging = true;
+        dragOffsetX = mouseX;
+        dragOffsetY = mouseY;
+      }
+    });
+
+    canvas.addEventListener("mousemove", (e) => {
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      if (lineIsDragging) {
+        const dx = mouseX - dragOffsetX;
+        const dy = mouseY - dragOffsetY;
+        let allWithinBounds = true;
+        points.forEach((point) => {
+          const newX = point.x + dx;
+          const newY = point.y + dy;
+          if (!isWithinBounds({ x: newX, y: newY })) {
+            allWithinBounds = false;
+          }
+        });
+
+        if (allWithinBounds) {
+          points.forEach((point) => {
+            point.x += dx;
+            point.y += dy;
+          });
+          dragOffsetX = mouseX;
+          dragOffsetY = mouseY;
+          drawLinePoints();
+          updateCanvasCoordinates();
+        }
+      } else if (points.some((p) => p.isDragging)) {
+        const point = points.find((p) => p.isDragging);
+        const newX = mouseX;
+        const newY = mouseY;
+        if (isWithinBounds({ x: newX, y: newY })) {
+          point.x = newX;
+          point.y = newY;
+          drawLinePoints();
+          updateCanvasCoordinates();
+        }
+      }
+
+      if (points.some((p) => p.isDragging)) {
+        canvas.style.cursor = "move";
+      } else {
+        canvas.style.cursor = "default";
+      }
+    });
+
+    canvas.addEventListener("mouseup", () => {
+      lineIsDragging = false;
+      points.forEach((point) => {
+        point.isDragging = false;
+      });
+    });
+
+    canvas.addEventListener("mouseout", () => {
+      lineIsDragging = false;
+      points.forEach((point) => {
+        point.isDragging = false;
+      });
+      canvas.style.cursor = "default";
+    });
+
+    drawLinePoints();
+    updateCanvasCoordinates();
+  }
+
   let selectedEvent: Event | null = null;
+  let selectedCameraId = "";
 
   function openEventModal(event: Event): any {
     selectedEvent = { ...event };
@@ -53,15 +367,6 @@
 
   function checkIfMobile() {
     isMobile = window.matchMedia("(max-width: 1024px)").matches;
-  }
-
-  function onSelectCamera(e:any){
-    const selectedCam = $cameras.find(
-     (cam) => cam?.id === e.target.value,
-    );
-    selectedCamera.set(e.target.value);
-    console.log(selectedCam);
-    roiCamera = selectedCam;
   }
 
   $: filteredEvents = $liveEvents.filter((event) => {
@@ -84,6 +389,17 @@
       window.removeEventListener('resize', checkIfMobile); // Clean up
     };
   });
+
+  onMount(async () => {
+    const nodeId = "yourNodeId";
+    const session = "yourSession";
+  });
+
+  let isOpen = false;
+
+  $:{
+    isOpen = !!$roiCamera;
+  }
 
 </script>
 
@@ -127,7 +443,7 @@
                   <div class="flex">
                     {#if currentPanel == 0}
                       <CameraList />
-                    {:else if currentPanel == 1}
+                    {:else if $isAlertPanelOpen && currentPanel == 1 && !$isRoiPanelOpen}
                       <div class="border-l flex flex-col p-2 overflow-visible w-full min-w-[360px]">
                         <h1 class="text-lg font-bold p-3">Events</h1>
                         <Tabs.Root>
@@ -229,6 +545,27 @@
                           </Tabs.Content>
                         </Tabs.Root>
                       </div>
+                      {:else if $isRoiPanelOpen || currentPanel === 2}
+                      <div class="border-l flex flex-col p-2 overflow-visible w-full min-w-[360px]">
+                        <div class="border-b border-gray-200">
+                          <h1 class="text-lg font-bold p-2">Mark ROI</h1>
+                        </div>
+                      <div class="p-3 ">
+                        <Label>Select Camera</Label>
+                        <Select.Root onSelectedChange={(e:any)=>{roiCamera.set(e?.value)}}>
+                          <Select.Trigger class="w-full mt-2">
+                            <Select.Value placeholder="Select a Camera" />
+                          </Select.Trigger>
+                          <Select.Content>
+                            {#each $cameras as camera}
+                            <Select.Item value={camera}>
+                              {camera.name}
+                            </Select.Item>
+                          {/each}
+                          </Select.Content>
+                        </Select.Root>
+                      </div>
+                      </div>
                     {/if}
                   </div>
                 {:else}
@@ -267,7 +604,7 @@
                       {:else if $isRoiPanelOpen}
                       <div class={`${currentPanel == 1 ? "font-bold bg-accent" : "bg-background/80 "} cursor-pointer h-[32px] rounded-t-xl  text-black dark:text-white px-3 flex items-center whitespace-nowrap shadow-xl z-40 border dark:border-muted-foreground/10`}>
                         <div class={`flex items-center justify-center place-items-center my-auto space-x-2`} on:click={() => {
-                          currentPanel = 1;
+                          currentPanel = 2;
                           isPaneCollapsed = false;
                         }}>
                           <span>Mark ROI</span>
@@ -297,3 +634,38 @@
 <div class="hidden lg:block">
   <SidePannel />
 </div>
+
+
+<Dialog.Root bind:open={isOpen}>
+  <Dialog.Trigger><slot></slot></Dialog.Trigger>
+  <Dialog.Content class="h-[90vh] max-w-[75vw]">
+    <div
+      class="relative h-[80vh] w-full"
+    >
+      <StreamTile
+        name={$roiCamera?.name}
+        id={$roiCamera?.id}
+        url={`${STREAM_URL}/api/ws?src=${$roiCamera?.id}`}
+      ></StreamTile>
+      {#if !draw}
+      <button
+        on:click={toggleDraw}
+        class="flex gap-2 bg-[rgba(0,0,0,.5)] text-white p-2 absolute bottom-4 left-1/2 -translate-x-1/2 items-center rounded-xl scale-90 z-20"
+        ><PenTool size={22} /></button
+      >
+    {:else}
+      <button
+        on:click={toggleDraw}
+        class="flex gap-2 z-[100] bg-[rgba(0,0,0,.5)] text-white p-2 absolute bottom-4 left-1/2 -translate-x-1/2 items-center rounded-xl scale-90"
+        ><X size={22} /></button
+      >{/if}
+      </div>
+      {#if draw}
+      <canvas
+        id="roicanvas"
+        class="bg-transparent z-50 h-full w-full absolute top-0 left-0"
+      ></canvas>
+    {/if}
+    </Dialog.Content
+  >
+</Dialog.Root>

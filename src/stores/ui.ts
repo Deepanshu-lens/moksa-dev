@@ -8,4 +8,4 @@ export const selectedLayout = writable<number>(
     ? Number(localStorage.getItem("selectedLayout")) || 3
     : 3
 );
-export const isRoiPanelOpen = writable<boolean>(false);
+export const isRoiPanelOpen = writable<boolean>(true);
