@@ -148,15 +148,17 @@
   customLayout.subscribe((value) => {
     if (value && value.rows > 0 && value.columns > 0) {
       localStorage.setItem("customLayout", JSON.stringify(value));
-      selectedLayout.set(12)
-    } else if (value && (value.rows === 0 && value.columns === 0)) {
+      selectedLayout.set(12);
+    } else if (value && value.rows === 0 && value.columns === 0) {
       localStorage.setItem("customLayout", JSON.stringify({}));
     } else {
       localStorage.setItem("customLayout", JSON.stringify({}));
     }
   });
   //@ts-ignore
-  selectedLayout.subscribe(value =>{ if(value<12)customLayout.set({})})
+  selectedLayout.subscribe((value) => {
+    if (value < 12) customLayout.set({});
+  });
 </script>
 
 <div
@@ -229,6 +231,7 @@
   </RegisterFaceDialog>
   <!-- svelte-ignore a11y_missing_attribute -->
   <a
+    href={window.location.href}
     target="_blank"
     rel="noreferrer"
     class="flex items-center justify-center gap-2 cursor-pointer relative lg:scale-95 2xl:scale-100 hover:text-primary"
@@ -242,7 +245,6 @@
             $user?.id || ""
           );
         }}
-        disabled
         class={`disabled:cursor-not-allowed disabled:opacity-50 text-black/[.4] h-[30px] w-[30px] rounded-full shadow-md group border-2 border-solid border-black/[.4] dark:border-white/[.4] bg-white dark:bg-black dark:text-white group-hover:text-white group-hover:bg-[#015a62] dark:group-hover:bg-[#258d9d] group-hover:border-none grid place-items-center`}
         ><Icon
           icon="material-symbols:screenshot-monitor-outline"
@@ -952,35 +954,35 @@
           <div
             class={cn(
               "flex flex-col items-center justify-evenly py-[2rem] mt-2 w-1/3 gap-1 hover:border-[#015a62] hover:border hover:border-solid rounded-md",
-                $selectedLayout > 11 &&
+              $selectedLayout > 11 &&
                 "px-2 border border-solid border-[#015a62] rounded-md text-primary"
             )}
           >
             <div class="flex justify-center items-center gap-2">
-              <div class = "flex flex-col w-full">
+              <div class="flex flex-col w-full">
                 <input
-                type="number"
-                bind:value={customRows}
-                min="1"
-                max="50"
-                step="1"
-                on:input={(e: any) => (customRows = parseInt(e.target?.value))}
-                class="bg-gray rounded-md"
+                  type="number"
+                  bind:value={customRows}
+                  min="1"
+                  max="50"
+                  step="1"
+                  on:input={(e: any) =>
+                    (customRows = parseInt(e.target?.value))}
+                  class="bg-gray rounded-md"
                 />
                 <span class="text-xs">R</span>
-                
               </div>
-                <span class="text-sm">X</span>
-                <div class = "flex flex-col w-full">
-                  <input
+              <span class="text-sm">X</span>
+              <div class="flex flex-col w-full">
+                <input
                   type="number"
                   min="1"
                   max="50"
                   step="1"
                   on:input={(e: any) =>
-                  (customColumns = parseInt(e.target?.value))}
-                bind:value={customColumns}
-                class="bg-gray rounded-md"
+                    (customColumns = parseInt(e.target?.value))}
+                  bind:value={customColumns}
+                  class="bg-gray rounded-md"
                 />
                 <span class="text-xs">C</span>
               </div>

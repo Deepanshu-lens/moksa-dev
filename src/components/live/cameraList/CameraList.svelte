@@ -257,11 +257,11 @@
         </span>
         |
         <span>
-          Total Nodes: {totalCamNodes?.nodes}
+          Total Nodes: {totalCamNodes?.nodes - 1}
         </span>
       </div>
     </div>
-    <div class="overflow-y-auto max-h-[calc(100vh-12rem)]">
+    <div class="overflow-y-auto max-h-[calc(100vh-14rem)]">
       {#each currentCameras as camera, index}
         <!-- svelte-ignore a11y_click_events_have_key_events -->
         <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
