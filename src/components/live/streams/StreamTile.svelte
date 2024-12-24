@@ -24,10 +24,6 @@
   export let visibilityCheck: boolean = true;
   export let name: string;
 
-  $: console.log(name, "name");
-  $: console.log(id, "id");
-  $: console.log(url, "url");
-
   // State Variables
   let videoElement: HTMLVideoElement;
   let mainVideoElement: VideoStream | null = null;

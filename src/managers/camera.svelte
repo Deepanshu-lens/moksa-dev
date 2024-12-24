@@ -19,7 +19,7 @@
       const localCameras = await pb
         .collection("camera")
         .getFullList<Camera>({
-          fields: "id,name,url,subUrl,save,created,node",
+          fields: "id,name,url,subUrl,save,created,node,isRoiEnabled,roiCanvasCoordinates",
           filter,
           sort: "created",
         });

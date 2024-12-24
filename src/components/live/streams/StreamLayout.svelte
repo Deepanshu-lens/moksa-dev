@@ -15,6 +15,7 @@
   import { writable } from "svelte/store";
   import { displayCameras } from "@/stores/camera";
   import { PictureInPicture2 } from "lucide-svelte";
+  let canvas;
 
   export let STREAM_URL;
   const isMobile = writable(false);
@@ -107,6 +108,9 @@
     selectedNode.set(record.id);
   };
 
+  // New writable store for coordinates
+  const coordinates = writable([]);
+
   onMount(() => {
     const updateScreenSize = () => {
       isMobile.set(window.innerWidth <= 768);
@@ -122,6 +126,67 @@
 
   $: captureRef.set(localCaptureRef);
   displayCameras.subscribe(() => priorityIndex.set(0));
+
+  // Function to draw lines on the canvas
+  const drawLines = (canvas, coords) => {
+    console.log(canvas, "canvas");
+    if (canvas && coords?.length > 0) {
+      const ctx = canvas.getContext("2d");
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear previous drawings
+      ctx.beginPath();
+      let points = [
+        { x: 50, y: 50, isDragging: false, color: "blue" },
+        { x: 100, y: 100, isDragging: false, color: "blue" },
+      ];
+
+      let samplePoints = coords?.map((c) => {
+        return {
+          x: c?.x,
+          y: c?.y,
+          isDragging: false,
+          color: "blue",
+        };
+      });
+
+      if (samplePoints?.length > 0) {
+        console.log(samplePoints, "sample points");
+        console.log(points, "points");
+
+        samplePoints?.forEach((point, index) => {
+          console.log(point, "point");
+          ctx.beginPath();
+          ctx.arc(point?.x, point?.y, 5, 0, Math.PI * 2);
+          ctx.fillStyle = point?.color;
+          ctx.fill();
+        });
+
+        // New code to join the points with a line
+        ctx.beginPath(); // Start a new path for the line
+        if (samplePoints?.length > 0) {
+          ctx.moveTo(samplePoints[0].x, samplePoints[0].y); // Move to the first point
+          ctx.lineTo(samplePoints[1].x, samplePoints[1].y); // Draw line to the second point
+        }
+        ctx.strokeStyle = "blue"; // Set line color
+        ctx.lineWidth = 1; // Set line width for better visibility
+        ctx.stroke(); // Render the line
+      }
+    }
+  };
+
+  onMount(() => {
+    setTimeout(() => {
+      console.log("called");
+      $displayCameras.forEach((camera, index) => {
+        let canvas = document.getElementById(`stream-canvas-${index}`);
+        if (camera?.isRoiEnabled && camera?.roiCanvasCoordinates) {
+          drawLines(canvas, camera.roiCanvasCoordinates);
+        }
+      });
+    }, 2000);
+  });
+
+  $: console.log($displayCameras, "disp");
 </script>
 
 {#if $nodes && $user}
@@ -165,46 +230,54 @@
     </div>
   {:else}
     <div class="flex flex-col flex-grow mt-4">
-      <div
-        bind:this={localCaptureRef}
-        class="grid grid-cols-1 gap-4 p-4 w-full lg:grid-cols-4 camera-grid pb-[30vh] lg:pb-5"
-        style={gridStyle + " height: calc(100vh - 7rem); overflow-y: auto;"}
-      >
-        {#key $displayCameras}
-          {#each $displayCameras as camera, index}
-            <div
-              class="relative"
-              style={$selectedLayout > 6 && $selectedLayout < 10
-                ? index === $priorityIndex && "grid-area: bigCell1;"
-                : $selectedLayout === 10
-                  ? index === $priorityIndex
-                    ? "grid-area: bigCell1;"
-                    : index === 1 && "grid-area:bigCell2;"
-                  : ""}
-            >
-              <StreamTile
-                name={camera?.name}
-                id={camera?.id}
-                url={`${STREAM_URL}/api/ws?src=${camera?.id}`}
-              ></StreamTile>
-              {#if index !== $priorityIndex && $selectedLayout > 6 && $selectedLayout < 10}
-                <button
-                  class="absolute bottom-4 left-4"
-                  on:click={() => {
-                    priorityIndex.set(index);
-                  }}
-                >
-                  <PictureInPicture2 size={16} />
-                </button>
-              {/if}
-            </div>
-          {/each}
-        {/key}
-      </div>
+      <div bind:this={localCaptureRef} class="relative">
+        <div
+          class="grid grid-cols-1 gap-4 p-4 w-full lg:grid-cols-4 camera-grid pb-[30vh] lg:pb-5"
+          style={gridStyle + " height: calc(100vh - 7rem); overflow-y: auto;"}
+        >
+          {#key $displayCameras}
+            {#each $displayCameras as camera, index}
+              <div class="relative">
+                <StreamTile
+                  name={camera?.name}
+                  id={camera?.id}
+                  url={`${STREAM_URL}/api/ws?src=${camera?.id}`}
+                ></StreamTile>
+                <!-- Canvas overlay for drawing lines -->
+                {#if camera?.isRoiEnabled}
+                  <canvas
+                    bind:this={canvas}
+                    id={`stream-canvas-${index}`}
+                    class="bg-transparent z-[10000] h-full w-full absolute top-0 left-0"
+                    on:load={() => {
+                      if (camera.roiCanvasCoordinates) {
+                        drawLines(
+                          `stream-canvas-${index}`,
+                          camera.roiCanvasCoordinates
+                        );
+                      }
+                    }}
+                  ></canvas>
+                {/if}
+                {#if index !== $priorityIndex && $selectedLayout > 6 && $selectedLayout < 10}
+                  <button
+                    class="absolute bottom-4 left-4"
+                    on:click={() => {
+                      priorityIndex.set(index);
+                    }}
+                  >
+                    <PictureInPicture2 size={16} />
+                  </button>
+                {/if}
+              </div>
+            {/each}
+          {/key}
+        </div>
 
-      {#if $totalCameras > 0}
-        <Pagination />
-      {/if}
+        {#if $totalCameras > 0}
+          <Pagination />
+        {/if}
+      </div>
     </div>
   {/if}
 {/if}

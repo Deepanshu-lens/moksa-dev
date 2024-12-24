@@ -26,7 +26,7 @@
   import { toast } from "svelte-sonner";
   const STREAM_URL = getStreamURL();
 
-  let currentPanel = 2;
+  let currentPanel = 1;
   let isPaneCollapsed = false;
   let paneOne: PaneAPI;
   let shouldUpdateContainer = false;
@@ -222,6 +222,8 @@
       });
       isOpen.set(false);
       toast.success("Roi Details Saved Successfully");
+      isRoiPanelOpen.set(false);
+      draw = false;
     } catch (error) {
       toast?.error(error?.message||"Something went wrong while adding ROI Cameras");
       console.log('error updating roi camera',error?.message);
