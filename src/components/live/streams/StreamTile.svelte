@@ -26,6 +26,7 @@
 
   // State Variables
   let videoElement: HTMLVideoElement;
+  let mainVideoElement: VideoStream | null = null;
   let state: string = "LOADING";
   const isFullScreen = writable<boolean>(false);
   let loading: boolean = false;
@@ -38,6 +39,24 @@
       cell.requestFullscreen({ navigationUI: "show" });
       isFullScreen.set(true);
       document.addEventListener("fullscreenchange", handleFullscreenChange);
+
+      const mainStream = document.createElement("video-stream");
+      mainStream.mode = mode;
+      mainStream.id = id + "_FULL";
+      mainStream.className = "video-player rounded-md";
+      mainStream.src = url + "_FULL";
+      mainStream.wsURL = url + "_FULL";
+      mainStream.addEventListener("statechange", (event) => {
+        if (event.detail.state === "PLAYING") {
+          console.log("READY TO PLAY!!!!!");
+          const existingStream = document.getElementById(id);
+          if (existingStream) {
+            existingStream.parentNode?.insertBefore(mainStream, existingStream);
+            existingStream.remove();
+          }
+        }
+      });
+      document.getElementById(`grid-cell-${id}`)?.appendChild(mainStream);
     }
   }
 
@@ -52,6 +71,29 @@
     if (!document.fullscreenElement) {
       isFullScreen.set(false);
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
+
+      const subStream = document.createElement("video-stream");
+      subStream.mode = mode;
+      subStream.id = id;
+      subStream.className = "video-player rounded-md";
+      subStream.src = url;
+      subStream.wsURL = url;
+      const mainStream = document.getElementById(`${id}_FULL`);
+      console.log(mainStream, subStream);
+      subStream.addEventListener("statechange", (event) => {
+        if (event.detail.state === "PLAYING") {
+          console.log("READY TO PLAY!!!!!");
+          if (mainStream) {
+            mainStream.parentNode?.insertBefore(subStream, mainStream);
+            mainStream.remove();
+          }
+        }
+      });
+      // if (mainStream) {
+      //   mainStream.parentNode?.insertBefore(subStream, mainStream);
+      //   mainStream.remove();
+      // }
+      document.getElementById(`grid-cell-${id}`)?.appendChild(subStream);
     }
   }
 
@@ -253,7 +295,7 @@
     </div>
   {/if}
 
-  {#if ($personCount.find((item) => item.camera === id)?.count > 0 && isProduction)}
+  {#if $personCount.find((item) => item.camera === id)?.count > 0 && isProduction}
     <div
       class="absolute left-4 bottom-2 rounded-md bg-neutral-600 bg-opacity-50 transition-opacity duration-300 text-white flex items-center gap-x-2 w-10"
     >
@@ -268,14 +310,14 @@
     {name}
   </div>
   {#if isProduction}
-  <div
-    class="absolute right-10 bottom-2 rounded-md transition-opacity duration-300 flex items-center gap-x-2 w-10"
-  >
-    <span class="size-2 bg-green-700 rounded-full ml-2"></span>
-    <Button variant="ghost" class="text-white" on:click={() => getHeatImg(id)}
-      >H</Button
+    <div
+      class="absolute right-10 bottom-2 rounded-md transition-opacity duration-300 flex items-center gap-x-2 w-10"
     >
-  </div>
+      <span class="size-2 bg-green-700 rounded-full ml-2"></span>
+      <Button variant="ghost" class="text-white" on:click={() => getHeatImg(id)}
+        >H</Button
+      >
+    </div>
   {/if}
   <ImagePreviewModal {loading} {imgDialogOpen}></ImagePreviewModal>
 </div>

@@ -121,7 +121,7 @@
   });
 
   $: captureRef.set(localCaptureRef);
-  displayCameras.subscribe(()=>priorityIndex.set(0))
+  displayCameras.subscribe(() => priorityIndex.set(0));
 </script>
 
 {#if $nodes && $user}
@@ -187,9 +187,14 @@
                 id={camera?.id}
                 url={`${STREAM_URL}/api/ws?src=${camera?.id}`}
               ></StreamTile>
-              {#if (index !== $priorityIndex && $selectedLayout > 6 && $selectedLayout < 10)}
-                <button class="absolute bottom-4 left-4" on:click={()=>{priorityIndex.set(index)}}>
-                  <PictureInPicture2 size={16}/>
+              {#if index !== $priorityIndex && $selectedLayout > 6 && $selectedLayout < 10}
+                <button
+                  class="absolute bottom-4 left-4"
+                  on:click={() => {
+                    priorityIndex.set(index);
+                  }}
+                >
+                  <PictureInPicture2 size={16} />
                 </button>
               {/if}
             </div>
