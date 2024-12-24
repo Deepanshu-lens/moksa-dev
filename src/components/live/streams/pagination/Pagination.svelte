@@ -9,26 +9,33 @@
     selectedLayout,
     displayCameras,
     selectedNode,
+    customLayout,
   } from "@/stores";
 
   const currentPage = writable(1);
-  let MAX_CAMERAS_PER_PAGE = 0
+  let MAX_CAMERAS_PER_PAGE = 0;
+  let custom_layout:{rows:number ; columns:number}|null ;
+
+  customLayout.subscribe(value=>custom_layout = value)
 
   // Reactive value for MAX_CAMERAS_PER_PAGE
-  $:{
-    if($selectedLayout < 7){
-     MAX_CAMERAS_PER_PAGE = ($selectedLayout > 0 ? $selectedLayout : 3) ** 2 ||
-    parseInt(localStorage.getItem("selectedLayout") || "3") ** 2;
-    } else if($selectedLayout === 51 ){
-      MAX_CAMERAS_PER_PAGE = 6
-    } else if($selectedLayout === 52 ){
-      MAX_CAMERAS_PER_PAGE = 8
-    }else if($selectedLayout === 53 ){
-      MAX_CAMERAS_PER_PAGE = 13
-    }else if($selectedLayout === 54 ){
-      MAX_CAMERAS_PER_PAGE = 10
-    }else{
-      MAX_CAMERAS_PER_PAGE = $selectedLayout**2
+  $: {
+    if (custom_layout && custom_layout.columns > 0 && custom_layout.rows > 0) {
+      MAX_CAMERAS_PER_PAGE = custom_layout.columns * custom_layout.rows;
+    } else {
+      if ($selectedLayout < 7) {
+        MAX_CAMERAS_PER_PAGE =
+          ($selectedLayout > 0 ? $selectedLayout : 3) ** 2 ||
+          parseInt(localStorage.getItem("selectedLayout") || "3") ** 2;
+      } else if ($selectedLayout === 7) {
+        MAX_CAMERAS_PER_PAGE = 6;
+      } else if ($selectedLayout === 8) {
+        MAX_CAMERAS_PER_PAGE = 8;
+      } else if ($selectedLayout === 9) {
+        MAX_CAMERAS_PER_PAGE = 13;
+      } else if ($selectedLayout === 10) {
+        MAX_CAMERAS_PER_PAGE = 10;
+      }
     }
   }
 
@@ -98,9 +105,9 @@
     }
     fetchDisplayCameras(get(currentPage));
   });
-  selectedLayout.subscribe(()=>{
-    currentPage.set(1)
-  })
+  selectedLayout.subscribe(() => {
+    currentPage.set(1);
+  });
 </script>
 
 <Pagination.Root

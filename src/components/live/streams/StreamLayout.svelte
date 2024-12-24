@@ -7,6 +7,7 @@
     user,
     selectedNode,
     captureRef,
+    customLayout,
   } from "@/stores";
   import pb from "@/lib/pb";
   import StreamTile from "./StreamTile.svelte";
@@ -21,6 +22,9 @@
   const priorityIndex = writable(0);
   const secondPriIndex = writable(1);
   let localCaptureRef;
+  let custom_layout;
+  let gridStyle;
+
   // // Function to determine the grid style based on the number of cameras
   const layoutConfigs = {
     6: "grid-template-columns: repeat(6, 1fr); grid-template-rows: repeat(6, 1fr);", // 6x6
@@ -29,7 +33,7 @@
     3: "grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);", // 3x3
     2: "grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr);", // 2x2
     1: "grid-template-columns: repeat(1, 1fr); grid-template-rows: repeat(1, 1fr);", // 1x1
-    51: `
+    7: `
       grid-template-columns: repeat(3, 1fr);
       grid-template-rows: repeat(3, 1fr);
       grid-template-areas:
@@ -37,7 +41,7 @@
         "bigCell1 bigCell1 ."
         ". . .";
     `, // 1+5 layout
-    52: `
+    8: `
       grid-template-columns: repeat(4, 1fr);
       grid-template-rows: repeat(4, 1fr);
       grid-template-areas:
@@ -46,7 +50,7 @@
         "bigCell1 bigCell1 bigCell1 ."
         ". . . .";
     `, // 1+7 layout
-    53: `
+    9: `
       grid-template-columns: repeat(4, 1fr);
       grid-template-rows: repeat(4, 1fr);
       grid-template-areas:
@@ -55,7 +59,7 @@
         ". . . ."
         ". . . .";
     `, // 1+12 layout
-    54: `
+    10: `
       grid-template-columns: repeat(4, 1fr);
       grid-template-rows: repeat(4, 1fr);
       grid-template-areas:
@@ -66,42 +70,29 @@
     `, // 2+8 layout
   };
 
-  function getGridStyle(cameraCount ,layoutIndex) {
+  function getGridStyle(cameraCount, layoutIndex) {
     if ($isMobile) {
       // Mobile view: 1 column and multiple rows based on cameraCount
       return `grid-template-columns: repeat(1, 1fr); grid-template-rows: repeat(${cameraCount}, 150px);`;
     }
-    if (
-      (layoutIndex > 0 && layoutIndex < 7) ||
-      (layoutIndex > 50 && layoutIndex < 55)
-    ) {
+    if (custom_layout && custom_layout.rows > 0 && custom_layout.columns > 0) {
+      return `grid-template-columns: repeat(${custom_layout.columns}, 1fr); grid-template-rows: repeat(${custom_layout.rows}, 1fr);`;
+    } else if (layoutIndex > 0 && layoutIndex < 11) {
       return layoutConfigs[layoutIndex];
-    }else{
-      return `grid-template-columns: repeat(${layoutIndex}, 1fr); grid-template-rows: repeat(${layoutIndex}, 1fr);`
     }
-
-    // switch (cameraCount) {
-    //   case 0:
-    //     return "grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);";
-    //   case 1:
-    //     return "grid-template-columns: repeat(1, 1fr); grid-template-rows: repeat(1, 1fr);";
-    //   case 2:
-    //     return "grid-template-columns: repeat(1, 1fr); grid-template-rows: repeat(2, 1fr);";
-    //   case 3:
-    //     return "grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(1, 1fr);";
-    //   case 4:
-    //     return "grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr);";
-    //   case 5:
-    //   case 6:
-    //     return "grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr);";
-    //   default:
-    //     return "grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);";
-    // }
   }
 
   // Reactive statement to calculate the grid style dynamically
   $: gridStyle = getGridStyle($cameras.length, $selectedLayout);
 
+  customLayout.subscribe((value) => {
+    if (value && value.rows > 0 && value.columns > 0) {
+      custom_layout = value;
+    }else{
+      custom_layout = {}
+    }
+    gridStyle = getGridStyle($cameras.length, $selectedLayout)
+  });
   let nodeName = "";
   const addNode = async () => {
     const data = {
@@ -179,9 +170,9 @@
           {#each $displayCameras as camera, index}
             <div
               class="relative"
-              style={$selectedLayout > 50 && $selectedLayout < 54
+              style={$selectedLayout > 6 && $selectedLayout < 10
                 ? index === $priorityIndex && "grid-area: bigCell1;"
-                : $selectedLayout === 54
+                : $selectedLayout === 10
                   ? index === $priorityIndex
                     ? "grid-area: bigCell1;"
                     : index === $secondPriIndex && "grid-area:bigCell2;"
@@ -204,7 +195,7 @@
                     ? `${STREAM_URL}/api/ws?src=${camera?.id}`
                     : `${STREAM_URL}/api/ws?src=${camera?.id}_FULL`}
               ></StreamTile>
-              {#if index !== $priorityIndex && $selectedLayout > 50 && $selectedLayout < 54}
+              {#if index !== $priorityIndex && $selectedLayout > 6 && $selectedLayout < 10}
                 <button
                   class="absolute bottom-4 left-4"
                   on:click={() => {
@@ -214,7 +205,7 @@
                   <PictureInPicture2 size={16} />
                 </button>
               {/if}
-              {#if index !== $priorityIndex && index !== $secondPriIndex && $selectedLayout === 54}
+              {#if index !== $priorityIndex && index !== $secondPriIndex && $selectedLayout === 10}
                 <div
                   class="absolute bottom-3 left-4 flex justify-between items-center py-3 gap-2"
                 >

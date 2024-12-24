@@ -9,6 +9,7 @@
     captureRef,
     user,
     nodes,
+    customLayout,
   } from "@/stores";
   import { cn } from "@/lib/utils";
   import * as Popover from "@/components/ui/popover";
@@ -18,17 +19,22 @@
   import JSZip from "jszip";
   import RegisterFaceDialog from "./faceRegister/register-face-dialog.svelte";
   import { addUserLogs } from "@/lib/logs/userLogs";
+  import { get } from "svelte/store";
 
   let selected = 0;
   let snipDropDownOpen = false;
   let recordDropdownOpen = false;
   let customRows: number;
+  let customColumns: number;
 
   $: {
-    if ($selectedLayout < 51) {
-      customRows = $selectedLayout;
+    const custom_layout = get(customLayout);
+    if (custom_layout) {
+      customRows = custom_layout.rows || 0;
+      customColumns = custom_layout.columns || 0;
     } else {
       customRows = 0;
+      customColumns = 0;
     }
   }
 
@@ -127,6 +133,30 @@
       console.log("ref unavailable");
     }
   };
+
+  $: {
+    if (customColumns >= 0 && customRows >= 0) {
+      if (customColumns === 0 || customRows === 0) {
+        localStorage.setItem("customLayout", JSON.stringify({}));
+      }
+      customLayout.set({ rows: customRows, columns: customColumns });
+    } else {
+      localStorage.setItem("customLayout", JSON.stringify({}));
+    }
+  }
+
+  customLayout.subscribe((value) => {
+    if (value && value.rows > 0 && value.columns > 0) {
+      localStorage.setItem("customLayout", JSON.stringify(value));
+      selectedLayout.set(12)
+    } else if (value && (value.rows === 0 && value.columns === 0)) {
+      localStorage.setItem("customLayout", JSON.stringify({}));
+    } else {
+      localStorage.setItem("customLayout", JSON.stringify({}));
+    }
+  });
+  //@ts-ignore
+  selectedLayout.subscribe(value =>{ if(value<12)customLayout.set({})})
 </script>
 
 <div
@@ -445,19 +475,19 @@
           <button
             class={cn(
               "flex flex-col items-center justify-evenly py-4 mt-2 w-1/3 gap-1 hover:border-[#015a62] hover:border hover:border-solid rounded-md",
-              selected === 51 &&
+              selected === 7 &&
                 "px-2 border border-solid border-[#015a62] rounded-md text-primary"
             )}
             on:click={(e) => {
               e.preventDefault();
-              selected = 51;
+              selected = 7;
             }}
           >
             <svg
               width="60"
               height="60"
               class={cn(
-                selected === 51 ? "text-primary" : "text-muted-foreground"
+                selected === 7 ? "text-primary" : "text-muted-foreground"
               )}
               id="Layer_2"
               data-name="Layer 2"
@@ -530,18 +560,18 @@
           <button
             class={cn(
               "flex flex-col items-center justify-evenly py-4 mt-2 w-1/3 gap-1 hover:border-[#015a62] hover:border hover:border-solid rounded-md",
-              selected === 52 &&
+              selected === 8 &&
                 "px-2 border border-solid border-[#015a62] rounded-md text-primary"
             )}
             on:click={(e) => {
               e.preventDefault();
-              selected = 52;
+              selected = 8;
             }}
           >
             <svg
               width="60"
               class={cn(
-                selected === 52 ? "text-primary" : "text-muted-foreground"
+                selected === 8 ? "text-primary" : "text-muted-foreground"
               )}
               height="60"
               id="Layer_2"
@@ -637,19 +667,19 @@
           <button
             class={cn(
               "flex flex-col items-center justify-evenly py-4 mt-2 w-1/3 gap-1 hover:border-[#015a62] hover:border hover:border-solid rounded-md",
-              selected === 53 &&
+              selected === 9 &&
                 "px-2 border border-solid border-[#015a62] rounded-md text-primary"
             )}
             on:click={(e) => {
               e.preventDefault();
-              selected = 53;
+              selected = 9;
             }}
           >
             <svg
               width="60"
               height="60"
               class={cn(
-                selected === 53 ? "text-primary" : "text-muted-foreground"
+                selected === 9 ? "text-primary" : "text-muted-foreground"
               )}
               id="Layer_2"
               data-name="Layer 2"
@@ -796,18 +826,18 @@
           <button
             class={cn(
               "flex flex-col items-center justify-evenly py-4 mt-2 w-1/3 gap-1 hover:border-[#015a62] hover:border hover:border-solid rounded-md",
-              selected === 54 &&
+              selected === 10 &&
                 "px-2 border border-solid border-[#015a62] rounded-md text-primary"
             )}
             on:click={(e) => {
               e.preventDefault();
-              selected = 54;
+              selected = 10;
             }}
           >
             <svg
               width="60"
               class={cn(
-                selected === 54 ? "text-primary" : "text-muted-foreground"
+                selected === 10 ? "text-primary" : "text-muted-foreground"
               )}
               height="60"
               id="Layer_2"
@@ -922,31 +952,39 @@
           <div
             class={cn(
               "flex flex-col items-center justify-evenly py-[2rem] mt-2 w-1/3 gap-1 hover:border-[#015a62] hover:border hover:border-solid rounded-md",
-              selected > 6 &&
-                $selectedLayout < 51 &&
+                $selectedLayout > 11 &&
                 "px-2 border border-solid border-[#015a62] rounded-md text-primary"
             )}
           >
             <div class="flex justify-center items-center gap-2">
-              <input
+              <div class = "flex flex-col w-full">
+                <input
                 type="number"
                 bind:value={customRows}
                 min="1"
                 max="50"
                 step="1"
-                on:input={(e: any) =>
-                  selectedLayout.set(parseInt(e.target?.value))}
-                class="w-1/3 bg-gray rounded-md"
-              />
-              <span class="text-sm">X</span>
-              <input
-                type="number"
-                disabled
-                bind:value={customRows}
-                class="w-1/3 bg-gray rounded-md"
-              />
+                on:input={(e: any) => (customRows = parseInt(e.target?.value))}
+                class="bg-gray rounded-md"
+                />
+                <span class="text-xs">R</span>
+                
+              </div>
+                <span class="text-sm">X</span>
+                <div class = "flex flex-col w-full">
+                  <input
+                  type="number"
+                  min="1"
+                  max="50"
+                  step="1"
+                  on:input={(e: any) =>
+                  (customColumns = parseInt(e.target?.value))}
+                bind:value={customColumns}
+                class="bg-gray rounded-md"
+                />
+                <span class="text-xs">C</span>
+              </div>
             </div>
-            <span>Custom rows</span>
           </div>
         </div>
       </Popover.Content>
