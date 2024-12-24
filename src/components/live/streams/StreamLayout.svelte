@@ -122,6 +122,8 @@
 
   $: captureRef.set(localCaptureRef);
   displayCameras.subscribe(() => priorityIndex.set(0));
+
+  $: console.log("!!", $displayCameras[0]);
 </script>
 
 {#if $nodes && $user}
@@ -185,7 +187,13 @@
               <StreamTile
                 name={camera?.name}
                 id={camera?.id}
-                url={`${STREAM_URL}/api/ws?src=${camera?.id}`}
+                url={camera?.streamType !== "Default"
+                  ? camera?.streamType === "Mainstream"
+                    ? `${STREAM_URL}/api/ws?src=${camera?.id}_FULL`
+                    : `${STREAM_URL}/api/ws?src=${camera?.id}`
+                  : $displayCameras.length > 4
+                    ? `${STREAM_URL}/api/ws?src=${camera?.id}`
+                    : `${STREAM_URL}/api/ws?src=${camera?.id}_FULL`}
               ></StreamTile>
               {#if index !== $priorityIndex && $selectedLayout > 6 && $selectedLayout < 10}
                 <button

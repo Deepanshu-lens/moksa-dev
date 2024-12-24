@@ -48,7 +48,6 @@
       mainStream.wsURL = url + "_FULL";
       mainStream.addEventListener("statechange", (event) => {
         if (event.detail.state === "PLAYING") {
-          console.log("READY TO PLAY!!!!!");
           const existingStream = document.getElementById(id);
           if (existingStream) {
             existingStream.parentNode?.insertBefore(mainStream, existingStream);
@@ -82,7 +81,6 @@
       console.log(mainStream, subStream);
       subStream.addEventListener("statechange", (event) => {
         if (event.detail.state === "PLAYING") {
-          console.log("READY TO PLAY!!!!!");
           if (mainStream) {
             mainStream.parentNode?.insertBefore(subStream, mainStream);
             mainStream.remove();

@@ -1,12 +1,16 @@
 <script lang="ts">
   let dialogOpen = false;
+  export let camera: any;
   export let save: boolean = true;
   export let face: boolean;
   export let faceDetectionThreshold: number = 0.9;
   export let personDetectionThreshold: number = 0.6;
   export let faceSearchThreshold: number = 0.3;
   export let saveDuration: number;
-  export let camera: any;
+  export let streamType: "Default" | "Mainstream" | "Substream" =
+    camera.streamType ?? "Default";
+  export let recordQuality: "Mainstream" | "Substream" =
+    camera.recordQuality ?? "Substream";
   export let motionThresh: number = 1000;
   export let fps: number = 1;
   export let person: boolean;
@@ -26,6 +30,9 @@
   import {
     Activity,
     FileVideo2,
+    Airplay,
+    Tv,
+    Disc3,
     TrendingUp,
     FolderSearch,
     Merge,
@@ -34,6 +41,19 @@
   } from "lucide-svelte";
   import pb from "@/lib/pb";
   import { toast } from "svelte-sonner";
+  const streamTypes = [
+    { value: "Default", label: "Default" },
+    { value: "Mainstream", label: "Mainstream" },
+    { value: "Substream", label: "Substream" },
+  ];
+  let selectedStreamType = streamTypes.find((m) => m.value === streamType);
+  const recordQualities = [
+    { value: "Mainstream", label: "Mainstream" },
+    { value: "Substream", label: "Substream" },
+  ];
+  let selectedRecordQuality = recordQualities.find(
+    (m) => m.value === recordQuality
+  );
   const items = [
     {
       value: 30 * 24 * 60,
@@ -56,7 +76,7 @@
       label: "Every minute",
     },
   ];
-  let activeTab = "video-saving";
+  let activeTab = "display-settings";
   const isProd = import.meta.env.PUBLIC_ENV === "production";
   let timeZone = ""; // Variable to hold the selected timezone
   const timeZones = [
@@ -125,7 +145,6 @@
 
     try {
       await pb.collection("camera").update(camera?.id, {
-        // Replace "cameraId" with the actual ID or reference
         save,
         face,
         faceDetThresh: faceDetectionThreshold,
@@ -136,6 +155,8 @@
         fps,
         person,
         timeZone,
+        streamType: selectedStreamType?.value,
+        recordQuality: selectedRecordQuality?.value,
       });
       // Optionally, you can close the dialog or show a success message
       dialogOpen = false; // Close the dialog after saving
@@ -169,6 +190,12 @@
           <TabsList
             class="flex p-5 flex-col gap-y-4 justify-start items-start w-full mx-auto bg-[#F3F3F3]  dark:bg-black"
           >
+            <TabsTrigger
+              value="display-settings"
+              class="w-full flex items-center justify-start dark:hover:bg-neutral-700"
+            >
+              <Tv size={16} class="mr-2" />Display Settings
+            </TabsTrigger>
             <TabsTrigger
               value="video-saving"
               class="w-full flex items-center justify-start dark:hover:bg-neutral-700"
@@ -204,6 +231,56 @@
 
         <!-- Tab Content Left side -->
         <div class="h-[29rem] relative px-3">
+          <!-- display settings -->
+          <TabsContent value="display-settings">
+            <div class="space-y-4 w-full">
+              <div
+                class="flex items-center justify-between p-2 gap-x-[23rem] border-b pb-2"
+              >
+                <Label class="text-nowrap">Display Settings</Label>
+              </div>
+              <div class="flex items-center space-x-4 pt-3">
+                <Airplay />
+                <div class="flex-1 space-y-1">
+                  <p class="text-sm font-medium leading-none">
+                    Stream Type: 'Mainstream', 'Substream', or 'Default'
+                  </p>
+                  <p class="text-xs text-muted-foreground">
+                    Mainstream offers higher quality, while substream provides
+                    lower quality for reduced bandwidth. 'Default' auto-switches
+                    to 'Mainstream' when 5 or more cameras are connected. Also
+                    reverts to mainstream on fullscreen.
+                  </p>
+                </div>
+                <Select.Root
+                  onSelectedChange={(e: {
+                    value: "Default" | "Mainstream" | "Substream";
+                  }) => (streamType = e.value)}
+                  items={streamTypes}
+                  bind:selected={selectedStreamType}
+                >
+                  <Select.Trigger class="w-[180px]">
+                    <Select.Value
+                      placeholder={streamTypes.find(
+                        (m) => m.value === streamType
+                      )?.label || "Select Stream Type"}
+                    />
+                  </Select.Trigger>
+                  <Select.Content>
+                    {#each streamTypes as fruit}
+                      <Select.Item
+                        value={fruit.value}
+                        label={fruit.label}
+                        class="truncate max-w-xs inline-block"
+                      >
+                        {fruit.label}
+                      </Select.Item>
+                    {/each}
+                  </Select.Content>
+                </Select.Root>
+              </div>
+            </div>
+          </TabsContent>
           <!-- video saving -->
           <TabsContent value="video-saving">
             <div class="space-y-4 w-[32.7rem]">
@@ -235,6 +312,44 @@
                     />
                   </div>
                 {/if}
+                <div class="flex items-center space-x-4 pt-3">
+                  <Disc3 />
+                  <div class="flex-1 space-y-1">
+                    <p class="text-sm font-medium leading-none">
+                      Stream Type: 'Mainstream' or 'Substream'
+                    </p>
+                    <p class="text-xs text-muted-foreground">
+                      Mainstream offers higher quality video recording, while
+                      substream provides lower quality for reduced bandwidth.
+                    </p>
+                  </div>
+                  <Select.Root
+                    onSelectedChange={(e: {
+                      value: "Mainstream" | "Substream";
+                    }) => (recordQuality = e.value)}
+                    items={recordQualities}
+                    bind:selected={selectedRecordQuality}
+                  >
+                    <Select.Trigger class="w-[180px]">
+                      <Select.Value
+                        placeholder={recordQualities.find(
+                          (m) => m.value === streamType
+                        )?.label || "Select Stream Type"}
+                      />
+                    </Select.Trigger>
+                    <Select.Content>
+                      {#each recordQualities as fruit}
+                        <Select.Item
+                          value={fruit.value}
+                          label={fruit.label}
+                          class="truncate max-w-xs inline-block"
+                        >
+                          {fruit.label}
+                        </Select.Item>
+                      {/each}
+                    </Select.Content>
+                  </Select.Root>
+                </div>
                 <div class="flex items-center space-x-4 pt-3">
                   <Merge />
                   <div class="flex-1 space-y-1">
