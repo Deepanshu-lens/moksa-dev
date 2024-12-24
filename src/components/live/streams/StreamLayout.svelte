@@ -79,6 +79,29 @@
       return `grid-template-columns: repeat(${custom_layout.columns}, 1fr); grid-template-rows: repeat(${custom_layout.rows}, 1fr);`;
     } else if (layoutIndex > 0 && layoutIndex < 11) {
       return layoutConfigs[layoutIndex];
+    } else if (layoutIndex === 0) {
+      switch (cameraCount) {
+        case 1:
+          return `grid-template-columns: repeat(1, 1fr); grid-template-rows: repeat(1, 1fr);`;
+        case 2:
+          return `grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr);`;
+        case 3:
+          return `grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr);`;
+        case 4:
+          return `grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr);`;
+        case 5:
+          return `grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, 1fr);`;
+        case 6:
+          return `grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, 1fr);`;
+        case 7:
+          return `grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, 1fr);`
+        case 8:
+          return `grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);`
+        case 9:
+          return `grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);`
+        default:
+          return `grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);`
+      }
     }
   }
 
@@ -88,10 +111,10 @@
   customLayout.subscribe((value) => {
     if (value && value.rows > 0 && value.columns > 0) {
       custom_layout = value;
-    }else{
-      custom_layout = {}
+    } else {
+      custom_layout = {};
     }
-    gridStyle = getGridStyle($cameras.length, $selectedLayout)
+    gridStyle = getGridStyle($cameras.length, $selectedLayout);
   });
   let nodeName = "";
   const addNode = async () => {

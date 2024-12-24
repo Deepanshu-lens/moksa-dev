@@ -14,9 +14,9 @@
 
   const currentPage = writable(1);
   let MAX_CAMERAS_PER_PAGE = 0;
-  let custom_layout:{rows:number ; columns:number}|null ;
+  let custom_layout: { rows: number; columns: number } | null;
 
-  customLayout.subscribe(value=>custom_layout = value)
+  customLayout.subscribe((value) => (custom_layout = value));
 
   // Reactive value for MAX_CAMERAS_PER_PAGE
   $: {
@@ -24,9 +24,44 @@
       MAX_CAMERAS_PER_PAGE = custom_layout.columns * custom_layout.rows;
     } else {
       if ($selectedLayout < 7) {
-        MAX_CAMERAS_PER_PAGE =
+        if ($selectedLayout === 0) {
+          switch ($totalCameras) {
+            case 1:
+              MAX_CAMERAS_PER_PAGE = 1;
+              break;
+            case 2:
+            MAX_CAMERAS_PER_PAGE = 2;
+            break;
+            case 3:
+            MAX_CAMERAS_PER_PAGE = 3;
+            break;
+            case 4:
+            MAX_CAMERAS_PER_PAGE = 4;
+            break;
+            case 5:
+            MAX_CAMERAS_PER_PAGE = 4;
+            break;
+            case 6:
+            MAX_CAMERAS_PER_PAGE = 6;
+            break;
+            case 7:
+            MAX_CAMERAS_PER_PAGE = 6;
+            break;
+            case 8:
+            MAX_CAMERAS_PER_PAGE = 9;
+            break;
+            case 9:
+            MAX_CAMERAS_PER_PAGE = 9;
+            break;
+            default:
+            MAX_CAMERAS_PER_PAGE = 9;
+            break;
+          }
+        } else {
+          MAX_CAMERAS_PER_PAGE =
           ($selectedLayout > 0 ? $selectedLayout : 3) ** 2 ||
           parseInt(localStorage.getItem("selectedLayout") || "3") ** 2;
+        }
       } else if ($selectedLayout === 7) {
         MAX_CAMERAS_PER_PAGE = 6;
       } else if ($selectedLayout === 8) {
