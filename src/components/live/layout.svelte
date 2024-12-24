@@ -22,16 +22,18 @@
   import StreamTile from "./streams/StreamTile.svelte";
   import { PenTool,X } from "lucide-svelte";
   import { writable } from "svelte/store";
+  import pb from "@/lib/pb";
+  import { toast } from "svelte-sonner";
   const STREAM_URL = getStreamURL();
 
   let currentPanel = 2;
-  let view = writable(1);
   let isPaneCollapsed = false;
   let paneOne: PaneAPI;
   let shouldUpdateContainer = false;
   let isMobile = false;
   let selectedEventFilter = "";
   let eventSearchQuery = "";
+
   const EVENT_FILTERS = [
     { filter: "face", label: "Face" },
     { filter: "person", label: "Person" },
@@ -54,169 +56,12 @@
     draw = !draw;
     if (draw) {
       setTimeout(() => {
-        if ($view === 2) {
-          setupCanvas();
-        } else {
           setupCanvasForLine();
-        }
       }, 0);
     }
   }
 
-  function setupCanvas() {
-    canvas = document.getElementById("roicanvas");
-    ctx = canvas.getContext("2d");
-    rect = canvas.getBoundingClientRect();
-
-    const points = [
-      { x: 50, y: 50, isDragging: false, color: "red" },
-      { x: 150, y: 50, isDragging: false, color: "red" },
-      { x: 150, y: 150, isDragging: false, color: "red" },
-      { x: 50, y: 150, isDragging: false, color: "red" },
-    ];
-
-    let shapeIsDragging = false;
-    let dragOffsetX = 0;
-    let dragOffsetY = 0;
-
-    canvas.width = rect.width;
-    canvas.height = rect.height;
-
-    function updateCanvasCoordinates() {
-      const videoResolution = { width: 640, height: 640 };
-      canvasCoordinates.set(
-        points.map((point) => ({
-          x: Math.round((point.x / rect.width) * videoResolution.width),
-          y: Math.round((point.y / rect.height) * videoResolution.height),
-        })),
-      );
-    }
-
-    function drawPoints() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.beginPath();
-      ctx.moveTo(points[0].x, points[0].y);
-      for (let i = 1; i < points.length; i++) {
-        ctx.lineTo(points[i].x, points[i].y);
-      }
-      ctx.closePath();
-      ctx.fillStyle = "rgba(255, 0, 0, 0.3)";
-      ctx.fill();
-      ctx.strokeStyle = "red";
-      ctx.stroke();
-      points.forEach((point) => {
-        ctx.beginPath();
-        ctx.arc(point.x, point.y, 5, 0, Math.PI * 2);
-        ctx.fillStyle = point.color;
-        ctx.fill();
-      });
-    }
-
-    function pointInShape(x, y) {
-      ctx.beginPath();
-      ctx.moveTo(points[0].x, points[0].y);
-      for (let i = 1; i < points.length; i++) {
-        ctx.lineTo(points[i].x, points[i].y);
-      }
-      ctx.closePath();
-      return ctx.isPointInPath(x, y);
-    }
-
-    function isWithinBounds(point) {
-      return (
-        point.x >= 0 &&
-        point.x <= rect.width &&
-        point.y >= 0 &&
-        point.y <= rect.height
-      );
-    }
-
-    canvas.addEventListener("mousedown", (e) => {
-      const mouseX = e.clientX - rect.left;
-      const mouseY = e.clientY - rect.top;
-      let onPoint = false;
-
-      points.forEach((point) => {
-        if (
-          Math.abs(mouseX - point.x) < 10 &&
-          Math.abs(mouseY - point.y) < 10
-        ) {
-          point.isDragging = true;
-          onPoint = true;
-        }
-      });
-
-      if (!onPoint && pointInShape(mouseX, mouseY)) {
-        shapeIsDragging = true;
-        dragOffsetX = mouseX;
-        dragOffsetY = mouseY;
-      }
-    });
-
-    canvas.addEventListener("mousemove", (e) => {
-      const mouseX = e.clientX - rect.left;
-      const mouseY = e.clientY - rect.top;
-
-      if (shapeIsDragging) {
-        const dx = mouseX - dragOffsetX;
-        const dy = mouseY - dragOffsetY;
-        let allWithinBounds = true;
-        points.forEach((point) => {
-          const newX = point.x + dx;
-          const newY = point.y + dy;
-          if (!isWithinBounds({ x: newX, y: newY })) {
-            allWithinBounds = false;
-          }
-        });
-
-        if (allWithinBounds) {
-          points.forEach((point) => {
-            point.x += dx;
-            point.y += dy;
-          });
-          dragOffsetX = mouseX;
-          dragOffsetY = mouseY;
-          drawPoints();
-          updateCanvasCoordinates();
-        }
-      } else if (points.some((p) => p.isDragging)) {
-        const point = points.find((p) => p.isDragging);
-        const newX = mouseX;
-        const newY = mouseY;
-        if (isWithinBounds({ x: newX, y: newY })) {
-          point.x = newX;
-          point.y = newY;
-          drawPoints();
-          updateCanvasCoordinates();
-        }
-      }
-
-      if (pointInShape(mouseX, mouseY) || points.some((p) => p.isDragging)) {
-        canvas.style.cursor = "move";
-      } else {
-        canvas.style.cursor = "default";
-      }
-    });
-
-    canvas.addEventListener("mouseup", () => {
-      shapeIsDragging = false;
-      points.forEach((point) => {
-        point.isDragging = false;
-      });
-    });
-
-    canvas.addEventListener("mouseout", () => {
-      shapeIsDragging = false;
-      points.forEach((point) => {
-        point.isDragging = false;
-      });
-      canvas.style.cursor = "default";
-    });
-
-    drawPoints();
-    updateCanvasCoordinates();
-  }
-
+  // setting Up Canvas to draw line over seleced roi camera
   function setupCanvasForLine() {
     canvas = document.getElementById("roicanvas");
     ctx = canvas.getContext("2d");
@@ -355,7 +200,6 @@
   }
 
   let selectedEvent: Event | null = null;
-  let selectedCameraId = "";
 
   function openEventModal(event: Event): any {
     selectedEvent = { ...event };
@@ -367,6 +211,21 @@
 
   function checkIfMobile() {
     isMobile = window.matchMedia("(max-width: 1024px)").matches;
+  }
+
+  // Saving ROI Details to db
+  async function updateAi() {
+    try {
+       await pb.collection("camera").update($roiCamera?.id,{
+        isRoiEnabled:true,
+        roiCanvasCoordinates:$canvasCoordinates
+      });
+      isOpen.set(false);
+      toast.success("Roi Details Saved Successfully");
+    } catch (error) {
+      toast?.error(error?.message||"Something went wrong while adding ROI Cameras");
+      console.log('error updating roi camera',error?.message);
+    }
   }
 
   $: filteredEvents = $liveEvents.filter((event) => {
@@ -395,10 +254,10 @@
     const session = "yourSession";
   });
 
-  let isOpen = false;
+  let isOpen = writable(false);
 
   $:{
-    isOpen = !!$roiCamera;
+    isOpen.set(!!$roiCamera);
   }
 
 </script>
@@ -514,7 +373,9 @@
                                 </DropdownMenu.Root>
                               </div>
                               {#if filteredEvents.length > 0}
+                                <!-- svelte-ignore a11y_no_static_element_interactions -->
                                 {#each filteredEvents as event}
+                                  <!-- svelte-ignore a11y_click_events_have_key_events -->
                                   <div class="flex bg-accent p-4 rounded-xl shadow-sm hover:border hover:border-primary relative group overflow-visible cursor-pointer" on:click={() => openEventModal(event)}>
                                     <div class="flex gap-6 items-center flex-grow">
                                       <img src={"data:image/jpeg;base64," + event.frameImage} alt={event.title || "Unknown Identity"} class="w-16 h-16 rounded-xl object-cover transform transition-transform duration-300 group-hover:scale-150" />
@@ -581,7 +442,9 @@
                 {#if $isAlertPanelOpen || $isRoiPanelOpen}
                   <div class="absolute z-50 -translate-x-full top-44 transform -left-8 transition-all duration-500 ease-in-out">
                     <div class="-rotate-90 flex flex-row-reverse items-center origin-top-right">
+                      <!-- svelte-ignore a11y_no_static_element_interactions -->
                       <div class={`${currentPanel == 0 ? "font-bold bg-accent" : "bg-background/80 "} cursor-pointer h-[32px] rounded-t-xl  text-black dark:text-white px-3 flex  items-center whitespace-nowrap shadow-xl z-40 border dark:border-muted-foreground/10`}>
+                        <!-- svelte-ignore a11y_click_events_have_key_events -->
                         <div class="flex items-center justify-center place-items-center my-auto space-x-2" on:click={() => (currentPanel = 0)}>
                           <span>Cameras</span>
                           <button class={`text-center items-center flex place-items-center hover:bg-foreground/50 hover:dark:text-black hover:text-white rounded-full hover:m-1`} on:click|stopPropagation={() => isAlertPanelOpen.set(false)}>
@@ -591,6 +454,8 @@
                       </div>
                       {#if $isAlertPanelOpen}
                       <div class={`${currentPanel == 1 ? "font-bold bg-accent" : "bg-background/80 "} cursor-pointer h-[32px] rounded-t-xl  text-black dark:text-white px-3 flex items-center whitespace-nowrap shadow-xl z-40 border dark:border-muted-foreground/10`}>
+                        <!-- svelte-ignore a11y_click_events_have_key_events -->
+                        <!-- svelte-ignore a11y_no_static_element_interactions -->
                         <div class={`flex items-center justify-center place-items-center my-auto space-x-2`} on:click={() => {
                           currentPanel = 1;
                           isPaneCollapsed = false;
@@ -603,6 +468,8 @@
                       </div>
                       {:else if $isRoiPanelOpen}
                       <div class={`${currentPanel == 1 ? "font-bold bg-accent" : "bg-background/80 "} cursor-pointer h-[32px] rounded-t-xl  text-black dark:text-white px-3 flex items-center whitespace-nowrap shadow-xl z-40 border dark:border-muted-foreground/10`}>
+                        <!-- svelte-ignore a11y_click_events_have_key_events -->
+                        <!-- svelte-ignore a11y_no_static_element_interactions -->
                         <div class={`flex items-center justify-center place-items-center my-auto space-x-2`} on:click={() => {
                           currentPanel = 2;
                           isPaneCollapsed = false;
@@ -636,11 +503,11 @@
 </div>
 
 
-<Dialog.Root bind:open={isOpen}>
+<Dialog.Root bind:open={$isOpen}>
   <Dialog.Trigger><slot></slot></Dialog.Trigger>
   <Dialog.Content class="h-[90vh] max-w-[75vw]">
     <div
-      class="relative h-[80vh] w-full"
+      class="relative h-[76vh] w-full"
     >
       <StreamTile
         name={$roiCamera?.name}
@@ -663,9 +530,25 @@
       {#if draw}
       <canvas
         id="roicanvas"
-        class="bg-transparent z-50 h-full w-full absolute top-0 left-0"
+        class="bg-transparent z-50 h-fit w-full absolute top-0 left-0"
       ></canvas>
     {/if}
+    <div class="w-full p-4 flex items-center gap-4">
+      <Button
+        on:click={() => {
+          updateAi();
+        }}>Save</Button
+      >
+      <Button
+        variant="secondary"
+        on:click={() => {
+          isOpen.set(false);
+          roiCamera.set(null);
+        }}>Cancel</Button
+      >
+    </div>
     </Dialog.Content
   >
+
+  <!-- footer -->
 </Dialog.Root>
