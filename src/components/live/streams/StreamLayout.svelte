@@ -19,6 +19,7 @@
   export let STREAM_URL;
   const isMobile = writable(false);
   const priorityIndex = writable(0);
+  const secondPriIndex = writable(1);
   let localCaptureRef;
   // // Function to determine the grid style based on the number of cameras
   const layoutConfigs = {
@@ -28,7 +29,7 @@
     3: "grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);", // 3x3
     2: "grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr);", // 2x2
     1: "grid-template-columns: repeat(1, 1fr); grid-template-rows: repeat(1, 1fr);", // 1x1
-    7: `
+    51: `
       grid-template-columns: repeat(3, 1fr);
       grid-template-rows: repeat(3, 1fr);
       grid-template-areas:
@@ -36,7 +37,7 @@
         "bigCell1 bigCell1 ."
         ". . .";
     `, // 1+5 layout
-    8: `
+    52: `
       grid-template-columns: repeat(4, 1fr);
       grid-template-rows: repeat(4, 1fr);
       grid-template-areas:
@@ -45,7 +46,7 @@
         "bigCell1 bigCell1 bigCell1 ."
         ". . . .";
     `, // 1+7 layout
-    9: `
+    53: `
       grid-template-columns: repeat(4, 1fr);
       grid-template-rows: repeat(4, 1fr);
       grid-template-areas:
@@ -54,7 +55,7 @@
         ". . . ."
         ". . . .";
     `, // 1+12 layout
-    10: `
+    54: `
       grid-template-columns: repeat(4, 1fr);
       grid-template-rows: repeat(4, 1fr);
       grid-template-areas:
@@ -65,33 +66,37 @@
     `, // 2+8 layout
   };
 
-  function getGridStyle(cameraCount, layoutIndex) {
-    if (layoutIndex > 0) {
-      return layoutConfigs[layoutIndex];
-    }
-
+  function getGridStyle(cameraCount ,layoutIndex) {
     if ($isMobile) {
       // Mobile view: 1 column and multiple rows based on cameraCount
       return `grid-template-columns: repeat(1, 1fr); grid-template-rows: repeat(${cameraCount}, 150px);`;
     }
-
-    switch (cameraCount) {
-      case 0:
-        return "grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);";
-      case 1:
-        return "grid-template-columns: repeat(1, 1fr); grid-template-rows: repeat(1, 1fr);";
-      case 2:
-        return "grid-template-columns: repeat(1, 1fr); grid-template-rows: repeat(2, 1fr);";
-      case 3:
-        return "grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(1, 1fr);";
-      case 4:
-        return "grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr);";
-      case 5:
-      case 6:
-        return "grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr);";
-      default:
-        return "grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);";
+    if (
+      (layoutIndex > 0 && layoutIndex < 7) ||
+      (layoutIndex > 50 && layoutIndex < 55)
+    ) {
+      return layoutConfigs[layoutIndex];
+    }else{
+      return `grid-template-columns: repeat(${layoutIndex}, 1fr); grid-template-rows: repeat(${layoutIndex}, 1fr);`
     }
+
+    // switch (cameraCount) {
+    //   case 0:
+    //     return "grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);";
+    //   case 1:
+    //     return "grid-template-columns: repeat(1, 1fr); grid-template-rows: repeat(1, 1fr);";
+    //   case 2:
+    //     return "grid-template-columns: repeat(1, 1fr); grid-template-rows: repeat(2, 1fr);";
+    //   case 3:
+    //     return "grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(1, 1fr);";
+    //   case 4:
+    //     return "grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr);";
+    //   case 5:
+    //   case 6:
+    //     return "grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr);";
+    //   default:
+    //     return "grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);";
+    // }
   }
 
   // Reactive statement to calculate the grid style dynamically
@@ -122,8 +127,6 @@
 
   $: captureRef.set(localCaptureRef);
   displayCameras.subscribe(() => priorityIndex.set(0));
-
-  $: console.log("!!", $displayCameras[0]);
 </script>
 
 {#if $nodes && $user}
@@ -176,12 +179,12 @@
           {#each $displayCameras as camera, index}
             <div
               class="relative"
-              style={$selectedLayout > 6 && $selectedLayout < 10
+              style={$selectedLayout > 50 && $selectedLayout < 54
                 ? index === $priorityIndex && "grid-area: bigCell1;"
-                : $selectedLayout === 10
+                : $selectedLayout === 54
                   ? index === $priorityIndex
                     ? "grid-area: bigCell1;"
-                    : index === 1 && "grid-area:bigCell2;"
+                    : index === $secondPriIndex && "grid-area:bigCell2;"
                   : ""}
             >
               <StreamTile
@@ -201,7 +204,7 @@
                     ? `${STREAM_URL}/api/ws?src=${camera?.id}`
                     : `${STREAM_URL}/api/ws?src=${camera?.id}_FULL`}
               ></StreamTile>
-              {#if index !== $priorityIndex && $selectedLayout > 6 && $selectedLayout < 10}
+              {#if index !== $priorityIndex && $selectedLayout > 50 && $selectedLayout < 54}
                 <button
                   class="absolute bottom-4 left-4"
                   on:click={() => {
@@ -210,6 +213,26 @@
                 >
                   <PictureInPicture2 size={16} />
                 </button>
+              {/if}
+              {#if index !== $priorityIndex && index !== $secondPriIndex && $selectedLayout === 54}
+                <div
+                  class="absolute bottom-3 left-4 flex justify-between items-center py-3 gap-2"
+                >
+                  <button
+                    on:click={() => {
+                      priorityIndex.set(index);
+                    }}
+                  >
+                    <PictureInPicture2 size={16} />
+                  </button>
+                  <button
+                    on:click={() => {
+                      secondPriIndex.set(index);
+                    }}
+                  >
+                    <PictureInPicture2 size={16} class="scale-x-[-1]" />
+                  </button>
+                </div>
               {/if}
             </div>
           {/each}

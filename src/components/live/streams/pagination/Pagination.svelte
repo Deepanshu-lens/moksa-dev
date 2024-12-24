@@ -19,14 +19,16 @@
     if($selectedLayout < 7){
      MAX_CAMERAS_PER_PAGE = ($selectedLayout > 0 ? $selectedLayout : 3) ** 2 ||
     parseInt(localStorage.getItem("selectedLayout") || "3") ** 2;
-    } else if($selectedLayout === 7 ){
+    } else if($selectedLayout === 51 ){
       MAX_CAMERAS_PER_PAGE = 6
-    } else if($selectedLayout === 8 ){
+    } else if($selectedLayout === 52 ){
       MAX_CAMERAS_PER_PAGE = 8
-    }else if($selectedLayout === 9 ){
+    }else if($selectedLayout === 53 ){
       MAX_CAMERAS_PER_PAGE = 13
-    }else if($selectedLayout === 10 ){
+    }else if($selectedLayout === 54 ){
       MAX_CAMERAS_PER_PAGE = 10
+    }else{
+      MAX_CAMERAS_PER_PAGE = $selectedLayout**2
     }
   }
 

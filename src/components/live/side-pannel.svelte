@@ -18,14 +18,19 @@
   import JSZip from "jszip";
   import RegisterFaceDialog from "./faceRegister/register-face-dialog.svelte";
   import { addUserLogs } from "@/lib/logs/userLogs";
-  import { onMount } from "svelte";
-  import { getCameras } from "@/managers/get-camera";
-  import { writable } from "svelte/store";
 
-  const maxStreamsPerPage = 36;
   let selected = 0;
   let snipDropDownOpen = false;
   let recordDropdownOpen = false;
+  let customRows: number;
+
+  $: {
+    if ($selectedLayout < 51) {
+      customRows = $selectedLayout;
+    } else {
+      customRows = 0;
+    }
+  }
 
   // Load the persisted selectedLayout from local storage if it exists
   if (typeof localStorage !== "undefined") {
@@ -39,7 +44,7 @@
   $: selected = $selectedLayout;
 
   // Whenever `selected` changes, update the store and localStorage
-  $: if (selectedLayout && selectedLayout.set) {
+  $: if (selectedLayout) {
     selectedLayout.set(selected);
     if (typeof localStorage !== "undefined") {
       localStorage.setItem("selectedLayout", String(selected));
@@ -440,19 +445,19 @@
           <button
             class={cn(
               "flex flex-col items-center justify-evenly py-4 mt-2 w-1/3 gap-1 hover:border-[#015a62] hover:border hover:border-solid rounded-md",
-              selected === 7 &&
+              selected === 51 &&
                 "px-2 border border-solid border-[#015a62] rounded-md text-primary"
             )}
             on:click={(e) => {
               e.preventDefault();
-              selected = 7;
+              selected = 51;
             }}
           >
             <svg
               width="60"
               height="60"
               class={cn(
-                selected === 7 ? "text-primary" : "text-muted-foreground"
+                selected === 51 ? "text-primary" : "text-muted-foreground"
               )}
               id="Layer_2"
               data-name="Layer 2"
@@ -525,18 +530,18 @@
           <button
             class={cn(
               "flex flex-col items-center justify-evenly py-4 mt-2 w-1/3 gap-1 hover:border-[#015a62] hover:border hover:border-solid rounded-md",
-              selected === 8 &&
+              selected === 52 &&
                 "px-2 border border-solid border-[#015a62] rounded-md text-primary"
             )}
             on:click={(e) => {
               e.preventDefault();
-              selected = 8;
+              selected = 52;
             }}
           >
             <svg
               width="60"
               class={cn(
-                selected === 8 ? "text-primary" : "text-muted-foreground"
+                selected === 52 ? "text-primary" : "text-muted-foreground"
               )}
               height="60"
               id="Layer_2"
@@ -629,22 +634,22 @@
             </svg>
             <span>1 + 7</span>
           </button>
-         <button
+          <button
             class={cn(
               "flex flex-col items-center justify-evenly py-4 mt-2 w-1/3 gap-1 hover:border-[#015a62] hover:border hover:border-solid rounded-md",
-              selected === 9 &&
+              selected === 53 &&
                 "px-2 border border-solid border-[#015a62] rounded-md text-primary"
             )}
             on:click={(e) => {
               e.preventDefault();
-              selected = 9;
+              selected = 53;
             }}
           >
             <svg
               width="60"
               height="60"
               class={cn(
-                selected === 9 ? "text-primary" : "text-muted-foreground"
+                selected === 53 ? "text-primary" : "text-muted-foreground"
               )}
               id="Layer_2"
               data-name="Layer 2"
@@ -791,18 +796,18 @@
           <button
             class={cn(
               "flex flex-col items-center justify-evenly py-4 mt-2 w-1/3 gap-1 hover:border-[#015a62] hover:border hover:border-solid rounded-md",
-              selected === 10 &&
+              selected === 54 &&
                 "px-2 border border-solid border-[#015a62] rounded-md text-primary"
             )}
             on:click={(e) => {
               e.preventDefault();
-              selected = 10;
+              selected = 54;
             }}
           >
             <svg
               width="60"
               class={cn(
-                selected === 10 ? "text-primary" : "text-muted-foreground"
+                selected === 54 ? "text-primary" : "text-muted-foreground"
               )}
               height="60"
               id="Layer_2"
@@ -914,6 +919,35 @@
             </svg>
             <span>2 + 8</span>
           </button>
+          <div
+            class={cn(
+              "flex flex-col items-center justify-evenly py-[2rem] mt-2 w-1/3 gap-1 hover:border-[#015a62] hover:border hover:border-solid rounded-md",
+              selected > 6 &&
+                $selectedLayout < 51 &&
+                "px-2 border border-solid border-[#015a62] rounded-md text-primary"
+            )}
+          >
+            <div class="flex justify-center items-center gap-2">
+              <input
+                type="number"
+                bind:value={customRows}
+                min="1"
+                max="50"
+                step="1"
+                on:input={(e: any) =>
+                  selectedLayout.set(parseInt(e.target?.value))}
+                class="w-1/3 bg-gray rounded-md"
+              />
+              <span class="text-sm">X</span>
+              <input
+                type="number"
+                disabled
+                bind:value={customRows}
+                class="w-1/3 bg-gray rounded-md"
+              />
+            </div>
+            <span>Custom rows</span>
+          </div>
         </div>
       </Popover.Content>
     </Popover.Root>
