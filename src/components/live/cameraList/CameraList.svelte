@@ -28,15 +28,14 @@
   let isSortingEnabled = false; // Flag to track if sorting is active
 
   let currentCameras = $cameras;
-  let totalCamNodes={};
-  
-  
-  $:{
+  let totalCamNodes = {};
+
+  $: {
     totalCamNodes = {
-    cameras: currentCameras?.length||0,
-    nodes: $nodes?.length,
-  };
-}
+      cameras: currentCameras?.length || 0,
+      nodes: $nodes?.length,
+    };
+  }
 
   onMount(() => {
     if (cameraItems) {
@@ -120,7 +119,6 @@
     isSortingEnabled = false;
     currentCameras = filteredCameras;
   }
-
 </script>
 
 <section class="border-l overflow-y-auto w-full">
@@ -251,7 +249,9 @@
         <CameraActionButton action="add" icon />
       </div>
 
-      <div class="item-count text-xs text-gray-500 flex items-center gap-x-2 w-full justify-center">
+      <div
+        class="item-count text-xs text-gray-500 flex items-center gap-x-2 w-full justify-center"
+      >
         <span>
           Total Cameras: {totalCamNodes?.cameras}
         </span>
@@ -275,7 +275,7 @@
           )}
           on:click={() => {
             if ($selectedCamera === camera.id) selectedCamera.set("");
-            else selectedCamera.set(camera.id);
+            else selectedCamera.set(camera.id.replace(/_FULL$/, ""));
           }}
         >
           <Icon

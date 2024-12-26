@@ -274,10 +274,14 @@
     bind:this={videoElement}
     class={cn(
       "video-player rounded-md",
-      $selectedCamera === id && "border-2 border-green-300"
+      $selectedCamera === id.replace(/_FULL$/, "") &&
+        "border-2 border-green-300"
     )}
     {id}
-    on:click={() => selectedCamera.set($selectedCamera === id ? "" : id)}
+    on:click={() =>
+      selectedCamera.set(
+        $selectedCamera === id ? "" : id.replace(/_FULL$/, "")
+      )}
     on:dblclick={() => {
       if ($isFullScreen) {
         exitFullscreen();
