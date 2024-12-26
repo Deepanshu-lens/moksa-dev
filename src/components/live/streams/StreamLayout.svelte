@@ -151,37 +151,37 @@
     const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
     ctx.beginPath();
+
+    // Get the current canvas dimensions
+    const canvasWidth = canvas.width; // Current canvas width
+    const canvasHeight = canvas.height; // Current canvas height
+
     coordinates.forEach((point, index) => {
+      const x = (point.x / 100) * canvasWidth; // Convert percentage to pixel
+      const y = (point.y / 100) * canvasHeight; // Convert percentage to pixel
+
       if (index === 0) {
-        ctx.moveTo(point.x, point.y); // Move to the first point
+        ctx.moveTo(x, y); // Move to the first point
       } else {
-        ctx.lineTo(point.x, point.y); // Draw line to subsequent points
+        ctx.lineTo(x, y); // Draw line to subsequent points
       }
     });
-    ctx.closePath();
+
     ctx.strokeStyle = "blue"; // Set line color
-    ctx.stroke(); // Draw the lines
+    ctx.lineWidth = 2;
+    ctx.stroke(); // Draw the lines connecting the points
 
-    // Draw dots at the start and end of the lines
-    if (coordinates.length > 0) {
-      // Draw dot at the start
+    // Now draw the points
+    coordinates.forEach((point) => {
+      const x = (point.x / 100) * canvasWidth; // Convert percentage to pixel
+      const y = (point.y / 100) * canvasHeight; // Convert percentage to pixel
+
+      // Draw the point with a smaller radius
       ctx.beginPath();
-      ctx.arc(coordinates[0].x, coordinates[0].y, 2, 0, Math.PI * 2); // Radius of 5
+      ctx.arc(x, y, 2, 0, Math.PI * 2); // Reduced radius to 2
       ctx.fillStyle = "blue"; // Dot color
       ctx.fill(); // Fill the dot
-
-      // Draw dot at the end
-      ctx.beginPath();
-      ctx.arc(
-        coordinates[coordinates.length - 1].x,
-        coordinates[coordinates.length - 1].y,
-        2,
-        0,
-        Math.PI * 2
-      ); // Radius of 5
-      ctx.fillStyle = "blue"; // Dot color
-      ctx.fill(); // Fill the dot
-    }
+    });
   }
 
   onMount(() => {

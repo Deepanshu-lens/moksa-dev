@@ -238,16 +238,25 @@
     // Saving ROI Details to db
     async function updateAi() {
     try {
-       await pb.collection("camera").update($selectedCamera,{
-        isRoiEnabled:true,
-        roiCanvasCoordinates:$canvasCoordinates
-      });
-      isOpen.set(false);
-      toast.success("Roi Details Saved Successfully");
-      draw = false;
+        // Convert points to percentages based on the current canvas width and height
+        const canvasWidth = rect.width; // Current canvas width
+        const canvasHeight = rect.height; // Current canvas height
+
+        const roiCanvasCoordinates = $canvasCoordinates?.map(point => ({
+            x: (point.x * 100) / canvasWidth, // Convert to percentage
+            y: (point.y * 100) / canvasHeight // Convert to percentage
+        }));
+
+        await pb.collection("camera").update($selectedCamera, {
+            isRoiEnabled: true,
+            roiCanvasCoordinates: roiCanvasCoordinates
+        });
+        isOpen.set(false);
+        toast.success("ROI Details Saved Successfully");
+        draw = false;
     } catch (error) {
-      toast?.error(error?.message||"Something went wrong while adding ROI Cameras");
-      console.log('error updating roi camera',error?.message);
+        toast?.error(error?.message || "Something went wrong while adding ROI Cameras");
+        console.log('error updating roi camera', error?.message);
     }
   }
 </script>
@@ -637,7 +646,7 @@
       {#if draw}
       <canvas
         id="roicanvas"
-        class="bg-transparent z-50 h-fit w-full absolute top-0 left-0"
+        class="bg-transparent z-40 h-fit w-full absolute top-0 left-0"
       ></canvas>
     {/if}
     <div class="w-full p-4 flex items-center gap-4">

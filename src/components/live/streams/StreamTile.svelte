@@ -377,7 +377,6 @@
     {/if}
     <ImagePreviewModal {loading} {imgDialogOpen}></ImagePreviewModal>
   </div>
-  
 {/if}
 
 <style>
