@@ -94,13 +94,13 @@
         case 6:
           return `grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, 1fr);`;
         case 7:
-          return `grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, 1fr);`
+          return `grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, 1fr);`;
         case 8:
-          return `grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);`
+          return `grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);`;
         case 9:
-          return `grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);`
+          return `grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);`;
         default:
-          return `grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);`
+          return `grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);`;
       }
     }
   }
@@ -187,7 +187,7 @@
       <div
         bind:this={localCaptureRef}
         class="grid grid-cols-1 gap-4 p-4 w-full lg:grid-cols-4 camera-grid pb-[30vh] lg:pb-5"
-        style={gridStyle + " height: calc(100vh - 7rem); overflow-y: auto;"}
+        style={gridStyle + " height: calc(100vh - 4rem); overflow-y: auto;"}
       >
         {#key $displayCameras}
           {#each $displayCameras as camera, index}
