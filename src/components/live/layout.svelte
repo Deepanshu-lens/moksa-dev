@@ -4,6 +4,7 @@
   import * as Resizable from "@/components/ui/resizable";
   import Icon from "@iconify/svelte";
   import {
+  cameras,
     isAlertPanelOpen,
     isRoiPanelOpen,
   } from "@/stores";
@@ -35,10 +36,17 @@
   let selectedEventFilter = "";
   let eventSearchQuery = "";
   let isOpen = writable(false);
+  let points=[
+      { x: 150, y: 150, isDragging: false, color: "blue" },
+      { x: 250, y: 250, isDragging: false, color: "blue" },
+    ];
+
+  let roiCamera = writable(null);
 
   let draw = false;
   let canvas, ctx, rect;
   let canvasCoordinates=writable({});
+
   function toggleDraw() {
     draw = !draw;
     if (draw) {
@@ -48,16 +56,16 @@
     }
   }
 
-   // setting Up Canvas to draw line over seleced roi camera
-   function setupCanvasForLine() {
+  // Modify the setupCanvasForLine function to draw the points
+  function setupCanvasForLine() {
     canvas = document.getElementById("roicanvas");
     ctx = canvas.getContext("2d");
     rect = canvas.getBoundingClientRect();
 
-    const points = [
-      { x: 150, y: 150, isDragging: false, color: "blue" },
-      { x: 250, y: 250, isDragging: false, color: "blue" },
-    ];
+    // const points = [
+    //   { x: 150, y: 150, isDragging: false, color: "blue" },
+    //   { x: 250, y: 250, isDragging: false, color: "blue" },
+    // ];
 
     let lineIsDragging = false;
     let dragOffsetX = 0;
@@ -225,6 +233,52 @@
     return matchesSearchQuery && matchesFilter;
   });
 
+  $:{
+    let temp = $cameras.find((cam) => cam.id === $selectedCamera);
+    roiCamera.set(temp);
+  }
+
+   // Function to draw lines on the canvas
+   function drawLines(canvas, coordinates) {
+     if(!!canvas){
+      points=coordinates;
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
+      ctx.beginPath();
+  
+      // Get the current canvas dimensions
+      const canvasWidth = canvas.width; // Current canvas width
+      const canvasHeight = canvas.height; // Current canvas height
+  
+      coordinates.forEach((point, index) => {
+        const x = (point.x / 100) * canvasWidth; // Convert percentage to pixel
+        const y = (point.y / 100) * canvasHeight; // Convert percentage to pixel
+  
+        if (index === 0) {
+          ctx.moveTo(x, y); // Move to the first point
+        } else {
+          ctx.lineTo(x, y); // Draw line to subsequent points
+        }
+      });
+  
+      ctx.strokeStyle = "blue"; // Set line color
+      ctx.lineWidth = 2;
+      ctx.stroke(); // Draw the lines connecting the points
+  
+      // Now draw the points
+      coordinates.forEach((point) => {
+        const x = (point.x / 100) * canvasWidth; // Convert percentage to pixel
+        const y = (point.y / 100) * canvasHeight; // Convert percentage to pixel
+  
+        // Draw the point with a smaller radius
+        ctx.beginPath();
+        ctx.arc(x, y, 2, 0, Math.PI * 2); // Reduced radius to 2
+        ctx.fillStyle = "blue"; // Dot color
+        ctx.fill(); // Fill the dot
+      });
+    }
+  }
+
   onMount(() => {
     checkIfMobile(); // Initial check
     window.addEventListener("resize", checkIfMobile); // Update on resize
@@ -257,6 +311,18 @@
     } catch (error) {
         toast?.error(error?.message || "Something went wrong while adding ROI Cameras");
         console.log('error updating roi camera', error?.message);
+    }
+  }
+
+  $:{
+    if($isOpen){
+      setTimeout(() => {
+        if($roiCamera?.isRoiEnabled){
+          console.log('entered here')
+          let canvas = document.getElementById("roicanvas");
+          drawLines(canvas, $roiCamera?.roiCanvasCoordinates);
+        }
+      }, 2000);
     }
   }
 </script>
@@ -643,12 +709,10 @@
         ><X size={22} /></button
       >{/if}
       </div>
-      {#if draw}
       <canvas
         id="roicanvas"
         class="bg-transparent z-40 h-fit w-full absolute top-0 left-0"
       ></canvas>
-    {/if}
     <div class="w-full p-4 flex items-center gap-4">
       <Button
         on:click={() => {

@@ -186,7 +186,6 @@
 
   onMount(() => {
     setTimeout(() => {
-      console.log("called");
       $displayCameras.forEach((camera, index) => {
         let canvas = document.getElementById(`stream-canvas-${index}`);
         if (camera?.isRoiEnabled && camera?.roiCanvasCoordinates) {
