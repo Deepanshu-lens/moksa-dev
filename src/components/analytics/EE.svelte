@@ -27,12 +27,7 @@
   import UpdateEmployeeDialog from "../dialogs/UpdateEmployeeDialog.svelte";
   import DeleteEmployeeDialog from "../dialogs/DeleteEmployeeDialog.svelte";
   import type { DateRange } from "bits-ui";
-  import {
-    CalendarDate,
-    DateFormatter,
-    type DateValue,
-    getLocalTimeZone,
-  } from "@internationalized/date";
+  import { type DateValue } from "@internationalized/date";
   import { RangeCalendar } from "@/components/ui/range-calendar";
   import * as Popover from "../ui/popover";
   import { Input } from "../ui/input";
@@ -351,6 +346,7 @@
   }
 
   let loading = false;
+  let detailsLoading = true;
 
   onMount(async () => {
     chartLoading = false;
@@ -381,10 +377,10 @@
       } else {
         employeeDetails.set(null);
       }
-      loading = false;
     } catch (error) {
       console.error("Error fetching data:", error);
     }
+    loading = false;
   });
 
   $: if (
@@ -549,6 +545,7 @@
     progress = 0;
     dashOffset = circumference - (progress / 100) * circumference;
     if (!!id) {
+      detailsLoading = true;
       try {
         const response = await fetch(
           `https://dev.api.moksa.ai/employeeEfficiency/getEmployeeEfficiencyByEmpid/${id}/${formatDate(startDate)}/${formatDate(today)}`,
@@ -571,6 +568,7 @@
       } catch (error) {
         console.log(error);
       }
+      detailsLoading = false;
     }
   }
 
@@ -776,7 +774,7 @@
     <div
       class=" col-span-3 row-span-4 border rounded-md p-2 flex flex-col flex-shrink-0 h-[550px] dark:border-white/[.7]"
     >
-      <span class="flex flex-col gap-3">
+      <div class="flex flex-col gap-3">
         <p class="text-[#323232] text-lg font-semibold dark:text-white">
           Employee Details
         </p>
@@ -908,12 +906,16 @@
               </span>
             </span>
           </span>
-        {:else}
+        {:else if detailsLoading}
           <div class="mx-auto my-20">
             <Spinner />
           </div>
+        {:else}
+          <div class="flex items-center justify-center h-full w-full my-20">
+            <p class="text-gray-500">No Employee Details Found</p>
+          </div>
         {/if}
-      </span>
+      </div>
       {#if $employeeDetails?.data?.length > 0 && $employeeData !== null}
         <span class="flex flex-col gap-3 mt-2">
           {#each [{ label: "Total Hours With Customers", hours: $employeeDetails?.data?.[0]?.total_customer, color1: "#02A7FD", color2: "#141C64" }, { label: "Total Hours on Mobile", hours: $employeeDetails?.data?.[0]?.total_mobile, color1: "#00FEA3", color2: "#007077" }, { label: "Total Hours Sitting Idle", hours: $employeeDetails?.data?.[0]?.total_idle, color1: "#FFB156", color2: "#FF007A" }, { label: "Total Hours With Filling Shelves", hours: $employeeDetails?.data?.[0]?.total_filling_shelves, color1: "#C8C303", color2: "#597802" }] as activity}
