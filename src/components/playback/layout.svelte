@@ -29,8 +29,7 @@
   import { user } from "@/stores";
   import JSZip from "jszip";
   import Label from "../ui/label/label.svelte";
-  import { convertDateTimeToTimeZone } from "@/lib/convertion/date-time";
-  import { convertDateToTimeZone } from "@/lib/convertion/date";
+  import { convertDateToTimeZone,convertDateTimeToTimeZone } from "@/lib/convertion";
 
   // Variables
   let availableChannels = writable<{ id: string; label: string; name?: string; timeZone?: string }[]>([]);
@@ -441,7 +440,7 @@
               channel.timeZone
             );
           } else {
-            formatted_search_date = convertDateTimeToTimeZone(searchDate);
+            formatted_search_date = convertDateToTimeZone(searchDate);
           }
           //this need to looked as we not always have a timeZone making the formatted date to be null
           const dateParts = formatted_search_date ? formatted_search_date.split(" ") : searchDate.split(" ")
@@ -472,7 +471,7 @@
             if (channel.timeZone) {
               timeZoneAdjTime = convertDateTimeToTimeZone(
                 data.created,
-                "Asia/Calcutta"
+                channel.timeZone
               );
             } else {
               timeZoneAdjTime = convertDateTimeToTimeZone(data.created);

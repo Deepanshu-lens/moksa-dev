@@ -6,7 +6,7 @@
  */
 
 const DEFAULT_TIMEZONE = "America/New_York"
-export function convertDateTimeToTimeZone(
+export default function convertDateTimeToTimeZone(
     dateTime: string,
     timeZone: string = DEFAULT_TIMEZONE
   ): string | null {
