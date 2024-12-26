@@ -22,7 +22,7 @@
 
   // Reactive value for MAX_CAMERAS_PER_PAGE
   $: {
-    if (isMobile) {
+    if ($isMobile) {
       MAX_CAMERAS_PER_PAGE = $totalCameras;
     } else {
       if (
