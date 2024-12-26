@@ -11,7 +11,7 @@ export const getCameras = async (nodeId: string,session:string) => {
   try {
     pb.autoCancellation(false);
     const localCameras = await pb.collection("camera").getFullList<Camera>({
-      fields: "id,name,node",
+      fields: "id,name,node,timeZone",
       filter,
       sort: "created",
     });

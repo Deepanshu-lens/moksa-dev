@@ -29,6 +29,7 @@
   import { user } from "@/stores";
   import JSZip from "jszip";
   import Label from "../ui/label/label.svelte";
+  import { convertDateTimeToTimeZone } from "@/lib/convertion/date-time";
 
   // Variables
   let availableChannels = writable<{ id: string; label: string }[]>([]);
@@ -423,9 +424,9 @@
       toast.error("No data to fetch");
       return;
     }
-
+    const formatted_search_date = searchDate;
     isFetching.set(true);
-
+    console.log("formatted search date", formatted_search_date);
     const dateParts = searchDate.split(" ");
     const day = dateParts[0].padStart(2, "0");
     const month =
@@ -457,7 +458,24 @@
             }
 
             const data = await response.json();
-            return { data, path: data.path, channel };
+            let timeZoneAdjTime;
+            if (channel.timeZone) {
+              timeZoneAdjTime = convertDateTimeToTimeZone(
+                data.created,
+                "Asia/Calcutta"
+              );
+            }else{
+              timeZoneAdjTime = convertDateTimeToTimeZone(data.created)
+            }
+            console.log("adjusted time", timeZoneAdjTime);
+            return {
+              data: {
+                ...data,
+                created: timeZoneAdjTime || data.created,
+              },
+              path: data.path,
+              channel,
+            };
           } catch (error) {
             return { error, channel }; // Return the error along with channel info
           }
@@ -1176,7 +1194,7 @@
             >Select Cameras</label
           >
           <!-- Cameras List limit upto 8 -->
-          <div class="w-full px-2 py-1 max-h-[160px] overflow-y-auto">
+          <div class="w-full px-2 py-1 max-h-[180px] overflow-y-auto">
             {#if $isLoading}
               <Loader2 size={20} class="animate-spin" />
             {:else if $availableChannels.length === 0}
@@ -1184,10 +1202,13 @@
                 No cameras have recordings available.
               </p>
             {:else}
+              <!-- svelte-ignore a11y_no_static_element_interactions -->
               {#each $availableChannels as channel}
                 <!-- <span>{$nodes?.find((node) => node?.id === channel?.node?.[0])?.name}</span> -->
+                <!-- svelte-ignore a11y_click_events_have_key_events -->
                 <div
-                  class="flex items-center mb-2 border dark:border my-4 hover:border hover:border-primary space-x-4 rounded-xl text-sm z-10 w-[90%] py-1.5 px-4 relative"
+                  class="flex items-center mb-2 border dark:border my-2 hover:border hover:border-primary space-x-4 rounded-md text-sm py-3 px-4 relative"
+                  on:click={() => toggleChannelSelection(channel)}
                 >
                   <input
                     disabled={$selectedChannels.length === 8 &&
@@ -1196,13 +1217,12 @@
                     id={channel.id}
                     value={channel.id}
                     checked={$selectedChannels.includes(channel)}
-                    on:change={() => toggleChannelSelection(channel)}
                     class="mr-2"
                   />
                   <label
                     for={channel.id}
                     class={cn(
-                      "text-sm",
+                      "text-sm truncate",
                       $selectedChannels.length === 8 &&
                         !$selectedChannels.includes(channel) &&
                         "text-gray-400"
