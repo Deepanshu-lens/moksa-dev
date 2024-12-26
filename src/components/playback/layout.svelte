@@ -30,9 +30,10 @@
   import JSZip from "jszip";
   import Label from "../ui/label/label.svelte";
   import { convertDateTimeToTimeZone } from "@/lib/convertion/date-time";
+  import { convertDateToTimeZone } from "@/lib/convertion/date";
 
   // Variables
-  let availableChannels = writable<{ id: string; label: string }[]>([]);
+  let availableChannels = writable<{ id: string; label: string; name?: string; timeZone?: string }[]>([]);
   let events: any[] = [];
   const currentTimeInterval = writable(0);
   let showRightPanel: boolean = true;
@@ -43,7 +44,7 @@
   let value: any = null;
   let searchDate = "";
   let eventDate = "";
-  let selectedChannels = writable<{ id: string; label: string }[]>([]);
+  let selectedChannels = writable<{ id: string; label: string; name?: string; timeZone?: string }[]>([]);
   let videoUrls: any = { responses: [], cams: [] };
   let isLoading = writable<boolean>(false);
   let startTime: string = "";
@@ -424,22 +425,31 @@
       toast.error("No data to fetch");
       return;
     }
-    const formatted_search_date = searchDate;
-    isFetching.set(true);
-    console.log("formatted search date", formatted_search_date);
-    const dateParts = searchDate.split(" ");
-    const day = dateParts[0].padStart(2, "0");
-    const month =
-      new Date(Date.parse(dateParts[1] + " 1, 2020")).getMonth() + 1;
-    const year = dateParts[2];
-    const formattedDate = `${year}_${month.toString().padStart(2, "0")}_${day}`;
 
     try {
       events = [];
       videoUrls = { responses: [], cams: [] };
 
+      isFetching.set(true);
+
       const responses = await Promise.allSettled(
         $selectedChannels.map(async (channel) => {
+          let formatted_search_date;
+          if (channel.timeZone) {
+            formatted_search_date = convertDateToTimeZone(
+              searchDate,
+              channel.timeZone
+            );
+          } else {
+            formatted_search_date = convertDateTimeToTimeZone(searchDate);
+          }
+          //this need to looked as we not always have a timeZone making the formatted date to be null
+          const dateParts = formatted_search_date ? formatted_search_date.split(" ") : searchDate.split(" ")
+          const day = dateParts[0].padStart(2, "0");
+          const month =
+            new Date(Date.parse(dateParts[1] + " 1, 2020")).getMonth() + 1;
+          const year = dateParts[2];
+          const formattedDate = `${year}_${month.toString().padStart(2, "0")}_${day}`;
           try {
             const response = await fetch(PLAYBACK_API_URL, {
               method: "POST",
@@ -464,10 +474,9 @@
                 data.created,
                 "Asia/Calcutta"
               );
-            }else{
-              timeZoneAdjTime = convertDateTimeToTimeZone(data.created)
+            } else {
+              timeZoneAdjTime = convertDateTimeToTimeZone(data.created);
             }
-            console.log("adjusted time", timeZoneAdjTime);
             return {
               data: {
                 ...data,

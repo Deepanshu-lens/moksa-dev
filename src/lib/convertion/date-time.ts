@@ -40,7 +40,7 @@ export function convertDateTimeToTimeZone(
     }
   }
   
-//   // Example Usage
+//   Example Usage
 //   const dateTime = "2024-12-26 09:02:42";
 //   const timeZone = "Asia/Kolkata";
 //   const formattedDateTime = convertDateTimeToTimeZone(dateTime, timeZone);
