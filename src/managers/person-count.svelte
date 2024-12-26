@@ -12,7 +12,7 @@
         .getFullList<any>();
       personCount.update(localpanels);
     } catch (error) {
-      console.error("Error initializing Panel Manager:", error);
+      console.error("Error initializing Person Manager:", error);
       }
     })();
 
