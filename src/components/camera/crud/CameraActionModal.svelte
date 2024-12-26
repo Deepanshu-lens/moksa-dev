@@ -244,7 +244,7 @@ wss://view.lenscorp.cloud/api/ws?src=${camera.id}`
         bind:mainUrl
         bind:subUrl
         bind:doneSubmit
-        modalOpen={$modalOpen}
+        modalOpen={modalOpen}
       />
     </Dialog.Content>
   </Dialog.Root>

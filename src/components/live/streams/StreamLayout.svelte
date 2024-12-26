@@ -7,6 +7,7 @@
     user,
     selectedNode,
     captureRef,
+    customLayout,
   } from "@/stores";
   import pb from "@/lib/pb";
   import StreamTile from "./StreamTile.svelte";
@@ -20,7 +21,11 @@
   export let STREAM_URL;
   const isMobile = writable(false);
   const priorityIndex = writable(0);
+  const secondPriIndex = writable(1);
   let localCaptureRef;
+  let custom_layout;
+  let gridStyle;
+
   // // Function to determine the grid style based on the number of cameras
   const layoutConfigs = {
     6: "grid-template-columns: repeat(6, 1fr); grid-template-rows: repeat(6, 1fr);", // 6x6
@@ -67,37 +72,51 @@
   };
 
   function getGridStyle(cameraCount, layoutIndex) {
-    if (layoutIndex > 0) {
-      return layoutConfigs[layoutIndex];
-    }
-
     if ($isMobile) {
       // Mobile view: 1 column and multiple rows based on cameraCount
       return `grid-template-columns: repeat(1, 1fr); grid-template-rows: repeat(${cameraCount}, 150px);`;
     }
-
-    switch (cameraCount) {
-      case 0:
-        return "grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);";
-      case 1:
-        return "grid-template-columns: repeat(1, 1fr); grid-template-rows: repeat(1, 1fr);";
-      case 2:
-        return "grid-template-columns: repeat(1, 1fr); grid-template-rows: repeat(2, 1fr);";
-      case 3:
-        return "grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(1, 1fr);";
-      case 4:
-        return "grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr);";
-      case 5:
-      case 6:
-        return "grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr);";
-      default:
-        return "grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);";
+    if (custom_layout && custom_layout.rows > 0 && custom_layout.columns > 0) {
+      return `grid-template-columns: repeat(${custom_layout.columns}, 1fr); grid-template-rows: repeat(${custom_layout.rows}, 1fr);`;
+    } else if (layoutIndex > 0 && layoutIndex < 11) {
+      return layoutConfigs[layoutIndex];
+    } else if (layoutIndex === 0) {
+      switch (cameraCount) {
+        case 1:
+          return `grid-template-columns: repeat(1, 1fr); grid-template-rows: repeat(1, 1fr);`;
+        case 2:
+          return `grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr);`;
+        case 3:
+          return `grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr);`;
+        case 4:
+          return `grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr);`;
+        case 5:
+          return `grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, 1fr);`;
+        case 6:
+          return `grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, 1fr);`;
+        case 7:
+          return `grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, 1fr);`;
+        case 8:
+          return `grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);`;
+        case 9:
+          return `grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);`;
+        default:
+          return `grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);`;
+      }
     }
   }
 
   // Reactive statement to calculate the grid style dynamically
   $: gridStyle = getGridStyle($cameras.length, $selectedLayout);
 
+  customLayout.subscribe((value) => {
+    if (value && value.rows > 0 && value.columns > 0) {
+      custom_layout = value;
+    } else {
+      custom_layout = {};
+    }
+    gridStyle = getGridStyle($cameras.length, $selectedLayout);
+  });
   let nodeName = "";
   const addNode = async () => {
     const data = {
@@ -193,17 +212,17 @@
   {#if $nodes.length === 0}
     <div
       class="
-    flex
-    flex-col
-    items-start
-    justify-center h-screen w-screen
-    dark:bg-dark-add-node
-    bg-no-repeat
-    pl-32
-    bg-light-add-node
-    bg-contain
-    bg-right
-    dark:bg-cover"
+        flex
+        flex-col
+        items-start
+        justify-center h-screen w-screen
+        dark:bg-dark-add-node
+        bg-no-repeat
+        pl-32
+        bg-light-add-node
+        bg-contain
+        bg-right
+        dark:bg-cover"
     >
       <form
         on:submit={(e) => e.preventDefault()}
@@ -230,54 +249,78 @@
     </div>
   {:else}
     <div class="flex flex-col flex-grow mt-4">
-      <div bind:this={localCaptureRef} class="relative">
-        <div
-          class="grid grid-cols-1 gap-4 p-4 w-full lg:grid-cols-4 camera-grid pb-[30vh] lg:pb-5"
-          style={gridStyle + " height: calc(100vh - 7rem); overflow-y: auto;"}
-        >
-          {#key $displayCameras}
-            {#each $displayCameras as camera, index}
-              <div class="relative">
-                <StreamTile
-                  name={camera?.name}
-                  id={camera?.id}
-                  url={`${STREAM_URL}/api/ws?src=${camera?.id}`}
-                ></StreamTile>
-                <!-- Canvas overlay for drawing lines -->
-                {#if camera?.isRoiEnabled}
-                  <canvas
-                    bind:this={canvas}
-                    id={`stream-canvas-${index}`}
-                    class="bg-transparent z-[10000] h-full w-full absolute top-0 left-0"
-                    on:load={() => {
-                      if (camera.roiCanvasCoordinates) {
-                        drawLines(
-                          `stream-canvas-${index}`,
-                          camera.roiCanvasCoordinates
-                        );
-                      }
-                    }}
-                  ></canvas>
-                {/if}
-                {#if index !== $priorityIndex && $selectedLayout > 6 && $selectedLayout < 10}
+      <div
+        bind:this={localCaptureRef}
+        class="grid grid-cols-1 gap-4 p-4 w-full lg:grid-cols-4 camera-grid pb-[30vh] lg:pb-5"
+        style={gridStyle + " height: calc(100vh - 4rem); overflow-y: auto;"}
+      >
+        {#key $displayCameras}
+          {#each $displayCameras as camera, index}
+            <div
+              class="relative"
+              style={$selectedLayout > 6 && $selectedLayout < 10
+                ? index === $priorityIndex && "grid-area: bigCell1;"
+                : $selectedLayout === 10
+                  ? index === $priorityIndex
+                    ? "grid-area: bigCell1;"
+                    : index === $secondPriIndex && "grid-area:bigCell2;"
+                  : ""}
+            >
+              <StreamTile
+                name={camera?.name}
+                id={camera?.streamType !== "Default"
+                  ? camera?.streamType === "Mainstream"
+                    ? `${camera?.id}_FULL`
+                    : `${camera?.id}`
+                  : $displayCameras.length > 4
+                    ? `${camera?.id}`
+                    : `${camera?.id}_FULL`}
+                url={camera?.streamType !== "Default"
+                  ? camera?.streamType === "Mainstream"
+                    ? `${STREAM_URL}/api/ws?src=${camera?.id}_FULL`
+                    : `${STREAM_URL}/api/ws?src=${camera?.id}`
+                  : $displayCameras.length > 4
+                    ? `${STREAM_URL}/api/ws?src=${camera?.id}`
+                    : `${STREAM_URL}/api/ws?src=${camera?.id}_FULL`}
+              ></StreamTile>
+              {#if index !== $priorityIndex && $selectedLayout > 6 && $selectedLayout < 10}
+                <button
+                  class="absolute bottom-4 left-4"
+                  on:click={() => {
+                    priorityIndex.set(index);
+                  }}
+                >
+                  <PictureInPicture2 size={16} />
+                </button>
+              {/if}
+              {#if index !== $priorityIndex && index !== $secondPriIndex && $selectedLayout === 10}
+                <div
+                  class="absolute bottom-3 left-4 flex justify-between items-center py-3 gap-2"
+                >
                   <button
-                    class="absolute bottom-4 left-4"
                     on:click={() => {
                       priorityIndex.set(index);
                     }}
                   >
                     <PictureInPicture2 size={16} />
                   </button>
-                {/if}
-              </div>
-            {/each}
-          {/key}
-        </div>
-
-        {#if $totalCameras > 0}
-          <Pagination />
-        {/if}
+                  <button
+                    on:click={() => {
+                      secondPriIndex.set(index);
+                    }}
+                  >
+                    <PictureInPicture2 size={16} class="scale-x-[-1]" />
+                  </button>
+                </div>
+              {/if}
+            </div>
+          {/each}
+        {/key}
       </div>
+
+      {#if $totalCameras > 0}
+        <Pagination />
+      {/if}
     </div>
   {/if}
 {/if}
