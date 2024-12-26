@@ -2,17 +2,7 @@
   import { createTable, Render, Subscribe } from "svelte-headless-table";
   import * as Table from "@/components/ui/table";
   import { Button } from "@/components/ui/button";
-  import {
-    ArrowUpDown,
-    Edit,
-    Store,
-    StoreIcon,
-    Trash2,
-    TrendingDown,
-    TrendingUp,
-    User,
-  } from "lucide-svelte";
-  import { createEventDispatcher } from "svelte";
+  import { ArrowUpDown, User } from "lucide-svelte";
   import {
     addPagination,
     addTableFilter,
@@ -21,8 +11,6 @@
   } from "svelte-headless-table/plugins";
   import { readable, writable } from "svelte/store";
   import Spinner from "@/components/ui/spinner/Spinner.svelte";
-
-  const dispatch = createEventDispatcher();
 
   export let efficiency;
   export let token;
@@ -34,11 +22,8 @@
   let currentPageIndex = 0;
   let loading = false;
 
-  console.log(efficiency.total);
-
   const fetchMoreData = async () => {
     currentpage++;
-    // console.log($dateRange, $selectedStore.value);
     const today = new Date();
     let startDate = new Date(today);
 
@@ -58,7 +43,6 @@
       default:
         startDate.setDate(today.getDate() - 7);
     }
-    // console.log(value);
     const start = value?.start
       ? `${value.start.year}-${String(value.start.month).padStart(2, "0")}-${String(value.start.day).padStart(2, "0")}`
       : "";
@@ -67,7 +51,6 @@
       : "";
 
     const formatDate = (date: Date) => date.toISOString().split("T")[0];
-    // console.log(currentpage);
     const efficiency = await fetch(
       `https://dev.api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/${$selectedStore.value}/${$dateRange === "custom" ? start : formatDate(startDate)}/${currentpage}/100/${$dateRange === "custom" ? end : formatDate(today)}`,
       {
@@ -79,7 +62,6 @@
     );
     return efficiency.json();
   };
-  // console.log("dashboard efficiency", efficiency.total);
 
   $: if ($dateRange || $selectedStore) {
     currentPageIndex = 0;
@@ -87,7 +69,8 @@
 
   $: dbData = efficiency.data.map((item) => {
     return {
-      employee: `${item.first_name} ${item.last_name}`,
+      employee: `${item?.employee}`,
+      storeName: item?.store_name,
       customer: item.customer,
       idle: item.idle,
       mobile: item.mobile,
@@ -122,7 +105,6 @@
     if ($pageIndex === $pageCount - 1 && currentDataCount < efficiency.total) {
       loading = true;
       const newData = await fetchMoreData();
-      console.log("new data", newData);
       efficiency.data = [...efficiency.data, ...newData?.data?.data];
       currentDataCount = efficiency.data.length;
       data.set(dbData); // Update the data store
@@ -155,7 +137,6 @@
     table.createViewModel(columns));
   $: ({ hasNextPage, hasPreviousPage, pageIndex, pageCount } =
     pluginStates.page);
-  $: ({ selectedDataIds } = pluginStates.select);
 </script>
 
 <div class="m-0">
@@ -217,9 +198,11 @@
                         <!-- <img src="/path/to/avatar.png" alt="Avatar" class="w-8 h-8 rounded-full" /> -->
                         <User class="size-5 text-blue-500 " />
                         <span class="text-sm font-medium whitespace-nowrap"
-                          >{row.original.employee}</span
+                          >{row?.original?.employee}</span
                         >
                       </div>
+                    {:else if cell.id === "store_name"}
+                      <span class="text-sm">{row?.original?.storeName}</span>
                     {:else if cell.id === "customer"}
                       <span class="text-sm">{row.original.customer}</span>
                     {:else if cell.id === "idle"}

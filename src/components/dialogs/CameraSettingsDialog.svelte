@@ -242,6 +242,9 @@
 
     await fetch(`/api/camera/updateCameraSettings`, {
       method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify(customerVarsPayload),
     })
       .then((response) => {
