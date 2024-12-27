@@ -148,7 +148,8 @@
 
   // Function to draw lines on the canvas
   function drawLines(canvas, coordinates) {
-    console.log(coordinates,'coord')
+    console.log(coordinates, "coords");
+
     const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
     ctx.beginPath();
@@ -157,15 +158,17 @@
     const canvasWidth = canvas.width; // Current canvas width
     const canvasHeight = canvas.height; // Current canvas height
 
-    coordinates.forEach((point, index) => {
-      const x = (point.x / 100) * canvasWidth; // Convert percentage to pixel
-      const y = (point.y / 100) * canvasHeight; // Convert percentage to pixel
+    coordinates.forEach((line) => {
+      line.forEach((point, index) => {
+        const x = (point.x / 100) * canvasWidth; // Convert percentage to pixel
+        const y = (point.y / 100) * canvasHeight; // Convert percentage to pixel
 
-      if (index === 0) {
-        ctx.moveTo(x, y); // Move to the first point
-      } else {
-        ctx.lineTo(x, y); // Draw line to subsequent points
-      }
+        if (index === 0) {
+          ctx.moveTo(x, y); // Move to the first point
+        } else {
+          ctx.lineTo(x, y); // Draw line to subsequent points
+        }
+      });
     });
 
     ctx.strokeStyle = "blue"; // Set line color
@@ -278,7 +281,7 @@
               ></StreamTile>
               <canvas
                 id={`stream-canvas-${index}`}
-                class="absolute top-0 left-0 w-full h-full"
+                class="absolute top-0 left-0 w-full h-full p-3"
                 style="pointer-events: none;"
               ></canvas>
               {#if index !== $priorityIndex && $selectedLayout > 6 && $selectedLayout < 10}

@@ -40,15 +40,12 @@
 
   let roiCamera = writable(null);
 
-  let draw = false;
   let canvas, ctx, rect;
   let canvasCoordinates = writable([]);
   let drawRectangle = false;
 
   function toggleDraw() {
-    draw = !draw;
     drawRectangle = false;
-    if (draw) {
       // Add a new line with two points when drawing is enabled
       lines.push([
         { x: 150, y: 150, isDragging: false, color: "blue" }, // First point of the new line
@@ -57,7 +54,6 @@
       setTimeout(() => {
         setupCanvasForLine();
       }, 0);
-    }
   }
 
   function setupCanvasForLine() {
@@ -298,16 +294,18 @@
       const canvasWidth = canvas.width; // Current canvas width
       const canvasHeight = canvas.height; // Current canvas height
   
-      coordinates.forEach((point, index) => {
+      coordinates.forEach((line) => {
+      line.forEach((point, index) => {
         const x = (point.x / 100) * canvasWidth; // Convert percentage to pixel
         const y = (point.y / 100) * canvasHeight; // Convert percentage to pixel
-  
+
         if (index === 0) {
           ctx.moveTo(x, y); // Move to the first point
         } else {
           ctx.lineTo(x, y); // Draw line to subsequent points
         }
       });
+    });
   
       ctx.strokeStyle = "blue"; // Set line color
       ctx.lineWidth = 1;
@@ -329,11 +327,17 @@
 
   function handleClear(){
     let canvasDefault = document.getElementById('roicanvas-default');
-    const ctxDefault = canvasDefault.getContext("2d");
-    ctxDefault.clearRect(0,0,canvasDefault?.clientWidth,canvasDefault.height); //clearing default canvas
+    if(canvasDefault){
+      const ctxDefault = canvasDefault.getContext("2d");
+      ctxDefault.clearRect(0,0,canvasDefault?.clientWidth,canvasDefault.height); //clearing default canvas
+    }
     
-    const ctx = canvas.getContext("2d");
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
+    if(canvas){
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
+    }
+    canvasCoordinates.set([]);
+    lines =[];
   }
 
   onMount(() => {
@@ -359,18 +363,20 @@
                 y: (point.y * 100) / canvasHeight // Convert to percentage
             }))
         );
-          
-        if($roiCamera?.isRoiEnabled && $roiCamera?.roiCanvasCoordinates){
-          roiCanvasCoordinates.push($roiCamera?.roiCanvasCoordinates);
+
+        if($roiCamera?.isRoiEnabled && $roiCamera?.roiCanvasCoordinates?.length>0){
+          if($canvasCoordinates?.length>0){
+            roiCanvasCoordinates.push(...$roiCamera?.roiCanvasCoordinates);
+          }
         }
 
         await pb.collection("camera").update($selectedCamera, {
             isRoiEnabled: true,
             roiCanvasCoordinates: roiCanvasCoordinates
         });
+        lines =[];
         isOpen.set(false);
         toast.success("ROI Details Saved Successfully");
-        draw = false;
     } catch (error) {
         toast?.error(error?.message || "Something went wrong while adding ROI Cameras");
         console.log('error updating roi camera', error?.message);
