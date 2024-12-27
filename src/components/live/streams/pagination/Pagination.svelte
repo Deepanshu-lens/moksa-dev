@@ -173,12 +173,12 @@
   perPage={MAX_CAMERAS_PER_PAGE || 9}
   siblingCount={1}
   let:pages
+  class="mt-0"
 >
   <Pagination.Content>
     <Pagination.Item>
       <Pagination.PrevButton
         on:click={() => prevPage()}
-        disabled={get(currentPage) === 1}
       >
         <ChevronLeft class="h-4 w-4" />
         <span class="hidden sm:block">Previous</span>

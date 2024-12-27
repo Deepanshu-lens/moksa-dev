@@ -186,8 +186,8 @@
     <div class="flex flex-col flex-grow mt-4">
       <div
         bind:this={localCaptureRef}
-        class="grid grid-cols-1 gap-4 p-4 w-full lg:grid-cols-4 camera-grid pb-[30vh] lg:pb-5"
-        style={gridStyle + " height: calc(100vh - 4rem); overflow-y: auto;"}
+        class="grid grid-cols-1 gap-4 p-4 w-full lg:grid-cols-4 camera-grid pb-[20vh] lg:pb-2"
+        style={gridStyle + "height: calc(100vh - 7.5rem); overflow-y: auto;"}
       >
         {#key $displayCameras}
           {#each $displayCameras as camera, index}
