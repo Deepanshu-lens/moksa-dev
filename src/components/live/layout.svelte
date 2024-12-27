@@ -46,9 +46,11 @@
   let draw = false;
   let canvas, ctx, rect;
   let canvasCoordinates=writable({});
+  let drawRectangle = false;
 
   function toggleDraw() {
     draw = !draw;
+    drawRectangle = false;
     if (draw) {
       setTimeout(() => {
           setupCanvasForLine();
@@ -56,7 +58,16 @@
     }
   }
 
-  // Modify the setupCanvasForLine function to draw the points
+  function toggleRectangleDraw() {
+    drawRectangle = !drawRectangle;
+    draw = false;
+    if (drawRectangle) {
+        setTimeout(() => {
+            setupCanvasForRectangle();
+        }, 0);
+    }
+  }
+
   function setupCanvasForLine() {
     canvas = document.getElementById("roicanvas");
     ctx = canvas.getContext("2d");
@@ -80,6 +91,7 @@
     }
 
     function drawLinePoints() {
+      // canvas should not clear when we have already lines and roi enabled
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.beginPath();
       ctx.moveTo(points[0].x, points[0].y);
@@ -189,6 +201,43 @@
     updateCanvasCoordinates();
   }
 
+  function setupCanvasForRectangle() {
+    canvas = document.getElementById("roicanvas");
+    ctx = canvas.getContext("2d");
+    rect = canvas.getBoundingClientRect();
+
+    let startX, startY, isDrawing = false;
+
+    canvas.addEventListener("mousedown", (e) => {
+        if (drawRectangle) {
+            startX = e.clientX - rect.left;
+            startY = e.clientY - rect.top;
+            isDrawing = true;
+        }
+    });
+
+    canvas.addEventListener("mousemove", (e) => {
+        if (isDrawing) {
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawLinePoints();
+            ctx.beginPath();
+            ctx.rect(startX, startY, mouseX - startX, mouseY - startY);
+            ctx.strokeStyle = "blue";
+            ctx.stroke();
+        }
+    });
+
+    canvas.addEventListener("mouseup", () => {
+        isDrawing = false;
+    });
+
+    canvas.addEventListener("mouseout", () => {
+        isDrawing = false;
+    });
+  }
+
   const EVENT_FILTERS = [
     { filter: "face", label: "Face" },
     { filter: "person", label: "Person" },
@@ -273,6 +322,15 @@
     }
   }
 
+  function handleClear(){
+    let canvasDefault = document.getElementById('roicanvas-default');
+    const ctxDefault = canvasDefault.getContext("2d");
+    ctxDefault.clearRect(0,0,canvasDefault?.clientWidth,canvasDefault.height); //clearing default canvas
+    
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
+  }
+
   onMount(() => {
     checkIfMobile(); // Initial check
     window.addEventListener("resize", checkIfMobile); // Update on resize
@@ -313,7 +371,7 @@
       setTimeout(() => {
         if($roiCamera?.isRoiEnabled){
           console.log('entered here')
-          let canvas = document.getElementById("roicanvas");
+          let canvas = document.getElementById("roicanvas-default");
           drawLines(canvas, $roiCamera?.roiCanvasCoordinates);
         }
       }, 2000);
@@ -690,22 +748,32 @@
         url={`${STREAM_URL}/api/ws?src=${$selectedCamera?.id}`}
         isMarkRoi={true}
       ></StreamTile>
-      {#if !draw}
-      <button
-        on:click={toggleDraw}
-        class="flex gap-2 bg-[rgba(0,0,0,.5)] text-white p-2 absolute bottom-4 left-1/2 -translate-x-1/2 items-center rounded-xl scale-90 z-20"
-        ><PenTool size={22} /></button
+      <div class="flex items-center justify-center">
+        <button
+          on:click={toggleDraw}
+          class="flex gap-2 bg-[rgba(0,0,0,.5)] text-white p-2 absolute bottom-4 left-1/2 -translate-x-1/2 items-center rounded-xl scale-90 z-20"
+          ><PenTool size={22} /></button
+        >
+        <button
+        on:click={toggleRectangleDraw}
+        class="flex gap-2 bg-[rgba(0,0,0,.5)] text-white p-2 absolute bottom-4 left-[65%] -translate-x-1/2 items-center rounded-xl scale-90 z-20"
       >
-    {:else}
-      <button
-        on:click={toggleDraw}
-        class="flex gap-2 z-[100] bg-[rgba(0,0,0,.5)] text-white p-2 absolute bottom-4 left-1/2 -translate-x-1/2 items-center rounded-xl scale-90"
-        ><X size={22} /></button
-      >{/if}
+        draw rectangle
+      </button>
+        <button
+          on:click={handleClear}
+          class="flex gap-2 bg-[rgba(0,0,0,.5)] text-white p-2 absolute bottom-4 left-[55%] -translate-x-1/2 items-center rounded-xl scale-90 z-20"
+          ><X size={22} /></button
+        >
+      </div>
       </div>
       <canvas
         id="roicanvas"
         class="bg-transparent z-40 h-[73.5vh] w-full absolute top-0 left-0"
+      ></canvas>
+      <canvas
+        id="roicanvas-default"
+        class="bg-transparent z-30 h-[73.5vh] w-full absolute top-0 left-0"
       ></canvas>
     <div class="w-full p-4 flex items-center gap-4">
       <Button
