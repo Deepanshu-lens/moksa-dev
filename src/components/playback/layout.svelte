@@ -176,7 +176,6 @@
         hls.on(Hls.Events.FRAG_CHANGED, async function (event, data) {
           const currentFragment = data.frag;
           if (currentFragment) {
-
             // Fetch the .ts file as a Blob
             try {
               const response = await fetch(currentFragment.url);
@@ -876,8 +875,12 @@
           <div
             class="zoomable-area"
             id={`area-${index}`}
-            on:mouseenter={()=>{selectedVideo.set(index)}}
-            on:mouseleave={()=>{selectedVideo.set(null)}}
+            on:mouseenter={() => {
+              selectedVideo.set(index);
+            }}
+            on:mouseleave={() => {
+              selectedVideo.set(null);
+            }}
           >
             <video
               id={`video-${index}`}
@@ -914,7 +917,9 @@
                 }}
                 class="cursor-pointer z-50"
               >
-                <span class="text-sm">1x<Play class="inline-block ml-0.5" size={14}/></span>
+                <span class="text-sm"
+                  >1x<Play class="inline-block ml-0.5" size={14} /></span
+                >
               </div>
               <div
                 on:click={() => {
@@ -922,7 +927,9 @@
                 }}
                 class="cursor-pointer z-50"
               >
-                <span class="text-sm">2x<FastForward class="inline-block ml-0.5" size={14} /></span>
+                <span class="text-sm"
+                  >2x<FastForward class="inline-block ml-0.5" size={14} /></span
+                >
               </div>
               <div
                 on:click={() => {
@@ -930,7 +937,9 @@
                 }}
                 class="cursor-pointer z-50"
               >
-                <span class="text-sm">4x<FastForward class="inline-block ml-0.5" size={14} /></span>
+                <span class="text-sm"
+                  >4x<FastForward class="inline-block ml-0.5" size={14} /></span
+                >
               </div>
               <div
                 on:click={() => {
@@ -938,7 +947,9 @@
                 }}
                 class="cursor-pointer z-50"
               >
-                <span class="text-sm">8x<FastForward class="inline-block ml-0.5" size={14} /></span>
+                <span class="text-sm"
+                  >8x<FastForward class="inline-block ml-0.5" size={14} /></span
+                >
               </div>
             </div>
             <div

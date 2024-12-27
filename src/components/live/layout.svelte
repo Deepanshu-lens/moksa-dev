@@ -39,7 +39,7 @@
   let points=[
       { x: 150, y: 150, isDragging: false, color: "blue" },
       { x: 250, y: 250, isDragging: false, color: "blue" },
-    ];
+  ];
 
   let roiCamera = writable(null);
 
@@ -61,11 +61,6 @@
     canvas = document.getElementById("roicanvas");
     ctx = canvas.getContext("2d");
     rect = canvas.getBoundingClientRect();
-
-    // const points = [
-    //   { x: 150, y: 150, isDragging: false, color: "blue" },
-    //   { x: 250, y: 250, isDragging: false, color: "blue" },
-    // ];
 
     let lineIsDragging = false;
     let dragOffsetX = 0;
@@ -241,7 +236,6 @@
    // Function to draw lines on the canvas
    function drawLines(canvas, coordinates) {
      if(!!canvas){
-      points=coordinates;
       const ctx = canvas.getContext("2d");
       ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
       ctx.beginPath();
@@ -262,7 +256,7 @@
       });
   
       ctx.strokeStyle = "blue"; // Set line color
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 1;
       ctx.stroke(); // Draw the lines connecting the points
   
       // Now draw the points
@@ -293,8 +287,8 @@
     async function updateAi() {
     try {
         // Convert points to percentages based on the current canvas width and height
-        const canvasWidth = rect.width; // Current canvas width
-        const canvasHeight = rect.height; // Current canvas height
+        const canvasWidth = rect?.width; // Current canvas width
+        const canvasHeight = rect?.height; // Current canvas height
 
         const roiCanvasCoordinates = $canvasCoordinates?.map(point => ({
             x: (point.x * 100) / canvasWidth, // Convert to percentage
@@ -711,7 +705,7 @@
       </div>
       <canvas
         id="roicanvas"
-        class="bg-transparent z-40 h-fit w-full absolute top-0 left-0"
+        class="bg-transparent z-40 h-[73.5vh] w-full absolute top-0 left-0"
       ></canvas>
     <div class="w-full p-4 flex items-center gap-4">
       <Button

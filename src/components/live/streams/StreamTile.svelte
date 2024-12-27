@@ -280,6 +280,17 @@
         $selectedCamera === id && "border-2 border-green-300"
       )}
       {id}
+      on:click={() =>
+        selectedCamera.set(
+          $selectedCamera === id ? "" : id.replace(/_FULL$/, "")
+        )}
+      on:dblclick={() => {
+        if ($isFullScreen) {
+          exitFullscreen();
+        } else {
+          fullscreen(id);
+        }
+      }}
     />
 
     <div
