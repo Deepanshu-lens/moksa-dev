@@ -44,16 +44,19 @@
 
   async function verifyOtp() {
     // Gather all OTP digits into a single string
-    const otp = otpInputs.map(input => input.value).join('');
+    const otp = otpInputs.map((input) => input.value).join("");
 
     // Verify the OTP and get the token
-    const response = await fetch(`https://dev.api.moksa.ai/auth/verifyOtp`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    const response = await fetch(
+      `https://dev.api.moksa.ai/auth/getTokenForOtp?otp=${otp}&email=${email}
+`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
       },
-      body: JSON.stringify({ email, otp }), // Use the stored email here
-    });
+    );
     const data = await response.json();
     if (data?.status === 200) {
       token = data.token; // Store the token for the next step
@@ -66,13 +69,16 @@
 
   async function resetPassword() {
     // Send the token to reset the password
-    const response = await fetch(`https://dev.api.moksa.ai/auth/resetPasswordWithOtp`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    const response = await fetch(
+      `https://dev.api.moksa.ai/auth/resetPasswordWithOtp`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ token, email, newPassword }),
       },
-      body: JSON.stringify({ token, email, newPassword }),
-    });
+    );
     const data = await response.json();
     if (data?.status === 200) {
       toast.success("Password reset successfully");
@@ -102,7 +108,7 @@
 
     // If the last input is filled, gather all OTP digits
     if (index === otpInputs.length - 1 && value) {
-      const otp = otpInputs.map(input => input.value).join('');
+      const otp = otpInputs.map((input) => input.value).join("");
     }
   }
 </script>
