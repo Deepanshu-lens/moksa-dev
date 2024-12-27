@@ -36,35 +36,27 @@
   let selectedEventFilter = "";
   let eventSearchQuery = "";
   let isOpen = writable(false);
-  let points=[
-      { x: 150, y: 150, isDragging: false, color: "blue" },
-      { x: 250, y: 250, isDragging: false, color: "blue" },
-  ];
+  let lines = []; // Array to store lines, each line is an array of two points
 
   let roiCamera = writable(null);
 
   let draw = false;
   let canvas, ctx, rect;
-  let canvasCoordinates=writable({});
+  let canvasCoordinates = writable([]);
   let drawRectangle = false;
 
   function toggleDraw() {
     draw = !draw;
     drawRectangle = false;
     if (draw) {
+      // Add a new line with two points when drawing is enabled
+      lines.push([
+        { x: 150, y: 150, isDragging: false, color: "blue" }, // First point of the new line
+        { x: 300, y: 300, isDragging: false, color: "blue" }  // Second point of the new line with different coordinates
+      ]);
       setTimeout(() => {
-          setupCanvasForLine();
+        setupCanvasForLine();
       }, 0);
-    }
-  }
-
-  function toggleRectangleDraw() {
-    drawRectangle = !drawRectangle;
-    draw = false;
-    if (drawRectangle) {
-        setTimeout(() => {
-            setupCanvasForRectangle();
-        }, 0);
     }
   }
 
@@ -82,23 +74,35 @@
 
     function updateCanvasCoordinates() {
       const videoResolution = { width: 640, height: 640 };
-      canvasCoordinates.set(
-        points.map((point) => ({
-          x: Math.round((point.x / rect.width) * videoResolution.width),
-          y: Math.round((point.y / rect.height) * videoResolution.height),
-        })),
+
+      // Map through each line and round the coordinates for each point
+      const roiCanvasCoordinates = lines.map(line => 
+          line.map(point => ({
+              x: Math.round((point.x / rect.width) * videoResolution.width),
+              y: Math.round((point.y / rect.height) * videoResolution.height),
+          }))
       );
+
+      canvasCoordinates.set(roiCanvasCoordinates);
     }
 
     function drawLinePoints() {
-      // canvas should not clear when we have already lines and roi enabled
+      // Clear the canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.beginPath();
-      ctx.moveTo(points[0].x, points[0].y);
-      ctx.lineTo(points[1].x, points[1].y);
-      ctx.strokeStyle = "blue";
-      ctx.stroke();
-      points.forEach((point) => {
+      
+      // Draw lines for each line in lines array
+      lines.forEach(line => {
+        if (line.length === 2) { // Ensure there are two points
+          ctx.beginPath();
+          ctx.moveTo(line[0].x, line[0].y);
+          ctx.lineTo(line[1].x, line[1].y);
+          ctx.strokeStyle = "blue";
+          ctx.stroke();
+        }
+      });
+
+      // Draw the points
+      lines.flat().forEach((point) => {
         ctx.beginPath();
         ctx.arc(point.x, point.y, 5, 0, Math.PI * 2);
         ctx.fillStyle = point.color;
@@ -120,7 +124,7 @@
       const mouseY = e.clientY - rect.top;
       let onPoint = false;
 
-      points.forEach((point) => {
+      lines.flat().forEach((point) => {
         if (
           Math.abs(mouseX - point.x) < 10 &&
           Math.abs(mouseY - point.y) < 10
@@ -145,7 +149,7 @@
         const dx = mouseX - dragOffsetX;
         const dy = mouseY - dragOffsetY;
         let allWithinBounds = true;
-        points.forEach((point) => {
+        lines.flat().forEach((point) => {
           const newX = point.x + dx;
           const newY = point.y + dy;
           if (!isWithinBounds({ x: newX, y: newY })) {
@@ -154,7 +158,7 @@
         });
 
         if (allWithinBounds) {
-          points.forEach((point) => {
+          lines.flat().forEach((point) => {
             point.x += dx;
             point.y += dy;
           });
@@ -163,8 +167,8 @@
           drawLinePoints();
           updateCanvasCoordinates();
         }
-      } else if (points.some((p) => p.isDragging)) {
-        const point = points.find((p) => p.isDragging);
+      } else if (lines.flat().some((p) => p.isDragging)) {
+        const point = lines.flat().find((p) => p.isDragging);
         const newX = mouseX;
         const newY = mouseY;
         if (isWithinBounds({ x: newX, y: newY })) {
@@ -175,7 +179,7 @@
         }
       }
 
-      if (points.some((p) => p.isDragging)) {
+      if (lines.flat().some((p) => p.isDragging)) {
         canvas.style.cursor = "move";
       } else {
         canvas.style.cursor = "default";
@@ -184,14 +188,14 @@
 
     canvas.addEventListener("mouseup", () => {
       lineIsDragging = false;
-      points.forEach((point) => {
+      lines.flat().forEach((point) => {
         point.isDragging = false;
       });
     });
 
     canvas.addEventListener("mouseout", () => {
       lineIsDragging = false;
-      points.forEach((point) => {
+      lines.flat().forEach((point) => {
         point.isDragging = false;
       });
       canvas.style.cursor = "default";
@@ -284,6 +288,7 @@
 
    // Function to draw lines on the canvas
    function drawLines(canvas, coordinates) {
+    canvasCoordinates.set(coordinates);
      if(!!canvas){
       const ctx = canvas.getContext("2d");
       ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
@@ -348,10 +353,16 @@
         const canvasWidth = rect?.width; // Current canvas width
         const canvasHeight = rect?.height; // Current canvas height
 
-        const roiCanvasCoordinates = $canvasCoordinates?.map(point => ({
-            x: (point.x * 100) / canvasWidth, // Convert to percentage
-            y: (point.y * 100) / canvasHeight // Convert to percentage
-        }));
+        const roiCanvasCoordinates = $canvasCoordinates?.map(line => 
+            line.map(point => ({
+                x: (point.x * 100) / canvasWidth, // Convert to percentage
+                y: (point.y * 100) / canvasHeight // Convert to percentage
+            }))
+        );
+          
+        if($roiCamera?.isRoiEnabled && $roiCamera?.roiCanvasCoordinates){
+          roiCanvasCoordinates.push($roiCamera?.roiCanvasCoordinates);
+        }
 
         await pb.collection("camera").update($selectedCamera, {
             isRoiEnabled: true,
@@ -754,12 +765,6 @@
           class="flex gap-2 bg-[rgba(0,0,0,.5)] text-white p-2 absolute bottom-4 left-1/2 -translate-x-1/2 items-center rounded-xl scale-90 z-20"
           ><PenTool size={22} /></button
         >
-        <button
-        on:click={toggleRectangleDraw}
-        class="flex gap-2 bg-[rgba(0,0,0,.5)] text-white p-2 absolute bottom-4 left-[65%] -translate-x-1/2 items-center rounded-xl scale-90 z-20"
-      >
-        draw rectangle
-      </button>
         <button
           on:click={handleClear}
           class="flex gap-2 bg-[rgba(0,0,0,.5)] text-white p-2 absolute bottom-4 left-[55%] -translate-x-1/2 items-center rounded-xl scale-90 z-20"

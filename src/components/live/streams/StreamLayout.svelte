@@ -148,6 +148,7 @@
 
   // Function to draw lines on the canvas
   function drawLines(canvas, coordinates) {
+    console.log(coordinates,'coord')
     const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
     ctx.beginPath();
