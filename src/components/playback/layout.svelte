@@ -914,7 +914,7 @@
 
             <div
               class={cn(
-                "absolute bottom-10 left-[25%] hidden items-center justify-between w-auto h-16 backdrop-blur-sm rounded-md border z-[100] px-4 gap-3",
+                "absolute bottom-10 left-1/2 -translate-x-1/2 hidden items-center justify-between w-[45%] h-16 backdrop-blur-sm rounded-md border z-[100] px-4 gap-3",
                 { flex: $selectedVideo === index }
               )}
             >
