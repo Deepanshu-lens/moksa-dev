@@ -5,7 +5,7 @@
   import { Button } from "@/components/ui/button";
   import { selectedNode } from "@/lib/stores";
   import { Switch } from "@/components/ui/switch";
-
+  import axios from "axios";
   import {
     ScanFace,
     Activity,
@@ -21,6 +21,7 @@
   export let save: boolean;
   export let face: boolean;
   export let running: boolean;
+  export let token;
   export let faceDetectionThreshold: number = 0.6;
   export let faceSearchThreshold: number = 0.3;
   export let runningDetectionThreshold: number = 0.75;
@@ -240,24 +241,25 @@
       };
     }
 
-    await fetch(`/api/camera/updateCameraSettings`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(customerVarsPayload),
-    })
+    await axios
+      .post(
+        `https://dev.api.moksa.ai/store/updateCustomerVars/${$selectedNode?.moksaId}`,
+        customerVarsPayload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
+      )
       .then((response) => {
-        if (!response.ok) {
-          throw new Error("Failed to update customer variables");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        console.log("Customer variables updated:", data);
+        console.log("Customer variables updated:", response.data);
       })
       .catch((error) => {
-        console.error("Error updating customer variables:", error);
+        console.error(
+          "Error updating customer variables:",
+          error.response?.data || error.message,
+        );
       });
   };
 </script>

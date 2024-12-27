@@ -54,6 +54,7 @@
   export let personCount: boolean;
   export let ptzControl;
   export let showOptions;
+  export let token;
   export let role: string;
   export let ptz;
   export let preset;
@@ -244,6 +245,7 @@
         </span>
       </CameraEditDialog>
       <CameraSettingsDialog
+        token={token}
         {user}
         {isSettingsDialogOpen}
         {showOptions}

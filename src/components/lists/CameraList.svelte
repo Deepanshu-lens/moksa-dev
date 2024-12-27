@@ -22,6 +22,7 @@
   export let isAllFullScreen: boolean;
   export let user;
   export let data;
+
   // export let showOptions;
   export let ptzControl;
   let cameraItems: HTMLDivElement;
@@ -182,6 +183,7 @@
       {#each $filteredNodeCameras as camera}
         {#key $selectedNode}
           <CameraMoksaCard
+            token={data?.token}
             {user}
             {ptzControl}
             {showOptions}
