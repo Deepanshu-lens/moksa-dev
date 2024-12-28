@@ -1,4 +1,5 @@
 <script lang="ts">
+    import P5 from 'p5-svelte';
   import StreamLayout from "./streams/StreamLayout.svelte";
   import * as Dialog from "@/components/ui/dialog";
   import * as Resizable from "@/components/ui/resizable";
@@ -20,7 +21,7 @@
   import Button from "../ui/button/button.svelte";
   import Input from "../ui/input/input.svelte";
   import { onMount } from "svelte";
-  import { PenTool,X } from "lucide-svelte";
+  import { PenTool,X,RectangleHorizontal } from "lucide-svelte";
   import getStreamURL from "@/lib/url";
   import { writable } from "svelte/store";
   import StreamTile from "./streams/StreamTile.svelte";
@@ -42,10 +43,13 @@
 
   let canvas, ctx, rect;
   let canvasCoordinates = writable([]);
-  let drawRectangle = false;
+
+  let isDrawingLines = false; // Track whether we are in line drawing mode
+  let isDrawingRectangles = false; // Track whether we are in rectangle drawing mode
 
   function toggleDraw() {
-    drawRectangle = false;
+    isDrawingLines =!isDrawingLines;
+    isDrawingRectangles = false;
       // Add a new line with two points when drawing is enabled
       lines.push([
         { x: 150, y: 150, isDragging: false, color: "blue" }, // First point of the new line
@@ -55,6 +59,99 @@
         setupCanvasForLine();
       }, 0);
   }
+
+  // Function to toggle drawing mode
+  const toggleDrawingMode = () => {
+    isDrawingLines=false;
+    isDrawingRectangles=!isDrawingRectangles;
+  };
+
+    // P5.js sketch
+    const sketch = (p) => {
+    let startX, startY; // Starting coordinates for drawing
+    let rectangles = []; // Array to store drawn rectangles
+    let lines = []; // Array to store drawn lines
+    let currentRect = null; // The current rectangle being drawn
+    let currentLine = null; // The current line being drawn
+
+    p.setup = () => {
+      p.createCanvas(1050, 550); // Adjusted to match your existing canvas size
+      p.background(0, 0, 0, 0); // Transparent background
+    };
+
+    p.draw = () => {
+      p.clear(); // Clear canvas for redraw
+
+      // Draw all completed rectangles
+      for (let rect of rectangles) {
+        p.noFill(); // Transparent interior
+        p.stroke(0, 0, 255); // Blue color for the border
+        p.strokeWeight(2); // Border thickness
+        p.rect(rect.x, rect.y, rect.w, rect.h); // Draw rectangle
+      }
+
+      // Draw all completed lines
+      for (let line of lines) {
+        p.stroke(0, 0, 255); // Blue color for line
+        p.strokeWeight(2); // Line thickness
+        p.line(line.x1, line.y1, line.x2, line.y2); // Draw line
+      }
+
+      // Draw the current rectangle while dragging
+      if (currentRect) {
+        p.noFill(); // Transparent interior
+        p.stroke(0, 0, 255); // Blue color for the border
+        p.strokeWeight(2); // Border thickness
+        p.rect(currentRect.x, currentRect.y, currentRect.w, currentRect.h); // Draw rectangle
+      }
+
+      // Draw the current line while dragging
+      if (currentLine) {
+        p.stroke(0, 0, 255); // Blue color for line
+        p.strokeWeight(2); // Line thickness
+        p.line(currentLine.x1, currentLine.y1, currentLine.x2, currentLine.y2); // Draw line
+      }
+    };
+
+    // Handle mouse press to start drawing
+    p.mousePressed = () => {
+      if (isDrawingRectangles) { // Check if rectangle drawing is enabled
+        startX = p.mouseX;
+        startY = p.mouseY;
+        currentRect = { x: startX, y: startY, w: 0, h: 0 }; // Initialize a rectangle
+      }
+
+      if (isDrawingLines) { // Check if line drawing is enabled
+        startX = p.mouseX;
+        startY = p.mouseY;
+        currentLine = { x1: startX, y1: startY, x2: startX, y2: startY }; // Initialize a line
+      }
+    };
+
+    // Handle mouse drag to update current rectangle or line dimensions
+    p.mouseDragged = () => {
+      if (isDrawingRectangles && currentRect) {
+        currentRect.w = p.mouseX - startX;
+        currentRect.h = p.mouseY - startY;
+      }
+      if (isDrawingLines && currentLine) {
+        currentLine.x2 = p.mouseX;
+        currentLine.y2 = p.mouseY;
+      }
+    };
+
+    // Handle mouse release to finalize the drawing
+    p.mouseReleased = () => {
+      if (isDrawingRectangles && currentRect) {
+        rectangles.push(currentRect); // Add the rectangle to the list
+        currentRect = null; // Reset current rectangle
+      }
+      if (isDrawingLines && currentLine) {
+        lines.push(currentLine); // Add the line to the list
+        currentLine = null; // Reset current line
+      }
+    };
+  };
 
   function setupCanvasForLine() {
     canvas = document.getElementById("roicanvas");
@@ -199,43 +296,6 @@
 
     drawLinePoints();
     updateCanvasCoordinates();
-  }
-
-  function setupCanvasForRectangle() {
-    canvas = document.getElementById("roicanvas");
-    ctx = canvas.getContext("2d");
-    rect = canvas.getBoundingClientRect();
-
-    let startX, startY, isDrawing = false;
-
-    canvas.addEventListener("mousedown", (e) => {
-        if (drawRectangle) {
-            startX = e.clientX - rect.left;
-            startY = e.clientY - rect.top;
-            isDrawing = true;
-        }
-    });
-
-    canvas.addEventListener("mousemove", (e) => {
-        if (isDrawing) {
-            const mouseX = e.clientX - rect.left;
-            const mouseY = e.clientY - rect.top;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawLinePoints();
-            ctx.beginPath();
-            ctx.rect(startX, startY, mouseX - startX, mouseY - startY);
-            ctx.strokeStyle = "blue";
-            ctx.stroke();
-        }
-    });
-
-    canvas.addEventListener("mouseup", () => {
-        isDrawing = false;
-    });
-
-    canvas.addEventListener("mouseout", () => {
-        isDrawing = false;
-    });
   }
 
   const EVENT_FILTERS = [
@@ -772,19 +832,28 @@
           ><PenTool size={22} /></button
         >
         <button
-          on:click={handleClear}
+          on:click={toggleDrawingMode}
           class="flex gap-2 bg-[rgba(0,0,0,.5)] text-white p-2 absolute bottom-4 left-[55%] -translate-x-1/2 items-center rounded-xl scale-90 z-20"
+          ><RectangleHorizontal size={22} /></button
+        >
+        <button
+          on:click={handleClear}
+          class="flex gap-2 bg-[rgba(0,0,0,.5)] text-white p-2 absolute bottom-4 left-[60%] -translate-x-1/2 items-center rounded-xl scale-90 z-20"
           ><X size={22} /></button
         >
       </div>
       </div>
-      <canvas
+      <!-- <canvas
         id="roicanvas"
         class="bg-transparent z-40 h-[73.5vh] w-full absolute top-0 left-0"
-      ></canvas>
+      ></canvas> -->
+      <!-- P5.js canvas -->
+       <div class="bg-transparent z-40 h-[70.5vh] w-full absolute top-0 left-0">
+        <P5 {sketch} parentDivStyle="position: absolute; top: 21px; left: 21px; z-index: 10; background: transparent; pointer-events: auto;" />
+       </div>
       <canvas
         id="roicanvas-default"
-        class="bg-transparent z-30 h-[73.5vh] w-full absolute top-0 left-0"
+        class="bg-transparent z-30 h-[72.5vh] w-full absolute top-0 left-0"
       ></canvas>
     <div class="w-full p-4 flex items-center gap-4">
       <Button
@@ -803,3 +872,8 @@
     </Dialog.Content
   >
 </Dialog.Root>
+<style>
+   canvas {
+    z-index: 100; /* Ensure the canvas is visible above/below other elements */
+  }
+</style>
