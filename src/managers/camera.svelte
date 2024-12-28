@@ -11,7 +11,7 @@
     try {
       const localCameras = await pb.collection("camera").getFullList<Camera>({
         fields:
-          "id,name,url,subUrl,save,saveDuration,created,node,fps,motionThresh,face,person,faceDetThresh,faceMatchThresh,personDetThreshold,timeZone,streamType,recordQuality,isRoiEnabled,roiCanvasCoordinates",
+          "id,name,url,subUrl,save,saveDuration,created,node,fps,motionThresh,face,person,faceDetThresh,faceMatchThresh,personDetThreshold,timeZone,streamType,recordQuality,isRoiEnabled,roiCanvasCoordinates,roiRectangleCoordinates",
         filter,
         sort: "created",
       });

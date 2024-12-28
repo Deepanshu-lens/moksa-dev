@@ -127,9 +127,6 @@
     selectedNode.set(record.id);
   };
 
-  // New writable store for coordinates
-  const coordinates = writable([]);
-
   onMount(() => {
     const updateScreenSize = () => {
       isMobile.set(window.innerWidth <= 768);
@@ -147,9 +144,7 @@
   displayCameras.subscribe(() => priorityIndex.set(0));
 
   // Function to draw lines on the canvas
-  function drawLines(canvas, coordinates) {
-    console.log(coordinates, "coords");
-
+  function drawLines(canvas, coordinates,rectangleCoordinates) {
     const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
     ctx.beginPath();
@@ -158,42 +153,42 @@
     const canvasWidth = canvas.width; // Current canvas width
     const canvasHeight = canvas.height; // Current canvas height
 
-    coordinates.forEach((line) => {
-      line.forEach((point, index) => {
-        const x = (point.x / 100) * canvasWidth; // Convert percentage to pixel
-        const y = (point.y / 100) * canvasHeight; // Convert percentage to pixel
-
-        if (index === 0) {
-          ctx.moveTo(x, y); // Move to the first point
-        } else {
-          ctx.lineTo(x, y); // Draw line to subsequent points
-        }
+    if(coordinates?.length>0){
+      coordinates?.forEach((line) => {
+        const x1 = (line?.x1/100)*canvasWidth;
+        const x2 = (line?.x2/100)*canvasWidth;
+        const y1 = (line?.y1/100)*canvasHeight;
+        const y2 = (line?.y2/100)*canvasHeight;
+  
+        ctx.moveTo(x1,y1);
+        ctx.lineTo(x2,y2);
       });
-    });
+    }
 
+    if(rectangleCoordinates?.length>0){
+      rectangleCoordinates?.forEach((rect)=>{
+        const x = (rect?.x/100)*canvasWidth;
+        const y = (rect?.y/100)*canvasHeight;
+        const w = (rect?.w/100)*canvasWidth;
+        const h = (rect?.h/100)*canvasHeight;
+        ctx.rect(x, y, w, h);
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      })
+    }
+    
     ctx.strokeStyle = "blue"; // Set line color
     ctx.lineWidth = 2;
     ctx.stroke(); // Draw the lines connecting the points
-
-    // Now draw the points
-    coordinates.forEach((point) => {
-      const x = (point.x / 100) * canvasWidth; // Convert percentage to pixel
-      const y = (point.y / 100) * canvasHeight; // Convert percentage to pixel
-
-      // Draw the point with a smaller radius
-      ctx.beginPath();
-      ctx.arc(x, y, 2, 0, Math.PI * 2); // Reduced radius to 2
-      ctx.fillStyle = "blue"; // Dot color
-      ctx.fill(); // Fill the dot
-    });
   }
 
   function showCanvasPoints() {
     setTimeout(() => {
       $displayCameras.forEach((camera, index) => {
+        console.log(camera,'camera')
         let canvas = document.getElementById(`stream-canvas-${index}`);
-        if (camera?.isRoiEnabled && camera?.roiCanvasCoordinates) {
-          drawLines(canvas, camera.roiCanvasCoordinates);
+        if (camera?.isRoiEnabled) {
+          drawLines(canvas, camera?.roiCanvasCoordinates,camera?.roiRectangleCoordinates);
         }
       });
     }, 2000);

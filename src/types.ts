@@ -95,6 +95,7 @@ export const cameraSchema = z.lazy(() =>
     timeZone: z.string().optional(),
     isRoiEnabled: z.boolean(),
     roiCanvasCoordinates: z.any(),
+    roiRectangleCoordinates:z.any(),
     streamType: z
       .enum(["", "Default", "Mainstream", "Substream"])
       .transform((val) => (val === "" ? "Default" : val)),

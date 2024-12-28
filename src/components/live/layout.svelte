@@ -38,10 +38,11 @@
   let eventSearchQuery = "";
   let isOpen = writable(false);
   let lines = []; // Array to store lines, each line is an array of two points
+  let rectangles = []; // Array to store drawn rectangles
 
   let roiCamera = writable(null);
-
-  let canvas, ctx, rect;
+  let p5Instance;
+  let canvas;
   let canvasCoordinates = writable([]);
 
   let isDrawingLines = false; // Track whether we are in line drawing mode
@@ -50,14 +51,6 @@
   function toggleDraw() {
     isDrawingLines =!isDrawingLines;
     isDrawingRectangles = false;
-      // Add a new line with two points when drawing is enabled
-      lines.push([
-        { x: 150, y: 150, isDragging: false, color: "blue" }, // First point of the new line
-        { x: 300, y: 300, isDragging: false, color: "blue" }  // Second point of the new line with different coordinates
-      ]);
-      setTimeout(() => {
-        setupCanvasForLine();
-      }, 0);
   }
 
   // Function to toggle drawing mode
@@ -67,12 +60,11 @@
   };
 
     // P5.js sketch
-    const sketch = (p) => {
+  const sketch = (p) => {
     let startX, startY; // Starting coordinates for drawing
-    let rectangles = []; // Array to store drawn rectangles
-    let lines = []; // Array to store drawn lines
     let currentRect = null; // The current rectangle being drawn
     let currentLine = null; // The current line being drawn
+    p5Instance = p;
 
     p.setup = () => {
       p.createCanvas(1050, 550); // Adjusted to match your existing canvas size
@@ -153,151 +145,6 @@
     };
   };
 
-  function setupCanvasForLine() {
-    canvas = document.getElementById("roicanvas");
-    ctx = canvas.getContext("2d");
-    rect = canvas.getBoundingClientRect();
-
-    let lineIsDragging = false;
-    let dragOffsetX = 0;
-    let dragOffsetY = 0;
-
-    canvas.width = rect.width;
-    canvas.height = rect.height;
-
-    function updateCanvasCoordinates() {
-      const videoResolution = { width: 640, height: 640 };
-
-      // Map through each line and round the coordinates for each point
-      const roiCanvasCoordinates = lines.map(line => 
-          line.map(point => ({
-              x: Math.round((point.x / rect.width) * videoResolution.width),
-              y: Math.round((point.y / rect.height) * videoResolution.height),
-          }))
-      );
-
-      canvasCoordinates.set(roiCanvasCoordinates);
-    }
-
-    function drawLinePoints() {
-      // Clear the canvas
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      // Draw lines for each line in lines array
-      lines.forEach(line => {
-        if (line.length === 2) { // Ensure there are two points
-          ctx.beginPath();
-          ctx.moveTo(line[0].x, line[0].y);
-          ctx.lineTo(line[1].x, line[1].y);
-          ctx.strokeStyle = "blue";
-          ctx.stroke();
-        }
-      });
-
-      // Draw the points
-      lines.flat().forEach((point) => {
-        ctx.beginPath();
-        ctx.arc(point.x, point.y, 5, 0, Math.PI * 2);
-        ctx.fillStyle = point.color;
-        ctx.fill();
-      });
-    }
-
-    function isWithinBounds(point) {
-      return (
-        point.x >= 0 &&
-        point.x <= rect.width &&
-        point.y >= 0 &&
-        point.y <= rect.height
-      );
-    }
-
-    canvas.addEventListener("mousedown", (e) => {
-      const mouseX = e.clientX - rect.left;
-      const mouseY = e.clientY - rect.top;
-      let onPoint = false;
-
-      lines.flat().forEach((point) => {
-        if (
-          Math.abs(mouseX - point.x) < 10 &&
-          Math.abs(mouseY - point.y) < 10
-        ) {
-          point.isDragging = true;
-          onPoint = true;
-        }
-      });
-
-      if (!onPoint) {
-        lineIsDragging = true;
-        dragOffsetX = mouseX;
-        dragOffsetY = mouseY;
-      }
-    });
-
-    canvas.addEventListener("mousemove", (e) => {
-      const mouseX = e.clientX - rect.left;
-      const mouseY = e.clientY - rect.top;
-
-      if (lineIsDragging) {
-        const dx = mouseX - dragOffsetX;
-        const dy = mouseY - dragOffsetY;
-        let allWithinBounds = true;
-        lines.flat().forEach((point) => {
-          const newX = point.x + dx;
-          const newY = point.y + dy;
-          if (!isWithinBounds({ x: newX, y: newY })) {
-            allWithinBounds = false;
-          }
-        });
-
-        if (allWithinBounds) {
-          lines.flat().forEach((point) => {
-            point.x += dx;
-            point.y += dy;
-          });
-          dragOffsetX = mouseX;
-          dragOffsetY = mouseY;
-          drawLinePoints();
-          updateCanvasCoordinates();
-        }
-      } else if (lines.flat().some((p) => p.isDragging)) {
-        const point = lines.flat().find((p) => p.isDragging);
-        const newX = mouseX;
-        const newY = mouseY;
-        if (isWithinBounds({ x: newX, y: newY })) {
-          point.x = newX;
-          point.y = newY;
-          drawLinePoints();
-          updateCanvasCoordinates();
-        }
-      }
-
-      if (lines.flat().some((p) => p.isDragging)) {
-        canvas.style.cursor = "move";
-      } else {
-        canvas.style.cursor = "default";
-      }
-    });
-
-    canvas.addEventListener("mouseup", () => {
-      lineIsDragging = false;
-      lines.flat().forEach((point) => {
-        point.isDragging = false;
-      });
-    });
-
-    canvas.addEventListener("mouseout", () => {
-      lineIsDragging = false;
-      lines.flat().forEach((point) => {
-        point.isDragging = false;
-      });
-      canvas.style.cursor = "default";
-    });
-
-    drawLinePoints();
-    updateCanvasCoordinates();
-  }
-
   const EVENT_FILTERS = [
     { filter: "face", label: "Face" },
     { filter: "person", label: "Person" },
@@ -342,8 +189,8 @@
     roiCamera.set(temp);
   }
 
-   // Function to draw lines on the canvas
-   function drawLines(canvas, coordinates) {
+   // Function to draw lines and Rectangles on initial load
+   function drawLinesRectangles(canvas, coordinates,rectangleCoordinates) {
     canvasCoordinates.set(coordinates);
      if(!!canvas){
       const ctx = canvas.getContext("2d");
@@ -354,34 +201,32 @@
       const canvasWidth = canvas.width; // Current canvas width
       const canvasHeight = canvas.height; // Current canvas height
   
-      coordinates.forEach((line) => {
-      line.forEach((point, index) => {
-        const x = (point.x / 100) * canvasWidth; // Convert percentage to pixel
-        const y = (point.y / 100) * canvasHeight; // Convert percentage to pixel
-
-        if (index === 0) {
-          ctx.moveTo(x, y); // Move to the first point
-        } else {
-          ctx.lineTo(x, y); // Draw line to subsequent points
-        }
-      });
-    });
+      if(coordinates?.length>0){
+      coordinates?.forEach((line) => {
+        const x1 = (line?.x1/100)*canvasWidth;
+        const x2 = (line?.x2/100)*canvasWidth;
+        const y1 = (line?.y1/100)*canvasHeight;
+        const y2 = (line?.y2/100)*canvasHeight;
   
+        ctx.moveTo(x1,y1);
+        ctx.lineTo(x2,y2);
+      });
+    }
+
+    if(rectangleCoordinates?.length>0){
+      rectangleCoordinates?.forEach((rect)=>{
+        const x = (rect?.x/100)*canvasWidth;
+        const y = (rect?.y/100)*canvasHeight;
+        const w = (rect?.w/100)*canvasWidth;
+        const h = (rect?.h/100)*canvasHeight;
+        ctx.rect(x, y, w, h);
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      })
+    }
       ctx.strokeStyle = "blue"; // Set line color
       ctx.lineWidth = 1;
       ctx.stroke(); // Draw the lines connecting the points
-  
-      // Now draw the points
-      coordinates.forEach((point) => {
-        const x = (point.x / 100) * canvasWidth; // Convert percentage to pixel
-        const y = (point.y / 100) * canvasHeight; // Convert percentage to pixel
-  
-        // Draw the point with a smaller radius
-        ctx.beginPath();
-        ctx.arc(x, y, 2, 0, Math.PI * 2); // Reduced radius to 2
-        ctx.fillStyle = "blue"; // Dot color
-        ctx.fill(); // Fill the dot
-      });
     }
   }
 
@@ -400,6 +245,17 @@
     lines =[];
   }
 
+    // Function to clear all drawn lines and rectangles
+  const clearAll = () => {
+    lines = []; // Clear the lines array
+    rectangles = []; // Clear the rectangles array
+    if (p5Instance) {
+      p5Instance.clear(); // Clear the canvas
+      p5Instance.background(0, 0, 0, 0); // Reset to transparent background
+    }
+    handleClear();
+  };
+
   onMount(() => {
     checkIfMobile(); // Initial check
     window.addEventListener("resize", checkIfMobile); // Update on resize
@@ -410,31 +266,58 @@
     };
   });
 
-    // Saving ROI Details to db
-    async function updateAi() {
+  // Saving ROI Details to db
+  async function updateAi() {
     try {
+        let canvas = document.getElementById("defaultCanvas0");
         // Convert points to percentages based on the current canvas width and height
-        const canvasWidth = rect?.width; // Current canvas width
-        const canvasHeight = rect?.height; // Current canvas height
+        const canvasWidth = canvas?.clientWidth; // Current canvas width
+        const canvasHeight = canvas?.clientHeight; // Current canvas height
+        rectangles?.pop(); //removing unneccessary line drawn
 
-        const roiCanvasCoordinates = $canvasCoordinates?.map(line => 
-            line.map(point => ({
-                x: (point.x * 100) / canvasWidth, // Convert to percentage
-                y: (point.y * 100) / canvasHeight // Convert to percentage
-            }))
+        let lineCoordinates = lines?.map(line => 
+            {
+              return{
+                x1:(line?.x1*100)/canvasWidth,
+                x2:(line?.x2*100)/canvasWidth,
+                y1:(line?.y1*100)/canvasHeight,
+                y2:(line?.y2*100)/canvasHeight
+              }
+            }
         );
 
-        if($roiCamera?.isRoiEnabled && $roiCamera?.roiCanvasCoordinates?.length>0){
-          if($canvasCoordinates?.length>0){
-            roiCanvasCoordinates.push(...$roiCamera?.roiCanvasCoordinates);
+        let rectangleCoordinates = rectangles?.map(rect=>{
+          {
+            return {
+              x:(rect?.x*100)/canvasWidth,
+              y:(rect?.y*100)/canvasHeight,
+              h:(rect?.h*100)/canvasHeight,
+              w:(rect?.w*100)/canvasWidth
+            }
+          }
+        });
+
+        // Adding already existing lines
+        if($roiCamera?.isRoiEnabled && $roiCamera?.roiCanvasCoordinates?.length > 0){
+          if(lineCoordinates?.length > 0){
+            lineCoordinates = [...lineCoordinates, ...$roiCamera?.roiCanvasCoordinates];
+          }
+        }
+
+        // Adding already existing rectangles
+        if($roiCamera?.isRoiEnabled && $roiCamera?.roiRectangleCoordinates?.length>0){
+          if(rectangleCoordinates?.length>0){
+            rectangleCoordinates = [...rectangleCoordinates, ...$roiCamera?.roiRectangleCoordinates];
           }
         }
 
         await pb.collection("camera").update($selectedCamera, {
-            isRoiEnabled: true,
-            roiCanvasCoordinates: roiCanvasCoordinates
+            isRoiEnabled: (lineCoordinates?.length===0 && rectangleCoordinates?.length===0) ? false:true,
+            roiCanvasCoordinates: lineCoordinates?.length>0? lineCoordinates:null,
+            roiRectangleCoordinates:rectangleCoordinates?.length>0 ? rectangleCoordinates :null
         });
         lines =[];
+        rectangles=[];
         isOpen.set(false);
         toast.success("ROI Details Saved Successfully");
     } catch (error) {
@@ -445,11 +328,12 @@
 
   $:{
     if($isOpen){
+      lines=[];
+      rectangles=[];
       setTimeout(() => {
         if($roiCamera?.isRoiEnabled){
-          console.log('entered here')
           let canvas = document.getElementById("roicanvas-default");
-          drawLines(canvas, $roiCamera?.roiCanvasCoordinates);
+          drawLinesRectangles(canvas, $roiCamera?.roiCanvasCoordinates,$roiCamera?.roiRectangleCoordinates);
         }
       }, 2000);
     }
@@ -828,7 +712,7 @@
       <div class="flex items-center justify-center">
         <button
           on:click={toggleDraw}
-          class="flex gap-2 bg-[rgba(0,0,0,.5)] text-white p-2 absolute bottom-4 left-1/2 -translate-x-1/2 items-center rounded-xl scale-90 z-20"
+          class="cursor-pointer flex gap-2 bg-[rgba(0,0,0,.5)] text-white p-2 absolute bottom-4 left-1/2 -translate-x-1/2 items-center rounded-xl scale-90 z-20"
           ><PenTool size={22} /></button
         >
         <button
@@ -837,7 +721,7 @@
           ><RectangleHorizontal size={22} /></button
         >
         <button
-          on:click={handleClear}
+          on:click={clearAll}
           class="flex gap-2 bg-[rgba(0,0,0,.5)] text-white p-2 absolute bottom-4 left-[60%] -translate-x-1/2 items-center rounded-xl scale-90 z-20"
           ><X size={22} /></button
         >
