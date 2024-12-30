@@ -26,7 +26,6 @@
     initialValues: { email: "", password: "" },
     extend: validator({ schema: loginSchema }),
     onSubmit: async (values) => {
-      console.log("Form submitted with:", values);
       const response = await login(values.email, values.password);
       if (!response) {
         reset();
@@ -58,7 +57,6 @@
     }
 
     if (authData) {
-      console.log(authData);
       user.set(authData.record);
       if (window.api) {
         await window.api.invoke("save-auth-token", pb.authStore.token);
