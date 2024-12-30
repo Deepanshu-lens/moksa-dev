@@ -2,15 +2,16 @@
   import StreamLayout from "./streams/StreamLayout.svelte";
   import * as Resizable from "@/components/ui/resizable";
   import Icon from "@iconify/svelte";
+  import CameraList from "@/components/live/cameraList/CameraList.svelte";
   import {
+    nodes,
+    liveEvents,
+    gallery,
     isAlertPanelOpen,
     isRoiPanelOpen,
     cameras,
     selectedCamera,
-    user,
   } from "@/stores";
-  import CameraList from "@/components/live/cameraList/CameraList.svelte";
-  import { nodes, liveEvents, gallery } from "@/stores";
   import SidePannel from "./side-pannel.svelte";
   import EventAlertModal from "../events/EventAlertModal.svelte";
   import * as Tabs from "@/components/ui/tabs";
@@ -24,6 +25,7 @@
   import { ChevronDown } from "lucide-svelte";
   import getStreamURL from "@/lib/url";
   import { addAuthLogs } from "@/lib/logs/authLogs";
+  import { cn } from "@/lib/utils";
   const STREAM_URL = getStreamURL();
 
   let currentPanel = 1;
@@ -88,6 +90,10 @@
       window.removeEventListener("resize", checkIfMobile); // Clean up
     };
   });
+
+  $: {
+    console.log("nodes length", $nodes?.length);
+  }
 </script>
 
 <div class="w-full">
@@ -99,10 +105,15 @@
     <Resizable.Pane defaultSize={70}>
       <StreamLayout {STREAM_URL} />
     </Resizable.Pane>
-    <Resizable.Handle withHandle class="hidden lg:flex" />
+    <Resizable.Handle
+      withHandle
+      class={cn("hidden lg:flex", { "lg:hidden": $nodes && $nodes.length < 1 })}
+    />
     <Resizable.Pane
       style={`${!isPaneCollapsed ? "overflow: visible;" : "overflow: hidden;"}`}
-      class="hidden lg:block"
+      class={cn("hidden lg:block", {
+        "lg:hidden": $nodes && $nodes?.length < 1,
+      })}
       maxSize={50}
       defaultSize={22}
       bind:pane={paneOne}
