@@ -80,7 +80,7 @@
   p5Instance = p;
 
   p.setup = () => {
-    p.createCanvas(1050, 590); // Adjusted to match your existing canvas size
+    p.createCanvas(1050, 610); // Adjusted to match your existing canvas size
     p.background(0, 0, 0, 0); // Transparent background
   };
 
@@ -505,6 +505,8 @@
         isDrawingRectangles=false;
         p5Instance=null;
         canvas=null;
+        isRotating=false;
+        isResizing=false;
         toast.success("ROI Details Saved Successfully");
     } catch (error) {
         toast?.error(error?.message || "Something went wrong while adding ROI Cameras");
@@ -892,9 +894,9 @@
 
 <Dialog.Root bind:open={$isOpen}>
   <!-- <Dialog.Trigger on:click={()=>isOpen.set(true)}><slot></slot></Dialog.Trigger> -->
-  <Dialog.Content class="h-[90vh] max-w-[75vw]">
+  <Dialog.Content class="h-[90vh] max-w-[77vw]">
     <div
-      class="relative h-[76vh] w-full"
+      class="relative h-[76vh] w-[97%]"
     >
       <StreamTile
         name={$selectedCamera?.name}
@@ -921,7 +923,7 @@
           <!-- Resize Button -->
         <button
           on:click={toggleResizeMode}
-          class={cn("cursor-pointer flex gap-2 bg-[rgba(0,0,0,.5)] text-white p-2 absolute -bottom-12 left-[65%] -translate-x-1/2 items-center rounded-xl scale-90 z-20", isResizing && "bg-gray-500")}
+          class={cn("cursor-pointer flex gap-2 bg-[rgba(0,0,0,.5)] text-white p-2 absolute top-[47%] -right-16 -translate-x-1/2 items-center rounded-xl scale-90 z-20", isResizing && "bg-gray-500")}
         >
           <Scaling size={22} /> <!-- Icon for resizing -->
         </button>
@@ -929,7 +931,7 @@
         <!-- Rotate Button -->
         <button
           on:click={toggleRotateMode}
-          class={cn("cursor-pointer flex gap-2 bg-[rgba(0,0,0,.5)] text-white p-2 absolute -bottom-12 left-[70%] -translate-x-1/2 items-center rounded-xl scale-90 z-20", isRotating && "bg-gray-500")}
+          class={cn("cursor-pointer flex gap-2 bg-[rgba(0,0,0,.5)] text-white p-2 absolute top-[55%] -right-16 -translate-x-1/2 items-center rounded-xl scale-90 z-20", isRotating && "bg-gray-500")}
         >
           <RotateCw size={22} /> <!-- Icon for rotation -->
         </button>
@@ -937,7 +939,7 @@
       </div>
       <!-- P5.js canvas -->
        <div class="bg-transparent z-40 h-[70.5vh] absolute top-5 left-5">
-        <P5 {sketch} parentDivStyle="position: absolute; top: 21px; left: 21px; z-index: 10; background: transparent; pointer-events: auto;" />
+        <P5 {sketch} parentDivStyle="position: absolute; top: 0; left: 0; z-index: 10; background: transparent; pointer-events: auto;" />
        </div>
       <canvas
         id="roicanvas-default"
