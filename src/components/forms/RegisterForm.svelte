@@ -67,7 +67,6 @@
     if (window.api) {
       try {
         session = await pb_online.collection("session").create({ owned: true });
-        console.log("session", session);
         if (session) {
           console.log("this ran");
           session_offline = await pb.collection("session").create(session);
@@ -89,7 +88,6 @@
           session: session.id,
         });
         if (authData) {
-          console.log("authData", authData);
           authData_offline = await pb
             .collection("users")
             .create({
