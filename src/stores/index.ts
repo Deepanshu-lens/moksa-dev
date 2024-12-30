@@ -7,7 +7,7 @@ import {
   displayCameras,
 } from "./camera";
 import { selectedNode, nodes } from "./node";
-import { activePanel, panels } from "./panels";
+import { activePanel, panels, isPanelLoading } from "./panels";
 import { events } from "./events";
 import { liveEvents } from "./live-events";
 import {
@@ -48,4 +48,5 @@ export {
   isGalleryLoading,
   displayCameras,
   customLayout,
+  isPanelLoading,
 };

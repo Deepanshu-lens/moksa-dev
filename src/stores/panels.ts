@@ -20,3 +20,4 @@ return {
 
 export const activePanel = writable<string>("");
 export const panels = createPanelStore();
+export const isPanelLoading = writable<boolean>(false)
