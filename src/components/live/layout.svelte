@@ -27,6 +27,7 @@
   import StreamTile from "./streams/StreamTile.svelte";
   import pb from "@/lib/pb";
   import { toast } from "svelte-sonner";
+  import { cn } from '@/lib/utils';
   const STREAM_URL = getStreamURL();
 
   let currentPanel = 1;
@@ -43,7 +44,6 @@
   let roiCamera = writable(null);
   let p5Instance;
   let canvas;
-  let canvasCoordinates = writable([]);
 
   let isDrawingLines = false; // Track whether we are in line drawing mode
   let isDrawingRectangles = false; // Track whether we are in rectangle drawing mode
@@ -132,15 +132,32 @@
       }
     };
 
+    // check whether the lines and rectangles drawn are not fake
+    function checkFakeLinesRect(currentItem:any) {
+      for (const key in currentItem) {
+    if (typeof currentItem[key] === "number" && currentItem[key] % 1 !== 0) {
+      return false; // Return true as soon as a whole number is found
+    }
+  }
+  return true; // Return false if no whole numbers are found
+}
+
     // Handle mouse release to finalize the drawing
     p.mouseReleased = () => {
       if (isDrawingRectangles && currentRect) {
-        rectangles.push(currentRect); // Add the rectangle to the list
-        currentRect = null; // Reset current rectangle
+        const isRectFake = checkFakeLinesRect(currentRect);
+        if(!isRectFake){
+          rectangles.push(currentRect); // Add the rectangle to the list
+          currentRect = null; // Reset current rectangle
+        }
       }
+
       if (isDrawingLines && currentLine) {
-        lines.push(currentLine); // Add the line to the list
-        currentLine = null; // Reset current line
+        const isLineFake = checkFakeLinesRect(currentLine);
+        if(!isLineFake){
+          lines.push(currentLine); // Add the line to the list
+          currentLine = null; // Reset current line
+        }
       }
     };
   };
@@ -184,14 +201,8 @@
     return matchesSearchQuery && matchesFilter;
   });
 
-  $:{
-    let temp = $cameras.find((cam) => cam.id === $selectedCamera);
-    roiCamera.set(temp);
-  }
-
    // Function to draw lines and Rectangles on initial load
    function drawLinesRectangles(canvas, coordinates,rectangleCoordinates) {
-    canvasCoordinates.set(coordinates);
      if(!!canvas){
       const ctx = canvas.getContext("2d");
       ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
@@ -241,8 +252,6 @@
       const ctx = canvas.getContext("2d");
       ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
     }
-    canvasCoordinates.set([]);
-    lines =[];
   }
 
     // Function to clear all drawn lines and rectangles
@@ -253,13 +262,21 @@
       p5Instance.clear(); // Clear the canvas
       p5Instance.background(0, 0, 0, 0); // Reset to transparent background
     }
+
+    roiCamera.update((value)=>{
+      const current = {
+        ...value,
+        roiCanvasCoordinates:[],
+        roiRectangleCoordinates:[],
+      }
+      return current;
+    });
     handleClear();
   };
 
   onMount(() => {
     checkIfMobile(); // Initial check
     window.addEventListener("resize", checkIfMobile); // Update on resize
-    // addAuthLogs("login", $user?.email || "");
 
     return () => {
       window.removeEventListener("resize", checkIfMobile); // Clean up
@@ -273,7 +290,8 @@
         // Convert points to percentages based on the current canvas width and height
         const canvasWidth = canvas?.clientWidth; // Current canvas width
         const canvasHeight = canvas?.clientHeight; // Current canvas height
-        rectangles?.pop(); //removing unneccessary line drawn
+        rectangles?.pop(); //removing unneccessary rectangle drawn
+        lines?.pop();
 
         let lineCoordinates = lines?.map(line => 
             {
@@ -299,26 +317,42 @@
 
         // Adding already existing lines
         if($roiCamera?.isRoiEnabled && $roiCamera?.roiCanvasCoordinates?.length > 0){
+          // when current array having lines
           if(lineCoordinates?.length > 0){
             lineCoordinates = [...lineCoordinates, ...$roiCamera?.roiCanvasCoordinates];
+          }
+
+           // when current is empty
+           else if($roiCamera?.roiCanvasCoordinates?.length>0 && lineCoordinates?.length===0){
+            lineCoordinates = [...$roiCamera?.roiCanvasCoordinates];
           }
         }
 
         // Adding already existing rectangles
         if($roiCamera?.isRoiEnabled && $roiCamera?.roiRectangleCoordinates?.length>0){
+          // when current array having rectangles
           if(rectangleCoordinates?.length>0){
             rectangleCoordinates = [...rectangleCoordinates, ...$roiCamera?.roiRectangleCoordinates];
+          }
+          // when current is empty
+          else if($roiCamera?.roiRectangleCoordinates?.length>0 && rectangleCoordinates?.length===0){
+            rectangleCoordinates = [...$roiCamera?.roiRectangleCoordinates];
           }
         }
 
         await pb.collection("camera").update($selectedCamera, {
-            isRoiEnabled: (lineCoordinates?.length===0 && rectangleCoordinates?.length===0) ? false:true,
+            isRoiEnabled: (lineCoordinates?.length>0 || rectangleCoordinates?.length>0) ? true:false,
             roiCanvasCoordinates: lineCoordinates?.length>0? lineCoordinates:null,
             roiRectangleCoordinates:rectangleCoordinates?.length>0 ? rectangleCoordinates :null
         });
         lines =[];
         rectangles=[];
         isOpen.set(false);
+        roiCamera.set(null);
+        isDrawingLines=false;
+        isDrawingRectangles=false;
+        p5Instance=null;
+        canvas=null;
         toast.success("ROI Details Saved Successfully");
     } catch (error) {
         toast?.error(error?.message || "Something went wrong while adding ROI Cameras");
@@ -326,18 +360,21 @@
     }
   }
 
-  $:{
-    if($isOpen){
+  isOpen.subscribe((open)=>{
+    if(open){
+      let temp = $cameras.find((cam) => cam.id === $selectedCamera);
+      roiCamera.set(temp);
       lines=[];
       rectangles=[];
       setTimeout(() => {
-        if($roiCamera?.isRoiEnabled){
+        if($roiCamera?.isRoiEnabled && ($roiCamera?.roiCanvasCoordinates?.length>0 || $roiCamera?.roiRectangleCoordinates?.length>0)){
           let canvas = document.getElementById("roicanvas-default");
           drawLinesRectangles(canvas, $roiCamera?.roiCanvasCoordinates,$roiCamera?.roiRectangleCoordinates);
         }
       }, 2000);
     }
-  }
+  });
+
 </script>
 
 <div class="w-full">
@@ -698,7 +735,7 @@
 </div>
 
 <Dialog.Root bind:open={$isOpen}>
-  <Dialog.Trigger><slot></slot></Dialog.Trigger>
+  <!-- <Dialog.Trigger on:click={()=>isOpen.set(true)}><slot></slot></Dialog.Trigger> -->
   <Dialog.Content class="h-[90vh] max-w-[75vw]">
     <div
       class="relative h-[76vh] w-full"
@@ -712,25 +749,21 @@
       <div class="flex items-center justify-center">
         <button
           on:click={toggleDraw}
-          class="cursor-pointer flex gap-2 bg-[rgba(0,0,0,.5)] text-white p-2 absolute bottom-4 left-1/2 -translate-x-1/2 items-center rounded-xl scale-90 z-20"
+          class={cn("cursor-pointer flex gap-2 bg-[rgba(0,0,0,.5)] text-white p-2 absolute bottom-4 left-1/2 -translate-x-1/2 items-center rounded-xl scale-90 z-20", isDrawingLines && "bg-gray-500")}
           ><PenTool size={22} /></button
         >
         <button
           on:click={toggleDrawingMode}
-          class="flex gap-2 bg-[rgba(0,0,0,.5)] text-white p-2 absolute bottom-4 left-[55%] -translate-x-1/2 items-center rounded-xl scale-90 z-20"
+          class={cn("flex gap-2 bg-[rgba(0,0,0,.5)] text-white p-2 absolute bottom-4 left-[55%] -translate-x-1/2 items-center rounded-xl scale-90 z-20",isDrawingRectangles && "bg-gray-500")}
           ><RectangleHorizontal size={22} /></button
         >
         <button
           on:click={clearAll}
-          class="flex gap-2 bg-[rgba(0,0,0,.5)] text-white p-2 absolute bottom-4 left-[60%] -translate-x-1/2 items-center rounded-xl scale-90 z-20"
+          class="flex gap-2 bg-[rgba(0,0,0,.5)] text-white p-2 absolute bottom-4 left-[60%] -translate-x-1/2 items-center rounded-xl scale-90 z-20 hover:bg-gray-500"
           ><X size={22} /></button
         >
       </div>
       </div>
-      <!-- <canvas
-        id="roicanvas"
-        class="bg-transparent z-40 h-[73.5vh] w-full absolute top-0 left-0"
-      ></canvas> -->
       <!-- P5.js canvas -->
        <div class="bg-transparent z-40 h-[70.5vh] w-full absolute top-0 left-0">
         <P5 {sketch} parentDivStyle="position: absolute; top: 21px; left: 21px; z-index: 10; background: transparent; pointer-events: auto;" />
