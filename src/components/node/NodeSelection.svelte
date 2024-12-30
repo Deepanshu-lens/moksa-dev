@@ -1,6 +1,9 @@
 <script lang="ts">
   import * as Select from "@/components/ui/select/index.js";
   import { nodes, selectedNode } from "@/stores";
+
+  export let allNodes:boolean = true;
+
   $: selectedValue = $nodes
     ? {
         value: $selectedNode,
@@ -23,15 +26,27 @@
       <Select.Value placeholder="Cameras" />
     </Select.Trigger>
     <Select.Content class="overflow-y-auto max-h-[calc(100vh-10rem)]">
-      {#each $nodes as node}
-        <Select.Item
-          value={node.id}
-          label={node.name}
-          class="truncate max-w-xs inline-block"
-        >
-          {node.name}
-        </Select.Item>
-      {/each}
+      {#if allNodes}
+        {#each $nodes as node}
+          <Select.Item
+            value={node.id}
+            label={node.name}
+            class="truncate max-w-xs inline-block"
+          >
+            {node.name}
+          </Select.Item>
+        {/each}
+      {:else}
+        {#each $nodes.slice(1) as node}
+          <Select.Item
+            value={node.id}
+            label={node.name}
+            class="truncate max-w-xs inline-block"
+          >
+            {node.name}
+          </Select.Item>
+        {/each}
+      {/if}
     </Select.Content>
   </Select.Root>
 {/if}
