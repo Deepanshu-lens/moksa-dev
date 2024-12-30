@@ -11,7 +11,6 @@
   import { addAuthLogs } from "@/lib/logs/authLogs";
 
   if (pb.authStore.token) {
-    console.log("HAVE IT");
     pb.authStore.clear();
   }
 
