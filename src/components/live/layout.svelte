@@ -4,13 +4,16 @@
   import * as Dialog from "@/components/ui/dialog";
   import * as Resizable from "@/components/ui/resizable";
   import Icon from "@iconify/svelte";
+  import CameraList from "@/components/live/cameraList/CameraList.svelte";
   import {
-  cameras,
+    nodes,
+    liveEvents,
+    gallery,
     isAlertPanelOpen,
     isRoiPanelOpen,
+    cameras,
+    selectedCamera,
   } from "@/stores";
-  import CameraList from "@/components/live/cameraList/CameraList.svelte";
-  import { nodes, liveEvents, gallery,selectedCamera } from "@/stores";
   import SidePannel from "./side-pannel.svelte";
   import EventAlertModal from "../events/EventAlertModal.svelte";
   import * as Tabs from "@/components/ui/tabs";
@@ -23,11 +26,9 @@
   import { onMount } from "svelte";
   import { PenTool,X,RectangleHorizontal,RotateCw,Scaling } from "lucide-svelte";
   import getStreamURL from "@/lib/url";
-  import { writable } from "svelte/store";
-  import StreamTile from "./streams/StreamTile.svelte";
-  import pb from "@/lib/pb";
-  import { toast } from "svelte-sonner";
-  import { cn } from '@/lib/utils';
+  import { cn } from "@/lib/utils";
+  import { writable } from 'svelte/store';
+  import StreamTile from './streams/StreamTile.svelte';
   const STREAM_URL = getStreamURL();
 
   let currentPanel = 1;
@@ -531,10 +532,15 @@
     <Resizable.Pane defaultSize={70}>
       <StreamLayout {STREAM_URL} />
     </Resizable.Pane>
-    <Resizable.Handle withHandle class="hidden lg:flex" />
+    <Resizable.Handle
+      withHandle
+      class={cn("hidden lg:flex", { "lg:hidden": $nodes && $nodes.length < 1 })}
+    />
     <Resizable.Pane
       style={`${!isPaneCollapsed ? "overflow: visible;" : "overflow: hidden;"}`}
-      class="hidden lg:block"
+      class={cn("hidden lg:block", {
+        "lg:hidden": $nodes && $nodes?.length < 1,
+      })}
       maxSize={50}
       defaultSize={22}
       bind:pane={paneOne}
@@ -949,6 +955,7 @@
     </Dialog.Content
   >
 </Dialog.Root>
+
 <style>
    canvas {
     z-index: 100; /* Ensure the canvas is visible above/below other elements */

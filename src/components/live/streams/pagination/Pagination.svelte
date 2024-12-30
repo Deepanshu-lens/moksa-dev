@@ -204,7 +204,6 @@
     <Pagination.Item>
       <Pagination.NextButton
         on:click={() => nextPage()}
-        disabled={get(currentPage) * MAX_CAMERAS_PER_PAGE >= $totalCameras}
       >
         <span class="hidden sm:block">Next</span>
         <ChevronRight class="h-4 w-4" />

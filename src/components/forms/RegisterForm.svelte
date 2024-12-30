@@ -9,6 +9,7 @@
   import { z } from "zod";
   import Button from "../ui/button/button.svelte";
   import { addAuthLogs } from "@/lib/logs/authLogs";
+  import PocketBase from "pocketbase";
 
   const registerSchema = userSchema
     .pick({
@@ -32,7 +33,6 @@
     initialValues: { name: "", email: "", password: "", confirmPassword: "" },
     extend: validator({ schema: registerSchema }),
     onSubmit: async (values) => {
-      console.log("Form submitted with:", values);
       const response = await register(
         values.name,
         values.email,
@@ -41,7 +41,9 @@
       //   if (!response) reset();
       if (response) {
         await addAuthLogs("register", values.email);
-        toast.success(`${values.name.split(" ")[0]}, welcome to ${import.meta.env.PUBLIC_BRAND_NAME}.`);
+        toast.success(
+          `${values.name.split(" ")[0]}, welcome to ${import.meta.env.PUBLIC_BRAND_NAME}.`
+        );
         reset();
         if (window.api) {
           window.api.navigate("/login");
@@ -59,29 +61,87 @@
   async function register(name: string, email: string, password: string) {
     let authData;
     let session;
-    try {
-      session = await pb.collection("session").create({ owned: true });
-    } catch (error) {
-      toast.error("Something went wrong. Please try again.");
+    let session_offline;
+    let authData_offline;
+    const pb_online = new PocketBase(import.meta.env.PUBLIC_POCKETBASE_URL);
+    if (window.api) {
+      try {
+        session = await pb_online.collection("session").create({ owned: true });
+        if (session) {
+          console.log("this ran");
+          session_offline = await pb.collection("session").create(session);
+        } else
+          session_offline = await pb
+            .collection("session")
+            .create({ owned: true });
+      } catch (error) {
+        console.error("Error creating session:-", error);
+        toast.error("Something went wrong. Please try again.");
+        return;
+      }
+      try {
+        authData = await pb_online.collection("users").create({
+          name: name,
+          email: email,
+          password: password,
+          passwordConfirm: password,
+          session: session.id,
+        });
+        if (authData) {
+          authData_offline = await pb
+            .collection("users")
+            .create({
+              ...authData,
+              password,
+              passwordConfirm: password,
+              email,
+            });
+        } else {
+          authData_offline = await pb.collection("users").create({
+            name: name,
+            email: email,
+            password: password,
+            passwordConfirm: password,
+            session: session_offline.id,
+          });
+        }
+      } catch (error) {
+        toast.error("Registration failed. Please try again.");
+        return;
+      }
+      if (authData_offline) {
+        return authData_offline;
+      } else if (authData) {
+        return authData;
+      }
+      toast.error("Registration failed. Please try again.");
       return;
-    }
-    try {
-      authData = await pb.collection("users").create({
-        name: name,
-        email: email,
-        password: password,
-        passwordConfirm: password,
-        session: session.id,
-      });
-    } catch (error) {
+    } else {
+      try {
+        session = await pb.collection("session").create({ owned: true });
+        console.log("session", session);
+      } catch (error) {
+        toast.error("Something went wrong. Please try again.");
+        return;
+      }
+      try {
+        authData = await pb.collection("users").create({
+          name: name,
+          email: email,
+          password: password,
+          passwordConfirm: password,
+          session: session.id,
+        });
+      } catch (error) {
+        toast.error("Registration failed. Please try again.");
+        return;
+      }
+      if (authData) {
+        return authData;
+      }
       toast.error("Registration failed. Please try again.");
       return;
     }
-    if (authData) {
-      return authData;
-    }
-    toast.error("Registration failed. Please try again.");
-    return;
   }
 </script>
 

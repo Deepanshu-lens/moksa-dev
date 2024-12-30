@@ -16,7 +16,7 @@
   import { writable } from "svelte/store";
   import { displayCameras } from "@/stores/camera";
   import { PictureInPicture2 } from "lucide-svelte";
-  let canvas;
+  import PocketBase from "pocketbase";
 
   export let STREAM_URL;
   const isMobile = writable(false);
@@ -25,6 +25,8 @@
   let localCaptureRef;
   let custom_layout;
   let gridStyle;
+  let nodeName = "";
+  const pb_online = new PocketBase(import.meta.env.PUBLIC_POCKETBASE_URL);
 
   // // Function to determine the grid style based on the number of cameras
   const layoutConfigs = {
@@ -117,14 +119,25 @@
     }
     gridStyle = getGridStyle($cameras.length, $selectedLayout);
   });
-  let nodeName = "";
+
   const addNode = async () => {
+    let record;
+    let record_offline;
     const data = {
       name: nodeName,
       session: $user.session[0],
     };
-    const record = await pb.collection("node").create(data);
-    selectedNode.set(record.id);
+    if (window.api) {
+      record = await pb_online.collection("node").create(data);
+      if (record) record_offline = pb.collection("node").create(record);
+      else record_offline = await pb.collection("node").create(data);
+
+      if (record) selectedNode.set(record.id);
+      else if (record_offline) selectedNode.set(record_offline.id);
+    } else {
+      record = await pb.collection("node").create(data);
+      selectedNode.set(record.id);
+    }
   };
 
   onMount(() => {
