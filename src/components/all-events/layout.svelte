@@ -57,7 +57,7 @@
 
 <div class="w-[95%] px-4 ml-8 mt-3 flex justify-between items-center">
   <div class="w-52">
-    <NodeSelection />
+    <NodeSelection allNodes={false}/>
   </div>
   <Popover.Root>
     <Popover.Trigger>
