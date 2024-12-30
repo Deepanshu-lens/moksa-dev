@@ -30,7 +30,10 @@
   import JSZip from "jszip";
   import * as Popover from "@/components/ui/popover/index";
   import Label from "../ui/label/label.svelte";
-  import { convertDateToTimeZone,convertDateTimeToTimeZone } from "@/lib/convertion";
+  import {
+    convertDateToTimeZone,
+    convertDateTimeToTimeZone,
+  } from "@/lib/convertion";
 
   // Variables
   let availableChannels = writable<{ id: string; label: string; name?: string; timeZone?: string }[]>([]);
@@ -61,11 +64,17 @@
   let selectedFileType = writable<string>("mp4");
   let selectedVideo = writable<number | null>();
   let isPopOpen = false;
+  let tabVal = writable<string>("byDate");
 
   const PLAYBACK_API_URL = getPlaybackURL();
 
   selectedNode.subscribe(() => {
     selectedChannels.set([]);
+  });
+  
+  tabVal.subscribe(() => {
+    startTime = "";
+    endTime = "";
   });
 
   //Constants
@@ -445,7 +454,9 @@
             formatted_search_date = convertDateToTimeZone(searchDate);
           }
           //this need to looked as we not always have a timeZone making the formatted date to be null
-          const dateParts = formatted_search_date ? formatted_search_date.split(" ") : searchDate.split(" ")
+          const dateParts = formatted_search_date
+            ? formatted_search_date.split(" ")
+            : searchDate.split(" ");
           const day = dateParts[0].padStart(2, "0");
           const month =
             new Date(Date.parse(dateParts[1] + " 1, 2020")).getMonth() + 1;
@@ -1228,7 +1239,7 @@
     >
       <NodeSelection />
       <div class="px-4 py-4 flex flex-col gap-1">
-        <Tabs.Root value="byDate">
+        <Tabs.Root bind:value={$tabVal}>
           <Tabs.List class="w-full border mb-4">
             <Tabs.Trigger value="byDate" class="w-1/2 rounded-md"
               >By Date</Tabs.Trigger
