@@ -12,6 +12,7 @@
   import { Label } from "@/components/ui/label";
   import { Button } from "@/components/ui/button";
   import { writable } from "svelte/store";
+  import PocketBase from "pocketbase";
 
   export let action: "add" | "edit" | "delete";
 
@@ -23,22 +24,52 @@
   let subUrl = "";
 
   const addNode = async () => {
+    let record;
+    let record_offline;
+    let cam;
+    let cam_offline;
     const data = {
       name: nodeName,
       session: $user.session[0],
     };
-    const record = await pb.collection("node").create(data);
-    selectedNode.set(record.id);
-    if (cameraName !== "" && mainUrl !== "") {
-      const data = {
-        name: cameraName,
-        url: mainUrl,
-        subUrl,
-        node: record.id,
-      };
-      await pb.collection("camera").create(data);
+    const pb_online = new PocketBase(import.meta.env.PUBLIC_POCKETBASE_URL);
+    if (window.api) {
+      //creating data online first
+      record = await pb_online.collection("node").create(data);
+      //based on online record creation creating data offline
+      if (record) record_offline = await pb.collection("node").create(record);
+      else record_offline = await pb.collection("node").create(data);
+
+      //if we have camera data
+      if (cameraName !== "" && mainUrl !== "") {
+        const data = {
+          name: cameraName,
+          url: mainUrl,
+          subUrl,
+          node: record?.id,
+        };
+        //creating record online first
+        cam = await pb_online.collection("camera").create(data);
+
+        //based on onlnie data creation data offline
+        if (cam) cam_offline = await pb.collection("camera").create(cam);
+        else cam_offline = await pb.collection("camera").create(data);
+      }
+    } else {
+      record = await pb.collection("node").create(data);
+      if (cameraName !== "" && mainUrl !== "") {
+        const data = {
+          name: cameraName,
+          url: mainUrl,
+          subUrl,
+          node: record?.id,
+        };
+        await pb.collection("camera").create(data);
+      }
     }
 
+    if (record) selectedNode.set(record.id);
+    else if (record_offline) selectedNode.set(record_offline.id);
     modalOpen.set(false);
   };
 
@@ -150,7 +181,12 @@
               </Card.Description>
             </Card.Header>
             <Card.Content class="space-y-2">
-              <AddCameraForm bind:cameraName bind:mainUrl bind:subUrl modalOpen={modalOpen}/>
+              <AddCameraForm
+                bind:cameraName
+                bind:mainUrl
+                bind:subUrl
+                {modalOpen}
+              />
             </Card.Content>
           </Card.Root>
         </Tabs.Content>
@@ -201,8 +237,7 @@
           type="submit"
           variant="brand"
           on:click={editNode}
-          disabled={nodeName === ""}
-          >Confirm</Button
+          disabled={nodeName === ""}>Confirm</Button
         >
       </Dialog.Footer>
     </Dialog.Content>

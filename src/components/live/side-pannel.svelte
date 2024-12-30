@@ -9,6 +9,7 @@
     captureRef,
     user,
     nodes,
+    customLayout,
   } from "@/stores";
   import { cn } from "@/lib/utils";
   import * as Popover from "@/components/ui/popover";
@@ -18,14 +19,25 @@
   import JSZip from "jszip";
   import RegisterFaceDialog from "./faceRegister/register-face-dialog.svelte";
   import { addUserLogs } from "@/lib/logs/userLogs";
-  import { onMount } from "svelte";
-  import { getCameras } from "@/managers/get-camera";
-  import { writable } from "svelte/store";
+  import { get } from "svelte/store";
 
-  const maxStreamsPerPage = 36;
   let selected = 0;
   let snipDropDownOpen = false;
   let recordDropdownOpen = false;
+  let customRows: number;
+  let customColumns: number;
+  export let isOpen;
+
+  $: {
+    const custom_layout = get(customLayout);
+    if (custom_layout) {
+      customRows = custom_layout.rows || 0;
+      customColumns = custom_layout.columns || 0;
+    } else {
+      customRows = 0;
+      customColumns = 0;
+    }
+  }
 
   // Load the persisted selectedLayout from local storage if it exists
   if (typeof localStorage !== "undefined") {
@@ -39,7 +51,7 @@
   $: selected = $selectedLayout;
 
   // Whenever `selected` changes, update the store and localStorage
-  $: if (selectedLayout && selectedLayout.set) {
+  $: if (selectedLayout) {
     selectedLayout.set(selected);
     if (typeof localStorage !== "undefined") {
       localStorage.setItem("selectedLayout", String(selected));
@@ -123,9 +135,45 @@
     }
   };
 
-  onMount(async()=>{
-    const res = await getCameras("all", $user?.session[0]);
-  })
+  const handleOpenMarkRoi = async () => {
+    if(!$selectedCamera) {
+      toast.error("Please select a camera first!");
+      return;
+    }
+    
+    await addUserLogs(
+      "User clicked on mark ROI",
+      $user?.email || "",
+      $user?.id || ""
+    );
+    isOpen.set(true);
+  }
+
+  $: {
+    if (customColumns >= 0 && customRows >= 0) {
+      if (customColumns === 0 || customRows === 0) {
+        localStorage.setItem("customLayout", JSON.stringify({}));
+      }
+      customLayout.set({ rows: customRows, columns: customColumns });
+    } else {
+      localStorage.setItem("customLayout", JSON.stringify({}));
+    }
+  }
+
+  customLayout.subscribe((value) => {
+    if (value && value.rows > 0 && value.columns > 0) {
+      localStorage.setItem("customLayout", JSON.stringify(value));
+      selectedLayout.set(12);
+    } else if (value && value.rows === 0 && value.columns === 0) {
+      localStorage.setItem("customLayout", JSON.stringify({}));
+    } else {
+      localStorage.setItem("customLayout", JSON.stringify({}));
+    }
+  });
+  //@ts-ignore
+  selectedLayout.subscribe((value) => {
+    if (value < 12) customLayout.set({});
+  });
 </script>
 
 <div
@@ -198,6 +246,7 @@
   </RegisterFaceDialog>
   <!-- svelte-ignore a11y_missing_attribute -->
   <a
+    href={window.location.href}
     target="_blank"
     rel="noreferrer"
     class="flex items-center justify-center gap-2 cursor-pointer relative lg:scale-95 2xl:scale-100 hover:text-primary"
@@ -211,7 +260,6 @@
             $user?.id || ""
           );
         }}
-        disabled
         class={`disabled:cursor-not-allowed disabled:opacity-50 text-black/[.4] h-[30px] w-[30px] rounded-full shadow-md group border-2 border-solid border-black/[.4] dark:border-white/[.4] bg-white dark:bg-black dark:text-white group-hover:text-white group-hover:bg-[#015a62] dark:group-hover:bg-[#258d9d] group-hover:border-none grid place-items-center`}
         ><Icon
           icon="material-symbols:screenshot-monitor-outline"
@@ -234,15 +282,7 @@
             !$isRoiPanelOpen,
         }
       )}
-      on:click={async () => {
-        await addUserLogs(
-          "User clicked on mark ROI",
-          $user?.email || "",
-          $user?.id || ""
-        );
-        isRoiPanelOpen.update((value) => !value);
-        isAlertPanelOpen.set(false);
-      }}><ScanSearch class="h-[22px] w-[22px]" /></button
+      on:click={handleOpenMarkRoi}><ScanSearch class="h-[22px] w-[22px]" /></button
     >
     <p
       class={`text-xs ${!$isRoiPanelOpen && "text-black/[.4] dark:text-white"}`}
@@ -633,7 +673,7 @@
             </svg>
             <span>1 + 7</span>
           </button>
-         <button
+          <button
             class={cn(
               "flex flex-col items-center justify-evenly py-4 mt-2 w-1/3 gap-1 hover:border-[#015a62] hover:border hover:border-solid rounded-md",
               selected === 9 &&
@@ -918,6 +958,43 @@
             </svg>
             <span>2 + 8</span>
           </button>
+          <div
+            class={cn(
+              "flex flex-col items-center justify-evenly py-[2rem] mt-2 w-1/3 gap-1 hover:border-[#015a62] hover:border hover:border-solid rounded-md",
+              $selectedLayout > 11 &&
+                "px-2 border border-solid border-[#015a62] rounded-md text-primary"
+            )}
+          >
+            <div class="flex justify-center items-center gap-2">
+              <div class="flex flex-col w-full">
+                <input
+                  type="number"
+                  bind:value={customRows}
+                  min="1"
+                  max="50"
+                  step="1"
+                  on:input={(e: any) =>
+                    (customRows = parseInt(e.target?.value))}
+                  class="bg-gray rounded-md"
+                />
+                <span class="text-xs">R</span>
+              </div>
+              <span class="text-sm">X</span>
+              <div class="flex flex-col w-full">
+                <input
+                  type="number"
+                  min="1"
+                  max="50"
+                  step="1"
+                  on:input={(e: any) =>
+                    (customColumns = parseInt(e.target?.value))}
+                  bind:value={customColumns}
+                  class="bg-gray rounded-md"
+                />
+                <span class="text-xs">C</span>
+              </div>
+            </div>
+          </div>
         </div>
       </Popover.Content>
     </Popover.Root>

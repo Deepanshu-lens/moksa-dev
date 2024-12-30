@@ -28,6 +28,7 @@
   import getPlaybackURL from "@/lib/playback";
   import { user } from "@/stores";
   import JSZip from "jszip";
+  import * as Popover from "@/components/ui/popover/index";
   import Label from "../ui/label/label.svelte";
 
   // Variables
@@ -58,6 +59,7 @@
   let playVisible = writable<any[]>([]);
   let selectedFileType = writable<string>("mp4");
   let selectedVideo = writable<number | null>();
+  let isPopOpen = false;
 
   const PLAYBACK_API_URL = getPlaybackURL();
 
@@ -176,7 +178,6 @@
         hls.on(Hls.Events.FRAG_CHANGED, async function (event, data) {
           const currentFragment = data.frag;
           if (currentFragment) {
-
             // Fetch the .ts file as a Blob
             try {
               const response = await fetch(currentFragment.url);
@@ -844,6 +845,11 @@
     const video = videoRefs[index];
     video.playbackRate = rate;
   };
+
+  const handleAllPlaybackRate = (rate: number) => {
+    videoRefs.every((ref) => (ref.playbackRate = rate));
+    isPopOpen = false;
+  };
 </script>
 
 <section class="right-playback flex-1 flex w-full h-screen justify-between">
@@ -876,8 +882,12 @@
           <div
             class="zoomable-area"
             id={`area-${index}`}
-            on:mouseenter={()=>{selectedVideo.set(index)}}
-            on:mouseleave={()=>{selectedVideo.set(null)}}
+            on:mouseenter={() => {
+              selectedVideo.set(index);
+            }}
+            on:mouseleave={() => {
+              selectedVideo.set(null);
+            }}
           >
             <video
               id={`video-${index}`}
@@ -904,7 +914,7 @@
 
             <div
               class={cn(
-                "absolute bottom-10 left-[25%] hidden items-center justify-between w-auto h-16 backdrop-blur-sm rounded-md border z-[100] px-4 gap-3",
+                "absolute bottom-10 left-1/2 -translate-x-1/2 hidden items-center justify-between w-[45%] h-16 backdrop-blur-sm rounded-md border z-[100] px-4 gap-3",
                 { flex: $selectedVideo === index }
               )}
             >
@@ -914,7 +924,9 @@
                 }}
                 class="cursor-pointer z-50"
               >
-                <span class="text-sm">1x<Play class="inline-block ml-0.5" size={14}/></span>
+                <span class="text-sm"
+                  >1x<Play class="inline-block ml-0.5" size={14} /></span
+                >
               </div>
               <div
                 on:click={() => {
@@ -922,7 +934,9 @@
                 }}
                 class="cursor-pointer z-50"
               >
-                <span class="text-sm">2x<FastForward class="inline-block ml-0.5" size={14} /></span>
+                <span class="text-sm"
+                  >2x<FastForward class="inline-block ml-0.5" size={14} /></span
+                >
               </div>
               <div
                 on:click={() => {
@@ -930,7 +944,9 @@
                 }}
                 class="cursor-pointer z-50"
               >
-                <span class="text-sm">4x<FastForward class="inline-block ml-0.5" size={14} /></span>
+                <span class="text-sm"
+                  >4x<FastForward class="inline-block ml-0.5" size={14} /></span
+                >
               </div>
               <div
                 on:click={() => {
@@ -938,7 +954,9 @@
                 }}
                 class="cursor-pointer z-50"
               >
-                <span class="text-sm">8x<FastForward class="inline-block ml-0.5" size={14} /></span>
+                <span class="text-sm"
+                  >8x<FastForward class="inline-block ml-0.5" size={14} /></span
+                >
               </div>
             </div>
             <div
@@ -1004,7 +1022,7 @@
         <div
           class="global-controls flex items-center gap-3 bg-gray-400 dark:bg-gray-800 w-full max-h-18"
         >
-          <div class="flex justify-end w-[13.85%]">
+          <div class="flex justify-center gap-3 w-[13.85%]">
             <button on:click={toggleAllPlayPause}>
               {#if $videoPlayStates.every((state) => state)}
                 <Pause
@@ -1018,6 +1036,38 @@
                 />
               {/if}
             </button>
+            <Popover.Root bind:open={isPopOpen}>
+              <Popover.Trigger
+                class="bg-brand-foreground dark:bg-brand text-white px-2 py-1 rounded-md"
+              >
+                <FastForward
+                  size={18}
+                  class="cursor-pointer border border-black dark:border-white rounded-full p-0.5"
+                />
+              </Popover.Trigger>
+              <Popover.Content class="w-36 h-52">
+                <Button
+                  variant="ghost"
+                  class="w-full"
+                  on:click={() => handleAllPlaybackRate(1)}>1X</Button
+                >
+                <Button
+                  variant="ghost"
+                  class="w-full"
+                  on:click={() => handleAllPlaybackRate(2)}>2X</Button
+                >
+                <Button
+                  variant="ghost"
+                  class="w-full"
+                  on:click={() => handleAllPlaybackRate(4)}>4X</Button
+                >
+                <Button
+                  variant="ghost"
+                  class="w-full"
+                  on:click={() => handleAllPlaybackRate(8)}>8X</Button
+                >
+              </Popover.Content>
+            </Popover.Root>
           </div>
           <div class="w-[90%] 2xl:w-[90%] m-0 p-0">
             <div

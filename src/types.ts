@@ -82,10 +82,26 @@ export const cameraSchema = z.lazy(() =>
     url: z.string().url("Invalid URL"),
     subUrl: z.any(),
     save: z.boolean(),
-    created:z.string(),
-    node:z.array(z.string())
-    // subUrl: z.string().url("Invalid URL").nullable().optional(),
-    // node: nodeSchema,
+    saveDuration: z.number().optional(),
+    created: z.string(),
+    node: z.array(z.string()),
+    fps: z.number().optional(),
+    motionThresh: z.number().optional(),
+    face: z.boolean().optional(),
+    person: z.boolean().optional(),
+    faceDetThresh: z.number().optional(),
+    faceMatchThresh: z.number().optional(),
+    personDetThreshold: z.number().optional(),
+    timeZone: z.string().optional(),
+    isRoiEnabled: z.boolean(),
+    roiCanvasCoordinates: z.any(),
+    roiRectangleCoordinates:z.any(),
+    streamType: z
+      .enum(["", "Default", "Mainstream", "Substream"])
+      .transform((val) => (val === "" ? "Default" : val)),
+    recordQuality: z
+      .enum(["", "Default", "Mainstream", "Substream"])
+      .transform((val) => (val === "" ? "Default" : val)),
   })
 );
 
@@ -123,7 +139,7 @@ export const eventSchema = z.lazy(() =>
     matchScore: z.number().optional(),
     sparshID: z.string().optional(),
     boxes: z.record(z.any()).optional(),
-    videoUrl:z.string().optional()
+    videoUrl: z.string().optional(),
   })
 );
 

@@ -305,12 +305,12 @@
               searchNode = e.target.value;
               let filteredNodes = newData.filter((node) => {
                 return node.name
-                  .toLowerCase()
+                  ?.toLowerCase()
                   .includes(e.target.value.toLowerCase());
               });
               filteredNodeNames = [...filteredNodes];
               let exact = newData.filter((node) => {
-                return node.name.toLowerCase() === e.target.value.toLowerCase();
+                return node.name.toLowerCase() === e.target.value?.toLowerCase();
               });
               if (exact.length > 0) {
                 enable = true;
@@ -595,7 +595,7 @@
                     (camera) => {
                       return camera[0].name
                         .toLowerCase()
-                        .includes(e.target.value.toLowerCase());
+                        .includes(e.target.value?.toLowerCase());
                     }
                   );
                   filteredCameraNames = [...filteredNames];

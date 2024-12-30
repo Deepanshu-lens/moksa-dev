@@ -28,15 +28,14 @@
   let isSortingEnabled = false; // Flag to track if sorting is active
 
   let currentCameras = $cameras;
-  let totalCamNodes={};
-  
-  
-  $:{
+  let totalCamNodes = {};
+
+  $: {
     totalCamNodes = {
-    cameras: currentCameras?.length||0,
-    nodes: $nodes?.length,
-  };
-}
+      cameras: currentCameras?.length || 0,
+      nodes: $nodes?.length,
+    };
+  }
 
   onMount(() => {
     if (cameraItems) {
@@ -69,8 +68,8 @@
         const extractNumbers = (str) =>
           str.match(/\d+/g) ? parseInt(str.match(/\d+/g)[0], 10) : 0;
 
-        const nameA = a.name.toLowerCase();
-        const nameB = b.name.toLowerCase();
+        const nameA = a.name?.toLowerCase();
+        const nameB = b.name?.toLowerCase();
 
         if (nameA === nameB) {
           comparison = 0;
@@ -105,12 +104,12 @@
   }
 
   function handleInput(event) {
-    let searchQuery = event.target.value.toLowerCase();
+    let searchQuery = event.target.value?.toLowerCase();
     let filteredCameras = $cameras.filter((camera) => {
-      const nameMatch = camera.name.toLowerCase().includes(searchQuery);
-      const urlMatch = camera.url.toLowerCase().includes(searchQuery);
+      const nameMatch = camera.name?.toLowerCase().includes(searchQuery);
+      const urlMatch = camera.url?.toLowerCase().includes(searchQuery);
       const subUrlMatch =
-        camera.subUrl && camera.subUrl.toLowerCase().includes(searchQuery);
+        camera.subUrl && camera.subUrl?.toLowerCase().includes(searchQuery);
 
       // Filter based on selected search criteria
       return searchCriteria === "name" ? nameMatch : urlMatch || subUrlMatch;
@@ -120,7 +119,6 @@
     isSortingEnabled = false;
     currentCameras = filteredCameras;
   }
-
 </script>
 
 <section class="border-l overflow-y-auto w-full">
@@ -251,17 +249,19 @@
         <CameraActionButton action="add" icon />
       </div>
 
-      <div class="item-count text-xs text-gray-500 flex items-center gap-x-2 w-full justify-center">
+      <div
+        class="item-count text-xs text-gray-500 flex items-center gap-x-2 w-full justify-center"
+      >
         <span>
           Total Cameras: {totalCamNodes?.cameras}
         </span>
         |
         <span>
-          Total Nodes: {totalCamNodes?.nodes}
+          Total Nodes: {totalCamNodes?.nodes - 1}
         </span>
       </div>
     </div>
-    <div class="overflow-y-auto max-h-[calc(100vh-12rem)]">
+    <div class="overflow-y-auto max-h-[calc(100vh-14rem)]">
       {#each currentCameras as camera, index}
         <!-- svelte-ignore a11y_click_events_have_key_events -->
         <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
@@ -275,7 +275,7 @@
           )}
           on:click={() => {
             if ($selectedCamera === camera.id) selectedCamera.set("");
-            else selectedCamera.set(camera.id);
+            else selectedCamera.set(camera.id.replace(/_FULL$/, ""));
           }}
         >
           <Icon

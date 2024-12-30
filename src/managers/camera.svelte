@@ -1,28 +1,20 @@
 <script lang="ts">
   import pb from "@/lib/pb";
-  import {
-    cameras,
-    selectedNode,
-    totalCameras,
-    user,
-  } from "@/stores";
+  import { cameras, selectedNode, totalCameras, user } from "@/stores";
   import { validateCamera, type Camera } from "@/types";
 
   const getInitialCameras = async (nodeId: string) => {
     let filter;
-    if(nodeId === "all")
-    filter = `session ?= "${$user?.session}"`
-     else
-    filter = `node.id ?= "${nodeId}"`
+    if (nodeId === "all") filter = `session ?= "${$user?.session}"`;
+    else filter = `node.id ?= "${nodeId}"`;
 
     try {
-      const localCameras = await pb
-        .collection("camera")
-        .getFullList<Camera>({
-          fields: "id,name,url,subUrl,save,created,node",
-          filter,
-          sort: "created",
-        });
+      const localCameras = await pb.collection("camera").getFullList<Camera>({
+        fields:
+          "id,name,url,subUrl,save,saveDuration,created,node,fps,motionThresh,face,person,faceDetThresh,faceMatchThresh,personDetThreshold,timeZone,streamType,recordQuality,isRoiEnabled,roiCanvasCoordinates,roiRectangleCoordinates",
+        filter,
+        sort: "created",
+      });
 
       cameras.set(localCameras);
       totalCameras.set(localCameras.length);
@@ -35,10 +27,8 @@
     getInitialCameras($selectedNode);
     pb.collection("camera").unsubscribe("*");
     let filter;
-    if($selectedNode === "all")
-    filter = `session ?= "${$user?.session}"`
-     else
-    filter = `node.id ?= "${$selectedNode}"`
+    if ($selectedNode === "all") filter = `session ?= "${$user?.session}"`;
+    else filter = `node.id ?= "${$selectedNode}"`;
 
     try {
       pb.collection("camera").subscribe(
@@ -70,7 +60,7 @@
     }
   }
 
-  export const getTotalCamerasCount = async()=>{
-    console.log(user,'user');
-  }
+  export const getTotalCamerasCount = async () => {
+    console.log(user, "user");
+  };
 </script>
