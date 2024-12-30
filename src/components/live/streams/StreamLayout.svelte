@@ -144,42 +144,50 @@
   displayCameras.subscribe(() => priorityIndex.set(0));
 
   // Function to draw lines on the canvas
-  function drawLines(canvas, coordinates,rectangleCoordinates) {
-    const ctx = canvas.getContext("2d");
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
-    ctx.beginPath();
+  function drawLinesRectangles(canvas, coordinates, rectangleCoordinates) {
+    if (!!canvas) {
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
+      ctx.beginPath();
 
-    // Get the current canvas dimensions
-    const canvasWidth = canvas.width; // Current canvas width
-    const canvasHeight = canvas.height; // Current canvas height
+      // Get the current canvas dimensions
+      const canvasWidth = canvas.width; // Current canvas width
+      const canvasHeight = canvas.height; // Current canvas height
 
-    if(coordinates?.length>0){
-      coordinates?.forEach((line) => {
-        const x1 = (line?.x1/100)*canvasWidth;
-        const x2 = (line?.x2/100)*canvasWidth;
-        const y1 = (line?.y1/100)*canvasHeight;
-        const y2 = (line?.y2/100)*canvasHeight;
-  
-        ctx.moveTo(x1,y1);
-        ctx.lineTo(x2,y2);
-      });
+      // Draw lines
+      if (coordinates?.length > 0) {
+        coordinates?.forEach((line) => {
+          const x1 = (line?.x1 / 100) * canvasWidth;
+          const x2 = (line?.x2 / 100) * canvasWidth;
+          const y1 = (line?.y1 / 100) * canvasHeight;
+          const y2 = (line?.y2 / 100) * canvasHeight;
+
+          ctx.moveTo(x1, y1);
+          ctx.lineTo(x2, y2);
+        });
+      }
+
+      // Draw rectangles (including rotated ones)
+      if (rectangleCoordinates?.length > 0) {
+        rectangleCoordinates?.forEach((rect) => {
+          const x = (rect?.x / 100) * canvasWidth;
+          const y = (rect?.y / 100) * canvasHeight;
+          const w = (rect?.w / 100) * canvasWidth;
+          const h = (rect?.h / 100) * canvasHeight;
+          const angle = (rect?.angle || 0) * (Math.PI / 180); // Convert angle to radians
+
+          ctx.save(); // Save the current state of the canvas
+          ctx.translate(x + w / 2, y + h / 2); // Move origin to rectangle center
+          ctx.rotate(angle); // Rotate the rectangle
+          ctx.rect(-w / 2, -h / 2, w, h); // Draw rectangle relative to the new origin
+          ctx.restore(); // Restore the original canvas state
+        });
+      }
+
+      ctx.strokeStyle = "blue"; // Set line color
+      ctx.lineWidth = 1;
+      ctx.stroke(); // Draw the lines and rectangles
     }
-
-    if(rectangleCoordinates?.length>0){
-      rectangleCoordinates?.forEach((rect)=>{
-        const x = (rect?.x/100)*canvasWidth;
-        const y = (rect?.y/100)*canvasHeight;
-        const w = (rect?.w/100)*canvasWidth;
-        const h = (rect?.h/100)*canvasHeight;
-        ctx.rect(x, y, w, h);
-        ctx.lineWidth = 1;
-        ctx.stroke();
-      })
-    }
-    
-    ctx.strokeStyle = "blue"; // Set line color
-    ctx.lineWidth = 2;
-    ctx.stroke(); // Draw the lines connecting the points
   }
 
   function showCanvasPoints() {
@@ -187,7 +195,11 @@
       $displayCameras.forEach((camera, index) => {
         let canvas = document.getElementById(`stream-canvas-${index}`);
         if (camera?.isRoiEnabled) {
-          drawLines(canvas, camera?.roiCanvasCoordinates,camera?.roiRectangleCoordinates);
+          drawLinesRectangles(
+            canvas,
+            camera?.roiCanvasCoordinates,
+            camera?.roiRectangleCoordinates
+          );
         }
       });
     }, 2000);
