@@ -67,7 +67,7 @@
     p5Instance = p;
 
     p.setup = () => {
-      p.createCanvas(1050, 550); // Adjusted to match your existing canvas size
+      p.createCanvas(1050, 590); // Adjusted to match your existing canvas size
       p.background(0, 0, 0, 0); // Transparent background
     };
 
@@ -749,28 +749,28 @@
       <div class="flex items-center justify-center">
         <button
           on:click={toggleDraw}
-          class={cn("cursor-pointer flex gap-2 bg-[rgba(0,0,0,.5)] text-white p-2 absolute bottom-4 left-1/2 -translate-x-1/2 items-center rounded-xl scale-90 z-20", isDrawingLines && "bg-gray-500")}
+          class={cn("cursor-pointer flex gap-2 bg-[rgba(0,0,0,.5)] text-white p-2 absolute -bottom-12 left-1/2 -translate-x-1/2 items-center rounded-xl scale-90 z-20", isDrawingLines && "bg-gray-500")}
           ><PenTool size={22} /></button
         >
         <button
           on:click={toggleDrawingMode}
-          class={cn("flex gap-2 bg-[rgba(0,0,0,.5)] text-white p-2 absolute bottom-4 left-[55%] -translate-x-1/2 items-center rounded-xl scale-90 z-20",isDrawingRectangles && "bg-gray-500")}
+          class={cn("flex gap-2 bg-[rgba(0,0,0,.5)] text-white p-2 absolute -bottom-12 left-[55%] -translate-x-1/2 items-center rounded-xl scale-90 z-20",isDrawingRectangles && "bg-gray-500")}
           ><RectangleHorizontal size={22} /></button
         >
         <button
           on:click={clearAll}
-          class="flex gap-2 bg-[rgba(0,0,0,.5)] text-white p-2 absolute bottom-4 left-[60%] -translate-x-1/2 items-center rounded-xl scale-90 z-20 hover:bg-gray-500"
+          class="flex gap-2 bg-[rgba(0,0,0,.5)] text-white p-2 absolute -bottom-12 left-[60%] -translate-x-1/2 items-center rounded-xl scale-90 z-20 hover:bg-gray-500"
           ><X size={22} /></button
         >
       </div>
       </div>
       <!-- P5.js canvas -->
-       <div class="bg-transparent z-40 h-[70.5vh] w-full absolute top-0 left-0">
+       <div class="bg-transparent z-40 h-[70.5vh] absolute top-5 left-5">
         <P5 {sketch} parentDivStyle="position: absolute; top: 21px; left: 21px; z-index: 10; background: transparent; pointer-events: auto;" />
        </div>
       <canvas
         id="roicanvas-default"
-        class="bg-transparent z-30 h-[72.5vh] w-full absolute top-0 left-0"
+        class="bg-transparent z-30 h-[74.5vh] w-[71vw] absolute top-5 left-5"
       ></canvas>
     <div class="w-full p-4 flex items-center gap-4">
       <Button

@@ -185,7 +185,6 @@
   function showCanvasPoints() {
     setTimeout(() => {
       $displayCameras.forEach((camera, index) => {
-        console.log(camera,'camera')
         let canvas = document.getElementById(`stream-canvas-${index}`);
         if (camera?.isRoiEnabled) {
           drawLines(canvas, camera?.roiCanvasCoordinates,camera?.roiRectangleCoordinates);
