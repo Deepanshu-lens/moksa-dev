@@ -1,6 +1,8 @@
 <script lang="ts">
-  let dialogOpen = false;
+  export let dialogOpen = false;
+  export let initialTab: string = "display-settings";
   export let camera: any;
+  import PocketBase from "pocketbase";
   let save: boolean = camera.save ?? true;
   let face: boolean = camera.face ?? false;
   let faceDetectionThreshold: number = camera.faceDetThresh ?? 0.92;
@@ -22,6 +24,8 @@
   import { Switch } from "@/components/ui/switch";
   import { Input } from "@/components/ui/input";
   import * as Select from "@/components/ui/select";
+  import Icon from "@iconify/svelte";
+
   import { Slider } from "@/components/ui/slider";
   import { Button } from "@/components/ui/button";
   import {
@@ -72,7 +76,7 @@
     },
   ];
   let selectedOverwriteInterval = items.find((m) => m.value === saveDuration);
-  let activeTab = "display-settings";
+  let activeTab = initialTab ?? "display-settings";
   const isProd = import.meta.env.PUBLIC_ENV === "production";
   const timeZones = [
     { value: "Pacific/Midway", label: "(GMT-11:00) Midway Island" },
@@ -123,6 +127,7 @@
     { value: "Pacific/Chatham", label: "(GMT+13:45) Chatham Islands" },
   ];
   let selectedTimezone = timeZones.find((m) => m.value === timeZone);
+  const pb_online = new PocketBase(import.meta.env.PUBLIC_POCKETBASE_URL);
   // Function to save camera settings
   const saveCameraSettings = async () => {
     // Log all values before sending
@@ -139,7 +144,7 @@
     });
 
     try {
-      await pb.collection("camera").update(camera?.id, {
+      const data = {
         save,
         face,
         faceDetThresh: faceDetectionThreshold,
@@ -152,7 +157,18 @@
         timeZone,
         streamType: selectedStreamType?.value,
         recordQuality: selectedRecordQuality?.value,
-      });
+        streamToCloud: camera.streamToCloud,
+        isLocalNetwork: camera.isLocalNetwork,
+      };
+      // if (window.api || isCurrentUrlLocalhost()) {
+      //   const record = await pb_online.collection("camera").update(camera?.id, );
+
+      //   if (record) await pb.collection("camera").update(camera?.id, );
+      //   else await pb.collection("camera").create(data);
+      // } else {
+      //   const record = await pb.collection("camera").create(data);
+      // }
+      await pb.collection("camera").update(camera?.id, data);
       // Optionally, you can close the dialog or show a success message
       dialogOpen = false; // Close the dialog after saving
     } catch (error) {
@@ -163,6 +179,13 @@
       // Optionally, show an error message to the user
     }
   };
+
+  $: console.log("ACTIVE TAB", activeTab);
+
+  function isCurrentUrlLocalhost(): boolean {
+    const hostname = window.location.hostname;
+    return hostname === "localhost" || hostname === "127.0.0.1";
+  }
 </script>
 
 <Dialog.Root bind:open={dialogOpen}>
@@ -196,6 +219,12 @@
               class="w-full flex items-center justify-start dark:hover:bg-neutral-700"
             >
               <FileVideo2 size={16} class="mr-2" />Video Saving
+            </TabsTrigger>
+            <TabsTrigger
+              value="cloud-stream"
+              class="w-full flex items-center justify-start dark:hover:bg-neutral-700"
+            >
+              <Icon icon="mdi:cloud" class="text-xl mr-2" />Cloud Streaming
             </TabsTrigger>
             <TabsTrigger
               value="face-scanning"
@@ -413,6 +442,90 @@
             </div>
           </TabsContent>
 
+          <!-- cloud streaming -->
+          <TabsContent value="cloud-stream">
+            <div class="space-y-4 w-full">
+              <div
+                class="flex items-center justify-between p-2 gap-x-[23rem] border-b pb-2"
+              >
+                <Label class="text-nowrap">Cloud Streaming</Label>
+              </div>
+
+              <div class="flex items-center space-x-4 pt-3">
+                <div class="flex-1 space-y-1">
+                  <p class="text-sm font-medium leading-none">
+                    Status: {camera.streamToCloud
+                      ? camera.streamToCloudStatus === "active"
+                        ? "Connected and streaming"
+                        : camera.streamToCloudStatus === "broadcasting"
+                          ? "Broadcasting to cloud"
+                          : camera.streamToCloudStatus === "receiving"
+                            ? "Receiving from cloud"
+                            : "Enabled - Waiting for connection"
+                      : "Disabled"}
+                  </p>
+                  <p class="text-xs text-muted-foreground">
+                    Enable cloud streaming to access your camera feed remotely
+                    and use AI features
+                  </p>
+                </div>
+                <Switch
+                  checked={camera.streamToCloud}
+                  onCheckedChange={async (checked) => {
+                    if (window.api || isCurrentUrlLocalhost()) {
+                      const record = await pb_online
+                        .collection("camera")
+                        .update(camera?.id, {
+                          streamToCloud: checked,
+                        });
+
+                      if (record)
+                        await pb.collection("camera").update(camera?.id, {
+                          streamToCloud: checked,
+                        });
+                    } else {
+                      const record = await pb
+                        .collection("camera")
+                        .update(camera?.id, {
+                          streamToCloud: checked,
+                        });
+                    }
+                  }}
+                />
+              </div>
+
+              {#if camera.streamToCloud}
+                <div
+                  class="mt-4 p-4 bg-neutral-100 dark:bg-neutral-900 rounded-lg"
+                >
+                  <h4 class="text-sm font-medium mb-2">Connection Details</h4>
+                  <div class="space-y-2 text-xs text-muted-foreground">
+                    <p>
+                      • Status: <span
+                        class={camera.streamToCloudStatus === "active"
+                          ? "text-green-500"
+                          : camera.streamToCloudStatus === "broadcasting" ||
+                              camera.streamToCloudStatus === "receiving"
+                            ? "text-blue-500"
+                            : "text-yellow-500"}
+                      >
+                        {camera.streamToCloudStatus === "active"
+                          ? "Connected"
+                          : camera.streamToCloudStatus === "broadcasting"
+                            ? "Broadcasting"
+                            : camera.streamToCloudStatus === "receiving"
+                              ? "Receiving"
+                              : "Connecting..."}
+                      </span>
+                    </p>
+                    <p>
+                      • Last connected: {camera?.lastCloudConnection || "Never"}
+                    </p>
+                  </div>
+                </div>
+              {/if}
+            </div>
+          </TabsContent>
           <!-- face scanning -->
           <TabsContent value="face-scanning">
             <div class="space-y-4 w-full">
@@ -807,7 +920,7 @@
               </div>
               <div class="flex items-center gap-8 w-52">
                 <Slider
-                  min={0}
+                  min={1}
                   max={25}
                   step={1}
                   value={[fps]}

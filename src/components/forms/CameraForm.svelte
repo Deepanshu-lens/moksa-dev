@@ -120,6 +120,11 @@
     }
   };
 
+  function isCurrentUrlLocalhost(): boolean {
+    const hostname = window.location.hostname;
+    return hostname === "localhost" || hostname === "127.0.0.1";
+  }
+
   const addCamera = async () => {
     if (tabValue === "rtsp") {
       try {
@@ -130,8 +135,11 @@
           node: $selectedNode,
           save: true,
           session: $user?.session[0],
+          isLocalNetwork: $isLocalNetwork,
+          streamToCloud: $streamToCloud,
+          fps: 1,
         };
-        if (window.api) {
+        if (window.api || isCurrentUrlLocalhost()) {
           const record = await pb_online.collection("camera").create(data);
 
           if (record) await pb.collection("camera").create(record);
@@ -176,9 +184,10 @@
             node: $selectedNode,
             save: true,
             session: $user?.session[0],
+            fps: 1,
           };
 
-          if (window.api) {
+          if (window.api || isCurrentUrlLocalhost()) {
             const record = await pb_online.collection("camera").create(data);
 
             if (record) await pb.collection("camera").create(record);
@@ -315,6 +324,33 @@
     }
   }
 
+  const isLocalIpAddress = (ipAddress: string) => {
+    const localIpPatterns = [
+      /^10\./, // 10.0.0.0 to 10.255.255.255
+      /^172\.(1[6-9]|2[0-9]|3[0-1])\./, // 172.16.0.0 to 172.31.255.255
+      /^192\.168\./, // 192.168.0.0 to 192.168.255.255
+      /^127\./, // Localhost
+      /^169\.254\./, // Link-local
+    ];
+    return localIpPatterns.some((pattern) => pattern.test(ipAddress));
+  };
+  let isLocalNetwork = writable(false);
+  let streamToCloud = writable(false);
+  $: {
+    if (mainUrl) {
+      try {
+        // Extract IP address from RTSP URL
+        const match = mainUrl.match(/@([^:/@]+)/);
+        if (match && match[1]) {
+          const ipAddress = match[1];
+          isLocalNetwork.set(isLocalIpAddress(ipAddress));
+        }
+      } catch (error) {
+        console.error("Error parsing IP address:", error);
+      }
+    }
+  }
+
   const setRtspToDb = async () => {
     gettingRtsp = true;
 
@@ -356,6 +392,7 @@
             motionSensitivity: 33,
             node: $selectedNode,
             save: true,
+            fps: 1,
           };
         } else {
           return {
@@ -365,6 +402,9 @@
             motionSensitivity: 33,
             node: $selectedNode,
             save: true,
+            isLocalNetwork: isLocalNetwork,
+            streamToCloud: $streamToCloud,
+            fps: 1,
           };
         }
       });
@@ -375,7 +415,7 @@
     // Loop over transformed data and create records
     const createPromises = transformedData.map(async (data: any) => {
       try {
-        if (window.api) {
+        if (window.api || isCurrentUrlLocalhost()) {
           const record = await pb_online.collection("camera").create(data);
 
           if (record) await pb.collection("camera").create(record);
@@ -440,7 +480,7 @@
 
 <form
   use:form
-  class="space-y-4 mt-4 w-full h-96 overflow-y-auto p-4 rounded-md"
+  class="space-y-4 mt-4 w-full max-h-[calc(100vh-12rem)] overflow-y-auto p-4 rounded-md"
 >
   <!-- Manual/Automatic Mode -->
   <div
@@ -522,6 +562,75 @@
             {#if $errors.subUrl}
               {$errors.subUrl}
             {/if}
+          </div>
+
+          <div class="space-y-4">
+            <div
+              class="flex items-center justify-between p-4 bg-gray-50 dark:bg-neutral-900 rounded-lg"
+            >
+              <div class="flex-1 pr-6">
+                <h4
+                  class="font-medium text-sm text-gray-700 dark:text-gray-300 mb-1"
+                >
+                  Internal Network Camera
+                </h4>
+                <p
+                  class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed"
+                >
+                  Select this if the camera is only accessible within your local
+                  network (e.g., <span
+                    class="font-mono bg-gray-100 dark:bg-neutral-800 px-1 py-0.5 rounded"
+                    >192.168.x.x</span
+                  >
+                  or
+                  <span
+                    class="font-mono bg-gray-100 dark:bg-neutral-800 px-1 py-0.5 rounded"
+                    >10.x.x.x</span
+                  >).
+                </p>
+              </div>
+              <div class="flex items-center">
+                <Switch
+                  id="internal-network"
+                  class="data-[state=checked]:bg-primary"
+                  bind:checked={$isLocalNetwork}
+                  onCheckedChange={(checked) => isLocalNetwork.set(checked)}
+                />
+              </div>
+            </div>
+
+            <div
+              class="flex items-center justify-between p-4 bg-gray-50 dark:bg-neutral-900 rounded-lg"
+            >
+              <div class="flex-1 pr-6">
+                <h4
+                  class="font-medium text-sm text-gray-700 dark:text-gray-300 mb-1"
+                >
+                  Enable Cloud Streaming
+                </h4>
+                <p
+                  class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed"
+                >
+                  Stream your camera feed through our secure cloud platform to
+                  enable:
+                  <span class="block mt-1 ml-2"
+                    >• Remote viewing from anywhere</span
+                  >
+                  <span class="block ml-2"
+                    >• AI-powered analytics and processing</span
+                  >
+                  <span class="block ml-2">• Secure access management</span>
+                </p>
+              </div>
+              <div class="flex items-center">
+                <Switch
+                  id="stream-to-cloud"
+                  class="data-[state=checked]:bg-primary"
+                  bind:checked={$streamToCloud}
+                  onCheckedChange={(checked) => streamToCloud.set(checked)}
+                />
+              </div>
+            </div>
           </div>
         </div>
         <div class="flex flex-col pb-4">
