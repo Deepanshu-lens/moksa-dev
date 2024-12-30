@@ -21,7 +21,7 @@
   import Button from "../ui/button/button.svelte";
   import Input from "../ui/input/input.svelte";
   import { onMount } from "svelte";
-  import { PenTool,X,RectangleHorizontal } from "lucide-svelte";
+  import { PenTool,X,RectangleHorizontal,RotateCw,Scaling } from "lucide-svelte";
   import getStreamURL from "@/lib/url";
   import { writable } from "svelte/store";
   import StreamTile from "./streams/StreamTile.svelte";
@@ -47,314 +47,258 @@
 
   let isDrawingLines = false; // Track whether we are in line drawing mode
   let isDrawingRectangles = false; // Track whether we are in rectangle drawing mode
+  let isRotating = false; // Whether we are in rotate mode
+  let isResizing = false; // Whether we are in resize mode
 
   function toggleDraw() {
     isDrawingLines =!isDrawingLines;
     isDrawingRectangles = false;
+    isRotating=false;
+    isResizing=false;
   }
 
   // Function to toggle drawing mode
   const toggleDrawingMode = () => {
     isDrawingLines=false;
     isDrawingRectangles=!isDrawingRectangles;
+    isRotating=false;
+    isResizing=false;
   };
 
-//     // P5.js sketch
-//   const sketch = (p) => {
-//     let startX, startY; // Starting coordinates for drawing
-//     let currentRect = null; // The current rectangle being drawn
-//     let currentLine = null; // The current line being drawn
-//     p5Instance = p;
+  const sketch = (p) => {
+  let startX, startY; // Starting coordinates for drawing
+  let currentRect = null; // The current rectangle being drawn
+  let currentLine = null; // The current line being drawn
+  let selectedRect = null; // The rectangle being rotated or resized
+  let initialMouseAngle = 0; // Initial angle between mouse and rectangle center
+  let initialRectAngle = 0; // Initial angle of the rectangle
+  let initialWidth = 0, initialHeight = 0; // Initial width and height of the rectangle
+  let initialMouseX = 0, initialMouseY = 0; // Initial mouse position for resizing and rotating
+  p5Instance = p;
 
-//     p.setup = () => {
-//       p.createCanvas(1050, 590); // Adjusted to match your existing canvas size
-//       p.background(0, 0, 0, 0); // Transparent background
-//     };
+  p.setup = () => {
+    p.createCanvas(1050, 590); // Adjusted to match your existing canvas size
+    p.background(0, 0, 0, 0); // Transparent background
+  };
 
-//     p.draw = () => {
-//       p.clear(); // Clear canvas for redraw
+  p.draw = () => {
+    p.clear(); // Clear canvas for redraw
 
-//       // Draw all completed rectangles
-//       for (let rect of rectangles) {
-//         p.noFill(); // Transparent interior
-//         p.stroke(0, 0, 255); // Blue color for the border
-//         p.strokeWeight(2); // Border thickness
-//         p.rect(rect.x, rect.y, rect.w, rect.h); // Draw rectangle
-//       }
+    // Draw all completed rectangles
+    for (let rect of rectangles) {
+      p.push();
+      p.translate(rect.x + rect.w / 2, rect.y + rect.h / 2); // Move origin to rectangle center
+      p.rotate(p.radians(rect.angle || 0)); // Rotate rectangle using stored angle
+      p.noFill(); // Transparent interior
+      p.stroke(0, 0, 255); // Blue color for the border
+      p.strokeWeight(2); // Border thickness
+      p.rectMode(p.CENTER);
+      p.rect(0, 0, rect.w, rect.h); // Draw rectangle
 
-//       // Draw all completed lines
-//       for (let line of lines) {
-//         p.stroke(0, 0, 255); // Blue color for line
-//         p.strokeWeight(2); // Line thickness
-//         p.line(line.x1, line.y1, line.x2, line.y2); // Draw line
-//       }
+      // Draw rotation handles (for rotation and resizing)
+      const halfW = rect.w / 2;
+      const halfH = rect.h / 2;
+      const handleSize = 10;
 
-//       // Draw the current rectangle while dragging
-//       if (currentRect) {
-//         p.noFill(); // Transparent interior
-//         p.stroke(0, 0, 255); // Blue color for the border
-//         p.strokeWeight(2); // Border thickness
-//         p.rect(currentRect.x, currentRect.y, currentRect.w, currentRect.h); // Draw rectangle
-//       }
+      p.fill(0, 255, 0); // Green color for handles
+      p.noStroke();
+      p.ellipse(-halfW, -halfH, handleSize); // Top-left
+      p.ellipse(halfW, -halfH, handleSize); // Top-right
+      p.ellipse(-halfW, halfH, handleSize); // Bottom-left
+      p.ellipse(halfW, halfH, handleSize); // Bottom-right
+      p.pop();
+    }
 
-//       // Draw the current line while dragging
-//       if (currentLine) {
-//         p.stroke(0, 0, 255); // Blue color for line
-//         p.strokeWeight(2); // Line thickness
-//         p.line(currentLine.x1, currentLine.y1, currentLine.x2, currentLine.y2); // Draw line
-//       }
-//     };
+    // Draw all completed lines
+    for (let line of lines) {
+      p.stroke(0, 0, 255); // Blue color for line
+      p.strokeWeight(2); // Line thickness
+      p.line(line.x1, line.y1, line.x2, line.y2); // Draw line
+    }
 
-//     // Handle mouse press to start drawing
-//     p.mousePressed = () => {
-//       if (isDrawingRectangles) { // Check if rectangle drawing is enabled
-//         startX = p.mouseX;
-//         startY = p.mouseY;
-//         currentRect = { x: startX, y: startY, w: 0, h: 0 }; // Initialize a rectangle
-//       }
+    // Draw the current rectangle while dragging
+    if (currentRect) {
+      p.noFill(); // Transparent interior
+      p.stroke(0, 0, 255); // Blue color for the border
+      p.strokeWeight(2); // Border thickness
+      p.rect(currentRect.x, currentRect.y, currentRect.w, currentRect.h); // Draw rectangle
+    }
 
-//       if (isDrawingLines) { // Check if line drawing is enabled
-//         startX = p.mouseX;
-//         startY = p.mouseY;
-//         currentLine = { x1: startX, y1: startY, x2: startX, y2: startY }; // Initialize a line
-//       }
-//     };
+    // Draw the current line while dragging
+    if (currentLine) {
+      p.stroke(0, 0, 255); // Blue color for line
+      p.strokeWeight(2); // Line thickness
+      p.line(currentLine.x1, currentLine.y1, currentLine.x2, currentLine.y2); // Draw line
+    }
+  };
 
-//     // Handle mouse drag to update current rectangle or line dimensions
-//     p.mouseDragged = () => {
-//       if (isDrawingRectangles && currentRect) {
-//         currentRect.w = p.mouseX - startX;
-//         currentRect.h = p.mouseY - startY;
-//       }
-//       if (isDrawingLines && currentLine) {
-//         currentLine.x2 = p.mouseX;
-//         currentLine.y2 = p.mouseY;
-//       }
-//     };
+  p.mousePressed = () => {
+    // Handle rotation or resizing or drawing based on the current mode
+    if (isRotating) {
+      for (let rect of rectangles) {
+        const centerX = rect.x + rect.w / 2;
+        const centerY = rect.y + rect.h / 2;
+        const halfW = rect.w / 2;
+        const halfH = rect.h / 2;
 
-//     // check whether the lines and rectangles drawn are not fake
-//     function checkFakeLinesRect(currentItem:any) {
-//       for (const key in currentItem) {
-//     if (typeof currentItem[key] === "number" && currentItem[key] % 1 !== 0) {
-//       return false; // Return true as soon as a whole number is found
-//     }
-//   }
-//   return true; // Return false if no whole numbers are found
-// }
+        const handlePositions = [
+          { x: centerX - halfW, y: centerY - halfH }, // Top-left
+          { x: centerX + halfW, y: centerY - halfH }, // Top-right
+          { x: centerX - halfW, y: centerY + halfH }, // Bottom-left
+          { x: centerX + halfW, y: centerY + halfH }, // Bottom-right
+        ];
 
-//     // Handle mouse release to finalize the drawing
-//     p.mouseReleased = () => {
-//       if (isDrawingRectangles && currentRect) {
-//         const isRectFake = checkFakeLinesRect(currentRect);
-//         if(!isRectFake){
-//           rectangles.push(currentRect); // Add the rectangle to the list
-//           currentRect = null; // Reset current rectangle
-//         }
-//       }
-
-//       if (isDrawingLines && currentLine) {
-//         const isLineFake = checkFakeLinesRect(currentLine);
-//         if(!isLineFake){
-//           lines.push(currentLine); // Add the line to the list
-//           currentLine = null; // Reset current line
-//         }
-//       }
-//     };
-//   };
-
-    const sketch = (p) => {
-      let startX, startY; // Starting coordinates for drawing
-      let currentRect = null; // The current rectangle being drawn
-      let currentLine = null; // The current line being drawn
-      let selectedRect = null; // The rectangle being rotated
-      let rotating = false; // Whether a rotation is in progress
-      let initialMouseAngle = 0; // Initial angle between mouse and rectangle center
-      let initialRectAngle = 0; // Initial angle of the rectangle
-      p5Instance = p;
-
-      p.setup = () => {
-        p.createCanvas(1050, 590); // Adjusted to match your existing canvas size
-        p.background(0, 0, 0, 0); // Transparent background
-      };
-
-      p.draw = () => {
-        p.clear(); // Clear canvas for redraw
-
-        // Draw all completed rectangles
-        for (let rect of rectangles) {
-          p.push();
-          p.translate(rect.x + rect.w / 2, rect.y + rect.h / 2); // Move origin to rectangle center
-          p.rotate(p.radians(rect.angle || 0)); // Rotate rectangle using stored angle
-          p.noFill(); // Transparent interior
-          p.stroke(0, 0, 255); // Blue color for the border
-          p.strokeWeight(2); // Border thickness
-          p.rectMode(p.CENTER);
-          p.rect(0, 0, rect.w, rect.h); // Draw rectangle
-
-          // Draw rotation handles
-          const halfW = rect.w / 2;
-          const halfH = rect.h / 2;
-          const handleSize = 10;
-
-          p.fill(0, 255, 0); // Green color for handles
-          p.noStroke();
-          p.ellipse(-halfW, -halfH, handleSize); // Top-left
-          p.ellipse(halfW, -halfH, handleSize); // Top-right
-          p.ellipse(-halfW, halfH, handleSize); // Bottom-left
-          p.ellipse(halfW, halfH, handleSize); // Bottom-right
-          p.pop();
-        }
-
-        // Draw all completed lines
-        for (let line of lines) {
-          p.stroke(0, 0, 255); // Blue color for line
-          p.strokeWeight(2); // Line thickness
-          p.line(line.x1, line.y1, line.x2, line.y2); // Draw line
-        }
-
-        // Draw the current rectangle while dragging
-        if (currentRect) {
-          p.noFill(); // Transparent interior
-          p.stroke(0, 0, 255); // Blue color for the border
-          p.strokeWeight(2); // Border thickness
-          p.rect(currentRect.x, currentRect.y, currentRect.w, currentRect.h); // Draw rectangle
-        }
-
-        // Draw the current line while dragging
-        if (currentLine) {
-          p.stroke(0, 0, 255); // Blue color for line
-          p.strokeWeight(2); // Line thickness
-          p.line(currentLine.x1, currentLine.y1, currentLine.x2, currentLine.y2); // Draw line
-        }
-      };
-
-      p.mousePressed = () => {
-        // Handle rotation
-        for (let rect of rectangles) {
-          const centerX = rect.x + rect.w / 2;
-          const centerY = rect.y + rect.h / 2;
-          const halfW = rect.w / 2;
-          const halfH = rect.h / 2;
-
-          const handlePositions = [
-            { x: centerX - halfW, y: centerY - halfH }, // Top-left
-            { x: centerX + halfW, y: centerY - halfH }, // Top-right
-            { x: centerX - halfW, y: centerY + halfH }, // Bottom-left
-            { x: centerX + halfW, y: centerY + halfH }, // Bottom-right
-          ];
-
-          // Check if any handle is clicked
-          for (let handle of handlePositions) {
-            if (
-              p.dist(p.mouseX, p.mouseY, handle.x, handle.y) <= 10 // Click near handle
-            ) {
-              selectedRect = rect;
-              rotating = true;
-
-              // Calculate initial mouse and rectangle angles
-              initialMouseAngle = Math.atan2(
-                p.mouseY - centerY,
-                p.mouseX - centerX
-              );
-              initialRectAngle = p.radians(rect.angle || 0);
-              return;
-            }
+        // Check if any handle is clicked (for rotation)
+        for (let handle of handlePositions) {
+          if (p.dist(p.mouseX, p.mouseY, handle.x, handle.y) <= 10) {
+            selectedRect = rect;
+            // Calculate initial mouse and rectangle angles for rotation
+            initialMouseAngle = Math.atan2(p.mouseY - centerY, p.mouseX - centerX);
+            initialRectAngle = p.radians(rect.angle || 0);
+            initialMouseX = p.mouseX;
+            initialMouseY = p.mouseY;
+            return;
           }
         }
+      }
+    }
 
-        // Handle rectangle drawing
-        if (isDrawingRectangles) {
-          startX = p.mouseX;
-          startY = p.mouseY;
-          currentRect = { x: startX, y: startY, w: 0, h: 0, angle: 0 }; // Initialize a rectangle with no angle
+    if (isResizing) {
+  // Handle resizing
+  for (let rect of rectangles) {
+    const centerX = rect.x + rect.w / 2;
+    const centerY = rect.y + rect.h / 2;
+    const halfW = rect.w / 2;
+    const halfH = rect.h / 2;
+
+    // Define the vertices (corners) of the rectangle
+    const vertices = [
+      { x: centerX - halfW, y: centerY - halfH }, // Top-left
+      { x: centerX + halfW, y: centerY - halfH }, // Top-right
+      { x: centerX - halfW, y: centerY + halfH }, // Bottom-left
+      { x: centerX + halfW, y: centerY + halfH }, // Bottom-right
+    ];
+
+    // Check if the mouse is near any of the rectangle's vertices (for resizing)
+    for (let vertex of vertices) {
+      const distance = p.dist(p.mouseX, p.mouseY, vertex.x, vertex.y);
+      const handleSize = 15; // Increase size of the "hit" area for resizing (can be adjusted)
+      if (distance <= handleSize) {
+        selectedRect = rect;
+        initialWidth = rect.w;
+        initialHeight = rect.h;
+        initialMouseX = p.mouseX;
+        initialMouseY = p.mouseY;
+        return; // Exit the loop once a vertex is selected for resizing
+      }
+    }
+  }
+}
+
+
+    if (isDrawingRectangles) {
+      // Handle rectangle drawing
+      startX = p.mouseX;
+      startY = p.mouseY;
+      currentRect = { x: startX, y: startY, w: 0, h: 0, angle: 0 }; // Initialize a rectangle with no angle
+    }
+
+    // Handle line drawing
+    if (isDrawingLines) {
+      startX = p.mouseX;
+      startY = p.mouseY;
+      currentLine = { x1: startX, y1: startY, x2: startX, y2: startY }; // Initialize a line
+    }
+  };
+
+  p.mouseDragged = () => {
+    if (isRotating && selectedRect) {
+      const centerX = selectedRect.x + selectedRect.w / 2;
+      const centerY = selectedRect.y + selectedRect.h / 2;
+
+      // Calculate current mouse angle relative to rectangle center
+      const currentMouseAngle = Math.atan2(p.mouseY - centerY, p.mouseX - centerX);
+
+      // Update rectangle's angle
+      selectedRect.angle = p.degrees(initialRectAngle + (currentMouseAngle - initialMouseAngle));
+    }
+
+    if (isResizing && selectedRect) {
+      // Update the width and height based on the mouse position
+      selectedRect.w = initialWidth + (p.mouseX - initialMouseX);
+      selectedRect.h = initialHeight + (p.mouseY - initialMouseY);
+    }
+
+    // Update current rectangle or line dimensions
+    if (isDrawingRectangles && currentRect) {
+      currentRect.w = p.mouseX - startX;
+      currentRect.h = p.mouseY - startY;
+    }
+
+    if (isDrawingLines && currentLine) {
+      currentLine.x2 = p.mouseX;
+      currentLine.y2 = p.mouseY;
+    }
+  };
+
+  p.mouseReleased = () => {
+    if (isRotating || isResizing) {
+      // Update the rectangle in the array
+      if (selectedRect) {
+        const rectIndex = rectangles.findIndex(
+          (rect) => rect.x === selectedRect.x && rect.y === selectedRect.y
+        );
+        if (rectIndex !== -1) {
+          rectangles[rectIndex] = selectedRect;
         }
-
-        // Handle line drawing
-        if (isDrawingLines) {
-          startX = p.mouseX;
-          startY = p.mouseY;
-          currentLine = { x1: startX, y1: startY, x2: startX, y2: startY }; // Initialize a line
-        }
-      };
-
-      p.mouseDragged = () => {
-        if (rotating && selectedRect) {
-          const centerX = selectedRect.x + selectedRect.w / 2;
-          const centerY = selectedRect.y + selectedRect.h / 2;
-
-          // Calculate current mouse angle relative to rectangle center
-          const currentMouseAngle = Math.atan2(
-            p.mouseY - centerY,
-            p.mouseX - centerX
-          );
-
-          // Update rectangle's angle
-          selectedRect.angle = p.degrees(
-            initialRectAngle + (currentMouseAngle - initialMouseAngle)
-          );
-
-        }
-
-        // Update current rectangle or line dimensions
-        if (isDrawingRectangles && currentRect) {
-          currentRect.w = p.mouseX - startX;
-          currentRect.h = p.mouseY - startY;
-        }
-        
-        if (isDrawingLines && currentLine) {
-          currentLine.x2 = p.mouseX;
-          currentLine.y2 = p.mouseY;
-        }
-      };
-
-      // Check whether the lines and rectangles drawn are not fake
-      function checkFakeLinesRect(currentItem) {
-        for (const key in currentItem) {
-          if (typeof currentItem[key] === "number" && currentItem[key] % 1 !== 0) {
-            return false; // Return true as soon as a whole number is found
-          }
-        }
-
-        return true;
       }
 
-      p.mouseReleased = () => {
-        if (rotating) {
-          rotating = false;
-          // Update the angle of the selected rectangle in the rectangles array
-          if (selectedRect) {
-            const rectIndex = rectangles.findIndex(
-                (rect) => rect.x === selectedRect.x && rect.y === selectedRect.y
-              );
-              if (rectIndex !== -1) {
-                rectangles[rectIndex].angle = selectedRect.angle;
-              }
-            }
+      // selectedRect = null; // Reset the selected rectangle
+    }
 
-            console.log(rectangles,'rectangle')
+    if (isDrawingRectangles && currentRect) {
+      let isRectangleFake = checkFakeLinesRect(currentRect);
+      if (!isRectangleFake) {
+        rectangles.push(currentRect); // Add the rectangle to the list
+        currentRect = null; // Reset current rectangle
+      }
+    }
 
-            selectedRect = null; // Reset the selected rectangle
-        }
+    if (isDrawingLines && currentLine) {
+      let isLineFake = checkFakeLinesRect(currentLine);
+      if (!isLineFake) {
+        lines.push(currentLine); // Add the line to the list
+        currentLine = null; // Reset current line
+      }
+    }
+  };
 
-        if (isDrawingRectangles && currentRect) {
-          let isRectangleFake = checkFakeLinesRect(currentRect);
-          console.log(currentRect,'currentRect')
-          if (!isRectangleFake) {
-            rectangles.push(currentRect); // Add the rectangle to the list
-            currentRect = null; // Reset current rectangle
-          }
-        }
+  // Check whether the lines and rectangles drawn are not fake
+  function checkFakeLinesRect(currentItem) {
+    for (const key in currentItem) {
+      if (typeof currentItem[key] === "number" && currentItem[key] % 1 !== 0) {
+        return false; // Return true as soon as a whole number is found
+      }
+    }
 
-        if (isDrawingLines && currentLine) {
-          let isLineFake = checkFakeLinesRect(currentLine);
-          if (!isLineFake) {
-            lines.push(currentLine); // Add the line to the list
-            currentLine = null; // Reset current line
-          }
-        }
-      };
-    };
+    return true;
+  }
+};
 
+
+  // handle toggling resizing 
+  const toggleResizeMode =()=>{
+    isResizing=!isResizing;
+    isDrawingRectangles=false;
+    isRotating=false;
+  }
+
+  // handle toggling rotating 
+  const toggleRotateMode =()=>{
+    isRotating=!isRotating;
+    isDrawingRectangles=false;
+    isResizing=false;
+  }
 
   const EVENT_FILTERS = [
     { filter: "face", label: "Face" },
@@ -394,46 +338,6 @@
       : true;
     return matchesSearchQuery && matchesFilter;
   });
-
-   // Function to draw lines and Rectangles on initial load
-  //  function drawLinesRectangles(canvas, coordinates,rectangleCoordinates) {
-  //    if(!!canvas){
-  //     const ctx = canvas.getContext("2d");
-  //     ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
-  //     ctx.beginPath();
-  
-  //     // Get the current canvas dimensions
-  //     const canvasWidth = canvas.width; // Current canvas width
-  //     const canvasHeight = canvas.height; // Current canvas height
-  
-  //     if(coordinates?.length>0){
-  //     coordinates?.forEach((line) => {
-  //       const x1 = (line?.x1/100)*canvasWidth;
-  //       const x2 = (line?.x2/100)*canvasWidth;
-  //       const y1 = (line?.y1/100)*canvasHeight;
-  //       const y2 = (line?.y2/100)*canvasHeight;
-  
-  //       ctx.moveTo(x1,y1);
-  //       ctx.lineTo(x2,y2);
-  //     });
-  //   }
-
-  //   if(rectangleCoordinates?.length>0){
-  //     rectangleCoordinates?.forEach((rect)=>{
-  //       const x = (rect?.x/100)*canvasWidth;
-  //       const y = (rect?.y/100)*canvasHeight;
-  //       const w = (rect?.w/100)*canvasWidth;
-  //       const h = (rect?.h/100)*canvasHeight;
-  //       ctx.rect(x, y, w, h);
-  //       ctx.lineWidth = 1;
-  //       ctx.stroke();
-  //     })
-  //   }
-  //     ctx.strokeStyle = "blue"; // Set line color
-  //     ctx.lineWidth = 1;
-  //     ctx.stroke(); // Draw the lines connecting the points
-  //   }
-  // }
 
   function drawLinesRectangles(canvas, coordinates, rectangleCoordinates) {
   if (!!canvas) {
@@ -480,7 +384,6 @@
     ctx.stroke(); // Draw the lines and rectangles
   }
 }
-
 
   function handleClear(){
     let canvasDefault = document.getElementById('roicanvas-default');
@@ -1004,6 +907,21 @@
           class="flex gap-2 bg-[rgba(0,0,0,.5)] text-white p-2 absolute -bottom-12 left-[60%] -translate-x-1/2 items-center rounded-xl scale-90 z-20 hover:bg-gray-500"
           ><X size={22} /></button
         >
+          <!-- Resize Button -->
+        <button
+          on:click={toggleResizeMode}
+          class={cn("cursor-pointer flex gap-2 bg-[rgba(0,0,0,.5)] text-white p-2 absolute -bottom-12 left-[65%] -translate-x-1/2 items-center rounded-xl scale-90 z-20", isResizing && "bg-gray-500")}
+        >
+          <Scaling size={22} /> <!-- Icon for resizing -->
+        </button>
+
+        <!-- Rotate Button -->
+        <button
+          on:click={toggleRotateMode}
+          class={cn("cursor-pointer flex gap-2 bg-[rgba(0,0,0,.5)] text-white p-2 absolute -bottom-12 left-[70%] -translate-x-1/2 items-center rounded-xl scale-90 z-20", isRotating && "bg-gray-500")}
+        >
+          <RotateCw size={22} /> <!-- Icon for rotation -->
+        </button>
       </div>
       </div>
       <!-- P5.js canvas -->
