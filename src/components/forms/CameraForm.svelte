@@ -16,8 +16,10 @@
   import Checkbox from "../ui/checkbox/checkbox.svelte";
   import { Loader2 } from "lucide-svelte";
   import getOnvifUrl from "@/lib/onvif";
+  import PocketBase from "pocketbase";
   import getPlaybackURL from "@/lib/playback";
 
+  const pb_online = new PocketBase(import.meta.env.PUBLIC_POCKETBASE_URL);
   export let cameraName = "";
   export let mainUrl = "";
   export let subUrl = "";
@@ -129,9 +131,14 @@
           save: true,
           session: $user?.session[0],
         };
+        if (window.api) {
+          const record = await pb_online.collection("camera").create(data);
 
-        const record = await pb.collection("camera").create(data);
-        console.log("Camera added:", record);
+          if (record) await pb.collection("camera").create(record);
+          else await pb.collection("camera").create(data);
+        } else {
+          const record = await pb.collection("camera").create(data);
+        }
         doneSubmit = true;
         modalOpen.set(false);
         toast.success("Camera added successfully");
@@ -171,8 +178,14 @@
             session: $user?.session[0],
           };
 
-          const record = await pb.collection("camera").create(data);
-          console.log("Camera added:", record);
+          if (window.api) {
+            const record = await pb_online.collection("camera").create(data);
+
+            if (record) await pb.collection("camera").create(record);
+            else await pb.collection("camera").create(data);
+          } else {
+            const record = await pb.collection("camera").create(data);
+          }
           doneSubmit = true;
         } catch (error) {
           console.error("Failed to add camera:", error);
@@ -305,7 +318,6 @@
   const setRtspToDb = async () => {
     gettingRtsp = true;
 
-    console.log(JSON.stringify($selectedOnvifCameras, null, 2));
     const promises = $selectedOnvifCameras.map(async (camera) => {
       const url = `${ONVIF_URL}/get-stream-uris?ip=${camera.ipAddress}&username=${userName}&password=${password}&port=${httpPort}`;
       try {
@@ -363,7 +375,14 @@
     // Loop over transformed data and create records
     const createPromises = transformedData.map(async (data: any) => {
       try {
-        const record = await pb.collection("camera").create(data);
+        if (window.api) {
+          const record = await pb_online.collection("camera").create(data);
+
+          if (record) await pb.collection("camera").create(record);
+          else await pb.collection("camera").create(data);
+        } else {
+          const record = await pb.collection("camera").create(data);
+        }
       } catch (error) {
         console.error("Failed to add camera:", error);
       }
