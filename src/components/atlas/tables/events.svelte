@@ -103,14 +103,14 @@
             class="flex items-center justify-between gap-2"
             on:click={() => sortByDate("asc")}
           >
-            Descending<ArrowDown10 size={16} />
+            Oldest First
+            <ArrowDown01 size={16} />
           </DropdownMenu.Item>
           <DropdownMenu.Item
             class="flex items-center justify-between gap-2"
             on:click={() => sortByDate("dsc")}
           >
-            Ascending
-            <ArrowDown01 size={16} />
+            Newest First<ArrowDown10 size={16} />
           </DropdownMenu.Item>
         </DropdownMenu.Group>
       </DropdownMenu.Content>
@@ -169,7 +169,7 @@
     <Table.Body
       class="overflow-y-scroll max-h-[calc(100vh-285px)] hide-scrollbar pb-10"
     >
-      {#each $filteredData.reverse() as event, i}
+      {#each $filteredData as event, i}
         {@const event_typed = event as any}
         {@const color = event_typed.bgColor}
         {@const eventSelected = $selectedEvents.includes(event_typed.id)}
