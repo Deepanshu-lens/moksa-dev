@@ -16,6 +16,7 @@
   } from "@/stores";
   import SidePannel from "./side-pannel.svelte";
   import EventAlertModal from "../events/EventAlertModal.svelte";
+  import { toast } from "svelte-sonner";
   import * as Tabs from "@/components/ui/tabs";
   import * as Accordion from "@/components/ui/accordion/index.ts";
   import ComfortableCard from "./alerts/comfortable-card.svelte";
@@ -29,6 +30,7 @@
   import { cn } from "@/lib/utils";
   import { writable } from 'svelte/store';
   import StreamTile from './streams/StreamTile.svelte';
+  import pb from '@/lib/pb';
   const STREAM_URL = getStreamURL();
 
   let currentPanel = 1;
@@ -165,36 +167,36 @@
     }
 
     if (isResizing) {
-  // Handle resizing
-  for (let rect of rectangles) {
-    const centerX = rect.x + rect.w / 2;
-    const centerY = rect.y + rect.h / 2;
-    const halfW = rect.w / 2;
-    const halfH = rect.h / 2;
+      // Handle resizing
+      for (let rect of rectangles) {
+        const centerX = rect.x + rect.w / 2;
+        const centerY = rect.y + rect.h / 2;
+        const halfW = rect.w / 2;
+        const halfH = rect.h / 2;
 
-    // Define the vertices (corners) of the rectangle
-    const vertices = [
-      { x: centerX - halfW, y: centerY - halfH }, // Top-left
-      { x: centerX + halfW, y: centerY - halfH }, // Top-right
-      { x: centerX - halfW, y: centerY + halfH }, // Bottom-left
-      { x: centerX + halfW, y: centerY + halfH }, // Bottom-right
-    ];
+        // Define the vertices (corners) of the rectangle
+        const vertices = [
+          { x: centerX - halfW, y: centerY - halfH }, // Top-left
+          { x: centerX + halfW, y: centerY - halfH }, // Top-right
+          { x: centerX - halfW, y: centerY + halfH }, // Bottom-left
+          { x: centerX + halfW, y: centerY + halfH }, // Bottom-right
+        ];
 
-    // Check if the mouse is near any of the rectangle's vertices (for resizing)
-    for (let vertex of vertices) {
-      const distance = p.dist(p.mouseX, p.mouseY, vertex.x, vertex.y);
-      const handleSize = 15; // Increase size of the "hit" area for resizing (can be adjusted)
-      if (distance <= handleSize) {
-        selectedRect = rect;
-        initialWidth = rect.w;
-        initialHeight = rect.h;
-        initialMouseX = p.mouseX;
-        initialMouseY = p.mouseY;
-        return; // Exit the loop once a vertex is selected for resizing
+        // Check if the mouse is near any of the rectangle's vertices (for resizing)
+        for (let vertex of vertices) {
+          const distance = p.dist(p.mouseX, p.mouseY, vertex.x, vertex.y);
+          const handleSize = 15; // Increase size of the "hit" area for resizing (can be adjusted)
+          if (distance <= handleSize) {
+            selectedRect = rect;
+            initialWidth = rect.w;
+            initialHeight = rect.h;
+            initialMouseX = p.mouseX;
+            initialMouseY = p.mouseY;
+            return; // Exit the loop once a vertex is selected for resizing
+          }
+        }
       }
     }
-  }
-}
 
 
     if (isDrawingRectangles) {
@@ -403,6 +405,10 @@
   const clearAll = () => {
     lines = []; // Clear the lines array
     rectangles = []; // Clear the rectangles array
+    isDrawingLines=false;
+    isDrawingRectangles=false;
+    isRotating=false;
+    isResizing=false;
     if (p5Instance) {
       p5Instance.clear(); // Clear the canvas
       p5Instance.background(0, 0, 0, 0); // Reset to transparent background
@@ -502,7 +508,6 @@
         toast.success("ROI Details Saved Successfully");
     } catch (error) {
         toast?.error(error?.message || "Something went wrong while adding ROI Cameras");
-        console.log('error updating roi camera', error?.message);
     }
   }
 
