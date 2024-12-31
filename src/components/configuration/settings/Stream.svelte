@@ -1,9 +1,10 @@
 <script type="ts">
-  import { selectedNode } from "@/stores";
+  import { selectedNode, user } from "@/stores";
   import { onMount } from "svelte";
   // import { addUserLog } from "@/lib/addUserLog";
   import * as Tabs from "@/components/ui/tabs";
   import Button from "@/components/ui/button/button.svelte";
+  import { addUserLogs } from "@/lib/logs/userLogs";
   let activeTab = "live";
   let delayOptions = [
     { id: 1, label: "No delay" },
@@ -29,6 +30,68 @@
         $selectedNode.live_resolution === 0 ? 6 : $selectedNode.live_resolution;
     }
   });
+
+  $: {
+    if (delaytype === 1) {
+      addUserLogs(
+        "User selected option No delay for stream",
+        $user?.email || "",
+        $user?.id || ""
+      );
+    } else if (delaytype === 2) {
+      addUserLogs(
+        "User selected option Shortest delay for stream",
+        $user?.email || "",
+        $user?.id || ""
+      );
+    } else if (delaytype === 3) {
+      addUserLogs(
+        "User selected option Best quality for stream",
+        $user?.email || "",
+        $user?.id || ""
+      );
+    }
+  }
+
+  $: {
+    if (resoType === 1) {
+      addUserLogs(
+        "User selected option 240p for stream",
+        $user?.email || "",
+        $user?.id || ""
+      );
+    } else if (resoType === 2) {
+      addUserLogs(
+        "User selected option 360p for stream",
+        $user?.email || "",
+        $user?.id || ""
+      );
+    } else if (resoType === 3) {
+      addUserLogs(
+        "User selected option 480p for stream",
+        $user?.email || "",
+        $user?.id || ""
+      );
+    } else if (resoType === 4) {
+      addUserLogs(
+        "User selected option 720p for stream",
+        $user?.email || "",
+        $user?.id || ""
+      );
+    } else if (resoType === 5) {
+      addUserLogs(
+        "User selected option 1080p for stream",
+        $user?.email || "",
+        $user?.id || ""
+      );
+    } else if (resoType === 6) {
+      addUserLogs(
+        "User selected option default for stream",
+        $user?.email || "",
+        $user?.id || ""
+      );
+    }
+  }
 </script>
 
 <div

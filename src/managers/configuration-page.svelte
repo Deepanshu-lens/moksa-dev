@@ -23,6 +23,8 @@
   import PageBarMobile2 from "@/components/bars/PageBarMobile2.svelte";
   import MobileMenuConfig from "@/components/bars/MobileNavs/MobileMenuConfig.svelte";
   import { currentSection } from "@/stores/config-section";
+  import { addUserLogs } from "@/lib/logs/userLogs";
+  import { user } from "@/stores";
 
   // State
   let search: string | null = null;
@@ -46,7 +48,8 @@
     searchParams.set("section", text);
     window.history.pushState(null, "", `${location.pathname}?${searchParams}`);
     currentSection.set(text);
-  };
+    addUserLogs(`User selected option ${text} for configuration`, $user?.email || "", $user?.id || "");
+  }
 
   // Styles
   const baseButtonClass = "h-[40px] w-[40px] rounded-full grid place-items-center";
@@ -63,7 +66,9 @@
       <span class="group flex flex-col gap-0.5 items-center justify-center">
         <button
           disabled={section === "Camera"}
-          on:click={() => handleButtonClick(section as Section)}
+          on:click={() => {
+            handleButtonClick(section as Section);
+          }}
           class={($currentSection !== section ? inactiveButtonClass : activeButtonClass) + (section === "Camera" ? " opacity-50" : "")}
         >
           {#if section === "Remote"}

@@ -1,3 +1,4 @@
+
 export function toggleFullscreen(element: HTMLElement) {
   if (element.requestFullscreen) {
     element.requestFullscreen();

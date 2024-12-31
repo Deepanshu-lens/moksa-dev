@@ -30,6 +30,7 @@
   import JSZip from "jszip";
   import * as Popover from "@/components/ui/popover/index";
   import Label from "../ui/label/label.svelte";
+  import { addUserLogs } from "@/lib/logs/userLogs";
 
   // Variables
   let availableChannels = writable<{ id: string; label: string }[]>([]);
@@ -117,50 +118,6 @@
     });
   }
 
-  function handleDownload(index: number) {
-    const videoElement = videoRefs[index];
-    const { name } = videoUrls.cams[index];
-
-    if (Hls.isSupported()) {
-      const hls = new Hls();
-      hls?.loadSource(videoUrls.responses[index]);
-      hls?.attachMedia(videoElement);
-
-      // Add this event listener to get the current chunk path
-      hls.on(Hls.Events.FRAG_CHANGED, async function (event, data) {
-        const currentFragment = data.frag;
-        if (currentFragment) {
-          // Fetch the .ts file as a Blob
-          try {
-            const response = await fetch(currentFragment.url);
-            if (!response.ok) {
-              throw new Error("Network response was not ok");
-            }
-            const blob = await response.blob();
-            // Create a new File object for the MP4 format
-            let convertedBlob = new File([blob], `video_${name}.mp4`, {
-              type: "video/mp4",
-            });
-            const blobUrl = URL.createObjectURL(blob);
-
-            // Create a temporary anchor element for download
-            const a = document.createElement("a");
-            a.href = blobUrl; // Set the href to the Blob URL
-            a.download = `video_${name}.ts`; // Set the desired file name for download
-            document.body.appendChild(a); // Append the anchor to the body
-            a.click(); // Trigger the download
-            document.body.removeChild(a); // Remove the anchor from the document
-
-            // Clean up the Blob URL
-            URL.revokeObjectURL(blobUrl);
-          } catch (error) {
-            console.error("Error downloading the .ts file:", error);
-          }
-        }
-      });
-    }
-  }
-
   // multiple download
   async function handleDownloadAllVideos() {
     const zip = new JSZip();
@@ -204,6 +161,7 @@
 
               folder.file(convertedBlob.name, convertedBlob); // Add the converted file to the ZIP folder
               resolve(); // Resolve the promise after adding the file
+              addUserLogs(`User downloaded video ${convertedBlob?.name}`, $user?.email || "", $user?.id || "");
             } catch (error) {
               console.error(`Error downloading video ${index}:`, error);
               resolve(); // Resolve even on error to continue with other downloads
@@ -269,6 +227,7 @@
 
           // Clean up the Blob URL
           URL.revokeObjectURL(blobUrl);
+          addUserLogs(`User downloaded video ${mp4File.name}`, $user?.email || "", $user?.id || "");
         } catch (error) {
           console.error(`Error downloading video ${index}:`, error);
         }
@@ -397,6 +356,7 @@
   }
 
   function seekAllVideos(intervalIndex: number) {
+    addUserLogs(`User seeked all videos to ${intervalIndex}`, $user?.email || "", $user?.id || "");
     videoRefs.forEach((video, index) => {
       video.pause();
       const seeker = document.querySelectorAll(
@@ -451,6 +411,7 @@
               }),
             });
 
+            addUserLogs(`User fetched playback data for ${channel?.label}`, $user?.email || "", $user?.id || "");
             if (!response.ok) {
               const errorData = await response.json();
               throw new Error(
@@ -555,11 +516,13 @@
     const video = videoRefs[index];
     if (video) {
       if (video.paused) {
+        addUserLogs(`User played video ${index}`, $user?.email || "", $user?.id || "");
         video
           .play()
           .then(() => syncPlayState(index, true))
           .catch(console.error);
       } else {
+        addUserLogs(`User paused video ${index}`, $user?.email || "", $user?.id || "");
         video.pause();
         syncPlayState(index, false);
       }
@@ -570,8 +533,10 @@
     const allPlaying = $videoPlayStates.every((state) => state);
     videoRefs.forEach((video, index) => {
       if (allPlaying) {
+        addUserLogs(`User paused all videos`, $user?.email || "", $user?.id || "");
         pauseVideo(index);
       } else {
+        addUserLogs(`User played all videos`, $user?.email || "", $user?.id || "");
         playVideo(index);
       }
     });

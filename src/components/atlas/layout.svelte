@@ -22,6 +22,7 @@
   import { panels, activePanel, user, isPanelLoading } from "@/stores";
   import pb from "@/lib/pb";
   import * as Tabs from "@/components/ui/tabs";
+  import { addUserLogs } from "@/lib/logs/userLogs";
 
   // Variables
   let searchDoor = writable("");
@@ -52,7 +53,7 @@
         session: $user?.session[0],
       };
       await pb.collection("atlas").create(panelDataToSubmit);
-
+      addUserLogs(`User added panel ${name}`, $user?.email || "", $user?.id || "");
       showRightPanel = false;
       toast.success("Panel added successfully");
       setTimeout(() => {

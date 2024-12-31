@@ -7,6 +7,8 @@
   import { List, ScanFace } from "lucide-svelte";
   import GalleryTable from "./GalleryTable.svelte";
   import RegisterFaceDialog from "../live/faceRegister/register-face-dialog.svelte";
+  import { addUserLogs } from "@/lib/logs/userLogs";
+  import { user } from "@/stores";
   TimeAgo.addLocale(en);
   const timeAgo = new TimeAgo("en-US");
   export let gallery: Gallery;
@@ -35,7 +37,10 @@
     <span class="group flex-col flex items-center justify-center gap-0.5">
       <!-- svelte-ignore a11y_consider_explicit_label -->
       <button
-        on:click={() => (view = 1)}
+        on:click={() => {
+          view = 1;
+          addUserLogs("User selected option Card View for gallery", $user?.email || "", $user?.id || "");
+        }}
         class={view !== 1
           ? `text-black/[.23] h-[40px] w-[40px] rounded-full shadow-md  border-2 border-solid border-black/[.23] dark:border-white/[.23] bg-white dark:bg-black dark:text-white group-hover:text-white group-hover:bg-[#015a62] dark:group-hover:bg-[#258d9d] group-hover:border-none grid place-items-center `
           : `relative border-none rounded-full shadow-md h-[40px] w-[40px] text-white bg-[#015a62] grid place-items-center dark:bg-[#258d9d]`}
@@ -61,7 +66,10 @@
 
     <span class="group flex-col flex items-center justify-center gap-0.5">
       <button
-        on:click={() => (view = 2)}
+        on:click={() => {
+          view = 2;
+          addUserLogs("User selected option List View for gallery", $user?.email || "", $user?.id || "");
+        }}
         class={view !== 2
           ? `text-black/[.23] h-[40px] w-[40px] rounded-full shadow-md  border-2 border-solid border-black/[.23] dark:border-white/[.23] bg-white dark:bg-black dark:text-white group-hover:text-white group-hover:bg-[#015a62] dark:group-hover:bg-[#258d9d] group-hover:border-none grid place-items-center `
           : `relative border-none rounded-full shadow-md h-[40px] w-[40px] text-white bg-[#015a62] grid place-items-center dark:bg-[#258d9d]`}

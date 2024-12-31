@@ -15,8 +15,9 @@
   import Reports from "@/components/reports/Reports.svelte";
   import Health from "@/components/reports/Health.svelte";
   import type { Node, Camera, Event } from "@/types.d.ts";
-  import { selectedNode } from "@/stores";
+  import { selectedNode, user } from "@/stores";
   import { writable } from "svelte/store";
+  import { addUserLogs } from "@/lib/logs/userLogs";
 
   let selectedScreen = writable(1);
   export let data: any;
@@ -97,6 +98,7 @@
       <span class="group flex items-center justify-center gap-0.5 flex-col">
         <button
           on:click={() => {
+            addUserLogs("User selected option Analytics for reports", $user?.email || "", $user?.id || "");
             handleChangeTab(1);
           }}
           class={$selectedScreen !== 1
@@ -113,6 +115,7 @@
       <span class="group flex items-center justify-center gap-0.5 flex-col">
         <button
           on:click={() => {
+            addUserLogs("User selected option Reports for reports", $user?.email || "", $user?.id || "");
             handleChangeTab(2);
           }}
           class={$selectedScreen !== 2
@@ -129,6 +132,7 @@
       <span class="group flex items-center justify-center gap-0.5 flex-col">
         <button
           on:click={() => {
+            addUserLogs("User selected option Access Control for reports", $user?.email || "", $user?.id || "");
             handleChangeTab(5);
           }}
           class={$selectedScreen !== 5
