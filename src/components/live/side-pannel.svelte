@@ -418,6 +418,11 @@
                 on:click={(e) => {
                   e.preventDefault();
                   selected = layout + 1;
+                  addUserLogs(
+                    `User selected screen layout ${layout + 1} x ${layout + 1}`,
+                    $user?.email || "",
+                    $user?.id || ""
+                  );
                 }}
               >
                 {#if layout != -1}
@@ -489,6 +494,11 @@
             )}
             on:click={(e) => {
               e.preventDefault();
+              addUserLogs(
+                `User selected screen layout 1 + 5`,
+                $user?.email || "",
+                $user?.id || ""
+              );
               selected = 7;
             }}
           >
@@ -574,6 +584,11 @@
             )}
             on:click={(e) => {
               e.preventDefault();
+              addUserLogs(
+                `User selected screen layout 1 + 7`,
+                $user?.email || "",
+                $user?.id || ""
+              );
               selected = 8;
             }}
           >
@@ -682,6 +697,11 @@
             on:click={(e) => {
               e.preventDefault();
               selected = 9;
+              addUserLogs(
+                `User selected screen layout 1 + 12`,
+                $user?.email || "",
+                $user?.id || ""
+              );
             }}
           >
             <svg
@@ -841,6 +861,11 @@
             on:click={(e) => {
               e.preventDefault();
               selected = 10;
+              addUserLogs(
+                `User selected screen layout 2 + 8`,
+                $user?.email || "",
+                $user?.id || ""
+              );
             }}
           >
             <svg
