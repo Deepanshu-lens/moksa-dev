@@ -6,6 +6,8 @@
   import { Label } from "@/components/ui/label";
   import { toast } from "svelte-sonner";
   import pb from "@/lib/pb"; // Assuming you have a Pocketbase instance
+  import { user } from "@/stores";
+  import { addUserLogs } from "@/lib/logs/userLogs";
 
   export let camera;
   export let modalOpen;
@@ -26,6 +28,7 @@
       try {
         await pb.collection("camera").update(camera.id, data);
         modalOpen.set(false);
+        addUserLogs("Camera updated successfully", $user?.email || "", $user?.id || "");
         toast.success("Camera updated successfully!");
       } catch (error) {
         toast.error("Failed to update camera.");

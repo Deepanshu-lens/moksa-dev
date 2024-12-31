@@ -2,10 +2,12 @@
   import pb from "@/lib/pb";
   import * as AlertDialog from "@/components/ui/alert-dialog";
   import { selectedNode, nodes, user } from "@/stores";
+  import { addUserLogs } from "@/lib/logs/userLogs";
   const deleteNode = async () => {
     const record = await pb
       .collection("node")
       .delete($nodes.find((n) => n.id === $selectedNode)?.id);
+    addUserLogs("Node deleted successfully", $user?.email || "", $user?.id || "");
   };
 
   $: $nodes.length > 0 && selectedNode.set($nodes[0].id);

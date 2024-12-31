@@ -13,6 +13,7 @@
   import { Button } from "@/components/ui/button";
   import { writable } from "svelte/store";
   import PocketBase from "pocketbase";
+  import { addUserLogs } from "@/lib/logs/userLogs";
 
   export let action: "add" | "edit" | "delete";
 
@@ -36,6 +37,7 @@
     if (window.api) {
       //creating data online first
       record = await pb_online.collection("node").create(data);
+      addUserLogs("Node created successfully", $user?.email || "", $user?.id || "");
       //based on online record creation creating data offline
       if (record) record_offline = await pb.collection("node").create(record);
       else record_offline = await pb.collection("node").create(data);
@@ -83,12 +85,14 @@
       .update($nodes.find((n) => n.id === $selectedNode)?.id, data);
     selectedNode.set(record.id);
     modalOpen.set(false);
+    addUserLogs("Node updated successfully", $user?.email || "", $user?.id || "");
   };
 
   const deleteNode = async () => {
     const record = await pb
       .collection("node")
       .delete($nodes.find((n) => n.id === $selectedNode)?.id);
+    addUserLogs("Node deleted successfully", $user?.email || "", $user?.id || "");
   };
 </script>
 

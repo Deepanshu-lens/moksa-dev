@@ -48,6 +48,8 @@
   } from "lucide-svelte";
   import pb from "@/lib/pb";
   import { toast } from "svelte-sonner";
+  import { addUserLogs } from "@/lib/logs/userLogs";
+  import { user } from "@/stores";
   const streamTypes = [
     { value: "Default", label: "Default" },
     { value: "Mainstream", label: "Mainstream" },
@@ -130,19 +132,6 @@
   const pb_online = new PocketBase(import.meta.env.PUBLIC_POCKETBASE_URL);
   // Function to save camera settings
   const saveCameraSettings = async () => {
-    // Log all values before sending
-    console.log("Saving camera settings with the following values:", {
-      save,
-      face,
-      faceDetectionThreshold,
-      personDetectionThreshold,
-      faceSearchThreshold,
-      motionThresh,
-      fps,
-      person,
-      timeZone,
-    });
-
     try {
       const data = {
         save,
@@ -169,8 +158,9 @@
       //   const record = await pb.collection("camera").create(data);
       // }
       await pb.collection("camera").update(camera?.id, data);
-      // Optionally, you can close the dialog or show a success message
+      addUserLogs("Camera settings updated successfully", $user?.email || "", $user?.id || "");
       dialogOpen = false; // Close the dialog after saving
+      // Optionally, you can close the dialog or show a success message
     } catch (error) {
       toast.error(
         error?.message || "something went wrong while updating camera settings"

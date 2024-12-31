@@ -1,6 +1,7 @@
 <script lang="ts">
   import * as Select from "@/components/ui/select/index.js";
-  import { nodes, selectedNode } from "@/stores";
+  import { addUserLogs } from "@/lib/logs/userLogs";
+  import { nodes, selectedNode, user } from "@/stores";
 
   export let allNodes:boolean = true;
 
@@ -17,6 +18,7 @@
   <Select.Root
     items={$nodes.map((node) => ({ value: node.id, label: node.name }))}
     onSelectedChange={(e: any) => {
+      addUserLogs(`User selected node ${e.label}`, $user?.email || "", $user?.id || "");
       selectedNode.set(e.value);
     }}
     bind:selected={selectedValue}

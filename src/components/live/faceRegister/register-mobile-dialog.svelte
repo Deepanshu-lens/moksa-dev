@@ -6,6 +6,8 @@
   import { writable } from "svelte/store";
   import { ChevronDown, X } from "lucide-svelte";
   import { cn } from "@/lib/utils";
+  import { user } from "@/stores";
+  import { addUserLogs } from "@/lib/logs/userLogs";
 
   let dialogOpen = false;
   let captureMode = 1;
@@ -191,6 +193,7 @@
         }),
       })
         .then(() => {
+          addUserLogs("User added person to gallery", $user?.email || "", $user?.id || "");
           toast.success(`${username} successfully added to gallery`);
           registrationImages.set([]);
           imposterImages.set([]);

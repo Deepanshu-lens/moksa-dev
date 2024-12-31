@@ -333,9 +333,7 @@
                 on:click={() => {
                   console.log("current view");
                   captureSlideScreenshot();
-                  // addUserLog(
-                  //   "user selected option currentView for screen snip",
-                  // );
+                  addUserLogs("User took screenshot of currentView", $user?.email || "", $user?.id || "");
                 }}
               >
                 Current View
@@ -352,6 +350,7 @@
                     toast.warning("Please select a stream to screen snip.");
                   } else {
                     handleSingleSS();
+                    addUserLogs("User took screenshot of selected screen", $user?.email || "", $user?.id || "");
                   }
                 }}
               >
@@ -365,6 +364,7 @@
                 on:click={() => {
                   console.log("all screens");
                   captureAllScreenshot();
+                  addUserLogs("User took screenshot of all screens", $user?.email || "", $user?.id || "");
                 }}
                 class=" px-4 py-2 hover:bg-[rgba(92,75,221,.1)] rounded-md dark:hover:bg-gray-600 dark:hover:text-white w-full"
               >

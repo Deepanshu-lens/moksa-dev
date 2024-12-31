@@ -1,6 +1,6 @@
 <script lang="ts">
   import pb from "@/lib/pb";
-  import { selectedNode } from "@/stores";
+  import { selectedNode, user } from "@/stores";
   import * as Dialog from "@/components/ui/dialog";
   import * as Popover from "@/components/ui/popover";
   import { Button } from "@/components/ui/button";
@@ -22,6 +22,7 @@
   import Slider from "@/components/ui/slider/slider.svelte";
   import CameraSettingModal from "@/components/ui/modal/CameraSettingModal.svelte";
   import EditCameraForm from "@/components/forms/EditCameraForm.svelte";
+  import { addUserLogs } from "@/lib/logs/userLogs";
 
   let index = writable(null);
   let status = writable(null);
@@ -200,6 +201,7 @@
       // Push the data to Pocketbase (to the 'cameras' collection, for example)
       const record = await pb.collection("camera").update(camera.id, data);
       modalOpen.set(false);
+      addUserLogs("Camera updated successfully", $user?.email || "", $user?.id || "");
       const streamElement = document.getElementById(`stream-${camera.id}`);
       if (streamElement) {
         streamElement.setAttribute(
@@ -216,6 +218,7 @@ wss://view.lenscorp.cloud/api/ws?src=${camera.id}`
 
   const deleteCamera = async () => {
     const record = await pb.collection("camera").delete(camera.id);
+    addUserLogs("Camera deleted successfully", $user?.email || "", $user?.id || "");
   };
 
   $: {
