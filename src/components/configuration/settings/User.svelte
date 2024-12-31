@@ -18,7 +18,8 @@
   import Button from "@/components/ui/button/button.svelte";
   import UserTable from "./UserTable.svelte";
   import Checkbox from "@/components/ui/checkbox/checkbox.svelte";
-  export let user: User;
+  import { addUserLogs } from "@/lib/logs/userLogs";
+  import { user } from "@/stores";
   export let records: LoginEvent[];
   export let logs: UserLog[];
   export let selected = 2;
@@ -40,12 +41,12 @@
         },
         body: JSON.stringify({
           newName: username,
-          sessionId: user.session,
+          sessionId: $user?.session[0],
         }),
       })
         .then((response) => {
           showUpdateUsernameModal = false;
-          toast(`Username updated from ${user.name} to ${username}`);
+          toast(`Username updated from ${$user?.name} to ${username}`);
           // addUserLog(
           //   `user clicked on save username, username updated to ${username}`,
           // );
@@ -133,6 +134,22 @@
   $: if (selected === 2 && !fetched) {
     fetchAllUsers();
   }
+
+  $: {
+    if (selectedP === 1) {
+      addUserLogs(
+        "user clicked on permissions tab, user panel",
+        $user?.email || "",
+        $user?.id || ""
+      );
+    } else if (selectedP === 2) {
+      addUserLogs(
+        "user clicked on nodes tab, user panel",
+        $user?.email || "",
+        $user?.id || ""
+      );
+    }
+  }
 </script>
 
 <div
@@ -146,6 +163,7 @@
         <span class="font-bold text-[#015A62] dark:text-white">
           User details
         </span>
+        <!-- svelte-ignore element_invalid_self_closing_tag -->
         <span
           class=" h-[3px] rounded-full bg-[#0B8995] w-full absolute left-0 -bottom-4"
         />
@@ -166,6 +184,7 @@
         <span class="font-bold text-[#015A62] dark:text-white">
           Permissions
         </span>
+        <!-- svelte-ignore element_invalid_self_closing_tag -->
         <span
           class=" h-[3px] rounded-full bg-[#0B8995] w-full absolute left-0 -bottom-4"
         />
@@ -175,7 +194,7 @@
         class="cursor-pointer text-[#212427] dark:text-[rgba(255,255,255,.6)] font-medium"
         on:click={() => {
           selected = 2;
-          addUserLog("user clicked on permissions button, user panel");
+          addUserLogs("user clicked on permissions button, user panel",$user?.email||"",$user?.id||"");
         }}
       >
         Permissions
@@ -184,6 +203,7 @@
     {#if selected === 3}
       <div class=" relative">
         <span class="font-bold text-[#015A62] dark:text-white"> Policies </span>
+        <!-- svelte-ignore element_invalid_self_closing_tag -->
         <span
           class=" h-[3px] rounded-full bg-[#0B8995] w-full absolute left-0 -bottom-4"
         />
@@ -193,7 +213,7 @@
         class="cursor-pointer text-[#212427] dark:text-[rgba(255,255,255,.6)] font-medium"
         on:click={() => {
           selected = 3;
-          addUserLog("user clicked on policies button, user panel");
+          addUserLogs("user clicked on policies button, user panel",$user?.email || "",$user?.id || "");
         }}
       >
         Policies
@@ -204,6 +224,7 @@
         <span class="font-bold text-[#015A62] dark:text-white">
           Login Events
         </span>
+        <!-- svelte-ignore element_invalid_self_closing_tag -->
         <span
           class=" h-[3px] rounded-full bg-[#0B8995] w-full absolute left-0 -bottom-4"
         />
@@ -213,7 +234,7 @@
         class="cursor-pointer text-[#212427] dark:text-[rgba(255,255,255,.6)] font-medium"
         on:click={() => {
           selected = 4;
-          addUserLog("user clicked on login events button, user panel");
+          addUserLogs("user clicked on login events button, user panel",$user?.email || "",$user?.id || "");
         }}
       >
         Login Events
@@ -224,6 +245,7 @@
         <span class="font-bold text-[#015A62] dark:text-white">
           System Logs
         </span>
+        <!-- svelte-ignore element_invalid_self_closing_tag -->
         <span
           class=" h-[3px] rounded-full bg-[#0B8995] w-full absolute left-0 -bottom-4"
         />
@@ -233,7 +255,7 @@
         class="cursor-pointer text-[#212427] dark:text-[rgba(255,255,255,.6)] font-medium"
         on:click={() => {
           selected = 6;
-          addUserLog("user clicked on system logs button, user panel");
+          addUserLogs("user clicked on system logs button, user panel",$user?.email || "",$user?.id || "");
         }}
       >
         System Logs
@@ -245,6 +267,7 @@
           {" "}
           Device Authorisation
         </span>
+        <!-- svelte-ignore element_invalid_self_closing_tag -->
         <span
           class=" h-[3px] rounded-full bg-[#0B8995] w-full absolute left-0 -bottom-4"
         />
@@ -254,7 +277,7 @@
         class="cursor-pointer text-[#212427] dark:text-[rgba(255,255,255,.6)] font-medium"
         on:click={() => {
           selected = 5;
-          addUserLog("user clicked on device authorisation button, user panel");
+          addUserLogs("user clicked on device authorisation button, user panel",$user?.email || "",$user?.id || "");
         }}
       >
         Device Authorisation
@@ -262,12 +285,14 @@
     {/if}
   </div>
   {#if selected === 1}
+    <!-- svelte-ignore element_invalid_self_closing_tag -->
     <div class="h-[1px] dark:bg-[#292929] w-[96%] mb-8 bg-[#e0e0e0]" />
 
     <!-- User Table -->
     <UserTable />
   {/if}
   {#if selected === 2}
+    <!-- svelte-ignore element_invalid_self_closing_tag -->
     <div class="h-[1px] dark:bg-[#292929] w-[96%] mb-8 bg-[#e0e0e0]" />
     <div
       class="w-[96%] mx-auto justify-between flex items-center px-6 mb-4 border border-gray-300 rounded-lg mt-5"
@@ -406,10 +431,12 @@
     {/if}
   {/if}
   {#if selected === 3}
+    <!-- svelte-ignore element_invalid_self_closing_tag -->
     <div class="h-[1px] dark:bg-[#292929] w-[96%] mb-8 bg-[#e0e0e0]" />
     <h2 class="font-medium px-6 mb-4">Policies</h2>
   {/if}
   {#if selected === 4}
+    <!-- svelte-ignore element_invalid_self_closing_tag -->
     <div class="h-[1px] dark:bg-[#292929] w-[96%] mb-8 bg-[#e0e0e0]" />
     <h2 class="font-medium px-6 mb-4">Login Events</h2>
     {#if records}
@@ -452,10 +479,12 @@
     {/if}
   {/if}
   {#if selected === 5}
+    <!-- svelte-ignore element_invalid_self_closing_tag -->
     <div class="h-[1px] dark:bg-[#292929] w-[96%] mb-8 bg-[#e0e0e0]" />
     <h2 class="font-medium px-6 mb-4">Device Authorisation Settings</h2>
   {/if}
   {#if selected === 6}
+    <!-- svelte-ignore element_invalid_self_closing_tag -->
     <div class="h-[1px] dark:bg-[#292929] w-[96%] mb-8 bg-[#e0e0e0]" />
     <h2 class="font-medium px-6 mb-4">System Logs</h2>
     {#if logs}

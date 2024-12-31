@@ -20,6 +20,8 @@
 import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Checkbox from "@/components/ui/checkbox/checkbox.svelte";
+  import { addUserLogs } from "@/lib/logs/userLogs";
+  import { user } from "@/stores";
 
 // const BASE_URL = "https://license.lenscorp.cloud/test";
 const BASE_URL = "https://license.lenscorp.cloud/api";
@@ -87,6 +89,7 @@ const refreshPageWithUserSection = () => {
         return;
       }
       toast.success(`Invite sent successfully to ${userEmail}`);
+      addUserLogs(`User invited ${userName}`, $user?.email||"", $user?.id||"");
       currentStep = 2;
     } catch (error) {
       console.error("Error sending invite:", error);
@@ -185,7 +188,7 @@ const refreshPageWithUserSection = () => {
 
 <Dialog.Root bind:open={dialogOpen}>
   <Dialog.Trigger><slot /></Dialog.Trigger>
-  <Dialog.Content class="max-h-[550px]">
+  <Dialog.Content class="max-h-[550px] max-w-[600px]">
     <Dialog.Header>
       <Dialog.Title>
         {#if currentStep === 1}
