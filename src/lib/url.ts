@@ -11,7 +11,7 @@ const getStreamURL = () => {
     const isProduction = import.meta.env.PUBLIC_ENV === "production";
     return isProduction
       ? import.meta.env.PUBLIC_STREAM_URL
-      : `ws://${hostname}:8080`;
+      : `ws://${hostname}:5717`;
   }
 };
 export default getStreamURL;

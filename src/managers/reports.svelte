@@ -126,6 +126,22 @@
           Reports
         </p>
       </span>
+      <span class="group flex items-center justify-center gap-0.5 flex-col">
+        <button
+          on:click={() => {
+            handleChangeTab(5);
+          }}
+          class={$selectedScreen !== 5
+            ? `text-[#727272]/90 h-[40px] w-[40px] rounded-full   border border-solid border-[#727272]/90 dark:border-white/[.23] bg-white dark:bg-black dark:text-white group-hover:text-white group-hover:bg-[linear-gradient(90deg,#113046_0%,#2B6365_100%)] dark:group-hover:bg-[#258d9d] group-hover:border-none grid place-items-center `
+            : `relative border-none rounded-full  h-[40px] w-[40px] text-white bg-[linear-gradient(90deg,#113046_0%,#2B6365_100%)] grid place-items-center dark:bg-[#258d9d]`}
+          ><HeartPulse class="h-[22px] w-[22px]" /></button
+        >
+        <p
+          class={`text-xs ${$selectedScreen !== 3 ? "group-hover:text-[#015a62] text-[#727272]/90 dark:text-white dark:group-hover:text-[#258d9d]" : "dark:text-[#258d9d]  text-[#015a62]"}`}
+        >
+          Health
+        </p>
+      </span>
       <!-- <span class="group flex items-center justify-center gap-0.5 flex-col">
         <button
           on:click={() => handleChangeTab(3)}

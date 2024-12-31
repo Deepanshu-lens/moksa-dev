@@ -3,7 +3,7 @@
   import Icon from "@iconify/svelte";
 
   import { VideoStream } from "@/lib/video-stream";
-  import { personCount, selectedCamera } from "@/stores";
+  import { cameras, personCount, selectedCamera } from "@/stores";
   import { PersonStanding } from "lucide-svelte";
   import { getHeatMapImage } from "@/managers/get-heathmap";
   import ImagePreviewModal from "./ImagePreviewModal.svelte";
@@ -23,6 +23,7 @@
   export let visibilityThreshold: number = 0;
   export let visibilityCheck: boolean = true;
   export let name: string;
+  export let isMarkRoi = false;
   let zoomableAreas: HTMLElement[] = [];
 
   // State Variables
@@ -254,86 +255,140 @@
       });
     });
   }
+
+  let roiCamera = $cameras.find((cam) => cam.id === $selectedCamera);
 </script>
 
-<!-- HTML Template -->
-<!-- svelte-ignore a11y_no_static_element_interactions -->
-<div
-  id={`grid-cell-${id}`}
-  class={cn(
-    "zoomable-area h-[100%]",
-    state === "LOADING"
-      ? "camera-placeholder"
-      : "relative overflow-hidden group"
-  )}
->
-  <!-- svelte-ignore a11y_click_events_have_key_events -->
-  <!-- svelte-ignore a11y_no_static_element_interactions -->
-  <!-- svelte-ignore element_invalid_self_closing_tag -->
-  <video-stream
-    bind:this={videoElement}
-    class={cn(
-      "video-player rounded-md",
-      $selectedCamera === id.replace(/_FULL$/, "") &&
-        "border-2 border-green-300"
-    )}
-    {id}
-    on:click={() =>
-      selectedCamera.set(
-        $selectedCamera === id ? "" : id.replace(/_FULL$/, "")
-      )}
-    on:dblclick={() => {
-      if ($isFullScreen) {
-        exitFullscreen();
-      } else {
-        fullscreen(id);
-      }
-    }}
-  />
-  {#if !$isFullScreen}
-    <!-- svelte-ignore a11y_click_events_have_key_events -->
-    <div
-      class="absolute top-2 right-2 rounded-md bg-black bg-opacity-50 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-      on:click={() => fullscreen(id)}
-    >
-      <Icon icon="mdi:fullscreen" class="text-white text-3xl cursor-pointer" />
-    </div>
-  {:else}
-    <!-- svelte-ignore a11y_click_events_have_key_events -->
-    <div
-      class="fixed top-5 right-5 rounded-md bg-black bg-opacity-50 transition-opacity duration-300"
-      on:click={() => exitFullscreen()}
-    >
-      <Icon icon="tabler:minimize" class="text-white text-3xl cursor-pointer" />
-    </div>
-  {/if}
-
-  {#if $personCount.find((item) => item.camera === id)?.count > 0 && isProduction}
-    <div
-      class="absolute left-4 bottom-2 rounded-md bg-neutral-600 bg-opacity-50 transition-opacity duration-300 text-white flex items-center gap-x-2 w-10"
-    >
-      <PersonStanding size={18} />
-      {$personCount.find((item) => item.camera === id)?.count}
-    </div>
-  {/if}
+<!-- ROI Camera is selected -->
+{#if isMarkRoi}
   <div
-    class="absolute left-4 top-2 rounded-md bg-neutral-600 bg-opacity-50 transition-opacity duration-300 text-white flex items-center gap-x-2 text-nowrap p-1"
+    id={`grid-cell-${id}`}
+    class={cn(
+      "zoomable-area h-[100%]",
+      state === "LOADING"
+        ? "camera-placeholder"
+        : "relative overflow-hidden group"
+    )}
   >
-    <span class="size-2 bg-green-700 rounded-full"></span>
-    {name}
-  </div>
-  {#if isProduction}
+    <!-- svelte-ignore a11y_click_events_have_key_events -->
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
+    <!-- svelte-ignore element_invalid_self_closing_tag -->
+    <video-stream
+      bind:this={videoElement}
+      class={cn(
+        "video-player rounded-md",
+        $selectedCamera === id && "border-2 border-green-300"
+      )}
+      {id}
+      on:click={() =>
+        selectedCamera.set(
+          $selectedCamera === id ? "" : id.replace(/_FULL$/, "")
+        )}
+      on:dblclick={() => {
+        if ($isFullScreen) {
+          exitFullscreen();
+        } else {
+          fullscreen(id);
+        }
+      }}
+    />
+
     <div
-      class="absolute right-10 bottom-2 rounded-md transition-opacity duration-300 flex items-center gap-x-2 w-10"
+      class="absolute left-4 top-2 rounded-md bg-neutral-600 bg-opacity-50 transition-opacity duration-300 text-white flex items-center gap-x-2 text-nowrap p-1"
     >
-      <span class="size-2 bg-green-700 rounded-full ml-2"></span>
-      <Button variant="ghost" class="text-white" on:click={() => getHeatImg(id)}
-        >H</Button
-      >
+      <span class="size-2 bg-green-700 rounded-full"></span>
+      {roiCamera?.name}
     </div>
-  {/if}
-  <ImagePreviewModal {loading} {imgDialogOpen}></ImagePreviewModal>
-</div>
+  </div>
+  <!-- when roi is not selected -->
+{:else}
+  <!-- HTML Template -->
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
+  <div
+    id={`grid-cell-${id}`}
+    class={cn(
+      "zoomable-area h-[100%]",
+      state === "LOADING"
+        ? "camera-placeholder"
+        : "relative overflow-hidden group"
+    )}
+  >
+    <!-- svelte-ignore a11y_click_events_have_key_events -->
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
+    <!-- svelte-ignore element_invalid_self_closing_tag -->
+    <video-stream
+      bind:this={videoElement}
+      class={cn(
+        "video-player rounded-md",
+        $selectedCamera === id.replace(/_FULL$/, "") &&
+          "border-2 border-green-300"
+      )}
+      {id}
+      on:click={() =>
+        selectedCamera.set(
+          $selectedCamera === id ? "" : id.replace(/_FULL$/, "")
+        )}
+      on:dblclick={() => {
+        if ($isFullScreen) {
+          exitFullscreen();
+        } else {
+          fullscreen(id);
+        }
+      }}
+    />
+    {#if !$isFullScreen}
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
+      <div
+        class="absolute top-2 right-2 rounded-md bg-black bg-opacity-50 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+        on:click={() => fullscreen(id)}
+      >
+        <Icon
+          icon="mdi:fullscreen"
+          class="text-white text-3xl cursor-pointer"
+        />
+      </div>
+    {:else}
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
+      <div
+        class="fixed top-5 right-5 rounded-md bg-black bg-opacity-50 transition-opacity duration-300"
+        on:click={() => exitFullscreen()}
+      >
+        <Icon
+          icon="tabler:minimize"
+          class="text-white text-3xl cursor-pointer"
+        />
+      </div>
+    {/if}
+
+    {#if $personCount.find((item) => item.camera === id)?.count > 0 && isProduction}
+      <div
+        class="absolute left-4 bottom-2 rounded-md bg-neutral-600 bg-opacity-50 transition-opacity duration-300 text-white flex items-center gap-x-2 w-10"
+      >
+        <PersonStanding size={18} />
+        {$personCount.find((item) => item.camera === id)?.count}
+      </div>
+    {/if}
+    <div
+      class="absolute left-4 top-2 rounded-md bg-neutral-600 bg-opacity-50 transition-opacity duration-300 text-white flex items-center gap-x-2 text-nowrap p-1"
+    >
+      <span class="size-2 bg-green-700 rounded-full"></span>
+      {name}
+    </div>
+    {#if isProduction}
+      <div
+        class="absolute right-10 bottom-2 rounded-md transition-opacity duration-300 flex items-center gap-x-2 w-10"
+      >
+        <span class="size-2 bg-green-700 rounded-full ml-2"></span>
+        <Button
+          variant="ghost"
+          class="text-white"
+          on:click={() => getHeatImg(id)}>H</Button
+        >
+      </div>
+    {/if}
+    <ImagePreviewModal {loading} {imgDialogOpen}></ImagePreviewModal>
+  </div>
+{/if}
 
 <style>
   .video-player {

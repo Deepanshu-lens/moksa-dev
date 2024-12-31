@@ -21,22 +21,29 @@
   })();
 
   try {
-    pb.collection("atlas_events").subscribe("*", (e: any) => {
-      if (e.action === "create") {
-        events.update((current: any) => [...current, e.record]);
-        toast.success("New event created", {
-          description: `${e.record.description} on ${e.record.deviceName}`,
-        });
-      } else if (e.action === "update") {
-        events.update((current: any) =>
-          current.map((cam: any) => (cam.id === e.record.id ? e.record : cam))
-        );
-      } else if (e.action === "delete") {
-        events.update((current: any) =>
-          current.filter((cam: any) => cam.id !== e.record.id)
-        );
+    pb.collection("atlas_events").subscribe(
+      "*",
+      (e: any) => {
+        if (e.action === "create") {
+          console.log("door unlocked", e.record);
+          events.update((current: any) => [e.record, ...current]);
+          toast.success("New event created", {
+            description: `${e.record.description} on ${e.record.deviceName}`,
+          });
+        } else if (e.action === "update") {
+          events.update((current: any) =>
+            current.map((cam: any) => (cam.id === e.record.id ? e.record : cam))
+          );
+        } else if (e.action === "delete") {
+          events.update((current: any) =>
+            current.filter((cam: any) => cam.id !== e.record.id)
+          );
+        }
+      },
+      {
+        expand: "user",
       }
-    });
+    );
   } catch (error) {
     console.error("Failed realtime events");
   }

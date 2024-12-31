@@ -39,11 +39,11 @@
     },
   ];
 
-  if (import.meta.env.PUBLIC_ENV === "production") {
-    data = data.filter((item) => item.name !== "Reports");
-  }
+  // if (import.meta.env.PUBLIC_ENV === "production") {
+  //   data = data.filter((item) => item.name !== "Reports");
+  // }
 
-  const disabledPaths: string[] = ["/reports"];
+  const disabledPaths: string[] = [];
 
   export let isVertical = false;
 </script>

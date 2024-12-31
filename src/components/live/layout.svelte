@@ -1,18 +1,22 @@
 <script lang="ts">
+    import P5 from 'p5-svelte';
   import StreamLayout from "./streams/StreamLayout.svelte";
+  import * as Dialog from "@/components/ui/dialog";
   import * as Resizable from "@/components/ui/resizable";
   import Icon from "@iconify/svelte";
+  import CameraList from "@/components/live/cameraList/CameraList.svelte";
   import {
+    nodes,
+    liveEvents,
+    gallery,
     isAlertPanelOpen,
     isRoiPanelOpen,
     cameras,
     selectedCamera,
-    user,
   } from "@/stores";
-  import CameraList from "@/components/live/cameraList/CameraList.svelte";
-  import { nodes, liveEvents, gallery } from "@/stores";
   import SidePannel from "./side-pannel.svelte";
   import EventAlertModal from "../events/EventAlertModal.svelte";
+  import { toast } from "svelte-sonner";
   import * as Tabs from "@/components/ui/tabs";
   import * as Accordion from "@/components/ui/accordion/index.ts";
   import ComfortableCard from "./alerts/comfortable-card.svelte";
@@ -21,9 +25,12 @@
   import Button from "../ui/button/button.svelte";
   import Input from "../ui/input/input.svelte";
   import { onMount } from "svelte";
-  import { ChevronDown } from "lucide-svelte";
+  import { PenTool,X,RectangleHorizontal,RotateCw,Scaling } from "lucide-svelte";
   import getStreamURL from "@/lib/url";
-  import { addAuthLogs } from "@/lib/logs/authLogs";
+  import { cn } from "@/lib/utils";
+  import { writable } from 'svelte/store';
+  import StreamTile from './streams/StreamTile.svelte';
+  import pb from '@/lib/pb';
   const STREAM_URL = getStreamURL();
 
   let currentPanel = 1;
@@ -33,6 +40,269 @@
   let isMobile = false;
   let selectedEventFilter = "";
   let eventSearchQuery = "";
+  let isOpen = writable(false);
+  let lines = []; // Array to store lines, each line is an array of two points
+  let rectangles = []; // Array to store drawn rectangles
+
+  let roiCamera = writable(null);
+  let p5Instance;
+  let canvas;
+
+  let isDrawingLines = false; // Track whether we are in line drawing mode
+  let isDrawingRectangles = false; // Track whether we are in rectangle drawing mode
+  let isRotating = false; // Whether we are in rotate mode
+  let isResizing = false; // Whether we are in resize mode
+
+  function toggleDraw() {
+    isDrawingLines =!isDrawingLines;
+    isDrawingRectangles = false;
+    isRotating=false;
+    isResizing=false;
+  }
+
+  // Function to toggle drawing mode
+  const toggleDrawingMode = () => {
+    isDrawingLines=false;
+    isDrawingRectangles=!isDrawingRectangles;
+    isRotating=false;
+    isResizing=false;
+  };
+
+  const sketch = (p) => {
+  let startX, startY; // Starting coordinates for drawing
+  let currentRect = null; // The current rectangle being drawn
+  let currentLine = null; // The current line being drawn
+  let selectedRect = null; // The rectangle being rotated or resized
+  let initialMouseAngle = 0; // Initial angle between mouse and rectangle center
+  let initialRectAngle = 0; // Initial angle of the rectangle
+  let initialWidth = 0, initialHeight = 0; // Initial width and height of the rectangle
+  let initialMouseX = 0, initialMouseY = 0; // Initial mouse position for resizing and rotating
+  p5Instance = p;
+
+  p.setup = () => {
+    p.createCanvas(1050, 610); // Adjusted to match your existing canvas size
+    p.background(0, 0, 0, 0); // Transparent background
+  };
+
+  p.draw = () => {
+    p.clear(); // Clear canvas for redraw
+
+    // Draw all completed rectangles
+    for (let rect of rectangles) {
+      p.push();
+      p.translate(rect.x + rect.w / 2, rect.y + rect.h / 2); // Move origin to rectangle center
+      p.rotate(p.radians(rect.angle || 0)); // Rotate rectangle using stored angle
+      p.noFill(); // Transparent interior
+      p.stroke(0, 0, 255); // Blue color for the border
+      p.strokeWeight(2); // Border thickness
+      p.rectMode(p.CENTER);
+      p.rect(0, 0, rect.w, rect.h); // Draw rectangle
+
+      // Draw rotation handles (for rotation and resizing)
+      const halfW = rect.w / 2;
+      const halfH = rect.h / 2;
+      const handleSize = 10;
+
+      p.fill(0, 255, 0); // Green color for handles
+      p.noStroke();
+      p.ellipse(-halfW, -halfH, handleSize); // Top-left
+      p.ellipse(halfW, -halfH, handleSize); // Top-right
+      p.ellipse(-halfW, halfH, handleSize); // Bottom-left
+      p.ellipse(halfW, halfH, handleSize); // Bottom-right
+      p.pop();
+    }
+
+    // Draw all completed lines
+    for (let line of lines) {
+      p.stroke(0, 0, 255); // Blue color for line
+      p.strokeWeight(2); // Line thickness
+      p.line(line.x1, line.y1, line.x2, line.y2); // Draw line
+    }
+
+    // Draw the current rectangle while dragging
+    if (currentRect) {
+      p.noFill(); // Transparent interior
+      p.stroke(0, 0, 255); // Blue color for the border
+      p.strokeWeight(2); // Border thickness
+      p.rect(currentRect.x, currentRect.y, currentRect.w, currentRect.h); // Draw rectangle
+    }
+
+    // Draw the current line while dragging
+    if (currentLine) {
+      p.stroke(0, 0, 255); // Blue color for line
+      p.strokeWeight(2); // Line thickness
+      p.line(currentLine.x1, currentLine.y1, currentLine.x2, currentLine.y2); // Draw line
+    }
+  };
+
+  p.mousePressed = () => {
+    // Handle rotation or resizing or drawing based on the current mode
+    if (isRotating) {
+      for (let rect of rectangles) {
+        const centerX = rect.x + rect.w / 2;
+        const centerY = rect.y + rect.h / 2;
+        const halfW = rect.w / 2;
+        const halfH = rect.h / 2;
+
+        const handlePositions = [
+          { x: centerX - halfW, y: centerY - halfH }, // Top-left
+          { x: centerX + halfW, y: centerY - halfH }, // Top-right
+          { x: centerX - halfW, y: centerY + halfH }, // Bottom-left
+          { x: centerX + halfW, y: centerY + halfH }, // Bottom-right
+        ];
+
+        // Check if any handle is clicked (for rotation)
+        for (let handle of handlePositions) {
+          if (p.dist(p.mouseX, p.mouseY, handle.x, handle.y) <= 10) {
+            selectedRect = rect;
+            // Calculate initial mouse and rectangle angles for rotation
+            initialMouseAngle = Math.atan2(p.mouseY - centerY, p.mouseX - centerX);
+            initialRectAngle = p.radians(rect.angle || 0);
+            initialMouseX = p.mouseX;
+            initialMouseY = p.mouseY;
+            return;
+          }
+        }
+      }
+    }
+
+    if (isResizing) {
+      // Handle resizing
+      for (let rect of rectangles) {
+        const centerX = rect.x + rect.w / 2;
+        const centerY = rect.y + rect.h / 2;
+        const halfW = rect.w / 2;
+        const halfH = rect.h / 2;
+
+        // Define the vertices (corners) of the rectangle
+        const vertices = [
+          { x: centerX - halfW, y: centerY - halfH }, // Top-left
+          { x: centerX + halfW, y: centerY - halfH }, // Top-right
+          { x: centerX - halfW, y: centerY + halfH }, // Bottom-left
+          { x: centerX + halfW, y: centerY + halfH }, // Bottom-right
+        ];
+
+        // Check if the mouse is near any of the rectangle's vertices (for resizing)
+        for (let vertex of vertices) {
+          const distance = p.dist(p.mouseX, p.mouseY, vertex.x, vertex.y);
+          const handleSize = 15; // Increase size of the "hit" area for resizing (can be adjusted)
+          if (distance <= handleSize) {
+            selectedRect = rect;
+            initialWidth = rect.w;
+            initialHeight = rect.h;
+            initialMouseX = p.mouseX;
+            initialMouseY = p.mouseY;
+            return; // Exit the loop once a vertex is selected for resizing
+          }
+        }
+      }
+    }
+
+
+    if (isDrawingRectangles) {
+      // Handle rectangle drawing
+      startX = p.mouseX;
+      startY = p.mouseY;
+      currentRect = { x: startX, y: startY, w: 0, h: 0, angle: 0 }; // Initialize a rectangle with no angle
+    }
+
+    // Handle line drawing
+    if (isDrawingLines) {
+      startX = p.mouseX;
+      startY = p.mouseY;
+      currentLine = { x1: startX, y1: startY, x2: startX, y2: startY }; // Initialize a line
+    }
+  };
+
+  p.mouseDragged = () => {
+    if (isRotating && selectedRect) {
+      const centerX = selectedRect.x + selectedRect.w / 2;
+      const centerY = selectedRect.y + selectedRect.h / 2;
+
+      // Calculate current mouse angle relative to rectangle center
+      const currentMouseAngle = Math.atan2(p.mouseY - centerY, p.mouseX - centerX);
+
+      // Update rectangle's angle
+      selectedRect.angle = p.degrees(initialRectAngle + (currentMouseAngle - initialMouseAngle));
+    }
+
+    if (isResizing && selectedRect) {
+      // Update the width and height based on the mouse position
+      selectedRect.w = initialWidth + (p.mouseX - initialMouseX);
+      selectedRect.h = initialHeight + (p.mouseY - initialMouseY);
+    }
+
+    // Update current rectangle or line dimensions
+    if (isDrawingRectangles && currentRect) {
+      currentRect.w = p.mouseX - startX;
+      currentRect.h = p.mouseY - startY;
+    }
+
+    if (isDrawingLines && currentLine) {
+      currentLine.x2 = p.mouseX;
+      currentLine.y2 = p.mouseY;
+    }
+  };
+
+  p.mouseReleased = () => {
+    if (isRotating || isResizing) {
+      // Update the rectangle in the array
+      if (selectedRect) {
+        const rectIndex = rectangles.findIndex(
+          (rect) => rect.x === selectedRect.x && rect.y === selectedRect.y
+        );
+        if (rectIndex !== -1) {
+          rectangles[rectIndex] = selectedRect;
+        }
+      }
+
+      // selectedRect = null; // Reset the selected rectangle
+    }
+
+    if (isDrawingRectangles && currentRect) {
+      let isRectangleFake = checkFakeLinesRect(currentRect);
+      if (!isRectangleFake) {
+        rectangles.push(currentRect); // Add the rectangle to the list
+        currentRect = null; // Reset current rectangle
+      }
+    }
+
+    if (isDrawingLines && currentLine) {
+      let isLineFake = checkFakeLinesRect(currentLine);
+      if (!isLineFake) {
+        lines.push(currentLine); // Add the line to the list
+        currentLine = null; // Reset current line
+      }
+    }
+  };
+
+  // Check whether the lines and rectangles drawn are not fake
+  function checkFakeLinesRect(currentItem) {
+    for (const key in currentItem) {
+      if (typeof currentItem[key] === "number" && currentItem[key] % 1 !== 0) {
+        return false; // Return true as soon as a whole number is found
+      }
+    }
+
+    return true;
+  }
+};
+
+
+  // handle toggling resizing 
+  const toggleResizeMode =()=>{
+    isResizing=!isResizing;
+    isDrawingRectangles=false;
+    isRotating=false;
+  }
+
+  // handle toggling rotating 
+  const toggleRotateMode =()=>{
+    isRotating=!isRotating;
+    isDrawingRectangles=false;
+    isResizing=false;
+  }
+
   const EVENT_FILTERS = [
     { filter: "face", label: "Face" },
     { filter: "person", label: "Person" },
@@ -61,17 +331,10 @@
     isMobile = window.matchMedia("(max-width: 1024px)").matches;
   }
 
-  function onSelectCamera(e: any) {
-    const selectedCam = $cameras.find((cam) => cam?.id === e.target.value);
-    selectedCamera.set(e.target.value);
-    console.log(selectedCam);
-    roiCamera = selectedCam;
-  }
-
   $: filteredEvents = $liveEvents.filter((event) => {
     const hasValidSearchQuery = eventSearchQuery.trim() !== "";
     const matchesSearchQuery = hasValidSearchQuery
-      ? event.title?.toLowerCase().includes(eventSearchQuery.toLowerCase())
+      ? event.title?.toLowerCase().includes(eventSearchQuery?.toLowerCase())
       : true;
     const matchesFilter = selectedEventFilter
       ? event.type === selectedEventFilter
@@ -79,15 +342,192 @@
     return matchesSearchQuery && matchesFilter;
   });
 
+  function drawLinesRectangles(canvas, coordinates, rectangleCoordinates) {
+  if (!!canvas) {
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
+    ctx.beginPath();
+
+    // Get the current canvas dimensions
+    const canvasWidth = canvas.width; // Current canvas width
+    const canvasHeight = canvas.height; // Current canvas height
+
+    // Draw lines
+    if (coordinates?.length > 0) {
+      coordinates?.forEach((line) => {
+        const x1 = (line?.x1 / 100) * canvasWidth;
+        const x2 = (line?.x2 / 100) * canvasWidth;
+        const y1 = (line?.y1 / 100) * canvasHeight;
+        const y2 = (line?.y2 / 100) * canvasHeight;
+
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+      });
+    }
+
+    // Draw rectangles (including rotated ones)
+    if (rectangleCoordinates?.length > 0) {
+      rectangleCoordinates?.forEach((rect) => {
+        const x = (rect?.x / 100) * canvasWidth;
+        const y = (rect?.y / 100) * canvasHeight;
+        const w = (rect?.w / 100) * canvasWidth;
+        const h = (rect?.h / 100) * canvasHeight;
+        const angle = (rect?.angle || 0) * (Math.PI / 180); // Convert angle to radians
+
+        ctx.save(); // Save the current state of the canvas
+        ctx.translate(x + w / 2, y + h / 2); // Move origin to rectangle center
+        ctx.rotate(angle); // Rotate the rectangle
+        ctx.rect(-w / 2, -h / 2, w, h); // Draw rectangle relative to the new origin
+        ctx.restore(); // Restore the original canvas state
+      });
+    }
+
+    ctx.strokeStyle = "blue"; // Set line color
+    ctx.lineWidth = 1;
+    ctx.stroke(); // Draw the lines and rectangles
+  }
+}
+
+  function handleClear(){
+    let canvasDefault = document.getElementById('roicanvas-default');
+    if(canvasDefault){
+      const ctxDefault = canvasDefault.getContext("2d");
+      ctxDefault.clearRect(0,0,canvasDefault?.clientWidth,canvasDefault.height); //clearing default canvas
+    }
+    
+    if(canvas){
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
+    }
+  }
+
+    // Function to clear all drawn lines and rectangles
+  const clearAll = () => {
+    lines = []; // Clear the lines array
+    rectangles = []; // Clear the rectangles array
+    isDrawingLines=false;
+    isDrawingRectangles=false;
+    isRotating=false;
+    isResizing=false;
+    if (p5Instance) {
+      p5Instance.clear(); // Clear the canvas
+      p5Instance.background(0, 0, 0, 0); // Reset to transparent background
+    }
+
+    roiCamera.update((value)=>{
+      const current = {
+        ...value,
+        roiCanvasCoordinates:[],
+        roiRectangleCoordinates:[],
+      }
+      return current;
+    });
+    handleClear();
+  };
+
   onMount(() => {
     checkIfMobile(); // Initial check
     window.addEventListener("resize", checkIfMobile); // Update on resize
-    // addAuthLogs("login", $user?.email || "");
 
     return () => {
       window.removeEventListener("resize", checkIfMobile); // Clean up
     };
   });
+
+  // Saving ROI Details to db
+  async function updateAi() {
+    try {
+        let canvas = document.getElementById("defaultCanvas0");
+        // Convert points to percentages based on the current canvas width and height
+        const canvasWidth = canvas?.clientWidth; // Current canvas width
+        const canvasHeight = canvas?.clientHeight; // Current canvas height
+        rectangles?.pop(); //removing unneccessary rectangle drawn
+        lines?.pop();
+
+        let lineCoordinates = lines?.map(line => 
+            {
+              return{
+                x1:(line?.x1*100)/canvasWidth,
+                x2:(line?.x2*100)/canvasWidth,
+                y1:(line?.y1*100)/canvasHeight,
+                y2:(line?.y2*100)/canvasHeight
+              }
+            }
+        );
+
+        let rectangleCoordinates = rectangles?.map(rect=>{
+          {
+            return {
+              x:(rect?.x*100)/canvasWidth,
+              y:(rect?.y*100)/canvasHeight,
+              h:(rect?.h*100)/canvasHeight,
+              w:(rect?.w*100)/canvasWidth,
+              angle:rect?.angle
+            }
+          }
+        });
+
+        // Adding already existing lines
+        if($roiCamera?.isRoiEnabled && $roiCamera?.roiCanvasCoordinates?.length > 0){
+          // when current array having lines
+          if(lineCoordinates?.length > 0){
+            lineCoordinates = [...lineCoordinates, ...$roiCamera?.roiCanvasCoordinates];
+          }
+
+           // when current is empty
+           else if($roiCamera?.roiCanvasCoordinates?.length>0 && lineCoordinates?.length===0){
+            lineCoordinates = [...$roiCamera?.roiCanvasCoordinates];
+          }
+        }
+
+        // Adding already existing rectangles
+        if($roiCamera?.isRoiEnabled && $roiCamera?.roiRectangleCoordinates?.length>0){
+          // when current array having rectangles
+          if(rectangleCoordinates?.length>0){
+            rectangleCoordinates = [...rectangleCoordinates, ...$roiCamera?.roiRectangleCoordinates];
+          }
+          // when current is empty
+          else if($roiCamera?.roiRectangleCoordinates?.length>0 && rectangleCoordinates?.length===0){
+            rectangleCoordinates = [...$roiCamera?.roiRectangleCoordinates];
+          }
+        }
+
+        await pb.collection("camera").update($selectedCamera, {
+            isRoiEnabled: (lineCoordinates?.length>0 || rectangleCoordinates?.length>0) ? true:false,
+            roiCanvasCoordinates: lineCoordinates?.length>0? lineCoordinates:null,
+            roiRectangleCoordinates:rectangleCoordinates?.length>0 ? rectangleCoordinates :null
+        });
+        lines =[];
+        rectangles=[];
+        isOpen.set(false);
+        roiCamera.set(null);
+        isDrawingLines=false;
+        isDrawingRectangles=false;
+        p5Instance=null;
+        canvas=null;
+        isRotating=false;
+        isResizing=false;
+        toast.success("ROI Details Saved Successfully");
+    } catch (error) {
+        toast?.error(error?.message || "Something went wrong while adding ROI Cameras");
+    }
+  }
+
+  isOpen.subscribe((open)=>{
+    if(open){
+      let temp = $cameras.find((cam) => cam.id === $selectedCamera);
+      roiCamera.set(temp);
+      lines=[];
+      rectangles=[];
+      setTimeout(() => {
+        if($roiCamera?.isRoiEnabled && ($roiCamera?.roiCanvasCoordinates?.length>0 || $roiCamera?.roiRectangleCoordinates?.length>0)){
+          let canvas = document.getElementById("roicanvas-default");
+          drawLinesRectangles(canvas, $roiCamera?.roiCanvasCoordinates,$roiCamera?.roiRectangleCoordinates);
+        }
+      }, 2000);
+    }
+  });
+
 </script>
 
 <div class="w-full">
@@ -99,10 +539,15 @@
     <Resizable.Pane defaultSize={70}>
       <StreamLayout {STREAM_URL} />
     </Resizable.Pane>
-    <Resizable.Handle withHandle class="hidden lg:flex" />
+    <Resizable.Handle
+      withHandle
+      class={cn("hidden lg:flex", { "lg:hidden": $nodes && $nodes.length < 1 })}
+    />
     <Resizable.Pane
       style={`${!isPaneCollapsed ? "overflow: visible;" : "overflow: hidden;"}`}
-      class="hidden lg:block"
+      class={cn("hidden lg:block", {
+        "lg:hidden": $nodes && $nodes?.length < 1,
+      })}
       maxSize={50}
       defaultSize={22}
       bind:pane={paneOne}
@@ -250,7 +695,9 @@
                                 </DropdownMenu.Root>
                               </div>
                               {#if filteredEvents.length > 0}
+                                <!-- svelte-ignore a11y_no_static_element_interactions -->
                                 {#each filteredEvents as event}
+                                  <!-- svelte-ignore a11y_click_events_have_key_events -->
                                   <div
                                     class="flex bg-accent p-4 rounded-xl shadow-sm hover:border hover:border-primary relative group overflow-visible cursor-pointer"
                                     on:click={() => openEventModal(event)}
@@ -349,9 +796,11 @@
                     <div
                       class="-rotate-90 flex flex-row-reverse items-center origin-top-right"
                     >
+                      <!-- svelte-ignore a11y_no_static_element_interactions -->
                       <div
                         class={`${currentPanel == 0 ? "font-bold bg-accent" : "bg-background/80 "} cursor-pointer h-[32px] rounded-t-xl  text-black dark:text-white px-3 flex  items-center whitespace-nowrap shadow-xl z-40 border dark:border-muted-foreground/10`}
                       >
+                        <!-- svelte-ignore a11y_click_events_have_key_events -->
                         <div
                           class="flex items-center justify-center place-items-center my-auto space-x-2"
                           on:click={() => (currentPanel = 0)}
@@ -373,6 +822,8 @@
                         <div
                           class={`${currentPanel == 1 ? "font-bold bg-accent" : "bg-background/80 "} cursor-pointer h-[32px] rounded-t-xl  text-black dark:text-white px-3 flex items-center whitespace-nowrap shadow-xl z-40 border dark:border-muted-foreground/10`}
                         >
+                          <!-- svelte-ignore a11y_click_events_have_key_events -->
+                          <!-- svelte-ignore a11y_no_static_element_interactions -->
                           <div
                             class={`flex items-center justify-center place-items-center my-auto space-x-2`}
                             on:click={() => {
@@ -397,6 +848,8 @@
                         <div
                           class={`${currentPanel == 1 ? "font-bold bg-accent" : "bg-background/80 "} cursor-pointer h-[32px] rounded-t-xl  text-black dark:text-white px-3 flex items-center whitespace-nowrap shadow-xl z-40 border dark:border-muted-foreground/10`}
                         >
+                          <!-- svelte-ignore a11y_click_events_have_key_events -->
+                          <!-- svelte-ignore a11y_no_static_element_interactions -->
                           <div
                             class={`flex items-center justify-center place-items-center my-auto space-x-2`}
                             on:click={() => {
@@ -436,5 +889,82 @@
   </div>
 {/if} -->
 <div class="hidden lg:block">
-  <SidePannel />
+  <SidePannel isOpen={isOpen}/>
 </div>
+
+<Dialog.Root bind:open={$isOpen}>
+  <!-- <Dialog.Trigger on:click={()=>isOpen.set(true)}><slot></slot></Dialog.Trigger> -->
+  <Dialog.Content class="h-[90vh] max-w-[77vw]">
+    <div
+      class="relative h-[76vh] w-[97%]"
+    >
+      <StreamTile
+        name={$selectedCamera?.name}
+        id={$selectedCamera?.id}
+        url={`${STREAM_URL}/api/ws?src=${$selectedCamera}`}
+        isMarkRoi={true}
+      ></StreamTile>
+      <div class="flex items-center justify-center">
+        <button
+          on:click={toggleDraw}
+          class={cn("cursor-pointer flex gap-2 bg-[rgba(0,0,0,.5)] text-white p-2 absolute -bottom-12 left-1/2 -translate-x-1/2 items-center rounded-xl scale-90 z-20", isDrawingLines && "bg-gray-500")}
+          ><PenTool size={22} /></button
+        >
+        <button
+          on:click={toggleDrawingMode}
+          class={cn("flex gap-2 bg-[rgba(0,0,0,.5)] text-white p-2 absolute -bottom-12 left-[55%] -translate-x-1/2 items-center rounded-xl scale-90 z-20",isDrawingRectangles && "bg-gray-500")}
+          ><RectangleHorizontal size={22} /></button
+        >
+        <button
+          on:click={clearAll}
+          class="flex gap-2 bg-[rgba(0,0,0,.5)] text-white p-2 absolute -bottom-12 left-[60%] -translate-x-1/2 items-center rounded-xl scale-90 z-20 hover:bg-gray-500"
+          ><X size={22} /></button
+        >
+          <!-- Resize Button -->
+        <button
+          on:click={toggleResizeMode}
+          class={cn("cursor-pointer flex gap-2 bg-[rgba(0,0,0,.5)] text-white p-2 absolute top-[47%] -right-16 -translate-x-1/2 items-center rounded-xl scale-90 z-20", isResizing && "bg-gray-500")}
+        >
+          <Scaling size={22} /> <!-- Icon for resizing -->
+        </button>
+
+        <!-- Rotate Button -->
+        <button
+          on:click={toggleRotateMode}
+          class={cn("cursor-pointer flex gap-2 bg-[rgba(0,0,0,.5)] text-white p-2 absolute top-[55%] -right-16 -translate-x-1/2 items-center rounded-xl scale-90 z-20", isRotating && "bg-gray-500")}
+        >
+          <RotateCw size={22} /> <!-- Icon for rotation -->
+        </button>
+      </div>
+      </div>
+      <!-- P5.js canvas -->
+       <div class="bg-transparent z-40 h-[70.5vh] absolute top-5 left-5">
+        <P5 {sketch} parentDivStyle="position: absolute; top: 0; left: 0; z-index: 10; background: transparent; pointer-events: auto;" />
+       </div>
+      <canvas
+        id="roicanvas-default"
+        class="bg-transparent z-30 h-[74.5vh] w-[71vw] absolute top-5 left-5"
+      ></canvas>
+    <div class="w-full p-4 flex items-center gap-4">
+      <Button
+        on:click={() => {
+          updateAi();
+        }}>Save</Button
+      >
+      <Button
+        variant="secondary"
+        on:click={() => {
+          isOpen.set(false);
+          selectedCamera.set(null);
+        }}>Cancel</Button
+      >
+    </div>
+    </Dialog.Content
+  >
+</Dialog.Root>
+
+<style>
+   canvas {
+    z-index: 100; /* Ensure the canvas is visible above/below other elements */
+  }
+</style>

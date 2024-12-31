@@ -8,7 +8,7 @@
     export let imageUrls: string[] = [];
     export let videoPath: string;
   
-    let view = "images";
+    let view = "videos";
   </script>
   
   <Dialog.Root bind:open={dialogOpen}>

@@ -68,8 +68,8 @@
         const extractNumbers = (str) =>
           str.match(/\d+/g) ? parseInt(str.match(/\d+/g)[0], 10) : 0;
 
-        const nameA = a.name.toLowerCase();
-        const nameB = b.name.toLowerCase();
+        const nameA = a.name?.toLowerCase();
+        const nameB = b.name?.toLowerCase();
 
         if (nameA === nameB) {
           comparison = 0;
@@ -104,12 +104,12 @@
   }
 
   function handleInput(event) {
-    let searchQuery = event.target.value.toLowerCase();
+    let searchQuery = event.target.value?.toLowerCase();
     let filteredCameras = $cameras.filter((camera) => {
-      const nameMatch = camera.name.toLowerCase().includes(searchQuery);
-      const urlMatch = camera.url.toLowerCase().includes(searchQuery);
+      const nameMatch = camera.name?.toLowerCase().includes(searchQuery);
+      const urlMatch = camera.url?.toLowerCase().includes(searchQuery);
       const subUrlMatch =
-        camera.subUrl && camera.subUrl.toLowerCase().includes(searchQuery);
+        camera.subUrl && camera.subUrl?.toLowerCase().includes(searchQuery);
 
       // Filter based on selected search criteria
       return searchCriteria === "name" ? nameMatch : urlMatch || subUrlMatch;

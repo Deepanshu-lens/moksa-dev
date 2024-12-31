@@ -16,6 +16,7 @@
   import { writable } from "svelte/store";
   import { displayCameras } from "@/stores/camera";
   import { PictureInPicture2 } from "lucide-svelte";
+  import PocketBase from "pocketbase";
 
   export let STREAM_URL;
   const isMobile = writable(false);
@@ -24,6 +25,8 @@
   let localCaptureRef;
   let custom_layout;
   let gridStyle;
+  let nodeName = "";
+  const pb_online = new PocketBase(import.meta.env.PUBLIC_POCKETBASE_URL);
 
   // // Function to determine the grid style based on the number of cameras
   const layoutConfigs = {
@@ -116,14 +119,25 @@
     }
     gridStyle = getGridStyle($cameras.length, $selectedLayout);
   });
-  let nodeName = "";
+
   const addNode = async () => {
+    let record;
+    let record_offline;
     const data = {
       name: nodeName,
       session: $user.session[0],
     };
-    const record = await pb.collection("node").create(data);
-    selectedNode.set(record.id);
+    if (window.api) {
+      record = await pb_online.collection("node").create(data);
+      if (record) record_offline = pb.collection("node").create(record);
+      else record_offline = await pb.collection("node").create(data);
+
+      if (record) selectedNode.set(record.id);
+      else if (record_offline) selectedNode.set(record_offline.id);
+    } else {
+      record = await pb.collection("node").create(data);
+      selectedNode.set(record.id);
+    }
   };
 
   onMount(() => {
@@ -141,23 +155,89 @@
 
   $: captureRef.set(localCaptureRef);
   displayCameras.subscribe(() => priorityIndex.set(0));
+
+  // Function to draw lines on the canvas
+  function drawLinesRectangles(canvas, coordinates, rectangleCoordinates) {
+    if (!!canvas) {
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
+      ctx.beginPath();
+
+      // Get the current canvas dimensions
+      const canvasWidth = canvas.width; // Current canvas width
+      const canvasHeight = canvas.height; // Current canvas height
+
+      // Draw lines
+      if (coordinates?.length > 0) {
+        coordinates?.forEach((line) => {
+          const x1 = (line?.x1 / 100) * canvasWidth;
+          const x2 = (line?.x2 / 100) * canvasWidth;
+          const y1 = (line?.y1 / 100) * canvasHeight;
+          const y2 = (line?.y2 / 100) * canvasHeight;
+
+          ctx.moveTo(x1, y1);
+          ctx.lineTo(x2, y2);
+        });
+      }
+
+      // Draw rectangles (including rotated ones)
+      if (rectangleCoordinates?.length > 0) {
+        rectangleCoordinates?.forEach((rect) => {
+          const x = (rect?.x / 100) * canvasWidth;
+          const y = (rect?.y / 100) * canvasHeight;
+          const w = (rect?.w / 100) * canvasWidth;
+          const h = (rect?.h / 100) * canvasHeight;
+          const angle = (rect?.angle || 0) * (Math.PI / 180); // Convert angle to radians
+
+          ctx.save(); // Save the current state of the canvas
+          ctx.translate(x + w / 2, y + h / 2); // Move origin to rectangle center
+          ctx.rotate(angle); // Rotate the rectangle
+          ctx.rect(-w / 2, -h / 2, w, h); // Draw rectangle relative to the new origin
+          ctx.restore(); // Restore the original canvas state
+        });
+      }
+
+      ctx.strokeStyle = "blue"; // Set line color
+      ctx.lineWidth = 1;
+      ctx.stroke(); // Draw the lines and rectangles
+    }
+  }
+
+  function showCanvasPoints() {
+    setTimeout(() => {
+      $displayCameras.forEach((camera, index) => {
+        let canvas = document.getElementById(`stream-canvas-${index}`);
+        if (camera?.isRoiEnabled) {
+          drawLinesRectangles(
+            canvas,
+            camera?.roiCanvasCoordinates,
+            camera?.roiRectangleCoordinates
+          );
+        }
+      });
+    }, 2000);
+  }
+
+  displayCameras?.subscribe((value) => {
+    showCanvasPoints();
+  });
 </script>
 
 {#if $nodes && $user}
   {#if $nodes.length === 0}
     <div
       class="
-    flex
-    flex-col
-    items-start
-    justify-center h-screen w-screen
-    dark:bg-dark-add-node
-    bg-no-repeat
-    pl-32
-    bg-light-add-node
-    bg-contain
-    bg-right
-    dark:bg-cover"
+        flex
+        flex-col
+        items-start
+        justify-center h-screen w-screen
+        dark:bg-dark-add-node
+        bg-no-repeat
+        pl-32
+        bg-light-add-node
+        bg-contain
+        bg-right
+        dark:bg-cover"
     >
       <form
         on:submit={(e) => e.preventDefault()}
@@ -218,6 +298,11 @@
                     ? `${STREAM_URL}/api/ws?src=${camera?.id}`
                     : `${STREAM_URL}/api/ws?src=${camera?.id}_FULL`}
               ></StreamTile>
+              <canvas
+                id={`stream-canvas-${index}`}
+                class="absolute top-0 left-0 w-full h-full p-3"
+                style="pointer-events: none;"
+              ></canvas>
               {#if index !== $priorityIndex && $selectedLayout > 6 && $selectedLayout < 10}
                 <button
                   class="absolute bottom-4 left-4"

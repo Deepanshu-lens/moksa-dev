@@ -26,6 +26,7 @@
   let recordDropdownOpen = false;
   let customRows: number;
   let customColumns: number;
+  export let isOpen;
 
   $: {
     const custom_layout = get(customLayout);
@@ -133,6 +134,20 @@
       console.log("ref unavailable");
     }
   };
+
+  const handleOpenMarkRoi = async () => {
+    if(!$selectedCamera) {
+      toast.error("Please select a camera first!");
+      return;
+    }
+    
+    await addUserLogs(
+      "User clicked on mark ROI",
+      $user?.email || "",
+      $user?.id || ""
+    );
+    isOpen.set(true);
+  }
 
   $: {
     if (customColumns >= 0 && customRows >= 0) {
@@ -267,15 +282,7 @@
             !$isRoiPanelOpen,
         }
       )}
-      on:click={async () => {
-        await addUserLogs(
-          "User clicked on mark ROI",
-          $user?.email || "",
-          $user?.id || ""
-        );
-        isRoiPanelOpen.update((value) => !value);
-        isAlertPanelOpen.set(false);
-      }}><ScanSearch class="h-[22px] w-[22px]" /></button
+      on:click={handleOpenMarkRoi}><ScanSearch class="h-[22px] w-[22px]" /></button
     >
     <p
       class={`text-xs ${!$isRoiPanelOpen && "text-black/[.4] dark:text-white"}`}
