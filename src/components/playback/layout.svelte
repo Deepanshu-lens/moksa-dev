@@ -36,7 +36,9 @@
   } from "@/lib/convertion";
 
   // Variables
-  let availableChannels = writable<{ id: string; label: string; name?: string; timeZone?: string }[]>([]);
+  let availableChannels = writable<
+    { id: string; label: string; name?: string; timeZone?: string }[]
+  >([]);
   let events: any[] = [];
   const currentTimeInterval = writable(0);
   let showRightPanel: boolean = true;
@@ -47,7 +49,9 @@
   let value: any = null;
   let searchDate = "";
   let eventDate = "";
-  let selectedChannels = writable<{ id: string; label: string; name?: string; timeZone?: string }[]>([]);
+  let selectedChannels = writable<
+    { id: string; label: string; name?: string; timeZone?: string }[]
+  >([]);
   let videoUrls: any = { responses: [], cams: [] };
   let isLoading = writable<boolean>(false);
   let startTime: string = "";
@@ -71,7 +75,7 @@
   selectedNode.subscribe(() => {
     selectedChannels.set([]);
   });
-  
+
   tabVal.subscribe(() => {
     startTime = "";
     endTime = "";
@@ -127,54 +131,10 @@
     });
   }
 
-  function handleDownload(index: number) {
-    const videoElement = videoRefs[index];
-    const { name } = videoUrls.cams[index];
-
-    if (Hls.isSupported()) {
-      const hls = new Hls();
-      hls?.loadSource(videoUrls.responses[index]);
-      hls?.attachMedia(videoElement);
-
-      // Add this event listener to get the current chunk path
-      hls.on(Hls.Events.FRAG_CHANGED, async function (event, data) {
-        const currentFragment = data.frag;
-        if (currentFragment) {
-          // Fetch the .ts file as a Blob
-          try {
-            const response = await fetch(currentFragment.url);
-            if (!response.ok) {
-              throw new Error("Network response was not ok");
-            }
-            const blob = await response.blob();
-            // Create a new File object for the MP4 format
-            let convertedBlob = new File([blob], `video_${name}.mp4`, {
-              type: "video/mp4",
-            });
-            const blobUrl = URL.createObjectURL(blob);
-
-            // Create a temporary anchor element for download
-            const a = document.createElement("a");
-            a.href = blobUrl; // Set the href to the Blob URL
-            a.download = `video_${name}.ts`; // Set the desired file name for download
-            document.body.appendChild(a); // Append the anchor to the body
-            a.click(); // Trigger the download
-            document.body.removeChild(a); // Remove the anchor from the document
-
-            // Clean up the Blob URL
-            URL.revokeObjectURL(blobUrl);
-          } catch (error) {
-            console.error("Error downloading the .ts file:", error);
-          }
-        }
-      });
-    }
-  }
-
   // multiple download
   async function handleDownloadAllVideos() {
     const zip = new JSZip();
-    const folder = zip.folder("videos"); // Create a folder in the ZIP
+    const folder = zip.folder("videos");
 
     const downloadPromises = videoUrls.responses.map((url, index) => {
       return new Promise(async (resolve) => {
@@ -184,11 +144,9 @@
         hls.loadSource(videoUrls.responses[index]);
         hls.attachMedia(videoElement);
 
-        // Add this event listener to get the current chunk path
-        hls.on(Hls.Events.FRAG_CHANGED, async function (event, data) {
+        const onFragmentChanged = async function (event, data) {
           const currentFragment = data.frag;
           if (currentFragment) {
-            // Fetch the .ts file as a Blob
             try {
               const response = await fetch(currentFragment.url);
               if (!response.ok) {
@@ -196,48 +154,48 @@
               }
               const tsBlob = await response.blob();
 
-              // Determine the file type based on user selection
-              const fileType = $selectedFileType; // Get the selected file type
+              const fileType = $selectedFileType;
               let convertedBlob;
 
               if (fileType === "mp4") {
-                // Create a new File object for the MP4 format
                 convertedBlob = new File([tsBlob], `video_${name}.mp4`, {
                   type: "video/mp4",
                 });
               } else if (fileType === "wav") {
-                // Create a new File object for the WAV format
                 convertedBlob = new File([tsBlob], `video_${name}.wav`, {
                   type: "video/wav",
                 });
               }
 
-              folder.file(convertedBlob.name, convertedBlob); // Add the converted file to the ZIP folder
-              resolve(); // Resolve the promise after adding the file
+              folder.file(convertedBlob.name, convertedBlob);
+
+              hls.off(Hls.Events.FRAG_CHANGED, onFragmentChanged);
+              resolve();
             } catch (error) {
               console.error(`Error downloading video ${index}:`, error);
-              resolve(); // Resolve even on error to continue with other downloads
+              hls.off(Hls.Events.FRAG_CHANGED, onFragmentChanged);
+              resolve();
             }
           } else {
-            resolve(); // Resolve if no current fragment
+            hls.off(Hls.Events.FRAG_CHANGED, onFragmentChanged);
+            resolve();
           }
-        });
+        };
+
+        hls.on(Hls.Events.FRAG_CHANGED, onFragmentChanged);
       });
     });
 
     Promise.all(downloadPromises).then(() => {
-      // Generate the ZIP file
       zip.generateAsync({ type: "blob" }).then((content) => {
-        // Create a temporary anchor element for download
         const a = document.createElement("a");
         const blobUrl = URL.createObjectURL(content);
         a.href = blobUrl;
-        a.download = "all_videos.zip"; // Set the desired file name for the ZIP
+        a.download = "all_videos.zip";
         document.body.appendChild(a);
-        a.click(); // Trigger the download
-        document.body.removeChild(a); // Remove the anchor from the document
+        a.click();
+        document.body.removeChild(a);
 
-        // Clean up the Blob URL
         URL.revokeObjectURL(blobUrl);
       });
     });
@@ -251,11 +209,9 @@
     hls.loadSource(videoUrls.responses[index]);
     hls.attachMedia(videoElement);
 
-    // Add this event listener to get the current chunk path
-    hls.on(Hls.Events.FRAG_CHANGED, async function (event, data) {
+    const onFragmentChanged = async function (event, data) {
       const currentFragment = data.frag;
       if (currentFragment) {
-        // Fetch the .ts file as a Blob
         try {
           const response = await fetch(currentFragment.url);
           if (!response.ok) {
@@ -263,27 +219,28 @@
           }
           const tsBlob = await response.blob();
 
-          // Create a new File object for the MP4 format
           const mp4File = new File([tsBlob], `video_${name}.mp4`, {
             type: "video/mp4",
           });
 
-          // Create a temporary anchor element for download
           const a = document.createElement("a");
           const blobUrl = URL.createObjectURL(mp4File);
           a.href = blobUrl;
-          a.download = mp4File.name; // Set the desired file name for download
+          a.download = mp4File.name;
           document.body.appendChild(a);
-          a.click(); // Trigger the download
-          document.body.removeChild(a); // Remove the anchor from the document
+          a.click();
+          document.body.removeChild(a);
 
-          // Clean up the Blob URL
           URL.revokeObjectURL(blobUrl);
         } catch (error) {
           console.error(`Error downloading video ${index}:`, error);
+        } finally {
+          hls.off(Hls.Events.FRAG_CHANGED, onFragmentChanged);
         }
       }
-    });
+    };
+
+    hls.on(Hls.Events.FRAG_CHANGED, onFragmentChanged);
   }
 
   const videoPlayer = () => {
