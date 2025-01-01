@@ -43,6 +43,7 @@
     { id: string; label: string; name?: string; timeZone?: string }[]
   >([]);
   let events: any[] = [];
+  let videoFrags = writable<any>({});
   const currentTimeInterval = writable(0);
   let showRightPanel: boolean = true;
   const videos = writable([]);
@@ -174,7 +175,11 @@
 
               hls.off(Hls.Events.FRAG_CHANGED, onFragmentChanged);
               resolve();
-              addUserLogs(`User downloaded video ${convertedBlob?.name}`, $user?.email || "", $user?.id || "");
+              addUserLogs(
+                `User downloaded video ${convertedBlob?.name}`,
+                $user?.email || "",
+                $user?.id || ""
+              );
             } catch (error) {
               console.error(`Error downloading video ${index}:`, error);
               hls.off(Hls.Events.FRAG_CHANGED, onFragmentChanged);
@@ -207,45 +212,38 @@
 
   // single download
   async function handleDownloadVideo(index: number) {
-    const { name } = videoUrls.cams[index];
-    const videoElement = videoRefs[index];
-    const hls = new Hls();
-    hls.loadSource(videoUrls.responses[index]);
-    hls.attachMedia(videoElement);
-
-    const onFragmentChanged = async function (event, data) {
-      const currentFragment = data.frag;
-      if (currentFragment) {
-        try {
-          const response = await fetch(currentFragment.url);
-          if (!response.ok) {
-            throw new Error("Network response was not ok");
-          }
-          const tsBlob = await response.blob();
-
-          const mp4File = new File([tsBlob], `video_${name}.mp4`, {
-            type: "video/mp4",
-          });
-
-          const a = document.createElement("a");
-          const blobUrl = URL.createObjectURL(mp4File);
-          a.href = blobUrl;
-          a.download = mp4File.name;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-
-          URL.revokeObjectURL(blobUrl);
-          addUserLogs(`User downloaded video ${mp4File.name}`, $user?.email || "", $user?.id || "");
-        } catch (error) {
-          console.error(`Error downloading video ${index}:`, error);
-        } finally {
-          hls.off(Hls.Events.FRAG_CHANGED, onFragmentChanged);
+    const url = $videoFrags[index];
+    if (url) {
+      try {
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
         }
-      }
-    };
+        const tsBlob = await response.blob();
 
-    hls.on(Hls.Events.FRAG_CHANGED, onFragmentChanged);
+        const mp4File = new File([tsBlob], `video_${name}.mp4`, {
+          type: "video/mp4",
+        });
+
+        const a = document.createElement("a");
+        const blobUrl = URL.createObjectURL(mp4File);
+        a.href = blobUrl;
+        a.download = mp4File.name;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        URL.revokeObjectURL(blobUrl);
+        addUserLogs(
+          `User downloaded video ${mp4File.name}`,
+          $user?.email || "",
+          $user?.id || ""
+        );
+        toast.success("Video downloaded!")
+      } catch (error) {
+        console.error(`Error downloading video ${index}:`, error);
+      }
+    }
   }
 
   const videoPlayer = () => {
@@ -272,6 +270,17 @@
               console.warn("Auto-play failed:", error);
               syncPlayState(index, false);
             });
+        });
+        hls?.on(Hls.Events.FRAG_CHANGED, (event, data) => {
+          const currentFragment = data.frag;
+          if (currentFragment) {
+            videoFrags.update((frags) => {
+              return {
+                ...frags,
+                [index]: currentFragment.url,
+              };
+            });
+          }
         });
       } else if (videoElement.canPlayType("application/vnd.apple.mpegurl")) {
         videoElement.src = videoUrls.responses[index];
@@ -369,7 +378,11 @@
   }
 
   function seekAllVideos(intervalIndex: number) {
-    addUserLogs(`User seeked all videos to ${intervalIndex}`, $user?.email || "", $user?.id || "");
+    addUserLogs(
+      `User seeked all videos to ${intervalIndex}`,
+      $user?.email || "",
+      $user?.id || ""
+    );
     videoRefs.forEach((video, index) => {
       video.pause();
       const seeker = document.querySelectorAll(
@@ -435,7 +448,11 @@
               }),
             });
 
-            addUserLogs(`User fetched playback data for ${channel?.label}`, $user?.email || "", $user?.id || "");
+            addUserLogs(
+              `User fetched playback data for ${channel?.label}`,
+              $user?.email || "",
+              $user?.id || ""
+            );
             if (!response.ok) {
               const errorData = await response.json();
               throw new Error(
@@ -556,13 +573,21 @@
     const video = videoRefs[index];
     if (video) {
       if (video.paused) {
-        addUserLogs(`User played video ${index}`, $user?.email || "", $user?.id || "");
+        addUserLogs(
+          `User played video ${index}`,
+          $user?.email || "",
+          $user?.id || ""
+        );
         video
           .play()
           .then(() => syncPlayState(index, true))
           .catch(console.error);
       } else {
-        addUserLogs(`User paused video ${index}`, $user?.email || "", $user?.id || "");
+        addUserLogs(
+          `User paused video ${index}`,
+          $user?.email || "",
+          $user?.id || ""
+        );
         video.pause();
         syncPlayState(index, false);
       }
@@ -573,10 +598,18 @@
     const allPlaying = $videoPlayStates.every((state) => state);
     videoRefs.forEach((video, index) => {
       if (allPlaying) {
-        addUserLogs(`User paused all videos`, $user?.email || "", $user?.id || "");
+        addUserLogs(
+          `User paused all videos`,
+          $user?.email || "",
+          $user?.id || ""
+        );
         pauseVideo(index);
       } else {
-        addUserLogs(`User played all videos`, $user?.email || "", $user?.id || "");
+        addUserLogs(
+          `User played all videos`,
+          $user?.email || "",
+          $user?.id || ""
+        );
         playVideo(index);
       }
     });
@@ -858,31 +891,21 @@
 
   //bookmark chunk
   async function bookMark(index: number, title: string) {
-    const { name } = videoUrls.cams[index];
-    const videoElement = videoRefs[index];
-    const hls = new Hls();
-    hls.loadSource(videoUrls.responses[index]);
-    hls.attachMedia(videoElement);
-
-    // Add this event listener to get the current chunk path
-    const markFrag = async (event, data) => {
-      const currentFragment = data.frag;
+      const currentFragment = $videoFrags[index];
       if (currentFragment) {
-        try{
+        try {
           const result = await pb.collection("criticalEvents").create({
             camera: $selectedChannels[index].id,
-            chunkUrl:currentFragment.url,
-            node:$selectedNode,
+            chunkUrl: currentFragment,
+            node: $selectedNode,
             session: $user?.session[0],
             title,
-          })
-        }catch(err){
-          console.error("Failed to save", err)
+          });
+          if(result) toast.success("Bookmark saved successfully.")
+        } catch (err) {
+          console.error("Failed to save", err);
         }
-        hls.off(Hls.Events.FRAG_CHANGED, markFrag);
-      }
     };
-    hls.on(Hls.Events.FRAG_CHANGED, markFrag);
   }
 </script>
 
