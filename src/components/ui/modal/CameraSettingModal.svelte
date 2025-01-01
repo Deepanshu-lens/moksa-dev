@@ -45,11 +45,17 @@
     Merge,
     PersonStanding,
     ScanFace,
+    MonitorCog,
+    Plus,
+    Minus,
+    Dot
   } from "lucide-svelte";
   import pb from "@/lib/pb";
   import { toast } from "svelte-sonner";
-  import { addUserLogs } from "@/lib/logs/userLogs";
-  import { user } from "@/stores";
+  import { writable } from "svelte/store";
+  import { onDestroy } from "svelte";
+  import StreamTile from "@/components/live/streams/StreamTile.svelte";
+  import getStreamURL from "@/lib/url";
   const streamTypes = [
     { value: "Default", label: "Default" },
     { value: "Mainstream", label: "Mainstream" },
@@ -77,6 +83,8 @@
       label: "Daily",
     },
   ];
+  const STREAM_URL = getStreamURL();
+
   let selectedOverwriteInterval = items.find((m) => m.value === saveDuration);
   let activeTab = initialTab ?? "display-settings";
   const isProd = import.meta.env.PUBLIC_ENV === "production";
@@ -130,8 +138,28 @@
   ];
   let selectedTimezone = timeZones.find((m) => m.value === timeZone);
   const pb_online = new PocketBase(import.meta.env.PUBLIC_POCKETBASE_URL);
+  
+  let index = writable(null);
+  let status = writable(null);
+  let presets = writable([]);
+  let zoomSpeed = writable("");
+  let isPtzOpen = writable(false);
+
   // Function to save camera settings
   const saveCameraSettings = async () => {
+    // Log all values before sending
+    console.log("Saving camera settings with the following values:", {
+      save,
+      face,
+      faceDetectionThreshold,
+      personDetectionThreshold,
+      faceSearchThreshold,
+      motionThresh,
+      fps,
+      person,
+      timeZone,
+    });
+
     try {
       const data = {
         save,
@@ -158,9 +186,8 @@
       //   const record = await pb.collection("camera").create(data);
       // }
       await pb.collection("camera").update(camera?.id, data);
-      addUserLogs("Camera settings updated successfully", $user?.email || "", $user?.id || "");
-      dialogOpen = false; // Close the dialog after saving
       // Optionally, you can close the dialog or show a success message
+      dialogOpen = false; // Close the dialog after saving
     } catch (error) {
       toast.error(
         error?.message || "something went wrong while updating camera settings"
@@ -170,12 +197,146 @@
     }
   };
 
-  $: console.log("ACTIVE TAB", activeTab);
-
   function isCurrentUrlLocalhost(): boolean {
     const hostname = window.location.hostname;
     return hostname === "localhost" || hostname === "127.0.0.1";
   }
+
+  async function getStatus() {
+    await fetch(`${import.meta.env.PUBLIC_ONVIF_URL}/status/${$index}`, {
+      method: "GET",
+    })
+      .then(async (res) => {
+        const data = await res.json();
+        // console.log(data)
+        status.set(data);
+      })
+      .catch((err) => console.log(err));
+  }
+  async function getPresets() {
+    await fetch(`${import.meta.env.PUBLIC_ONVIF_URL}/presets/${$index}`, {
+      method: "GET",
+    })
+      .then(async (res) => {
+        const data = await res.json();
+        // console.log(data)
+        const presetArray = Object.entries(data).map(([name, token]) => ({
+          name,
+          token,
+        }));
+
+        presets.set(presetArray);
+      })
+      .catch((err) => console.log(err));
+  }
+  async function setPreset() {
+    try {
+      await fetch(`${import.meta.env.PUBLIC_ONVIF_URL}/set-preset/${$index}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          presetName: `Preset ${$presets.length}`,
+          // presetToken: `Preset ${$presets.length}`
+        }),
+      }).then(async (res) => {
+        const data = await res.json();
+        if (!res?.ok) {
+          throw new Error(data?.message);
+        }
+        await getPresets();
+        toast.success(`Preset Saved Successfully!`);
+      });
+    } catch (error) {
+      toast.error(
+        error?.message || "Something went wrong while intializing onvif!"
+      );
+      console.log(error?.message, "err");
+    }
+  }
+  async function move(move: any, zoomValue: number) {
+    await fetch(`${import.meta.env.PUBLIC_ONVIF_URL}/relative-move/${$index}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        x: move === "left" ? -0.2 : move === "right" ? 0.2 : 0,
+        y: move === "up" ? 0.2 : move === "down" ? -0.2 : 0,
+        zoom: zoomValue === undefined ? $status.position.zoom : zoomValue,
+        speed: {
+          x: move[0],
+          y: move[0],
+          zoom: zoomValue,
+        },
+      }),
+    })
+      .then(async (res) => {
+        const data = await res.json();
+        console.log(data);
+        await getStatus();
+      })
+      .catch((err) => console.log(err));
+  }
+
+  async function moveSpeed(move: any, zoomValue: number) {
+    await fetch(`${import.meta.env.PUBLIC_ONVIF_URL}/relative-move/${$index}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        speed: {
+          x: move[0],
+          y: move[0],
+          zoom: zoomValue,
+        },
+      }),
+    })
+      .then(async (res) => {
+        const data = await res.json();
+        console.log(data);
+        await getStatus();
+      })
+      .catch((err) => console.log(err));
+  }
+  async function gotoPreset(preset) {
+    await fetch(`${import.meta.env.PUBLIC_ONVIF_URL}/goto-preset/${$index}`, {
+      method: "POST",
+      headers: {
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify({
+        preset: preset.token,
+      }),
+    })
+      .then(async (res) => {
+        const data = await res.json();
+        console.log(data);
+        toast.success(`Moved to preset: ${preset.name}`);
+      })
+      .catch((err) => console.log(err));
+  }
+
+  onDestroy(async () => {
+    console.log("stop called");
+    await fetch(`${import.meta.env.PUBLIC_ONVIF_URL}/stop/${index}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        pantilt: true,
+        zoom: true,
+      }),
+    })
+      .then(async (res) => {
+        const data = await res.json();
+        console.log(data);
+      })
+      .catch((err) => console.log(err));
+  });
 </script>
 
 <Dialog.Root bind:open={dialogOpen}>
@@ -193,8 +354,8 @@
         onValueChange={(value) => (activeTab = value)}
         class="w-full flex"
       >
-        <!-- Right Side tabs -->
-        <div class="h-[30rem] bg-neutral-100 dark:bg-black dark:text-white">
+        <!-- Left Side tabs -->
+        <div class="h-[32rem] bg-neutral-100 dark:bg-black dark:text-white">
           <TabsList
             class="flex p-5 flex-col gap-y-4 justify-start items-start w-full mx-auto bg-[#F3F3F3]  dark:bg-black"
           >
@@ -240,11 +401,17 @@
             >
               <TrendingUp size={16} class="mr-2" />AI Frame Ratio
             </TabsTrigger>
+            <TabsTrigger
+              value="ptz"
+              class="w-full flex items-center justify-start dark:hover:bg-neutral-700"
+            >
+              <MonitorCog size={16} class="mr-2" />PTZ Controls
+            </TabsTrigger>
           </TabsList>
         </div>
 
-        <!-- Tab Content Left side -->
-        <div class="h-[29rem] relative px-3">
+        <!-- Tab Content Right side -->
+        <div class="h-[35rem] relative px-3">
           <!-- display settings -->
           <TabsContent value="display-settings">
             <div class="space-y-4 w-full">
@@ -516,6 +683,7 @@
               {/if}
             </div>
           </TabsContent>
+
           <!-- face scanning -->
           <TabsContent value="face-scanning">
             <div class="space-y-4 w-full">
@@ -537,7 +705,7 @@
                     step={0.01}
                     value={[faceDetectionThreshold]}
                     onValueChange={(e) => (faceDetectionThreshold = e[0])}
-                    class="w-[60%]"
+                    class="w-[50%]"
                   />
                   <div class="relative flex items-center max-w-[8rem] ml-2">
                     <!-- svelte-ignore a11y_consider_explicit_label -->
@@ -625,6 +793,7 @@
                       class="w-[60%]"
                     />
                     <div class="relative flex items-center max-w-[8rem] ml-2">
+                      <!-- svelte-ignore a11y_consider_explicit_label -->
                       <button
                         type="button"
                         id="decrement-button"
@@ -667,6 +836,7 @@
                         placeholder="0"
                         required
                       />
+                      <!-- svelte-ignore a11y_consider_explicit_label -->
                       <button
                         type="button"
                         id="increment-button"
@@ -825,6 +995,7 @@
                   }}
                 />
                 <div class="relative flex items-center max-w-[8rem] ml-2">
+                  <!-- svelte-ignore a11y_consider_explicit_label -->
                   <button
                     type="button"
                     id="decrement-button"
@@ -863,6 +1034,7 @@
                     placeholder="0"
                     required
                   />
+                  <!-- svelte-ignore a11y_consider_explicit_label -->
                   <button
                     type="button"
                     id="increment-button"
@@ -920,6 +1092,7 @@
                   }}
                 />
                 <div class="relative flex items-center max-w-[8rem] ml-2">
+                  <!-- svelte-ignore a11y_consider_explicit_label -->
                   <button
                     type="button"
                     id="decrement-button"
@@ -958,6 +1131,7 @@
                     placeholder="0"
                     required
                   />
+                  <!-- svelte-ignore a11y_consider_explicit_label -->
                   <button
                     type="button"
                     id="increment-button"
@@ -992,8 +1166,133 @@
             </p>
           </TabsContent>
 
+          <!-- Ptz controls -->
+          <TabsContent value="ptz">
+            <div class="w-[33rem]">
+              <!-- Streaming container -->
+             <div class="w-full h-48">
+              <StreamTile
+              name={camera?.name}
+              id={camera?.id}
+              url={`${STREAM_URL}/api/ws?src=${camera?.id}`}
+            ></StreamTile>
+             </div>
+              <div class="flex items-center justify-evenly mt-6">
+                <span class="flex flex-col items-center justify-center gap-2">
+                  <span
+                    class="h-[75px] w-[35px] p-2 rounded-2xl bg-[#202020] interior text-white flex flex-col items-center justify-between"
+                  >
+                    <button on:click={() => moveSpeed("", 0.1)}
+                      ><Plus size="16" /></button
+                    >
+                    <button on:click={() => moveSpeed("", 0.1)}
+                      ><Minus size="16" /></button
+                    >
+                  </span>
+                  <p class="text-sm text-white">Focus</p>
+                </span>
+                <span>
+                  <span
+                    class="size-[120px] p-2 rounded-full bg-gradient-to-b border border-gray-800 shadow-custom-inset drop-shadow-3xl drop-shadow-gray-200 dark:border-gray-600 dark:shadow-gray-600 text-white flex flex-col items-center justify-center relative"
+                  >
+                    <span
+                      class="size-[80px] rounded-full bg-gradient-to-b shadow-lg drop-shadow-md shadow-gray-700 dark:border-gray-600 dark:shadow-gray-600 text-white border border-solid relative"
+                    >
+                      <!-- <Tooltip.Root>
+                      <Tooltip.Trigger asChild let:builder> -->
+                      <Button
+                        on:click={() => setPreset()}
+                        class="absolute text-white bg-gradient-to-b from-[#202020] to-[#141414] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                      >
+                        <Plus size="20" />
+                      </Button>
+                      <!-- </Tooltip.Trigger>
+                      <Tooltip.Content>
+                        <p>Add Preset</p>
+                      </Tooltip.Content>
+                    </Tooltip.Root> -->
+                    </span>
+      
+                    <button
+                      class="absolute text-white top-1/2 left-1 -translate-y-1/2"
+                      on:click={() => move("left", 0)}
+                    >
+                      <Dot size="20" />
+                    </button>
+                    <button
+                      class="absolute text-white top-1 left-1/2 -translate-x-1/2"
+                      on:click={() => move("up", 0)}
+                    >
+                      <Dot size="20" />
+                    </button>
+                    <button
+                      class="absolute text-white top-1/2 right-1 -translate-y-1/2"
+                      on:click={() => move("right", 0)}
+                    >
+                      <Dot size="20" />
+                    </button>
+                    <button
+                      class="absolute text-white bottom-1 right-1/2 translate-x-1/2"
+                      on:click={() => move("down", 0)}
+                    >
+                      <Dot size="20" />
+                    </button>
+                  </span>
+                </span>
+                <span class="flex flex-col items-center justify-center gap-2">
+                  <span
+                    class="h-[75px] w-[35px] p-2 rounded-2xl bg-[#202020] text-white flex flex-col items-center justify-between"
+                  >
+                    <button on:click={() => move("", 0.1)}><Plus size="16" /></button>
+                    <button on:click={() => move("", -0.1)}
+                      ><Minus size="16" /></button
+                    >
+                  </span>
+                  <p class="text-sm text-white">Zoom</p>
+                </span>
+              </div>
+              <div class="flex flex-col items-start justify-center gap-2 my-2 px-4">
+                <p class="text-sm text-white">Camera speed</p>
+                <Slider
+                  class="w-full bg-[#181818]"
+                  rangeBg="bg-[red]"
+                  max={1}
+                  step={0.1}
+                  onValueChange={(v) => moveSpeed(v, 0)}
+                />
+              </div>
+              <div class="flex flex-col items-start justify-center gap-1 my-2 px-4">
+                <p class="text-sm text-[#202020] dark:text-white">Presets</p>
+                <Select.Root portal={null}>
+                  <Select.Trigger class="w-full bg-[#202020] text-white">
+                    <Select.Value placeholder="Select a Preset" />
+                  </Select.Trigger>
+                  <Select.Content class="bg-[#202020]">
+                    <Select.Group>
+                      <Select.Label class="text-white">Presets</Select.Label>
+                      {#if $presets.length > 0}
+                        {#each $presets as preset}
+                          <Select.Item
+                            class="text-white"
+                            on:click={() => gotoPreset(preset)}
+                            value={preset?.token}
+                            label={preset?.name}>{preset?.name}</Select.Item
+                          >
+                        {/each}
+                      {:else}
+                        <Select.Item class="text-white" value={null} label={null}
+                          >No Presets</Select.Item
+                        >
+                      {/if}
+                    </Select.Group>
+                  </Select.Content>
+                </Select.Root>
+              </div>
+            </div>
+          </TabsContent>
+
           <div class="flex justify-end items-end absolute bottom-0 w-full">
-            <div class="border-t pt-4 w-full text-right">
+            <div class="border-t py-4 w-full text-right">
               <Button
                 variant="brand"
                 type="button"
