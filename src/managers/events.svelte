@@ -24,8 +24,15 @@
     }
   });
 
-  const getSoundsForSeverity = (severity: string) => {
-    let sound = JSON.parse(localStorage.getItem(severity));
+  const getSoundsForSeverityAndType = (severity: string, type: string) => {
+    let sound = JSON.parse(localStorage.getItem(type));
+
+    // if sound accoring to type is not found, then get sound according to severity
+    let localSeverity = JSON.parse(localStorage.getItem(severity));
+    if (!!localSeverity) {
+      sound = localSeverity;
+    }
+
     if (sound === "Notification") {
       soundFilePath =
         localStorage.getItem("alertSound") || "/notification-alert.mp3";
@@ -60,7 +67,7 @@
 
               // getting event sounds for severity
               toast.warning(`Event detected: ${e?.record?.title}`);
-              getSoundsForSeverity(e?.record?.severity);
+              getSoundsForSeverityAndType(e?.record?.severity, e?.record?.type);
               return updated;
             });
           } else if (e.action === "update") {

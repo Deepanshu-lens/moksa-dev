@@ -138,6 +138,16 @@
   ];
   let selectedTimezone = timeZones.find((m) => m.value === timeZone);
   const pb_online = new PocketBase(import.meta.env.PUBLIC_POCKETBASE_URL);
+
+  let eventType:string;
+  let EventTypes=["face","fire","person","alpr"];
+  let notification_sounds = [
+    "Level Up",
+    "Notification",
+    "Public Beep",
+    "Short Beep",
+  ];
+  let audio;
   
   let index = writable(null);
   let status = writable(null);
@@ -337,6 +347,25 @@
       })
       .catch((err) => console.log(err));
   });
+
+  // Select Alert Sound according to Event Type
+  const handleSelectAlertSound = (v) => {
+    window.localStorage.setItem(eventType, v?.value);
+    let sound = v?.value;
+    let soundFilePath = "/level-up.mp3";
+    if (sound === "Notification") {
+      soundFilePath = "/notification-alert.mp3";
+    } else if (sound === "Public Beep") {
+      soundFilePath = "/public-beep-sound.mp3";
+    } else if (sound === "Short Beep") {
+      soundFilePath = "/short-beep-tone.mp3";
+    } else {
+      soundFilePath = "/level-up.mp3";
+    }
+    audio = new Audio(`/notification-sounds/${soundFilePath}`);
+    audio.play();
+  };
+
 </script>
 
 <Dialog.Root bind:open={dialogOpen}>
@@ -406,6 +435,12 @@
               class="w-full flex items-center justify-start dark:hover:bg-neutral-700"
             >
               <MonitorCog size={16} class="mr-2" />PTZ Controls
+            </TabsTrigger>
+            <TabsTrigger
+              value="event"
+              class="w-full flex items-center justify-start dark:hover:bg-neutral-700"
+            >
+              <MonitorCog size={16} class="mr-2" />Event Notification
             </TabsTrigger>
           </TabsList>
         </div>
@@ -1287,6 +1322,69 @@
                     </Select.Group>
                   </Select.Content>
                 </Select.Root>
+              </div>
+            </div>
+          </TabsContent>
+
+          <!-- Event Notification Management -->
+          <TabsContent value="event">
+            <div class="w-[33rem] p-3">
+              <h4>Select Event Sounds according to Event Type</h4>
+              <div class="h-full p-5 pt-8">
+                <div class="flex flex-col m-5">
+                  <Label class="">Select Event Type</Label>
+                  <Select.Root
+                    portal={null}
+                    onSelectedChange={(v) => {
+                      eventType = v?.value;
+                    }}
+                  >
+                    <Select.Trigger class="mt-3 w-52">
+                      <Select.Value placeholder="Select a Event Type" />
+                    </Select.Trigger>
+                    <Select.Content class="">
+                      <Select.Group>
+                        <Select.Label class="">Type</Select.Label>
+                        {#if EventTypes.length > 0}
+                          {#each EventTypes as type}
+                            <Select.Item class="" value={type}
+                              >{type}</Select.Item
+                            >
+                          {/each}
+                        {:else}
+                          <Select.Item class="" value={null} 
+                            >No Types</Select.Item
+                          >
+                        {/if}
+                      </Select.Group>
+                    </Select.Content>
+                  </Select.Root>
+                </div>
+              
+                <div class="flex flex-col m-5">
+                  <Label class="">Select Event Alert Sounds</Label>
+                  <Select.Root portal={null} onSelectedChange={handleSelectAlertSound}>
+                    <Select.Trigger class="mt-3 w-52">
+                      <Select.Value placeholder="Select a Alert Sound" />
+                    </Select.Trigger>
+                    <Select.Content class="">
+                      <Select.Group>
+                        <Select.Label class="">Sounds</Select.Label>
+                        {#if notification_sounds.length > 0}
+                          {#each notification_sounds as sound}
+                            <Select.Item class="" value={sound} label={sound}
+                              >{sound}</Select.Item
+                            >
+                          {/each}
+                        {:else}
+                          <Select.Item class="" value={null} 
+                            >No Presets</Select.Item
+                          >
+                        {/if}
+                      </Select.Group>
+                    </Select.Content>
+                  </Select.Root>
+                </div>
               </div>
             </div>
           </TabsContent>
