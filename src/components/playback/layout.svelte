@@ -11,6 +11,7 @@
     PauseCircle,
     Download,
     FastForward,
+    Star,
   } from "lucide-svelte";
   import { selectedNode, nodes } from "@/stores";
   import { writable } from "svelte/store";
@@ -35,6 +36,7 @@
     convertDateToTimeZone,
     convertDateTimeToTimeZone,
   } from "@/lib/convertion";
+  import pb from "@/lib/pb";
 
   // Variables
   let availableChannels = writable<
@@ -853,6 +855,35 @@
     videoRefs.every((ref) => (ref.playbackRate = rate));
     isPopOpen = false;
   };
+
+  //bookmark chunk
+  async function bookMark(index: number, title: string) {
+    const { name } = videoUrls.cams[index];
+    const videoElement = videoRefs[index];
+    const hls = new Hls();
+    hls.loadSource(videoUrls.responses[index]);
+    hls.attachMedia(videoElement);
+
+    // Add this event listener to get the current chunk path
+    const markFrag = async (event, data) => {
+      const currentFragment = data.frag;
+      if (currentFragment) {
+        try{
+          const result = await pb.collection("criticalEvents").create({
+            camera: $selectedChannels[index].id,
+            chunkUrl:currentFragment.url,
+            node:$selectedNode,
+            session: $user?.session[0],
+            title,
+          })
+        }catch(err){
+          console.error("Failed to save", err)
+        }
+        hls.off(Hls.Events.FRAG_CHANGED, markFrag);
+      }
+    };
+    hls.on(Hls.Events.FRAG_CHANGED, markFrag);
+  }
 </script>
 
 <section class="right-playback flex-1 flex w-full h-screen justify-between">
@@ -1150,6 +1181,15 @@
                 class="cursor-pointer border border-black dark:bg-neutral-500 rounded-full"
               >
                 <Download size={14} />
+              </button>
+              <button
+                style="cursor: pointer;"
+                on:click={() => {
+                  bookMark(index, "Book Mark 1");
+                }}
+                class="cursor-pointer border border-black dark:bg-neutral-500 rounded-full p-0.5"
+              >
+                <Star size={12} />
               </button>
             </div>
             <div
