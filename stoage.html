@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Storage Stats Dashboard</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js Data Labels Plugin CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Storage Stats Dashboard</h1>
+        </header>
+
+        <section class="summary">
+            <div class="summary-item">
+                <h2>Total Storage Used</h2>
+                <p id="total-storage">Loading...</p>
+            </div>
+            <div class="summary-item">
+                <h2>Total Disk Storage</h2>
+                <p id="total-disk-storage">Loading...</p>
+            </div>
+            <div class="summary-item">
+                <h2>Playback Path</h2>
+                <p id="playback-path">Loading...</p>
+            </div>
+        </section>
+
+        <section class="filters">
+            <div class="filter-item">
+                <label for="display-all">Display All Cameras:</label>
+                <input type="checkbox" id="display-all" checked>
+            </div>
+            <div class="filter-item" id="camera-select-container" style="display: none;">
+                <label for="camera-select">Select Camera IDs:</label>
+                <select id="camera-select" multiple>
+                    <!-- Options will be populated dynamically -->
+                </select>
+            </div>
+            <button id="apply-filters">Apply Filters</button>
+        </section>
+
+        <section class="charts">
+            <div class="chart-container">
+                <h3>Storage by Date</h3>
+                <canvas id="dateChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>Storage by Camera</h3>
+                <canvas id="cameraChart"></canvas>
+            </div>
+        </section>
+    </div>
+
+    <script src="assets/js/script.js"></script>
+</body>
+</html>

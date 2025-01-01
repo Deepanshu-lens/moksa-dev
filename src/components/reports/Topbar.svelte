@@ -16,6 +16,7 @@
   import { cn } from "@/lib/utils.js";
   import { Button } from "@/components/ui/button/index.js";
   import * as Popover from "@/components/ui/popover/index.js";
+  import NodeSelection from "../node/NodeSelection.svelte";
   export let selectedScreen: number;
 
   function handleDateInput() {
@@ -51,7 +52,9 @@
               ? "Parking Management"
               : selectedScreen === 5
                 ? "System Health"
-              : "Events Management"}
+                : selectedScreen === 6
+                  ? "Events Management"
+                  : "Storage Stats Dashboard"}
     </h2>
     <h5 class="text-sm text-neutral-500">
       {selectedScreen === 1
@@ -62,6 +65,12 @@
             ? "Find reports based on detected events and saved information."
             : "Find reports based on detected events and saved information."}
     </h5>
+
+    {#if selectedScreen === 7}
+      <div class="w-52 m-2">
+        <NodeSelection />
+      </div>
+    {/if}
   </div>
   {#if selectedScreen === 2}
     <div class="flex items-center gap-4">
@@ -93,16 +102,14 @@
       <!-- svelte-ignore a11y-click-events-have-key-events -->
       <!-- svelte-ignore a11y-no-static-element-interactions -->
       <div class="flex items-center gap-4">
-        <span
-          class="relative"
-        >
+        <span class="relative">
           <Popover.Root>
             <Popover.Trigger asChild let:builder>
               <Button
                 variant="outline"
                 class={cn(
                   "w-[240px]  text-left font-normal",
-                  !value && "text-muted-foreground",
+                  !value && "text-muted-foreground"
                 )}
                 builders={[builder]}
               >
