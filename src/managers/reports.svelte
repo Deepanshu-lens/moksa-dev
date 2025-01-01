@@ -7,6 +7,7 @@
     HeartPulse,
     ParkingMeter,
     Lock,
+    CalendarRange,
   } from "lucide-svelte";
   import Topbar from "@/components/reports/Topbar.svelte";
   import Analytics from "@/components/reports/Analytics.svelte";
@@ -18,70 +19,11 @@
   import { selectedNode, user } from "@/stores";
   import { writable } from "svelte/store";
   import { addUserLogs } from "@/lib/logs/userLogs";
+  import EventsManagement from "@/components/reports/EventsManagement.svelte";
 
-  let selectedScreen = writable(1);
+  let selectedScreen = writable(6);
   export let data: any;
   let nodes: Node[] = [];
-
-  //   async function getNodes(): Promise<Node[]> {
-  //     if (session?.node.length > 0) {
-  //       const nodes = await PB.collection("node").getFullList(200, {
-  //         sort: "created",
-  //         expand: "camera",
-  //         filter: `session~"${session.id}"`,
-  //       });
-  //       console.log("getnodes", nodes);
-  //       return nodes.map(
-  //         (node) =>
-  //           ({
-  //             ...node,
-  //             session: session.id,
-  //             camera:
-  //               node.camera.length > 0
-  //                 ? (node.expand.camera.reverse().map((cam: Camera) => ({
-  //                     name: cam.name,
-  //                     id: cam.id,
-  //                     url: cam.url,
-  //                     subUrl: cam.subUrl,
-  //                     save: cam.save,
-  //                     face: cam.face,
-  //                     vehicle: cam.vehicle,
-  //                     faceDetThresh: cam.faceDetThresh,
-  //                     faceMatchThresh: cam.faceMatchThresh,
-  //                     vehicleDetThresh: cam.vehicleDetThresh,
-  //                     vehiclePlateThresh: cam.vehiclePlateThresh,
-  //                     vehicleOCRThresho: cam.vehicleOCRThresh,
-  //                     saveFolder: cam.saveFolder,
-  //                     saveDuration: cam.saveDuration,
-  //                     motionThresh: cam.motionThresh,
-  //                     priority: cam.priority,
-  //                   })) as Camera[])
-  //                 : [],
-  //           }) as unknown as Node
-  //       );
-  //     }
-  //     return [];
-  //   }
-
-  //   onMount(async () => {
-  //     nodes = await getNodes();
-  //     selectedNode.set(nodes[0]);
-
-  //     PB.collection("camera").subscribe("*", async (e) => {
-  //       nodes = await getNodes();
-  //       selectedNode.set(nodes[0]);
-  //     });
-
-  //     PB.collection("node").subscribe("*", async (e) => {
-  //       nodes = await getNodes();
-  //       selectedNode.set(nodes[0]);
-  //     });
-  //   });
-
-  //   onDestroy(() => {
-  //     PB.collection("node").unsubscribe("*");
-  //     PB.collection("camera").unsubscribe("*");
-  //   });
 
   const handleChangeTab = (tab: number) => {
     selectedScreen.set(tab);
@@ -98,7 +40,11 @@
       <span class="group flex items-center justify-center gap-0.5 flex-col">
         <button
           on:click={() => {
-            addUserLogs("User selected option Analytics for reports", $user?.email || "", $user?.id || "");
+            addUserLogs(
+              "User selected option Analytics for reports",
+              $user?.email || "",
+              $user?.id || ""
+            );
             handleChangeTab(1);
           }}
           class={$selectedScreen !== 1
@@ -115,7 +61,11 @@
       <span class="group flex items-center justify-center gap-0.5 flex-col">
         <button
           on:click={() => {
-            addUserLogs("User selected option Reports for reports", $user?.email || "", $user?.id || "");
+            addUserLogs(
+              "User selected option Reports for reports",
+              $user?.email || "",
+              $user?.id || ""
+            );
             handleChangeTab(2);
           }}
           class={$selectedScreen !== 2
@@ -132,7 +82,11 @@
       <span class="group flex items-center justify-center gap-0.5 flex-col">
         <button
           on:click={() => {
-            addUserLogs("User selected option Access Control for reports", $user?.email || "", $user?.id || "");
+            addUserLogs(
+              "User selected option Access Control for reports",
+              $user?.email || "",
+              $user?.id || ""
+            );
             handleChangeTab(5);
           }}
           class={$selectedScreen !== 5
@@ -146,80 +100,32 @@
           Health
         </p>
       </span>
-      <!-- <span class="group flex items-center justify-center gap-0.5 flex-col">
-        <button
-          on:click={() => handleChangeTab(3)}
-          class={$selectedScreen !== 3
-            ? `text-[#727272]/90 h-[40px] w-[40px] rounded-full   border border-solid border-[#727272]/90 dark:border-white/[.23] bg-white dark:bg-black dark:text-white group-hover:text-white group-hover:bg-[linear-gradient(90deg,#113046_0%,#2B6365_100%)] dark:group-hover:bg-[#258d9d] group-hover:border-none grid place-items-center `
-            : `relative border-none rounded-full  h-[40px] w-[40px] text-white bg-[linear-gradient(90deg,#113046_0%,#2B6365_100%)] grid place-items-center dark:bg-[#258d9d]`}
-        >
-          {#if $selectedScreen !== 3}
-            <img
-              src="/images/access.png"
-              alt="access"
-              class="h-[25px] w-[25px]"
-            />
-          {:else}
-            <img
-              src="/images/acces_dark.png"
-              alt="access"
-              class="h-[25px] w-[25px]"
-            />
-          {/if}
-        </button>
-        <p
-          class={`text-xs ${$selectedScreen !== 3 ? "group-hover:text-[#015a62] text-[#727272]/90 dark:text-white dark:group-hover:text-[#258d9d]" : "dark:text-[#258d9d]  text-[#015a62]"}`}
-        >
-          Access
-        </p>
-      </span>
       <span class="group flex items-center justify-center gap-0.5 flex-col">
         <button
-          on:click={() => handleChangeTab(4)}
-          class={$selectedScreen !== 4
+          on:click={() => {
+            addUserLogs(
+              "User selected option Access Control for reports",
+              $user?.email || "",
+              $user?.id || ""
+            );
+            handleChangeTab(6);
+          }}
+          class={$selectedScreen !== 6
             ? `text-[#727272]/90 h-[40px] w-[40px] rounded-full   border border-solid border-[#727272]/90 dark:border-white/[.23] bg-white dark:bg-black dark:text-white group-hover:text-white group-hover:bg-[linear-gradient(90deg,#113046_0%,#2B6365_100%)] dark:group-hover:bg-[#258d9d] group-hover:border-none grid place-items-center `
             : `relative border-none rounded-full  h-[40px] w-[40px] text-white bg-[linear-gradient(90deg,#113046_0%,#2B6365_100%)] grid place-items-center dark:bg-[#258d9d]`}
+          ><CalendarRange class="h-[22px] w-[22px]" /></button
         >
-          {#if $selectedScreen === 4}
-            <img
-              src="/images/parking.png"
-              alt="parking"
-              class="h-[25px] w-[25px]"
-            />
-          {:else}
-            <img
-              src="/images/parking_light.png"
-              alt="parking"
-              class="h-[25px] w-[25px]"
-            />
-          {/if}
-        </button>
         <p
-          class={`text-xs ${$selectedScreen !== 4 ? "group-hover:text-[#015a62] text-[#727272]/90 dark:text-white dark:group-hover:text-[#258d9d]" : "dark:text-[#258d9d]  text-[#015a62]"}`}
+          class={`text-xs ${$selectedScreen !== 6 ? "group-hover:text-[#015a62] text-[#727272]/90 dark:text-white dark:group-hover:text-[#258d9d]" : "dark:text-[#258d9d]  text-[#015a62]"}`}
         >
-          Parking
+          Events
         </p>
       </span>
-
-      <span class="group flex items-center justify-center gap-0.5 flex-col">
-        <button
-          on:click={() => handleChangeTab(5)}
-          class={$selectedScreen !== 5
-            ? `text-[#727272]/90 h-[40px] w-[40px] rounded-full   border border-solid border-[#727272]/90 dark:border-white/[.23] bg-white dark:bg-black dark:text-white group-hover:text-white group-hover:bg-[linear-gradient(90deg,#113046_0%,#2B6365_100%)] dark:group-hover:bg-[#258d9d] group-hover:border-none grid place-items-center `
-            : `relative border-none rounded-full  h-[40px] w-[40px] text-white bg-[linear-gradient(90deg,#113046_0%,#2B6365_100%)] grid place-items-center dark:bg-[#258d9d]`}
-          ><HeartPulse class="h-[22px] w-[22px]" />
-        </button>
-        <p
-          class={`text-xs ${$selectedScreen !== 5 ? "group-hover:text-[#015a62] text-[#727272]/90 dark:text-white dark:group-hover:text-[#258d9d]" : "dark:text-[#258d9d]  text-[#015a62]"}`}
-        >
-          Health
-        </p>
-      </span> -->
     </div>
   </section>
   <section class="right w-full h-full">
     {#if $selectedScreen !== 5}
-    <Topbar selectedScreen={$selectedScreen} />
+      <Topbar selectedScreen={$selectedScreen} />
     {/if}
     {#if $selectedScreen === 1}
       <Analytics />
@@ -239,6 +145,9 @@
     {/if}
     {#if $selectedScreen === 5 && $selectedNode}
       <Health {data} {nodes} />
+    {/if}
+    {#if $selectedScreen === 6}
+      <EventsManagement />
     {/if}
   </section>
 </main>

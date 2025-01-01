@@ -49,7 +49,9 @@
             ? "Access Control"
             : selectedScreen === 4
               ? "Parking Management"
-              : "System Health"}
+              : selectedScreen === 5
+                ? "System Health"
+              : "Events Management"}
     </h2>
     <h5 class="text-sm text-neutral-500">
       {selectedScreen === 1
