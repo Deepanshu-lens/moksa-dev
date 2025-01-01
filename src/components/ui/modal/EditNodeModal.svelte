@@ -5,7 +5,7 @@
   import { Label } from "@/components/ui/label";
   import { Button } from "@/components/ui/button";
   import { selectedNode, nodes, user } from "@/stores";
-
+  import { addUserLogs } from "@/lib/logs/userLogs";
   let nodeName = "";
   let modalOpen = false;
 
@@ -19,6 +19,7 @@
       .update($nodes.find((n) => n.id === $selectedNode)?.id, data);
     selectedNode.set(record.id);
     modalOpen = false;
+    addUserLogs("Node updated successfully", $user?.email || "", $user?.id || "");
   };
 </script>
 

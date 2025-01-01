@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { addUserLogs } from "@/lib/logs/userLogs";
+  import { user } from "@/stores";
   import PocketBase from "pocketbase";
   // import { page } from "$app/stores";
   import { getContext } from "svelte";
@@ -31,6 +33,11 @@
     const changefield = label.toLowerCase();
     const data = session;
     data[changefield] = event.target.checked;
+    addUserLogs(
+      `User selected ${changefield} for license`,
+      $user?.email||"",
+      $user?.id||""
+    );
     const record = await PB.collection("session").update(session?.id, data);
     console.log("pages updated", record);
     // }

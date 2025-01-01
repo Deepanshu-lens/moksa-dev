@@ -40,7 +40,7 @@
       );
       //   if (!response) reset();
       if (response) {
-        await addAuthLogs("register", values.email);
+        await addAuthLogs("User Registered", values.email);
         toast.success(
           `${values.name.split(" ")[0]}, welcome to ${import.meta.env.PUBLIC_BRAND_NAME}.`
         );

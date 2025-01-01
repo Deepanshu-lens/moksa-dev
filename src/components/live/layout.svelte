@@ -13,6 +13,7 @@
     isRoiPanelOpen,
     cameras,
     selectedCamera,
+    user,
   } from "@/stores";
   import SidePannel from "./side-pannel.svelte";
   import EventAlertModal from "../events/EventAlertModal.svelte";
@@ -31,6 +32,7 @@
   import { writable } from 'svelte/store';
   import StreamTile from './streams/StreamTile.svelte';
   import pb from '@/lib/pb';
+  import { addUserLogs } from '@/lib/logs/userLogs';
   const STREAM_URL = getStreamURL();
 
   let currentPanel = 1;
@@ -497,6 +499,7 @@
             roiCanvasCoordinates: lineCoordinates?.length>0? lineCoordinates:null,
             roiRectangleCoordinates:rectangleCoordinates?.length>0 ? rectangleCoordinates :null
         });
+        addUserLogs("ROI Details Saved Successfully", $user?.email || "", $user?.id || "");
         lines =[];
         rectangles=[];
         isOpen.set(false);
@@ -893,7 +896,6 @@
 </div>
 
 <Dialog.Root bind:open={$isOpen}>
-  <!-- <Dialog.Trigger on:click={()=>isOpen.set(true)}><slot></slot></Dialog.Trigger> -->
   <Dialog.Content class="h-[90vh] max-w-[77vw]">
     <div
       class="relative h-[76vh] w-[97%]"

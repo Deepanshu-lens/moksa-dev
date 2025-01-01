@@ -7,9 +7,11 @@
     allEvents,
     totalAllEvent,
     personCount,
+    user,
   } from "@/stores";
   import pb from "@/lib/pb";
   import EventAlertModal from "@/components/events/EventAlertModal.svelte";
+  import { addUserLogs } from "@/lib/logs/userLogs";
 
   export let selectedEventTypeFilters;
   export let date;
@@ -111,6 +113,7 @@
   }
 
   function openEventModal(event: Event): void {
+    addUserLogs(`User viewed event ${event?.title}`, $user?.email || "", $user?.id || "");
     selectedEvent = { ...event };
   }
 

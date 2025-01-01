@@ -3,7 +3,6 @@
   type Section = "Remote" | "Stream" | "Recording" | "System" | "Camera" | "License" | "User";
 
   // Imports
-  import { writable } from "svelte/store";
   import {
     CameraIcon,
     Cast,
@@ -12,6 +11,7 @@
     Radio,
     Router,
     User2,
+    TriangleAlert
   } from "lucide-svelte";
   import Stream from "@/components/configuration//settings/Stream.svelte";
   import Camera from "@/components/configuration/settings/Camera.svelte";
@@ -23,6 +23,9 @@
   import PageBarMobile2 from "@/components/bars/PageBarMobile2.svelte";
   import MobileMenuConfig from "@/components/bars/MobileNavs/MobileMenuConfig.svelte";
   import { currentSection } from "@/stores/config-section";
+  import { addUserLogs } from "@/lib/logs/userLogs";
+  import { user } from "@/stores";
+  import AlertsManagement from "@/components/configuration/alerts-management.svelte";
 
   // State
   let search: string | null = null;
@@ -46,7 +49,8 @@
     searchParams.set("section", text);
     window.history.pushState(null, "", `${location.pathname}?${searchParams}`);
     currentSection.set(text);
-  };
+    addUserLogs(`User selected option ${text} for configuration`, $user?.email || "", $user?.id || "");
+  }
 
   // Styles
   const baseButtonClass = "h-[40px] w-[40px] rounded-full grid place-items-center";
@@ -59,11 +63,13 @@
 <section class="right h-[calc(100vh-75px)] w-full flex-1 bg-background flex flex-row-reverse">
   <!-- Navigation Buttons -->
   <div class="flex-col gap-4 items-center justify-center pl-2 pr-4 h-full my-auto hidden lg:flex">
-    {#each ["Remote", "Stream", "Recording", "System", "Camera", "License", "User"] as section}
+    {#each ["Remote", "Stream", "Recording", "System", "Camera", "License", "User","Alerts"] as section}
       <span class="group flex flex-col gap-0.5 items-center justify-center">
         <button
           disabled={section === "Camera"}
-          on:click={() => handleButtonClick(section as Section)}
+          on:click={() => {
+            handleButtonClick(section as Section);
+          }}
           class={($currentSection !== section ? inactiveButtonClass : activeButtonClass) + (section === "Camera" ? " opacity-50" : "")}
         >
           {#if section === "Remote"}
@@ -78,8 +84,10 @@
             <CameraIcon class="h-[22px] w-[22px]" />
           {:else if section === "License"}
             <FileSignatureIcon class="h-[22px] w-[22px]" />
-          {:else}
+          {:else if section === "User"}
             <User2 class="h-[22px] w-[22px]" />
+          {:else}
+            <TriangleAlert class="h-[22px] w-[22px]" />
           {/if}
         </button>
         <p class={`text-xs ${$currentSection !== section ? "text-[#727272]/90 dark:text-white" : ""}`}>
@@ -103,8 +111,10 @@
       <Camera />
     {:else if $currentSection === "License"}
       <License />
-    {:else}
+    {:else if $currentSection === "User"}
       <UserS/>
+    {:else}
+      <AlertsManagement/>
     {/if}
   </div>
 

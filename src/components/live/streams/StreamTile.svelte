@@ -3,7 +3,7 @@
   import Icon from "@iconify/svelte";
 
   import { VideoStream } from "@/lib/video-stream";
-  import { cameras, personCount, selectedCamera } from "@/stores";
+  import { cameras, personCount, selectedCamera, user } from "@/stores";
   import { PersonStanding } from "lucide-svelte";
   import { getHeatMapImage } from "@/managers/get-heathmap";
   import ImagePreviewModal from "./ImagePreviewModal.svelte";
@@ -11,6 +11,7 @@
   import { cn } from "@/lib/utils";
   import { writable } from "svelte/store";
   import { updateTransform } from "@/lib/video-utils";
+  import { addUserLogs } from "@/lib/logs/userLogs";
 
   const isProduction = import.meta.env.PUBLIC_ENV === "production";
 
@@ -112,6 +113,7 @@
   const getHeatImg = async (id: string) => {
     imgDialogOpen.set(true);
     loading = true;
+    addUserLogs("User viewed heatmap", $user?.email || "", $user?.id || "");
     await getHeatMapImage(id);
     loading = false;
   };
@@ -286,8 +288,10 @@
         )}
       on:dblclick={() => {
         if ($isFullScreen) {
+          addUserLogs("User exited fullscreen", $user?.email || "", $user?.id || "");
           exitFullscreen();
         } else {
+          addUserLogs("User entered fullscreen", $user?.email || "", $user?.id || "");
           fullscreen(id);
         }
       }}

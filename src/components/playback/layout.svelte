@@ -30,6 +30,7 @@
   import JSZip from "jszip";
   import * as Popover from "@/components/ui/popover/index";
   import Label from "../ui/label/label.svelte";
+  import { addUserLogs } from "@/lib/logs/userLogs";
   import {
     convertDateToTimeZone,
     convertDateTimeToTimeZone,
@@ -171,6 +172,7 @@
 
               hls.off(Hls.Events.FRAG_CHANGED, onFragmentChanged);
               resolve();
+              addUserLogs(`User downloaded video ${convertedBlob?.name}`, $user?.email || "", $user?.id || "");
             } catch (error) {
               console.error(`Error downloading video ${index}:`, error);
               hls.off(Hls.Events.FRAG_CHANGED, onFragmentChanged);
@@ -232,6 +234,7 @@
           document.body.removeChild(a);
 
           URL.revokeObjectURL(blobUrl);
+          addUserLogs(`User downloaded video ${mp4File.name}`, $user?.email || "", $user?.id || "");
         } catch (error) {
           console.error(`Error downloading video ${index}:`, error);
         } finally {
@@ -364,6 +367,7 @@
   }
 
   function seekAllVideos(intervalIndex: number) {
+    addUserLogs(`User seeked all videos to ${intervalIndex}`, $user?.email || "", $user?.id || "");
     videoRefs.forEach((video, index) => {
       video.pause();
       const seeker = document.querySelectorAll(
@@ -429,6 +433,7 @@
               }),
             });
 
+            addUserLogs(`User fetched playback data for ${channel?.label}`, $user?.email || "", $user?.id || "");
             if (!response.ok) {
               const errorData = await response.json();
               throw new Error(
@@ -549,11 +554,13 @@
     const video = videoRefs[index];
     if (video) {
       if (video.paused) {
+        addUserLogs(`User played video ${index}`, $user?.email || "", $user?.id || "");
         video
           .play()
           .then(() => syncPlayState(index, true))
           .catch(console.error);
       } else {
+        addUserLogs(`User paused video ${index}`, $user?.email || "", $user?.id || "");
         video.pause();
         syncPlayState(index, false);
       }
@@ -564,8 +571,10 @@
     const allPlaying = $videoPlayStates.every((state) => state);
     videoRefs.forEach((video, index) => {
       if (allPlaying) {
+        addUserLogs(`User paused all videos`, $user?.email || "", $user?.id || "");
         pauseVideo(index);
       } else {
+        addUserLogs(`User played all videos`, $user?.email || "", $user?.id || "");
         playVideo(index);
       }
     });

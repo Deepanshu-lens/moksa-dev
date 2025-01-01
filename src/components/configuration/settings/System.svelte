@@ -1,12 +1,16 @@
 <script lang="ts">
   import Switch from "@/components/ui/switch/switch.svelte";
+  import { addUserLogs } from "@/lib/logs/userLogs";
   import { ChevronDown, RotateCcw } from "lucide-svelte";
-  // import { addUserLog } from "@/lib/addUserLog";
+  import { user } from "@/stores";
 
   let selected = 1;
   let firmType = 1;
   let firmOptions = [
-    { id: 1, label: `Update online using ${import.meta.env.PUBLIC_BRAND_NAME} server` },
+    {
+      id: 1,
+      label: `Update online using ${import.meta.env.PUBLIC_BRAND_NAME} server`,
+    },
     {
       id: 2,
       label: "manual update (if you have the update package available)",
@@ -15,6 +19,22 @@
   let checked = false;
   let showRebootModal = false;
   let selectedTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+  $: {
+    if (firmType === 1) {
+      addUserLogs(
+        "User selected online update for firmware",
+        $user?.email || "",
+        $user?.id || ""
+      );
+    }else if(firmType === 2){
+      addUserLogs(
+        "User selected manual update for firmware",
+        $user?.email || "",
+        $user?.id || ""
+      );
+    }
+  }
 </script>
 
 <div

@@ -17,7 +17,7 @@
   import { Loader2 } from "lucide-svelte";
   import getOnvifUrl from "@/lib/onvif";
   import PocketBase from "pocketbase";
-  import getPlaybackURL from "@/lib/playback";
+  import { addUserLogs } from "@/lib/logs/userLogs";
 
   const pb_online = new PocketBase(import.meta.env.PUBLIC_POCKETBASE_URL);
   export let cameraName = "";
@@ -149,6 +149,7 @@
         }
         doneSubmit = true;
         modalOpen.set(false);
+        addUserLogs("Camera added successfully via rtsp", $user?.email || "", $user?.id || "");
         toast.success("Camera added successfully");
       } catch (error) {
         console.error("Failed to add camera:", error);
@@ -202,6 +203,7 @@
       }
       doneSubmit = true;
       modalOpen.set(false);
+      addUserLogs("Camera added successfully via spectra", $user?.email || "", $user?.id || "");
       toast.success("Camera added successfully");
     } else {
       setRtspToDb();
@@ -369,6 +371,7 @@
         }
 
         const data = await response.json();
+        addUserLogs("Camera added successfully via rtsp to db method", $user?.email || "", $user?.id || "");
         return { camera: camera.cameraName, data };
       } catch (error) {
         console.error(

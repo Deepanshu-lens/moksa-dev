@@ -205,6 +205,7 @@
             $user?.email || "",
             $user?.id || ""
           );
+          addUserLogs("User added person to gallery", $user?.email || "", $user?.id || "");
           toast.success(`${username} successfully added to gallery`);
           registrationImages.set([]);
           imposterImages.set([]);

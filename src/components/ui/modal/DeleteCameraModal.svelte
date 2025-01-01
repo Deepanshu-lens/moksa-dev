@@ -2,10 +2,12 @@
   import pb from "@/lib/sharedPB";
   import * as AlertDialog from "@/components/ui/alert-dialog";
   import { selectedNode, nodes, user } from "@/stores";
+  import { addUserLogs } from "@/lib/logs/userLogs";
   export let camera;
 
   const deleteCamera = async () => {
     const record = await pb.collection("camera").delete(camera.id);
+    addUserLogs("Camera deleted successfully", $user?.email || "", $user?.id || "");
   };
 </script>
 
