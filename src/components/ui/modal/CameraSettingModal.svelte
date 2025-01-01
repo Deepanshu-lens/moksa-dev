@@ -1330,8 +1330,8 @@
           <TabsContent value="event">
             <div class="w-[33rem] p-3">
               <h4>Select Event Sounds according to Event Type</h4>
-              <div class="h-full p-5 pt-8">
-                <div class="flex flex-col m-5">
+              <div class="h-full p-5 pt-4">
+                <div class="flex flex-col my-3">
                   <Label class="">Select Event Type</Label>
                   <Select.Root
                     portal={null}
@@ -1361,7 +1361,7 @@
                   </Select.Root>
                 </div>
               
-                <div class="flex flex-col m-5">
+                <div class="flex flex-col mt-6">
                   <Label class="">Select Event Alert Sounds</Label>
                   <Select.Root portal={null} onSelectedChange={handleSelectAlertSound}>
                     <Select.Trigger class="mt-3 w-52">
