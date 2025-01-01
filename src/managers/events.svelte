@@ -13,7 +13,8 @@
   onMount(() => {
     let sound = window.localStorage.getItem("alertSound") || "Short Beep";
     if (sound === "Notification") {
-      soundFilePath = "/notification-alert.mp3";
+      soundFilePath =
+        localStorage.getItem("alertSound") || "/notification-alert.mp3";
     } else if (sound === "Public Beep") {
       soundFilePath = "/public-beep-sound.mp3";
     } else if (sound === "Short Beep") {
@@ -22,6 +23,24 @@
       soundFilePath = "/level-up.mp3";
     }
   });
+
+  const getSoundsForSeverity = (severity: string) => {
+    let sound = JSON.parse(localStorage.getItem(severity));
+    if (sound === "Notification") {
+      soundFilePath =
+        localStorage.getItem("alertSound") || "/notification-alert.mp3";
+    } else if (sound === "Public Beep") {
+      soundFilePath = "/public-beep-sound.mp3";
+    } else if (sound === "Short Beep") {
+      soundFilePath = "/short-beep-tone.mp3";
+    } else {
+      soundFilePath = "/level-up.mp3";
+    }
+    audio = new Audio(
+      `/notification-sounds/${localStorage.getItem("alertSound") || soundFilePath}`
+    );
+    audio.play(); // Play sound when critical event is detected
+  };
 
   const subscribeToEvents = () => {
     try {
@@ -39,17 +58,12 @@
                 updated.splice(0, trimSize); // Remove the first 20 events
               }
 
-              // playing sound upon critical event
-              if (e?.record?.severity === "critical") {
-                toast.warning(`Critical event detected: ${e?.record?.title}`);
-                audio = new Audio(`/notification-sounds/${soundFilePath}`);
-                audio.play(); // Play sound when critical event is detected
-              }
-
+              // getting event sounds for severity
+              toast.warning(`Event detected: ${e?.record?.title}`);
+              getSoundsForSeverity(e?.record?.severity);
               return updated;
             });
           } else if (e.action === "update") {
-            audio.play(); // Play sound when critical event is detected
             liveEvents.update((current: any) =>
               current.map((cam: any) =>
                 cam.id === e.record.id ? e.record : cam
