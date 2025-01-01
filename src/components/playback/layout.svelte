@@ -31,9 +31,15 @@
   import * as Popover from "@/components/ui/popover/index";
   import Label from "../ui/label/label.svelte";
   import { addUserLogs } from "@/lib/logs/userLogs";
+  import {
+    convertDateToTimeZone,
+    convertDateTimeToTimeZone,
+  } from "@/lib/convertion";
 
   // Variables
-  let availableChannels = writable<{ id: string; label: string }[]>([]);
+  let availableChannels = writable<
+    { id: string; label: string; name?: string; timeZone?: string }[]
+  >([]);
   let events: any[] = [];
   const currentTimeInterval = writable(0);
   let showRightPanel: boolean = true;
@@ -44,7 +50,9 @@
   let value: any = null;
   let searchDate = "";
   let eventDate = "";
-  let selectedChannels = writable<{ id: string; label: string }[]>([]);
+  let selectedChannels = writable<
+    { id: string; label: string; name?: string; timeZone?: string }[]
+  >([]);
   let videoUrls: any = { responses: [], cams: [] };
   let isLoading = writable<boolean>(false);
   let startTime: string = "";
@@ -61,11 +69,17 @@
   let selectedFileType = writable<string>("mp4");
   let selectedVideo = writable<number | null>();
   let isPopOpen = false;
+  let tabVal = writable<string>("byDate");
 
   const PLAYBACK_API_URL = getPlaybackURL();
 
   selectedNode.subscribe(() => {
     selectedChannels.set([]);
+  });
+
+  tabVal.subscribe(() => {
+    startTime = "";
+    endTime = "";
   });
 
   //Constants
@@ -121,7 +135,7 @@
   // multiple download
   async function handleDownloadAllVideos() {
     const zip = new JSZip();
-    const folder = zip.folder("videos"); // Create a folder in the ZIP
+    const folder = zip.folder("videos");
 
     const downloadPromises = videoUrls.responses.map((url, index) => {
       return new Promise(async (resolve) => {
@@ -131,11 +145,9 @@
         hls.loadSource(videoUrls.responses[index]);
         hls.attachMedia(videoElement);
 
-        // Add this event listener to get the current chunk path
-        hls.on(Hls.Events.FRAG_CHANGED, async function (event, data) {
+        const onFragmentChanged = async function (event, data) {
           const currentFragment = data.frag;
           if (currentFragment) {
-            // Fetch the .ts file as a Blob
             try {
               const response = await fetch(currentFragment.url);
               if (!response.ok) {
@@ -143,49 +155,49 @@
               }
               const tsBlob = await response.blob();
 
-              // Determine the file type based on user selection
-              const fileType = $selectedFileType; // Get the selected file type
+              const fileType = $selectedFileType;
               let convertedBlob;
 
               if (fileType === "mp4") {
-                // Create a new File object for the MP4 format
                 convertedBlob = new File([tsBlob], `video_${name}.mp4`, {
                   type: "video/mp4",
                 });
               } else if (fileType === "wav") {
-                // Create a new File object for the WAV format
                 convertedBlob = new File([tsBlob], `video_${name}.wav`, {
                   type: "video/wav",
                 });
               }
 
-              folder.file(convertedBlob.name, convertedBlob); // Add the converted file to the ZIP folder
-              resolve(); // Resolve the promise after adding the file
+              folder.file(convertedBlob.name, convertedBlob);
+
+              hls.off(Hls.Events.FRAG_CHANGED, onFragmentChanged);
+              resolve();
               addUserLogs(`User downloaded video ${convertedBlob?.name}`, $user?.email || "", $user?.id || "");
             } catch (error) {
               console.error(`Error downloading video ${index}:`, error);
-              resolve(); // Resolve even on error to continue with other downloads
+              hls.off(Hls.Events.FRAG_CHANGED, onFragmentChanged);
+              resolve();
             }
           } else {
-            resolve(); // Resolve if no current fragment
+            hls.off(Hls.Events.FRAG_CHANGED, onFragmentChanged);
+            resolve();
           }
-        });
+        };
+
+        hls.on(Hls.Events.FRAG_CHANGED, onFragmentChanged);
       });
     });
 
     Promise.all(downloadPromises).then(() => {
-      // Generate the ZIP file
       zip.generateAsync({ type: "blob" }).then((content) => {
-        // Create a temporary anchor element for download
         const a = document.createElement("a");
         const blobUrl = URL.createObjectURL(content);
         a.href = blobUrl;
-        a.download = "all_videos.zip"; // Set the desired file name for the ZIP
+        a.download = "all_videos.zip";
         document.body.appendChild(a);
-        a.click(); // Trigger the download
-        document.body.removeChild(a); // Remove the anchor from the document
+        a.click();
+        document.body.removeChild(a);
 
-        // Clean up the Blob URL
         URL.revokeObjectURL(blobUrl);
       });
     });
@@ -199,11 +211,9 @@
     hls.loadSource(videoUrls.responses[index]);
     hls.attachMedia(videoElement);
 
-    // Add this event listener to get the current chunk path
-    hls.on(Hls.Events.FRAG_CHANGED, async function (event, data) {
+    const onFragmentChanged = async function (event, data) {
       const currentFragment = data.frag;
       if (currentFragment) {
-        // Fetch the .ts file as a Blob
         try {
           const response = await fetch(currentFragment.url);
           if (!response.ok) {
@@ -211,28 +221,29 @@
           }
           const tsBlob = await response.blob();
 
-          // Create a new File object for the MP4 format
           const mp4File = new File([tsBlob], `video_${name}.mp4`, {
             type: "video/mp4",
           });
 
-          // Create a temporary anchor element for download
           const a = document.createElement("a");
           const blobUrl = URL.createObjectURL(mp4File);
           a.href = blobUrl;
-          a.download = mp4File.name; // Set the desired file name for download
+          a.download = mp4File.name;
           document.body.appendChild(a);
-          a.click(); // Trigger the download
-          document.body.removeChild(a); // Remove the anchor from the document
+          a.click();
+          document.body.removeChild(a);
 
-          // Clean up the Blob URL
           URL.revokeObjectURL(blobUrl);
           addUserLogs(`User downloaded video ${mp4File.name}`, $user?.email || "", $user?.id || "");
         } catch (error) {
           console.error(`Error downloading video ${index}:`, error);
+        } finally {
+          hls.off(Hls.Events.FRAG_CHANGED, onFragmentChanged);
         }
       }
-    });
+    };
+
+    hls.on(Hls.Events.FRAG_CHANGED, onFragmentChanged);
   }
 
   const videoPlayer = () => {
@@ -386,21 +397,32 @@
       return;
     }
 
-    isFetching.set(true);
-
-    const dateParts = searchDate.split(" ");
-    const day = dateParts[0].padStart(2, "0");
-    const month =
-      new Date(Date.parse(dateParts[1] + " 1, 2020")).getMonth() + 1;
-    const year = dateParts[2];
-    const formattedDate = `${year}_${month.toString().padStart(2, "0")}_${day}`;
-
     try {
       events = [];
       videoUrls = { responses: [], cams: [] };
 
+      isFetching.set(true);
+
       const responses = await Promise.allSettled(
         $selectedChannels.map(async (channel) => {
+          let formatted_search_date;
+          if (channel.timeZone) {
+            formatted_search_date = convertDateToTimeZone(
+              searchDate,
+              channel.timeZone
+            );
+          } else {
+            formatted_search_date = convertDateToTimeZone(searchDate);
+          }
+          //this need to looked as we not always have a timeZone making the formatted date to be null
+          const dateParts = formatted_search_date
+            ? formatted_search_date.split(" ")
+            : searchDate.split(" ");
+          const day = dateParts[0].padStart(2, "0");
+          const month =
+            new Date(Date.parse(dateParts[1] + " 1, 2020")).getMonth() + 1;
+          const year = dateParts[2];
+          const formattedDate = `${year}_${month.toString().padStart(2, "0")}_${day}`;
           try {
             const response = await fetch(PLAYBACK_API_URL, {
               method: "POST",
@@ -420,7 +442,23 @@
             }
 
             const data = await response.json();
-            return { data, path: data.path, channel };
+            let timeZoneAdjTime;
+            if (channel.timeZone) {
+              timeZoneAdjTime = convertDateTimeToTimeZone(
+                data.created,
+                channel.timeZone
+              );
+            } else {
+              timeZoneAdjTime = convertDateTimeToTimeZone(data.created);
+            }
+            return {
+              data: {
+                ...data,
+                created: timeZoneAdjTime || data.created,
+              },
+              path: data.path,
+              channel,
+            };
           } catch (error) {
             return { error, channel }; // Return the error along with channel info
           }
@@ -1167,7 +1205,7 @@
     >
       <NodeSelection />
       <div class="px-4 py-4 flex flex-col gap-1">
-        <Tabs.Root value="byDate">
+        <Tabs.Root bind:value={$tabVal}>
           <Tabs.List class="w-full border mb-4">
             <Tabs.Trigger value="byDate" class="w-1/2 rounded-md"
               >By Date</Tabs.Trigger
@@ -1180,7 +1218,7 @@
             >Select Cameras</label
           >
           <!-- Cameras List limit upto 8 -->
-          <div class="w-full px-2 py-1 max-h-[160px] overflow-y-auto">
+          <div class="w-full px-2 py-1 max-h-[180px] overflow-y-auto">
             {#if $isLoading}
               <Loader2 size={20} class="animate-spin" />
             {:else if $availableChannels.length === 0}
@@ -1188,10 +1226,13 @@
                 No cameras have recordings available.
               </p>
             {:else}
+              <!-- svelte-ignore a11y_no_static_element_interactions -->
               {#each $availableChannels as channel}
                 <!-- <span>{$nodes?.find((node) => node?.id === channel?.node?.[0])?.name}</span> -->
+                <!-- svelte-ignore a11y_click_events_have_key_events -->
                 <div
-                  class="flex items-center mb-2 border dark:border my-4 hover:border hover:border-primary space-x-4 rounded-xl text-sm z-10 w-[90%] py-1.5 px-4 relative"
+                  class="flex items-center mb-2 border dark:border my-2 hover:border hover:border-primary space-x-4 rounded-md text-sm py-3 px-4 relative"
+                  on:click={() => toggleChannelSelection(channel)}
                 >
                   <input
                     disabled={$selectedChannels.length === 8 &&
@@ -1200,13 +1241,12 @@
                     id={channel.id}
                     value={channel.id}
                     checked={$selectedChannels.includes(channel)}
-                    on:change={() => toggleChannelSelection(channel)}
                     class="mr-2"
                   />
                   <label
                     for={channel.id}
                     class={cn(
-                      "text-sm",
+                      "text-sm truncate",
                       $selectedChannels.length === 8 &&
                         !$selectedChannels.includes(channel) &&
                         "text-gray-400"
