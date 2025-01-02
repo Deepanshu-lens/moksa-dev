@@ -4,7 +4,7 @@
   import { selectedNode } from "@/stores";
   import * as Dialog from "@/components/ui/dialog";
   import { Button } from "@/components/ui/button";
-  import { cn } from "@/lib";
+  import { cn } from "@/lib/utils";
   export let toggleDisplayLayouts: () => void;
   let dialogOpen = false;
   let selected =

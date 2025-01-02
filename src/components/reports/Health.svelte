@@ -33,7 +33,7 @@
 
   import AreaAnalysis from "./charts/AreaAnalysis.svelte";
   import { Input } from "../ui/input";
-  import StorageNvrCard from "../cards/StorageNvrCard.svelte";
+  // import StorageNvrCard from "../cards/StorageNvrCard.svelte";
   import Doughnut from "./charts/Doughnut.svelte";
   import pb from "@/lib/pb";
   import { writable } from "svelte/store";
@@ -696,9 +696,9 @@
       </div>
       <div class="flex flex-wrap items-center gap-5 pb-10">
         {#if NvrStorageData}
-          {#each NvrStorageData as sd}
+          <!-- {#each NvrStorageData as sd}
             <StorageNvrCard {sd} />
-          {/each}
+          {/each} -->
         {/if}
       </div>
     </section>

@@ -2,7 +2,7 @@
   import { toast } from "svelte-sonner";
   import * as Dialog from "@/components/ui/dialog";
   import { Input } from "@/components/ui/input";
-  import { cn } from "@/lib";
+    import { cn } from "@/lib/utils";
   import { writable } from "svelte/store";
   let dialogOpen = false;
   let captureMode = 1;
@@ -14,7 +14,7 @@
   import { toast } from "svelte-sonner";
   import * as Dialog from "@/components/ui/dialog";
   import { Input } from "@/components/ui/input";
-  import { cn } from "@/lib";
+  import { cn } from "@/lib/utils";
   import { writable } from "svelte/store";
   import { Button } from "@/components/ui/button";
   import { ChevronDown } from "lucide-svelte";
@@ -56,7 +56,7 @@
         0,
         0,
         webcamSource.videoWidth,
-        webcamSource.videoHeight,
+        webcamSource.videoHeight
       );
       let frame = webcamCanvas.toDataURL("image/jpeg");
       // Process the captured frame as needed, for example, by sending it to a server
@@ -83,7 +83,7 @@
   const onFileUpload = async (e) => {
     console.log(e.target.files);
     const files = Array.from(e.target.files).filter(
-      (file) => file.name !== ".DS_Store" && file.type !== "",
+      (file) => file.name !== ".DS_Store" && file.type !== ""
     );
     if (files.length > 0) {
       for (const file of files) {

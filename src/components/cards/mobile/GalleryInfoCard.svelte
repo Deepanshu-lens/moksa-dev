@@ -1,6 +1,6 @@
 <script lang="ts">
   import * as Card from "@/components/ui/card";
-  import { cn } from "@/lib";
+  import { cn } from "@/lib/utils";
   import type { Gallery } from "@/types";
   export let person: Gallery;
   import TimeAgo from "javascript-time-ago";

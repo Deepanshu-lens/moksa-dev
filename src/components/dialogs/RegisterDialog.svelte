@@ -3,7 +3,7 @@
   import * as Dialog from "@/components/ui/dialog";
   import { Input } from "@/components/ui/input";
   import { Button } from "@/components/ui/button";
-  import { cn } from "@/lib";
+  import { cn } from "@/lib/utils";
   import { writable } from "svelte/store";
   import { ChevronDown, X } from "lucide-svelte";
   import { page } from "@/stores";

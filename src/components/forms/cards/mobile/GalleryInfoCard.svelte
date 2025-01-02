@@ -1,6 +1,6 @@
 <script lang="ts">
   import * as Card from "@/components/ui/card";
-  import { cn } from "@/lib";
+  import { cn } from "@/lib/utils";
   import type { Gallery } from "@/types";
   export let person: Gallery;
   import TimeAgo from "javascript-time-ago";
@@ -22,7 +22,7 @@
             class={cn(
               "inline-block h-10 w-10 rounded-full ring-2 ring-white",
               "lg:w-12",
-              "3xl:w-16 3xl:h-16",
+              "3xl:w-16 3xl:h-16"
             )}
             src={"data:image/jpeg;base64," + img}
             alt=""

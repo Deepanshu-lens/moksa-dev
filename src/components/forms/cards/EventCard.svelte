@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { cn } from "@/lib";
+  import { cn } from "@/lib/utils";
   import type { Event } from "@/types";
   import { MoreVertical } from "lucide-svelte";
   export let event: Event;
@@ -13,7 +13,7 @@
   <div class="flex items-center justify-between">
     <img
       class={cn(
-        `inline-block h-6 w-6 rounded-full ring-2 ring-white dark:ring-black`,
+        `inline-block h-6 w-6 rounded-full ring-2 ring-white dark:ring-black`
       )}
       src={"data:image/jpeg;base64," + event.frameImage}
       alt="thumbnail"

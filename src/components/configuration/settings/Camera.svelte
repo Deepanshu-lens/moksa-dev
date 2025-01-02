@@ -46,7 +46,7 @@
   // import AddNodeDialog from "@/components/dialogs/AddNodeDialog.svelte";
   import AddNodeDialog from "@/components/ui/modal/AddNodeModal.svelte";
   // import AlertDeleteNode from "@/components/dialogs/alerts/AlertDeleteNode.svelte";
-  import {selectedNode} from "@/stores";
+  import { selectedNode } from "@/stores";
   import type { User } from "@/types";
   import { Filter, Search, Trash2, X, Plus } from "lucide-svelte";
   export let user: User;
@@ -59,7 +59,7 @@
   // import CameraDeleteDialog from "@/components/dialogs/CameraDeleteDialog.svelte";
   import { Input } from "@/components/ui/input";
   import Button from "@/components/ui/button/button.svelte";
-  // import { cn } from "@/lib";
+  //   import { cn } from "@/lib/utils";
   import { buttonVariants } from "@/components/ui/button";
   import AddCameraModal from "@/components/ui/modal/AddCameraModal.svelte";
 

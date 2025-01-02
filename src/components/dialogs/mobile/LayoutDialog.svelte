@@ -2,7 +2,7 @@
   import { toast } from "svelte-sonner";
   import { selectedNode } from "@/stores";
   import * as Dialog from "@/components/ui/dialog";
-  import { cn } from "@/lib";
+  import { cn } from "@/lib/utils";
   import { Columns2, RectangleVertical } from "lucide-svelte";
 
   let selectedValue;
