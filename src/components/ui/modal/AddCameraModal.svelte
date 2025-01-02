@@ -322,7 +322,7 @@
             : 'dark:hover:bg-neutral-700'}"
           on:click={() => (modeAdd = 1)}
         >
-          Add Node
+          Add Store
         </button>
         <button
           class="font-semibold w-full text-left my-3 px-4 py-2 rounded-md dark:hover:bg-neutral-700 {modeAdd ===
@@ -357,7 +357,7 @@
       <div class="w-2/3 pl-4 flex flex-col h-full mx-2">
         <div class="flex-grow">
           {#if modeAdd === 1}
-            <h2 class="text-xl font-bold mb-4 border-b pb-2">Add Node</h2>
+            <h2 class="text-xl font-bold mb-4 border-b pb-2">Add Store</h2>
           {:else if modeAdd === 2}
             <h2 class="text-xl font-bold mb-4 border-b pb-2">Add Sub-node</h2>
           {:else if modeAdd === 4}

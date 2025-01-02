@@ -1,1405 +1,369 @@
 <script lang="ts">
-  export let dialogOpen = false;
-  export let initialTab: string = "display-settings";
-  export let camera: any;
-  import PocketBase from "pocketbase";
-  let save: boolean = camera.save ?? true;
-  let face: boolean = camera.face ?? false;
-  let faceDetectionThreshold: number = camera.faceDetThresh ?? 0.92;
-  let personDetectionThreshold: number = camera.personDetThreshold ?? 0.6;
-  let faceSearchThreshold: number = camera.faceMatchThresh ?? 0.3;
-  let saveDuration: number =
-    camera.saveDuration === 0 ? 7 : camera.saveDuration;
-  console.log("saveDuration", saveDuration);
-  let streamType: "Default" | "Mainstream" | "Substream" =
-    camera.streamType ?? "Default";
-  let recordQuality: "Mainstream" | "Substream" =
-    camera.recordQuality ?? "Substream";
-  let motionThresh: number = camera.motionThresh ?? 1000;
-  let fps: number = camera.fps ?? 1;
-  let person: boolean = camera.person ?? false;
-  let timeZone: string = camera.timeZone ?? "America/New_York";
-  import * as Dialog from "@/components/ui/dialog";
-  import { Label } from "@/components/ui/label";
-  import { Switch } from "@/components/ui/switch";
-  import { Input } from "@/components/ui/input";
-  import * as Select from "@/components/ui/select";
-  import Icon from "@iconify/svelte";
-
-  import { Slider } from "@/components/ui/slider";
-  import { Button } from "@/components/ui/button";
-  import {
-    Tabs,
-    TabsContent,
-    TabsList,
-    TabsTrigger,
-  } from "@/components/ui/tabs";
-  import {
-    Activity,
-    FileVideo2,
-    Airplay,
-    Tv,
-    Disc3,
-    TrendingUp,
-    FolderSearch,
-    Merge,
-    PersonStanding,
-    ScanFace,
-    MonitorCog,
-    Plus,
-    Minus,
-    Dot
-  } from "lucide-svelte";
-  import pb from "@/lib/pb";
   import { toast } from "svelte-sonner";
-  import { writable } from "svelte/store";
-  import { onDestroy } from "svelte";
-  import StreamTile from "@/components/live/streams/StreamTile.svelte";
-  import getStreamURL from "@/lib/url";
-  const streamTypes = [
-    { value: "Default", label: "Default" },
-    { value: "Mainstream", label: "Mainstream" },
-    { value: "Substream", label: "Substream" },
+  import * as Dialog from "@/components/ui/dialog";
+  import { Button } from "@/components/ui/button";
+  import { selectedNode } from "@/stores";
+  import { Switch } from "@/components/ui/switch";
+  import axios from "axios";
+  import {
+    ScanFace,
+    Activity,
+    Siren,
+    PersonStanding,
+    ShieldAlert,
+    Plus,
+  } from "lucide-svelte";
+
+  export let cameraName = "";
+  export let cameraURL = "";
+  export let cameraId = "";
+  export let save: boolean;
+  export let face: boolean;
+  export let running: boolean;
+  export let token;
+  export let faceDetectionThreshold: number = 0.6;
+  export let faceSearchThreshold: number = 0.3;
+  export let runningDetectionThreshold: number = 0.75;
+  export let saveDuration: number;
+  export let saveFolder: string;
+  export let motion: number = 1000;
+  export let priority: boolean;
+  export let intrusionDetection: boolean;
+  export let intrusionPerson: boolean;
+  export let intrusionVehicle: boolean;
+  export let intrusionPersonThresh: number = 0.3;
+  export let intrusionVehicleThresh: number = 0.3;
+  export let lineCrossing: boolean;
+  export let linePerson: boolean;
+  export let lineVehicle: boolean;
+  export let linePersonThresh: number = 0.3;
+  export let lineVehicleThresh: number = 0.3;
+  export let personCount: boolean;
+  export let subUrl: string;
+  export let theft: boolean;
+  export let safety: boolean;
+  export let person: boolean;
+  export let employeEE: boolean;
+  export let heatmap: boolean;
+  export let theftDetectionThresh: number = 0.5;
+  export let showOptions;
+  export let isSettingsDialogOpen;
+  export let cameraNo;
+  export let moksaId;
+  export let user;
+  let dialogOpen = false;
+
+  let activeTab = "theft-detection";
+
+  const tabs = [
+    { id: "theft-detection", label: "Theft Detection", icon: ScanFace },
+    { id: "heatmap", label: "Heatmap", icon: Activity },
+    {
+      id: "person-count",
+      label: "Person Count",
+      icon: ShieldAlert,
+    },
+    { id: "kitchen-safety", label: "Kitchen Safety", icon: PersonStanding },
+    { id: "employee-safety", label: "Employee Safety", icon: Siren },
   ];
-  let selectedStreamType = streamTypes.find((m) => m.value === streamType);
-  const recordQualities = [
-    { value: "Mainstream", label: "Mainstream" },
-    { value: "Substream", label: "Substream" },
-  ];
-  let selectedRecordQuality = recordQualities.find(
-    (m) => m.value === recordQuality
-  );
-  const items = [
-    {
-      value: 30,
-      label: "Monthly",
-    },
-    {
-      value: 7,
-      label: "Weekly",
-    },
-    {
-      value: 1,
-      label: "Daily",
-    },
-  ];
-  const STREAM_URL = getStreamURL();
 
-  let selectedOverwriteInterval = items.find((m) => m.value === saveDuration);
-  let activeTab = initialTab ?? "display-settings";
-  const isProd = import.meta.env.PUBLIC_ENV === "production";
-  const timeZones = [
-    { value: "Pacific/Midway", label: "(GMT-11:00) Midway Island" },
-    { value: "Pacific/Niue", label: "(GMT-11:00) Niue" },
-    { value: "Pacific/Pago_Pago", label: "(GMT-11:00) Pago Pago" },
-    { value: "America/Adak", label: "(GMT-10:00) Adak" },
-    {
-      value: "America/Los_Angeles",
-      label: "(GMT-08:00) Pacific Time (US & Canada)",
-    },
-    {
-      value: "America/Denver",
-      label: "(GMT-07:00) Mountain Time (US & Canada)",
-    },
-    {
-      value: "America/Chicago",
-      label: "(GMT-06:00) Central Time (US & Canada)",
-    },
-    {
-      value: "America/New_York",
-      label: "(GMT-05:00) Eastern Time (US & Canada)",
-    },
-    { value: "America/Halifax", label: "(GMT-04:00) Atlantic Time (Canada)" },
-    {
-      value: "America/Argentina/Buenos_Aires",
-      label: "(GMT-03:00) Buenos Aires",
-    },
-    { value: "America/Sao_Paulo", label: "(GMT-03:00) São Paulo" },
-    { value: "Atlantic/Azores", label: "(GMT-01:00) Azores" },
-    { value: "Europe/London", label: "(GMT+00:00) London" },
-    { value: "Europe/Berlin", label: "(GMT+01:00) Berlin" },
-    { value: "Europe/Paris", label: "(GMT+01:00) Paris" },
-    { value: "Europe/Moscow", label: "(GMT+03:00) Moscow" },
-    { value: "Asia/Dubai", label: "(GMT+04:00) Dubai" },
-    { value: "Asia/Kabul", label: "(GMT+04:30) Kabul" },
-    { value: "Asia/Tehran", label: "(GMT+03:30) Tehran" },
-    { value: "Asia/Karachi", label: "(GMT+05:00) Karachi" },
-    { value: "Asia/Calcutta", label: "(GMT+05:30) Kolkata" },
-    { value: "Asia/Dhaka", label: "(GMT+06:00) Dhaka" },
-    { value: "Asia/Bangkok", label: "(GMT+07:00) Bangkok" },
-    { value: "Asia/Hong_Kong", label: "(GMT+08:00) Hong Kong" },
-    { value: "Asia/Tokyo", label: "(GMT+09:00) Tokyo" },
-    { value: "Australia/Sydney", label: "(GMT+10:00) Sydney" },
-    { value: "Australia/Adelaide", label: "(GMT+09:30) Adelaide" },
-    { value: "Australia/Perth", label: "(GMT+08:00) Perth" },
-    { value: "Pacific/Auckland", label: "(GMT+13:00) Auckland" },
-    { value: "Pacific/Fiji", label: "(GMT+12:00) Fiji" },
-    { value: "Pacific/Chatham", label: "(GMT+13:45) Chatham Islands" },
-  ];
-  let selectedTimezone = timeZones.find((m) => m.value === timeZone);
-  const pb_online = new PocketBase(import.meta.env.PUBLIC_POCKETBASE_URL);
-
-  let eventType:string;
-  let EventTypes=["face","fire","person","alpr"];
-  let notification_sounds = [
-    "Level Up",
-    "Notification",
-    "Public Beep",
-    "Short Beep",
-  ];
-  let audio;
-  
-  let index = writable(null);
-  let status = writable(null);
-  let presets = writable([]);
-  let zoomSpeed = writable("");
-  let isPtzOpen = writable(false);
-
-  // Function to save camera settings
-  const saveCameraSettings = async () => {
-    // Log all values before sending
-    console.log("Saving camera settings with the following values:", {
-      save,
-      face,
-      faceDetectionThreshold,
-      personDetectionThreshold,
-      faceSearchThreshold,
-      motionThresh,
-      fps,
-      person,
-      timeZone,
-    });
-
-    try {
-      const data = {
-        save,
-        face,
-        faceDetThresh: faceDetectionThreshold,
-        personDetThreshold: personDetectionThreshold,
-        faceMatchThresh: faceSearchThreshold,
-        saveDuration,
-        motionThresh,
-        fps,
-        person,
-        timeZone,
-        streamType: selectedStreamType?.value,
-        recordQuality: selectedRecordQuality?.value,
-        streamToCloud: camera.streamToCloud,
-        isLocalNetwork: camera.isLocalNetwork,
-      };
-      // if (window.api || isCurrentUrlLocalhost()) {
-      //   const record = await pb_online.collection("camera").update(camera?.id, );
-
-      //   if (record) await pb.collection("camera").update(camera?.id, );
-      //   else await pb.collection("camera").create(data);
-      // } else {
-      //   const record = await pb.collection("camera").create(data);
-      // }
-      await pb.collection("camera").update(camera?.id, data);
-      // Optionally, you can close the dialog or show a success message
-      dialogOpen = false; // Close the dialog after saving
-    } catch (error) {
-      toast.error(
-        error?.message || "something went wrong while updating camera settings"
-      );
-      console.error("Error updating camera settings:", error);
-      // Optionally, show an error message to the user
-    }
-  };
-
-  function isCurrentUrlLocalhost(): boolean {
-    const hostname = window.location.hostname;
-    return hostname === "localhost" || hostname === "127.0.0.1";
-  }
-
-  async function getStatus() {
-    await fetch(`${import.meta.env.PUBLIC_ONVIF_URL}/status/${$index}`, {
-      method: "GET",
-    })
-      .then(async (res) => {
-        const data = await res.json();
-        // console.log(data)
-        status.set(data);
-      })
-      .catch((err) => console.log(err));
-  }
-  async function getPresets() {
-    await fetch(`${import.meta.env.PUBLIC_ONVIF_URL}/presets/${$index}`, {
-      method: "GET",
-    })
-      .then(async (res) => {
-        const data = await res.json();
-        // console.log(data)
-        const presetArray = Object.entries(data).map(([name, token]) => ({
-          name,
-          token,
-        }));
-
-        presets.set(presetArray);
-      })
-      .catch((err) => console.log(err));
-  }
-  async function setPreset() {
-    try {
-      await fetch(`${import.meta.env.PUBLIC_ONVIF_URL}/set-preset/${$index}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          presetName: `Preset ${$presets.length}`,
-          // presetToken: `Preset ${$presets.length}`
-        }),
-      }).then(async (res) => {
-        const data = await res.json();
-        if (!res?.ok) {
-          throw new Error(data?.message);
-        }
-        await getPresets();
-        toast.success(`Preset Saved Successfully!`);
-      });
-    } catch (error) {
-      toast.error(
-        error?.message || "Something went wrong while intializing onvif!"
-      );
-      console.log(error?.message, "err");
-    }
-  }
-  async function move(move: any, zoomValue: number) {
-    await fetch(`${import.meta.env.PUBLIC_ONVIF_URL}/relative-move/${$index}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        x: move === "left" ? -0.2 : move === "right" ? 0.2 : 0,
-        y: move === "up" ? 0.2 : move === "down" ? -0.2 : 0,
-        zoom: zoomValue === undefined ? $status.position.zoom : zoomValue,
-        speed: {
-          x: move[0],
-          y: move[0],
-          zoom: zoomValue,
-        },
-      }),
-    })
-      .then(async (res) => {
-        const data = await res.json();
-        console.log(data);
-        await getStatus();
-      })
-      .catch((err) => console.log(err));
-  }
-
-  async function moveSpeed(move: any, zoomValue: number) {
-    await fetch(`${import.meta.env.PUBLIC_ONVIF_URL}/relative-move/${$index}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        speed: {
-          x: move[0],
-          y: move[0],
-          zoom: zoomValue,
-        },
-      }),
-    })
-      .then(async (res) => {
-        const data = await res.json();
-        console.log(data);
-        await getStatus();
-      })
-      .catch((err) => console.log(err));
-  }
-  async function gotoPreset(preset) {
-    await fetch(`${import.meta.env.PUBLIC_ONVIF_URL}/goto-preset/${$index}`, {
-      method: "POST",
-      headers: {
-        "Content-type": "application/json",
-      },
-      body: JSON.stringify({
-        preset: preset.token,
-      }),
-    })
-      .then(async (res) => {
-        const data = await res.json();
-        console.log(data);
-        toast.success(`Moved to preset: ${preset.name}`);
-      })
-      .catch((err) => console.log(err));
-  }
-
-  onDestroy(async () => {
-    console.log("stop called");
-    await fetch(`${import.meta.env.PUBLIC_ONVIF_URL}/stop/${index}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        pantilt: true,
-        zoom: true,
-      }),
-    })
-      .then(async (res) => {
-        const data = await res.json();
-        console.log(data);
-      })
-      .catch((err) => console.log(err));
-  });
-
-  // Select Alert Sound according to Event Type
-  const handleSelectAlertSound = (v) => {
-    window.localStorage.setItem(eventType, v?.value);
-    let sound = v?.value;
-    let soundFilePath = "/level-up.mp3";
-    if (sound === "Notification") {
-      soundFilePath = "/notification-alert.mp3";
-    } else if (sound === "Public Beep") {
-      soundFilePath = "/public-beep-sound.mp3";
-    } else if (sound === "Short Beep") {
-      soundFilePath = "/short-beep-tone.mp3";
+  $: {
+    if (dialogOpen) {
+      isSettingsDialogOpen.set(true);
     } else {
-      soundFilePath = "/level-up.mp3";
+      isSettingsDialogOpen.set(false);
     }
-    audio = new Audio(`/notification-sounds/${soundFilePath}`);
-    audio.play();
+  }
+
+  let labels = {
+    "employee-safety": [],
+    "theft-detection": [],
+    heatmap: [],
+    "person-count": [],
+    "kitchen-safety": [],
   };
 
+  const editCamera = async () => {
+    setTimeout(() => {
+      console.log(showOptions.set(""));
+    }, 1000);
+    await fetch("/api/camera/editCamera", {
+      method: "put",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        cameraId,
+        nodeId: $selectedNode.id,
+        name: cameraName,
+        url: cameraURL,
+        subUrl,
+        face,
+        save,
+        running,
+        faceDetectionThreshold,
+        faceSearchThreshold,
+        runningThresh: runningDetectionThreshold,
+        saveDuration,
+        saveFolder,
+        motionThresh: motion === 0 ? 1000 : motion,
+        priority: priority === true ? 1 : 0,
+        intrusionDetection,
+        intrusionPerson,
+        intrusionVehicle,
+        intrusionPersonThresh,
+        intrusionVehicleThresh,
+        lineCrossing,
+        linePerson,
+        lineVehicle,
+        linePersonThresh,
+        lineVehicleThresh,
+        personCount,
+        theft,
+        safety,
+        person,
+        theftDetectionThresh,
+        employeEE,
+        heatmap,
+      }),
+    }).then(() => {
+      toast("Camera settings updated.");
+      dialogOpen = false;
+    });
+    const enabledFeatures = {
+      heat: heatmap || false,
+      count: person || false,
+      theft: theft || false,
+      kitchenhygiene: safety || false,
+      rtsp: false,
+    };
+    const dev = await fetch(`/api/camera/updateFeatures`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        storeId: $selectedNode.moksaId,
+        camId: moksaId,
+        feature: enabledFeatures,
+      }),
+    });
+    const r = await dev.json();
+
+    // New Camera settings modal api
+
+    // Initialize customer variable objects
+    const mobileCustomerVars = {};
+    const theftCustomerVars = {};
+    const heatmapCustomerVars = {};
+    const peopleCustomerVars = {};
+    const kitchenCustomerVars = {};
+
+    // Populate the customer variable objects based on the labels for all tabs
+    for (const tab of tabs) {
+      labels[tab.id].forEach((label) => {
+        if (label.name && label.value) {
+          if (tab.id === "employee-safety") {
+            mobileCustomerVars[label.name] = label.value;
+          } else if (tab.id === "theft-detection") {
+            theftCustomerVars[label.name] = label.value;
+          } else if (tab.id === "heatmap") {
+            heatmapCustomerVars[label.name] = label.value;
+          } else if (tab.id === "person-count") {
+            peopleCustomerVars[label.name] = label.value;
+          } else if (tab.id === "kitchen-safety") {
+            kitchenCustomerVars[label.name] = label.value;
+          }
+        }
+      });
+    }
+
+    // Construct the payload based on which customer vars are populated
+    const customerVarsPayload = {
+      lensCameraId: cameraId,
+      triggerDeployment: true,
+      storeId: $selectedNode?.moksaId,
+    };
+
+    // Add customer vars to the payload only if they have values
+    if (Object.keys(mobileCustomerVars).length > 0) {
+      customerVarsPayload.mobileCustomerVars = {
+        isEnabled: "True",
+        ...mobileCustomerVars,
+      };
+    }
+    if (Object.keys(theftCustomerVars).length > 0) {
+      customerVarsPayload.theftCustomerVars = {
+        isEnabled: "True",
+        ...theftCustomerVars,
+      };
+    }
+    if (Object.keys(heatmapCustomerVars).length > 0) {
+      customerVarsPayload.heatmapCustomerVars = {
+        isEnabled: "True",
+        ...heatmapCustomerVars,
+      };
+    }
+    if (Object.keys(peopleCustomerVars).length > 0) {
+      customerVarsPayload.peopleCustomerVars = {
+        isEnabled: "True",
+        ...peopleCustomerVars,
+      };
+    }
+    if (Object.keys(kitchenCustomerVars).length > 0) {
+      customerVarsPayload.kitchenCustomerVars = {
+        isEnabled: "True",
+        ...kitchenCustomerVars,
+      };
+    }
+
+    await axios
+      .post(
+        `https://dev.api.moksa.ai/store/updateCustomerVars/${$selectedNode?.moksaId}`,
+        customerVarsPayload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      )
+      .then((response) => {
+        console.log("Customer variables updated:", response.data);
+      })
+      .catch((error) => {
+        console.error(
+          "Error updating customer variables:",
+          error.response?.data || error.message
+        );
+      });
+  };
 </script>
 
+<!-- markup (zero or more items) goes here -->
 <Dialog.Root bind:open={dialogOpen}>
   <Dialog.Trigger><slot /></Dialog.Trigger>
-  <Dialog.Content class="sm:max-w-[800px] pl-0 pb-0 gap-0">
-    <Dialog.Header class="border-b pb-2 pl-6 mb-0">
-      <Dialog.Title>Camera Settings</Dialog.Title>
-      <Dialog.Description></Dialog.Description>
-    </Dialog.Header>
+  <Dialog.Content
+    class="sm:max-w-[900px] scale-90 2xl:scale-100 max-h-[90%] overflow-y-scroll"
+  >
+    <!-- Header -->
+    <div class="bg-[#000B40] text-white p-6">
+      <Dialog.Title class="text-xl font-semibold">Camera Settings</Dialog.Title>
+      <Dialog.Description class="text-gray-300">
+        Change settings for {cameraName} camera
+      </Dialog.Description>
+    </div>
 
-    <!-- Dialog Content -->
-    <div class="main-content mt-0">
-      <Tabs
-        value={activeTab}
-        onValueChange={(value) => (activeTab = value)}
-        class="w-full flex"
-      >
-        <!-- Left Side tabs -->
-        <div class="h-[32rem] bg-neutral-100 dark:bg-black dark:text-white">
-          <TabsList
-            class="flex p-5 flex-col gap-y-4 justify-start items-start w-full mx-auto bg-[#F3F3F3]  dark:bg-black"
+    <div class="flex h-[400px]">
+      <!-- Sidebar -->
+      <div class="w-64 bg-gray-100 p-2 space-y-1">
+        {#each tabs as tab}
+          <button
+            class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm
+            {activeTab === tab.id
+              ? 'bg-blue-500 text-white'
+              : 'hover:bg-gray-200'}"
+            on:click={() => (activeTab = tab.id)}
           >
-            <TabsTrigger
-              value="display-settings"
-              class="w-full flex items-center justify-start dark:hover:bg-neutral-700"
-            >
-              <Tv size={16} class="mr-2" />Display Settings
-            </TabsTrigger>
-            <TabsTrigger
-              value="video-saving"
-              class="w-full flex items-center justify-start dark:hover:bg-neutral-700"
-            >
-              <FileVideo2 size={16} class="mr-2" />Video Saving
-            </TabsTrigger>
-            <TabsTrigger
-              value="cloud-stream"
-              class="w-full flex items-center justify-start dark:hover:bg-neutral-700"
-            >
-              <Icon icon="mdi:cloud" class="text-xl mr-2" />Cloud Streaming
-            </TabsTrigger>
-            <TabsTrigger
-              value="face-scanning"
-              class="w-full flex items-center justify-start dark:hover:bg-neutral-700"
-            >
-              <ScanFace size={16} class="mr-2" />Face Detection
-            </TabsTrigger>
-            <TabsTrigger
-              value="person-detection"
-              class="w-full flex items-center justify-start dark:hover:bg-neutral-700"
-            >
-              <PersonStanding size={16} class="mr-2" />Person Detection
-            </TabsTrigger>
-            <TabsTrigger
-              value="motion-sensitivity"
-              class="w-full flex items-center justify-start dark:hover:bg-neutral-700"
-            >
-              <Activity size={16} class="mr-2" />Motion Sensitivity
-            </TabsTrigger>
-            <TabsTrigger
-              value="fps"
-              class="w-full flex items-center justify-start dark:hover:bg-neutral-700"
-            >
-              <TrendingUp size={16} class="mr-2" />AI Frame Ratio
-            </TabsTrigger>
-            <TabsTrigger
-              value="ptz"
-              class="w-full flex items-center justify-start dark:hover:bg-neutral-700"
-            >
-              <MonitorCog size={16} class="mr-2" />PTZ Controls
-            </TabsTrigger>
-            <TabsTrigger
-              value="event"
-              class="w-full flex items-center justify-start dark:hover:bg-neutral-700"
-            >
-              <MonitorCog size={16} class="mr-2" />Event Notification
-            </TabsTrigger>
-          </TabsList>
-        </div>
+            <svelte:component this={tab.icon} class="w-5 h-5" />
+            {tab.label}
+          </button>
+        {/each}
+      </div>
 
-        <!-- Tab Content Right side -->
-        <div class="h-[35rem] relative px-3">
-          <!-- display settings -->
-          <TabsContent value="display-settings">
-            <div class="space-y-4 w-full">
-              <div
-                class="flex items-center justify-between p-2 gap-x-[23rem] border-b pb-2"
-              >
-                <Label class="text-nowrap">Display Settings</Label>
-              </div>
-              <div class="flex items-center space-x-4 pt-3">
-                <Airplay />
-                <div class="flex-1 space-y-1">
-                  <p class="text-sm font-medium leading-none">
-                    Stream Type: 'Mainstream', 'Substream', or 'Default'
-                  </p>
-                  <p class="text-xs text-muted-foreground">
-                    Mainstream offers higher quality, while substream provides
-                    lower quality for reduced bandwidth. 'Default' auto-switches
-                    to 'Mainstream' when 5 or more cameras are connected. Also
-                    reverts to mainstream on fullscreen.
+      <!-- Content Area -->
+      <div class="flex-1 p-6">
+        {#each tabs as tab}
+          {#if activeTab === tab.id}
+            <div class="space-y-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h3 class="text-lg font-semibold">{tab.label}</h3>
+                  <p class="text-gray-500">
+                    Save camera feed directly to your device
                   </p>
                 </div>
-                <Select.Root
-                  onSelectedChange={(e: {
-                    value: "Default" | "Mainstream" | "Substream";
-                  }) => (streamType = e.value)}
-                  items={streamTypes}
-                  bind:selected={selectedStreamType}
-                >
-                  <Select.Trigger class="w-[180px]">
-                    <Select.Value
-                      placeholder={streamTypes.find(
-                        (m) => m.value === streamType
-                      )?.label || "Select Stream Type"}
-                    />
-                  </Select.Trigger>
-                  <Select.Content>
-                    {#each streamTypes as fruit}
-                      <Select.Item
-                        value={fruit.value}
-                        label={fruit.label}
-                        class="truncate max-w-xs inline-block"
-                      >
-                        {fruit.label}
-                      </Select.Item>
-                    {/each}
-                  </Select.Content>
-                </Select.Root>
-              </div>
-            </div>
-          </TabsContent>
-          <!-- video saving -->
-          <TabsContent value="video-saving">
-            <div class="space-y-4 w-[32.7rem]">
-              <div
-                class="flex items-center justify-between p-2 gap-x-[23rem
-                  ] border-b pb-2"
-              >
-                <Label class="text-nowrap">Video Saving</Label>
                 <Switch bind:checked={save} />
               </div>
 
               {#if save}
-                <!-- Add other video saving options here -->
-                {#if !isProd}
-                  <div class="flex items-center space-x-4 pt-3">
-                    <FolderSearch />
-                    <div class="flex-1 space-y-1">
-                      <p class="text-sm font-medium leading-none">Save Here</p>
-                      <p class="text-sm text-muted-foreground">
-                        Point your video to its future home.
-                      </p>
-                    </div>
-                    <Input
-                      id="picture"
-                      type="text"
-                      class="w-[180px] placeholder:dark:text-gray-400"
-                      disabled
-                      placeholder="./PlayBack"
-                    />
-                  </div>
-                {/if}
-                <div class="flex items-center space-x-4 pt-3">
-                  <Disc3 />
-                  <div class="flex-1 space-y-1">
-                    <p class="text-sm font-medium leading-none">
-                      Stream Type: 'Mainstream' or 'Substream'
-                    </p>
-                    <p class="text-xs text-muted-foreground">
-                      Mainstream offers higher quality video recording, while
-                      substream provides lower quality for reduced bandwidth.
-                    </p>
-                  </div>
-                  <Select.Root
-                    onSelectedChange={(e: {
-                      value: "Mainstream" | "Substream";
-                    }) => (recordQuality = e.value)}
-                    items={recordQualities}
-                    bind:selected={selectedRecordQuality}
-                  >
-                    <Select.Trigger class="w-[180px]">
-                      <Select.Value
-                        placeholder={recordQualities.find(
-                          (m) => m.value === streamType
-                        )?.label || "Select Stream Type"}
-                      />
-                    </Select.Trigger>
-                    <Select.Content>
-                      {#each recordQualities as fruit}
-                        <Select.Item
-                          value={fruit.value}
-                          label={fruit.label}
-                          class="truncate max-w-xs inline-block"
+                <div class="mt-8">
+                  {#if labels[activeTab].length === 0}
+                    <!-- Empty state when no labels -->
+                    <div
+                      class="border-2 border-dashed border-gray-200 rounded-lg p-8"
+                    >
+                      <div class="text-center text-gray-500">
+                        <button
+                          class="flex items-center gap-2 mx-auto text-blue-500"
+                          on:click={() =>
+                            (labels[activeTab] = [
+                              ...labels[activeTab],
+                              { name: "", value: "" },
+                            ])}
                         >
-                          {fruit.label}
-                        </Select.Item>
+                          <Plus class="w-5 h-5" />
+                          Get started by adding your first label
+                        </button>
+                      </div>
+                    </div>
+                  {:else}
+                    <!-- Show inputs when we have labels -->
+                    <div class="flex flex-col gap-4">
+                      {#each labels[activeTab] as label, index}
+                        <div class="flex items-center gap-4">
+                          <input
+                            type="text"
+                            placeholder="Name of the label"
+                            class="flex-1 p-2 border rounded-md"
+                            bind:value={label.name}
+                          />
+                          <input
+                            type="text"
+                            placeholder="Input field"
+                            class="flex-1 p-2 border rounded-md"
+                            bind:value={label.value}
+                          />
+                        </div>
                       {/each}
-                    </Select.Content>
-                  </Select.Root>
-                </div>
-                <div class="flex items-center space-x-4 pt-3">
-                  <Merge />
-                  <div class="flex-1 space-y-1">
-                    <p class="text-sm font-medium leading-none">
-                      Overwrite Interval
-                    </p>
-                    <p class="text-sm text-muted-foreground">
-                      Duration until the saved video is overwritten.
-                    </p>
-                  </div>
-                  <Select.Root
-                    onSelectedChange={(e) => (saveDuration = e.value)}
-                    {items}
-                    bind:selected={selectedOverwriteInterval}
-                  >
-                    <Select.Trigger class="w-[180px]">
-                      <Select.Value
-                        placeholder={items.find((m) => m.value === saveDuration)
-                          ?.label || "Select Duration"}
-                      />
-                    </Select.Trigger>
-                    <Select.Content>
-                      <Select.Group>
-                        {#each items as fruit}
-                          <Select.Item value={fruit.value} label={fruit.label}
-                            >{fruit.label}</Select.Item
-                          >
-                        {/each}
-                      </Select.Group>
-                    </Select.Content>
-                    <Select.Input name="favoriteFruit" />
-                  </Select.Root>
-                </div>
 
-                <!-- Timezone Selector -->
-                <div class="mt-4">
-                  <Label
-                    for="timezone"
-                    class="block text-sm font-medium text-gray-700 my-3"
-                    >Select Timezone</Label
-                  >
-                  <Select.Root
-                    bind:selected={selectedTimezone}
-                    items={timeZones}
-                    onSelectedChange={(e) => (timeZone = e.value)}
-                  >
-                    <Select.Trigger class="w-[280px] my-3">
-                      <Select.Value
-                        placeholder={items.find((m) => m.value === timeZone)
-                          ?.label || "Select Duration"}
-                      />
-                    </Select.Trigger>
-                    <Select.Content class="h-60 overflow-y-auto">
-                      <Select.Group>
-                        {#each timeZones as zone}
-                          <Select.Item value={zone.value} label={zone.label}
-                            >{zone.label}</Select.Item
-                          >
-                        {/each}
-                      </Select.Group>
-                    </Select.Content>
-                    <Select.Input name="favoriteFruit" />
-                  </Select.Root>
-                </div>
-              {/if}
-            </div>
-          </TabsContent>
-
-          <!-- cloud streaming -->
-          <TabsContent value="cloud-stream">
-            <div class="space-y-4 w-full">
-              <div
-                class="flex items-center justify-between p-2 gap-x-[23rem] border-b pb-2"
-              >
-                <Label class="text-nowrap">Cloud Streaming</Label>
-              </div>
-
-              <div class="flex items-center space-x-4 pt-3">
-                <div class="flex-1 space-y-1">
-                  <p class="text-sm font-medium leading-none">
-                    Status: {camera.streamToCloud
-                      ? camera.streamToCloudStatus === "active"
-                        ? "Connected and streaming"
-                        : camera.streamToCloudStatus === "broadcasting"
-                          ? "Broadcasting to cloud"
-                          : camera.streamToCloudStatus === "receiving"
-                            ? "Receiving from cloud"
-                            : "Enabled - Waiting for connection"
-                      : "Disabled"}
-                  </p>
-                  <p class="text-xs text-muted-foreground">
-                    Enable cloud streaming to access your camera feed remotely
-                    and use AI features
-                  </p>
-                </div>
-                <Switch
-                  checked={camera.streamToCloud}
-                  onCheckedChange={async (checked) => {
-                    if (window.api || isCurrentUrlLocalhost()) {
-                      const record = await pb_online
-                        .collection("camera")
-                        .update(camera?.id, {
-                          streamToCloud: checked,
-                        });
-
-                      if (record)
-                        await pb.collection("camera").update(camera?.id, {
-                          streamToCloud: checked,
-                        });
-                    } else {
-                      const record = await pb
-                        .collection("camera")
-                        .update(camera?.id, {
-                          streamToCloud: checked,
-                        });
-                    }
-                  }}
-                />
-              </div>
-
-              {#if camera.streamToCloud}
-                <div
-                  class="mt-4 p-4 bg-neutral-100 dark:bg-neutral-900 rounded-lg"
-                >
-                  <h4 class="text-sm font-medium mb-2">Connection Details</h4>
-                  <div class="space-y-2 text-xs text-muted-foreground">
-                    <p>
-                      • Status: <span
-                        class={camera.streamToCloudStatus === "active"
-                          ? "text-green-500"
-                          : camera.streamToCloudStatus === "broadcasting" ||
-                              camera.streamToCloudStatus === "receiving"
-                            ? "text-blue-500"
-                            : "text-yellow-500"}
-                      >
-                        {camera.streamToCloudStatus === "active"
-                          ? "Connected"
-                          : camera.streamToCloudStatus === "broadcasting"
-                            ? "Broadcasting"
-                            : camera.streamToCloudStatus === "receiving"
-                              ? "Receiving"
-                              : "Connecting..."}
-                      </span>
-                    </p>
-                    <p>
-                      • Last connected: {camera?.lastCloudConnection || "Never"}
-                    </p>
-                  </div>
-                </div>
-              {/if}
-            </div>
-          </TabsContent>
-
-          <!-- face scanning -->
-          <TabsContent value="face-scanning">
-            <div class="space-y-4 w-full">
-              <div
-                class="flex items-center justify-between p-2 gap-x-[23rem] border-b pb-2"
-              >
-                <Label class="text-nowrap">Face Scanning</Label>
-                <Switch bind:checked={face} />
-              </div>
-              {#if face}
-                <Label>Face Detection Threshold</Label>
-                <p class="text-sm text-muted-foreground mt-1 mb-4">
-                  Adjust the threshold to accommodate smaller or larger faces
-                </p>
-                <div class="flex items-center gap-x-2">
-                  <Slider
-                    min={0}
-                    max={1}
-                    step={0.01}
-                    value={[faceDetectionThreshold]}
-                    onValueChange={(e) => (faceDetectionThreshold = e[0])}
-                    class="w-[50%]"
-                  />
-                  <div class="relative flex items-center max-w-[8rem] ml-2">
-                    <!-- svelte-ignore a11y_consider_explicit_label -->
-                    <button
-                      type="button"
-                      id="decrement-button"
-                      class="bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-600 hover:bg-gray-200 border border-gray-300 rounded-s-lg p-2 h-8 focus:ring-gray-100 dark:focus:ring-gray-700 focus:ring-2 focus:outline-none"
-                      on:click={() => {
-                        faceDetectionThreshold = Math.max(
-                          0,
-                          faceDetectionThreshold - 0.1
-                        ); // Step of 0.01
-                      }}
-                    >
-                      <svg
-                        class="w-3 h-3 text-gray-900 dark:text-white"
-                        aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 18 2"
-                      >
-                        <path
-                          stroke="currentColor"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M1 1h16"
-                        />
-                      </svg>
-                    </button>
-                    <input
-                      type="text"
-                      id="quantity-input"
-                      class="bg-gray-50 border-x-0 border-gray-300 h-11 text-center text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                      value={faceDetectionThreshold}
-                      on:input={(e) => {
-                        const value = Math.min(Math.max(e.target.value, 0), 10);
-                        faceDetectionThreshold = value / 10;
-                      }}
-                      placeholder="0"
-                      required
-                    />
-                    <!-- svelte-ignore a11y_consider_explicit_label -->
-                    <button
-                      type="button"
-                      id="increment-button"
-                      class="bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-600 hover:bg-gray-200 border border-gray-300 rounded-e-lg p-2 h-8 focus:ring-gray-100 dark:focus:ring-gray-700 focus:ring-2 focus:outline-none"
-                      on:click={() => {
-                        faceDetectionThreshold = Math.min(
-                          1,
-                          faceDetectionThreshold + 0.1
-                        ); // Step of 0.01
-                      }}
-                    >
-                      <svg
-                        class="w-3 h-3 text-gray-900 dark:text-white"
-                        aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 18 18"
-                      >
-                        <path
-                          stroke="currentColor"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M9 1v16M1 9h16"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-                <div>
-                  <Label>Face Matching Threshold</Label>
-                  <p class="text-sm text-muted-foreground mt-1 mb-4">
-                    Adjust the threshold to accomodate smaller or larger faces
-                  </p>
-                  <div class="flex items-center gap-x-2">
-                    <Slider
-                      min={0}
-                      max={1}
-                      step={0.1}
-                      value={[faceSearchThreshold]}
-                      onValueChange={(e) => (faceSearchThreshold = e[0])}
-                      class="w-[60%]"
-                    />
-                    <div class="relative flex items-center max-w-[8rem] ml-2">
-                      <!-- svelte-ignore a11y_consider_explicit_label -->
+                      <!-- Add new button -->
                       <button
-                        type="button"
-                        id="decrement-button"
-                        class="bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-600 hover:bg-gray-200 border border-gray-300 rounded-s-lg p-2 h-8 focus:ring-gray-100 dark:focus:ring-gray-700 focus:ring-2 focus:outline-none"
-                        on:click={() => {
-                          faceSearchThreshold = Math.max(
-                            0,
-                            faceSearchThreshold - 0.1
-                          ); // Step of 0.01
-                        }}
+                        class="flex items-center gap-2 text-blue-500 hover:bg-gray-50 p-2 rounded"
+                        on:click={() =>
+                          (labels[activeTab] = [
+                            ...labels[activeTab],
+                            { name: "", value: "" },
+                          ])}
                       >
-                        <svg
-                          class="w-3 h-3 text-gray-900 dark:text-white"
-                          aria-hidden="true"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 18 2"
-                        >
-                          <path
-                            stroke="currentColor"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M1 1h16"
-                          />
-                        </svg>
-                      </button>
-                      <input
-                        type="text"
-                        id="quantity-input"
-                        class="bg-gray-50 border-x-0 border-gray-300 h-11 text-center text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                        value={faceSearchThreshold}
-                        on:input={(e) => {
-                          const value = Math.min(
-                            Math.max(e.target.value, 0),
-                            10
-                          );
-                          faceSearchThreshold = value / 10;
-                        }}
-                        placeholder="0"
-                        required
-                      />
-                      <!-- svelte-ignore a11y_consider_explicit_label -->
-                      <button
-                        type="button"
-                        id="increment-button"
-                        class="bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-600 hover:bg-gray-200 border border-gray-300 rounded-e-lg p-2 h-8 focus:ring-gray-100 dark:focus:ring-gray-700 focus:ring-2 focus:outline-none"
-                        on:click={() => {
-                          faceSearchThreshold = Math.min(
-                            1,
-                            faceSearchThreshold + 0.1
-                          ); // Step of 0.01
-                        }}
-                      >
-                        <svg
-                          class="w-3 h-3 text-gray-900 dark:text-white"
-                          aria-hidden="true"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 18 18"
-                        >
-                          <path
-                            stroke="currentColor"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M9 1v16M1 9h16"
-                          />
-                        </svg>
+                        <Plus class="w-4 h-4" />
+                        Add new
                       </button>
                     </div>
-                  </div>
+                  {/if}
                 </div>
               {/if}
             </div>
-          </TabsContent>
+          {/if}
+        {/each}
+      </div>
+    </div>
 
-          <!-- person detection -->
-          <TabsContent value="person-detection">
-            <div class="space-y-4 w-full">
-              <div class="border-b pb-2 p-2">
-                <div class="flex items-center justify-between gap-x-[20rem]">
-                  <Label
-                    class="text-nowrap text-base
-                    ">Person Detection</Label
-                  >
-                  <Switch bind:checked={person} />
-                </div>
-                <p class="text-sm text-muted-foreground mt-1">
-                  Parameters for identifying persons
-                </p>
-              </div>
-              {#if person}
-                <div class="flex items-center gap-x-2">
-                  <Label class="my-3">Person Detection Threshold</Label>
-                  <Slider
-                    min={0}
-                    max={1}
-                    step={0.01}
-                    value={[personDetectionThreshold]}
-                    onValueChange={(e) => (personDetectionThreshold = e[0])}
-                    class="w-[60%]"
-                  />
-                  <div class="relative flex items-center max-w-[8rem] ml-2">
-                    <!-- svelte-ignore a11y_consider_explicit_label -->
-                    <button
-                      type="button"
-                      id="decrement-button"
-                      class="bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-600 hover:bg-gray-200 border border-gray-300 rounded-s-lg p-2 h-8 focus:ring-gray-100 dark:focus:ring-gray-700 focus:ring-2 focus:outline-none"
-                      on:click={() => {
-                        personDetectionThreshold = Math.max(
-                          0,
-                          personDetectionThreshold - 0.1
-                        ); // Step of 0.01
-                      }}
-                    >
-                      <svg
-                        class="w-3 h-3 text-gray-900 dark:text-white"
-                        aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 18 2"
-                      >
-                        <path
-                          stroke="currentColor"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M1 1h16"
-                        />
-                      </svg>
-                    </button>
-                    <input
-                      type="text"
-                      id="quantity-input"
-                      class="bg-gray-50 border-x-0 border-gray-300 h-11 text-center text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                      value={personDetectionThreshold}
-                      on:input={(e) => {
-                        const value = Math.min(Math.max(e.target.value, 0), 10);
-                        personDetectionThreshold = value;
-                      }}
-                      placeholder="0"
-                      required
-                    />
-                    <!-- svelte-ignore a11y_consider_explicit_label -->
-                    <button
-                      type="button"
-                      id="increment-button"
-                      class="bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-600 hover:bg-gray-200 border border-gray-300 rounded-e-lg p-2 h-8 focus:ring-gray-100 dark:focus:ring-gray-700 focus:ring-2 focus:outline-none"
-                      on:click={() => {
-                        personDetectionThreshold = Math.min(
-                          1,
-                          personDetectionThreshold + 0.1
-                        ); // Step of 0.01
-                      }}
-                    >
-                      <svg
-                        class="w-3 h-3 text-gray-900 dark:text-white"
-                        aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 18 18"
-                      >
-                        <path
-                          stroke="currentColor"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M9 1v16M1 9h16"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              {/if}
-            </div>
-          </TabsContent>
-
-          <!-- motion sensitivity -->
-          <TabsContent value="motion-sensitivity">
-            <div
-              class="rounded-md p-2 my-2 flex items-center justify-between w-[33rem]"
-            >
-              <div class="flex items-center space-x-4 mx-4">
-                <Activity />
-                <p class="text-sm font-medium leading-none">
-                  Motion Sensitivity
-                </p>
-              </div>
-              <div class="flex items-center gap-8 w-52">
-                <Slider
-                  min={0}
-                  max={10}
-                  step={1}
-                  value={[motionThresh]}
-                  class="w-32"
-                  onValueChange={(e) => {
-                    motionThresh = e[0];
-                  }}
-                />
-                <div class="relative flex items-center max-w-[8rem] ml-2">
-                  <!-- svelte-ignore a11y_consider_explicit_label -->
-                  <button
-                    type="button"
-                    id="decrement-button"
-                    class="bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-600 hover:bg-gray-200 border border-gray-300 rounded-s-lg p-2 h-8 focus:ring-gray-100 dark:focus:ring-gray-700 focus:ring-2 focus:outline-none"
-                    on:click={() => {
-                      if (motionThresh > 0) {
-                        motionThresh = Math.max(0, motionThresh - 1); // Step of 1
-                      }
-                    }}
-                  >
-                    <svg
-                      class="w-3 h-3 text-gray-900 dark:text-white"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 18 2"
-                    >
-                      <path
-                        stroke="currentColor"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M1 1h16"
-                      />
-                    </svg>
-                  </button>
-                  <input
-                    type="text"
-                    id="quantity-input"
-                    class="bg-gray-50 border-x-0 border-gray-300 h-11 text-center text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                    value={motionThresh}
-                    on:input={(e) => {
-                      const value = Math.min(Math.max(e.target.value, 0), 10);
-                      motionThresh = value;
-                    }}
-                    placeholder="0"
-                    required
-                  />
-                  <!-- svelte-ignore a11y_consider_explicit_label -->
-                  <button
-                    type="button"
-                    id="increment-button"
-                    class="bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-600 hover:bg-gray-200 border border-gray-300 rounded-e-lg p-2 h-8 focus:ring-gray-100 dark:focus:ring-gray-700 focus:ring-2 focus:outline-none"
-                    on:click={() => {
-                      if (motionThresh < 10) {
-                        motionThresh = Math.min(10, motionThresh + 1); // Step of 1
-                      }
-                    }}
-                  >
-                    <svg
-                      class="w-3 h-3 text-gray-900 dark:text-white"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 18 18"
-                    >
-                      <path
-                        stroke="currentColor"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M9 1v16M1 9h16"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            </div>
-            <p class="text-sm text-muted-foreground mt-2 p-2 mx-4">
-              {`Increase in Motion Sensitivity might cause decrease in ${isProd ? "cost" : "CPU Usage"}.`}
-            </p>
-          </TabsContent>
-
-          <!-- frames performance settings -->
-          <TabsContent value="fps">
-            <div
-              class="rounded-md p-2 my-2 flex items-center justify-between w-[33rem]"
-            >
-              <div class="flex items-center space-x-4 mx-4">
-                <TrendingUp />
-                <p class="text-sm font-medium leading-none">
-                  Frames Per Second
-                </p>
-              </div>
-              <div class="flex items-center gap-8 w-52">
-                <Slider
-                  min={1}
-                  max={25}
-                  step={1}
-                  value={[fps]}
-                  class="w-32"
-                  onValueChange={(e) => {
-                    fps = e[0];
-                  }}
-                />
-                <div class="relative flex items-center max-w-[8rem] ml-2">
-                  <!-- svelte-ignore a11y_consider_explicit_label -->
-                  <button
-                    type="button"
-                    id="decrement-button"
-                    class="bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-600 hover:bg-gray-200 border border-gray-300 rounded-s-lg p-2 h-8 focus:ring-gray-100 dark:focus:ring-gray-700 focus:ring-2 focus:outline-none"
-                    on:click={() => {
-                      if (fps > 0) {
-                        fps = Math.max(0, fps - 1); // Step of 1
-                      }
-                    }}
-                  >
-                    <svg
-                      class="w-3 h-3 text-gray-900 dark:text-white"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 18 2"
-                    >
-                      <path
-                        stroke="currentColor"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M1 1h16"
-                      />
-                    </svg>
-                  </button>
-                  <input
-                    type="text"
-                    id="quantity-input"
-                    class="bg-gray-50 border-x-0 border-gray-300 h-11 text-center text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                    value={fps}
-                    on:input={(e) => {
-                      const value = Math.min(Math.max(e.target.value, 0), 25);
-                      fps = value;
-                    }}
-                    placeholder="0"
-                    required
-                  />
-                  <!-- svelte-ignore a11y_consider_explicit_label -->
-                  <button
-                    type="button"
-                    id="increment-button"
-                    class="bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-600 hover:bg-gray-200 border border-gray-300 rounded-e-lg p-2 h-8 focus:ring-gray-100 dark:focus:ring-gray-700 focus:ring-2 focus:outline-none"
-                    on:click={() => {
-                      if (fps < 25) {
-                        fps = Math.min(25, fps + 1); // Step of 1
-                      }
-                    }}
-                  >
-                    <svg
-                      class="w-3 h-3 text-gray-900 dark:text-white"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 18 18"
-                    >
-                      <path
-                        stroke="currentColor"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M9 1v16M1 9h16"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            </div>
-            <p class="text-sm text-muted-foreground mt-2 p-2 mx-4">
-              {`Increase in FPS might cause high ${isProd ? "cost" : "CPU Usage"}.`}
-            </p>
-          </TabsContent>
-
-          <!-- Ptz controls -->
-          <TabsContent value="ptz">
-            <div class="w-[33rem]">
-              <!-- Streaming container -->
-             <div class="w-full h-48">
-              <StreamTile
-              name={camera?.name}
-              id={camera?.id}
-              url={`${STREAM_URL}/api/ws?src=${camera?.id}`}
-            ></StreamTile>
-             </div>
-              <div class="flex items-center justify-evenly mt-6">
-                <span class="flex flex-col items-center justify-center gap-2">
-                  <span
-                    class="h-[75px] w-[35px] p-2 rounded-2xl bg-[#202020] interior text-white flex flex-col items-center justify-between"
-                  >
-                    <button on:click={() => moveSpeed("", 0.1)}
-                      ><Plus size="16" /></button
-                    >
-                    <button on:click={() => moveSpeed("", 0.1)}
-                      ><Minus size="16" /></button
-                    >
-                  </span>
-                  <p class="text-sm text-white">Focus</p>
-                </span>
-                <span>
-                  <span
-                    class="size-[120px] p-2 rounded-full bg-gradient-to-b border border-gray-800 shadow-custom-inset drop-shadow-3xl drop-shadow-gray-200 dark:border-gray-600 dark:shadow-gray-600 text-white flex flex-col items-center justify-center relative"
-                  >
-                    <span
-                      class="size-[80px] rounded-full bg-gradient-to-b shadow-lg drop-shadow-md shadow-gray-700 dark:border-gray-600 dark:shadow-gray-600 text-white border border-solid relative"
-                    >
-                      <!-- <Tooltip.Root>
-                      <Tooltip.Trigger asChild let:builder> -->
-                      <Button
-                        on:click={() => setPreset()}
-                        class="absolute text-white bg-gradient-to-b from-[#202020] to-[#141414] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-                      >
-                        <Plus size="20" />
-                      </Button>
-                      <!-- </Tooltip.Trigger>
-                      <Tooltip.Content>
-                        <p>Add Preset</p>
-                      </Tooltip.Content>
-                    </Tooltip.Root> -->
-                    </span>
-      
-                    <button
-                      class="absolute text-white top-1/2 left-1 -translate-y-1/2"
-                      on:click={() => move("left", 0)}
-                    >
-                      <Dot size="20" />
-                    </button>
-                    <button
-                      class="absolute text-white top-1 left-1/2 -translate-x-1/2"
-                      on:click={() => move("up", 0)}
-                    >
-                      <Dot size="20" />
-                    </button>
-                    <button
-                      class="absolute text-white top-1/2 right-1 -translate-y-1/2"
-                      on:click={() => move("right", 0)}
-                    >
-                      <Dot size="20" />
-                    </button>
-                    <button
-                      class="absolute text-white bottom-1 right-1/2 translate-x-1/2"
-                      on:click={() => move("down", 0)}
-                    >
-                      <Dot size="20" />
-                    </button>
-                  </span>
-                </span>
-                <span class="flex flex-col items-center justify-center gap-2">
-                  <span
-                    class="h-[75px] w-[35px] p-2 rounded-2xl bg-[#202020] text-white flex flex-col items-center justify-between"
-                  >
-                    <button on:click={() => move("", 0.1)}><Plus size="16" /></button>
-                    <button on:click={() => move("", -0.1)}
-                      ><Minus size="16" /></button
-                    >
-                  </span>
-                  <p class="text-sm text-white">Zoom</p>
-                </span>
-              </div>
-              <div class="flex flex-col items-start justify-center gap-2 my-2 px-4">
-                <p class="text-sm text-white">Camera speed</p>
-                <Slider
-                  class="w-full bg-[#181818]"
-                  rangeBg="bg-[red]"
-                  max={1}
-                  step={0.1}
-                  onValueChange={(v) => moveSpeed(v, 0)}
-                />
-              </div>
-              <div class="flex flex-col items-start justify-center gap-1 my-2 px-4">
-                <p class="text-sm text-[#202020] dark:text-white">Presets</p>
-                <Select.Root portal={null}>
-                  <Select.Trigger class="w-full bg-[#202020] text-white">
-                    <Select.Value placeholder="Select a Preset" />
-                  </Select.Trigger>
-                  <Select.Content class="bg-[#202020]">
-                    <Select.Group>
-                      <Select.Label class="text-white">Presets</Select.Label>
-                      {#if $presets.length > 0}
-                        {#each $presets as preset}
-                          <Select.Item
-                            class="text-white"
-                            on:click={() => gotoPreset(preset)}
-                            value={preset?.token}
-                            label={preset?.name}>{preset?.name}</Select.Item
-                          >
-                        {/each}
-                      {:else}
-                        <Select.Item class="text-white" value={null} label={null}
-                          >No Presets</Select.Item
-                        >
-                      {/if}
-                    </Select.Group>
-                  </Select.Content>
-                </Select.Root>
-              </div>
-            </div>
-          </TabsContent>
-
-          <!-- Event Notification Management -->
-          <TabsContent value="event">
-            <div class="w-[33rem] p-3">
-              <h4>Select Event Sounds according to Event Type</h4>
-              <div class="h-full p-5 pt-4">
-                <div class="flex flex-col my-3">
-                  <Label class="">Select Event Type</Label>
-                  <Select.Root
-                    portal={null}
-                    onSelectedChange={(v) => {
-                      eventType = v?.value;
-                    }}
-                  >
-                    <Select.Trigger class="mt-3 w-52">
-                      <Select.Value placeholder="Select a Event Type" />
-                    </Select.Trigger>
-                    <Select.Content class="">
-                      <Select.Group>
-                        <Select.Label class="">Type</Select.Label>
-                        {#if EventTypes.length > 0}
-                          {#each EventTypes as type}
-                            <Select.Item class="" value={type}
-                              >{type}</Select.Item
-                            >
-                          {/each}
-                        {:else}
-                          <Select.Item class="" value={null} 
-                            >No Types</Select.Item
-                          >
-                        {/if}
-                      </Select.Group>
-                    </Select.Content>
-                  </Select.Root>
-                </div>
-              
-                <div class="flex flex-col mt-6">
-                  <Label class="">Select Event Alert Sounds</Label>
-                  <Select.Root portal={null} onSelectedChange={handleSelectAlertSound}>
-                    <Select.Trigger class="mt-3 w-52">
-                      <Select.Value placeholder="Select a Alert Sound" />
-                    </Select.Trigger>
-                    <Select.Content class="">
-                      <Select.Group>
-                        <Select.Label class="">Sounds</Select.Label>
-                        {#if notification_sounds.length > 0}
-                          {#each notification_sounds as sound}
-                            <Select.Item class="" value={sound} label={sound}
-                              >{sound}</Select.Item
-                            >
-                          {/each}
-                        {:else}
-                          <Select.Item class="" value={null} 
-                            >No Presets</Select.Item
-                          >
-                        {/if}
-                      </Select.Group>
-                    </Select.Content>
-                  </Select.Root>
-                </div>
-              </div>
-            </div>
-          </TabsContent>
-
-          <div class="flex justify-end items-end absolute bottom-0 w-full">
-            <div class="border-t py-4 w-full text-right">
-              <Button
-                variant="brand"
-                type="button"
-                on:click={saveCameraSettings}>Save Changes</Button
-              >
-            </div>
-          </div>
-        </div>
-      </Tabs>
+    <!-- Footer -->
+    <div class="flex justify-end gap-3 p-4 border-t">
+      <Button variant="outline" on:click={() => (dialogOpen = false)}>
+        Cancel
+      </Button>
+      <Button on:click={editCamera} disabled={user?.role === "admin"}>
+        Save
+      </Button>
     </div>
   </Dialog.Content>
 </Dialog.Root>
+
+<style>
+  /* Add if needed for custom scrollbar or other styles */
+  :global(.dialog-content) {
+    max-height: 90vh;
+  }
+</style>

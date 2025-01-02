@@ -177,9 +177,7 @@
 >
   <Pagination.Content>
     <Pagination.Item>
-      <Pagination.PrevButton
-        on:click={() => prevPage()}
-      >
+      <Pagination.PrevButton on:click={() => prevPage()}>
         <ChevronLeft class="h-4 w-4" />
         <span class="hidden sm:block">Previous</span>
       </Pagination.PrevButton>
@@ -202,9 +200,7 @@
       {/if}
     {/each}
     <Pagination.Item>
-      <Pagination.NextButton
-        on:click={() => nextPage()}
-      >
+      <Pagination.NextButton on:click={() => nextPage()}>
         <span class="hidden sm:block">Next</span>
         <ChevronRight class="h-4 w-4" />
       </Pagination.NextButton>

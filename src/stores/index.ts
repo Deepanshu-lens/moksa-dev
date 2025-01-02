@@ -21,11 +21,11 @@ import { imageUrl } from "./heatMapimageUrl";
 import { faceEvents } from "./face-events";
 import { allEvents, totalAllEvent, isEventsLoading } from "./all-events";
 import { gallery, totalFaceRegistered, isGalleryLoading } from "./gallery";
-import {eventsManager, loadingEvents} from "./events-manager";
+import { eventsManager, loadingEvents } from "./events-manager";
 
 export {
   user,
-  loadingEvents ,
+  loadingEvents,
   eventsManager,
   cameras,
   totalCameras,

@@ -51,7 +51,7 @@
 
   const subscribeToEvents = () => {
     try {
-      if (!selectedNode) return; // Only subscribe if selectedNode is valid
+      if (!$selectedNode) return; // Only subscribe if $selectedNode is valid
 
       subscription = pb.collection("events").subscribe(
         "*",

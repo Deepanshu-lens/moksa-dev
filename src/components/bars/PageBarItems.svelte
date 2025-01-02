@@ -3,7 +3,6 @@
   import { cn } from "@/lib/utils";
   import { user } from "@/stores";
   import Icon from "@iconify/svelte";
-  import axios from "axios";
 
   let currentPath = window.location.pathname;
   if (window.api) {
@@ -23,20 +22,7 @@
 
   let data = [
     { name: "Live", link: "/", icon: "live-icon" },
-    { name: "Playback", link: "/playback", icon: "playback-icon" },
-    { name: "Events", link: "/events", icon: "events-icon" },
-    { name: "Gallery", link: "/gallery", icon: "gallery-icon" },
-    {
-      name: "Atlas",
-      link: "/atlas",
-      icon: "atlas-icon",
-    },
-    { name: "Reports", link: "/reports", icon: "reports-icon" },
-    {
-      name: "Configuration",
-      link: "/configuration",
-      icon: "configuration-icon",
-    },
+    { name: "Analytics", link: "/analytics", icon: "playback-icon" },
   ];
 
   // if (import.meta.env.PUBLIC_ENV === "production") {
@@ -50,7 +36,7 @@
 
 <div
   class={isVertical
-    ? "flex flex-col items-center space-y-12"
+    ? "flex flex-col items-center space-y-12 "
     : "flex justify-center space-x-6 w-full"}
 >
   <nav class="hidden md:flex space-x-4">
@@ -85,7 +71,7 @@
           "text-sm transition-all px-3 py-2 rounded-md cursor-pointer",
           isActive(link.link)
             ? "font-medium bg-gray-200 text-black"
-            : "font-normal hover:bg-gray-100 hover:text-black",
+            : "font-normal hover:bg-gray-100 hover:text-black text-white",
           disabledPaths.includes(link.link) && "cursor-not-allowed opacity-50"
         )}
       >

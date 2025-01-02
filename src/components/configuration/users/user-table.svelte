@@ -140,7 +140,7 @@ $: if($user) {
                 </TableCell>
                 <TableCell class="w-[15%]">{user.name}</TableCell>
                 <TableCell class="w-[15%] text-neutral-500">
-                  {roles[user.role?.name as keyof typeof roles] || 'User Role'}
+                  {roles[user?.role?.name as keyof typeof roles] || 'User Role'}
                 </TableCell>
                 <TableCell class="w-[15%] text-neutral-500">{user.email}</TableCell>
                 <TableCell class="w-[15%] text-neutral-500">{user.lastActivity}</TableCell>

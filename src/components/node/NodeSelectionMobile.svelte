@@ -2,11 +2,11 @@
   import * as Select from "@/components/ui/select/index.js";
   import { nodes, selectedNode } from "@/stores";
   let selectedValue = {
-    value: $selectedNode,
+    value: selectedNode,
     label: $nodes.find((n) => n.id === $selectedNode)?.name,
   };
   $: selectedValue = {
-    value: $selectedNode,
+    value: selectedNode,
     label: $nodes.find((n) => n.id === $selectedNode)?.name,
   };
 

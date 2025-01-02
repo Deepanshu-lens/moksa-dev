@@ -46,7 +46,7 @@
   // import AddNodeDialog from "@/components/dialogs/AddNodeDialog.svelte";
   import AddNodeDialog from "@/components/ui/modal/AddNodeModal.svelte";
   // import AlertDeleteNode from "@/components/dialogs/alerts/AlertDeleteNode.svelte";
-  import { selectedNode } from "@/stores";
+  import {selectedNode} from "@/stores";
   import type { User } from "@/types";
   import { Filter, Search, Trash2, X, Plus } from "lucide-svelte";
   export let user: User;
@@ -54,7 +54,7 @@
   import { toast } from "svelte-sonner";
   // import { addUserLog } from "@/lib/addUserLog";
   import { writable } from "svelte/store";
-  // import { page } from "$app/stores";
+  // import { page } from "@/stores";
   import * as Select from "@/components/ui/select";
   // import CameraDeleteDialog from "@/components/dialogs/CameraDeleteDialog.svelte";
   import { Input } from "@/components/ui/input";
@@ -106,7 +106,7 @@
       }
       const result = await data.json();
       nodeData.set(
-        result?.nodeData.map((node) => ({ ...node, session: user.session }))
+        result?.nodeData.map((node) => ({ ..?.node, session: user.session }))
       );
     } else {
       console.log("no selected node");
@@ -310,7 +310,9 @@
               });
               filteredNodeNames = [...filteredNodes];
               let exact = newData.filter((node) => {
-                return node.name.toLowerCase() === e.target.value?.toLowerCase();
+                return (
+                  node.name.toLowerCase() === e.target.value?.toLowerCase()
+                );
               });
               if (exact.length > 0) {
                 enable = true;

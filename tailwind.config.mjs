@@ -77,10 +77,12 @@ const config = {
         },
       }),
       backgroundImage: {
-        "login-background": "url('../images/loginBG.png')",
-        "login-dark-background": "url('../images/loginBGDark.png')",
+        "login-background": "url('../images/loginBG.jpg')",
+        "login-dark-background": "url('../images/loginBGDark.jpg')",
         "dark-add-node": 'url("../images/addNodeDark.png")',
         "light-add-node": "url('../images/addNodeLight.jpg')",
+        "custom-gradient":
+          "linear-gradient(to right, #000610, #050E41, #000307)", // Define your gradient here
       },
     },
   },

@@ -7,37 +7,48 @@
   let nvrDataset;
   // Reactive statement to update nvrDataset whenever NvrData changes
 
-
   // $: console.log(NvrData)
   $: if (NvrData && $selectedNode) {
-     NvrData = NvrData.map((nvr: any) => {
+    NvrData = NvrData.map((nvr: any) => {
       // console.log(nvr.ip)
       const matchingCams: any = uniqueCams.filter((cam: any) => {
         // console.log(cam.url)
         return cam.url.includes(nvr.ip);
       });
-      return { ...nvr, cams: matchingCams }
-     });
-// console.log('nvrdata after cams add',NvrData)
+      return { ...nvr, cams: matchingCams };
+    });
+    // console.log('nvrdata after cams add',NvrData)
     nvrDataset = {
-      labels: NvrData.filter((nvr: any) => nvr.expand?.ip_address?.country === 'India')
+      labels: NvrData.filter(
+        (nvr: any) => nvr.expand?.ip_address?.country === "India"
+      )
         .map((nvr: any) => nvr.expand?.ip_address?.location)
         .filter((location: any) => location !== undefined),
       dataSet: [
         {
           label: "active cams",
-          data: NvrData.filter((nvr: any) => nvr.expand?.ip_address?.country === 'India' && nvr.expand?.ip_address?.location !== undefined)
-            .map((nvr: any) => nvr.cams ? nvr.cams.filter((cam: any) => cam.status).length : 0),
+          data: NvrData.filter(
+            (nvr: any) =>
+              nvr.expand?.ip_address?.country === "India" &&
+              nvr.expand?.ip_address?.location !== undefined
+          ).map((nvr: any) =>
+            nvr.cams ? nvr.cams.filter((cam: any) => cam.status).length : 0
+          ),
           backgroundColor: "rgba(153, 162, 251, 1)",
-          stack: 'Stack 0',
+          stack: "Stack 0",
           barThickness: 30,
         },
         {
           label: "inactive cams",
-          data: NvrData.filter((nvr: any) => nvr.expand?.ip_address?.country === 'India' && nvr.expand?.ip_address?.location !== undefined)
-            .map((nvr: any) => nvr.cams ? nvr.cams.filter((cam: any) => !cam.status).length : 0),
+          data: NvrData.filter(
+            (nvr: any) =>
+              nvr.expand?.ip_address?.country === "India" &&
+              nvr.expand?.ip_address?.location !== undefined
+          ).map((nvr: any) =>
+            nvr.cams ? nvr.cams.filter((cam: any) => !cam.status).length : 0
+          ),
           backgroundColor: "rgba(219, 222, 251, 1)",
-          stack: 'Stack 0',
+          stack: "Stack 0",
           barThickness: 30,
         },
       ],
@@ -51,7 +62,7 @@
 
   const data = {
     labels: nvrDataset?.labels,
-    datasets: nvrDataset?.dataSet
+    datasets: nvrDataset?.dataSet,
   };
 
   const options = {
@@ -73,8 +84,8 @@
         },
         title: {
           display: true,
-          text: 'Locations',
-          color: '#111',
+          text: "Locations",
+          color: "#111",
           font: {
             size: 14,
             weight: 500,
@@ -89,8 +100,8 @@
         },
         title: {
           display: true,
-          text: 'Number of Cameras ->',
-          color: '#111',
+          text: "Number of Cameras ->",
+          color: "#111",
           font: {
             size: 14,
             weight: 500,
@@ -99,7 +110,7 @@
         ticks: {
           stepSize: 1,
           precision: 0,
-        }
+        },
       },
     },
     elements: {

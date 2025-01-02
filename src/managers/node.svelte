@@ -11,12 +11,15 @@
       filter: `session.id?="${pb.authStore.model?.session[0]}"`,
       sort: "-created",
     });
-     localNodes.length > 0 ? nodes.set([{ id: "all", name: "All" }, ...localNodes]): nodes.set(localNodes)
+    localNodes.length > 0
+      ? nodes.set([{ id: "all", name: "All" }, ...localNodes])
+      : nodes.set(localNodes);
     localNodes.length > 0 &&
-      (localStorage.getItem("selectedNode") &&
-      [{id:"all",name:"All"},...localNodes].filter((l) => l.id === localStorage.getItem("selectedNode"))
-        .length > 0
-        ? selectedNode.set(localStorage.getItem("selectedNode") ?? "")
+      (localStorage.getItem("$selectedNode") &&
+      [{ id: "all", name: "All" }, ...localNodes].filter(
+        (l) => l.id === localStorage.getItem("$selectedNode")
+      ).length > 0
+        ? selectedNode.set(localStorage.getItem("$selectedNode") ?? "")
         : selectedNode.set(localNodes[0].id));
   }
 
@@ -44,7 +47,7 @@
           nodes.update((current) =>
             current.filter((cam) => cam.id !== e.record.id)
           );
-          $nodes.length > 0 && selectedNode.set($nodes[0].id);
+          $nodes.length > 0 && $selectedNode.set($nodes[0].id);
         }
       },
       {

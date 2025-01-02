@@ -12,7 +12,7 @@
       return {
         sessionId: user.expand.session[0].id,
         nodeId: data.nodesList
-          .filter((node) => user.expand.session[0].node.includes(node.id))
+          .filter((node) => user.expand.session[0]?.node.includes(node.id))
           .map((node) => node.id),
       };
     });
@@ -41,12 +41,12 @@
     <Table.Row class="bg-transparent flex items-center justify-between p-3">
       <Table.Head class="text-[#727272] h-full w-[200px]">User/Nodes</Table.Head
       >
-      {#if data?.nodesList?.length>0}
-      {#each data?.nodesList as node}
-        <Table.Head class="text-[#727272] h-full w-[200px]">
-          {node.name}
-        </Table.Head>
-      {/each}
+      {#if data?.nodesList?.length > 0}
+        {#each data?.nodesList as node}
+          <Table.Head class="text-[#727272] h-full w-[200px]">
+            {node.name}
+          </Table.Head>
+        {/each}
       {/if}
     </Table.Row>
   </Table.Header>
@@ -68,7 +68,7 @@
           </Table.Cell>
           {#each data?.nodesList as node}
             <Table.Cell class="text-[#727272] h-full text-sm w-[200px]">
-              <!-- <input type="checkbox" checked={user.expand.session[0].node.includes(node.id)}  on:change={(e) => {
+              <!-- <input type="checkbox" checked={user.expand.session[0]?.node.includes(node.id)}  on:change={(e) => {
                     console.log(e.target.checked)
                     console.log(node.id, user.session[0])
 
@@ -76,15 +76,15 @@
 
               <Checkbox
                 class="data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
-                checked={user.expand.session[0].node.includes(node.id)}
+                checked={user.expand.session[0]?.node.includes(node.id)}
                 on:change={(e) => {
                   const isChecked = e.target.checked;
                   if (isChecked) {
-                    user.expand.session[0].node.push(node.id);
+                    user.expand.session[0]?.node.push(node.id);
                   } else {
-                    const index = user.expand.session[0].node.indexOf(node.id);
+                    const index = user.expand.session[0]?.node.indexOf(node.id);
                     if (index > -1) {
-                      user.expand.session[0].node.splice(index, 1);
+                      user.expand.session[0]?.node.splice(index, 1);
                     }
                   }
                 }}

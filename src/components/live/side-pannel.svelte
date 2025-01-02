@@ -177,7 +177,7 @@
 </script>
 
 <div
-  class="flex flex-col space-y-8 items-center justify-center px-2 h-screen border-l relative"
+  class="flex flex-col space-y-8 items-center justify-center px-2 h-screen border-l relative bg-custom-gradient"
   style="height:calc(100vh - 3rem);"
 >
   <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -186,21 +186,19 @@
     class="group flex-col flex items-center justify-center gap-0.5"
     on:click={fullscreenLayout}
   >
-    <!-- <button
-        disabled={!features.includes("Grid Fullscreen") || cameraCount === 0} -->
     <button
-      class={`disabled:cursor-not-allowed disabled:opacity-50 text-black/[.4] h-[30px] w-[30px] rounded-full shadow-md group border-2 border-solid border-black/[.4] dark:border-white/[.4] bg-white dark:bg-black dark:text-white group-hover:text-white group-hover:bg-[#015a62] dark:group-hover:bg-[#258d9d] group-hover:border-none grid place-items-center`}
+      class={`disabled:cursor-not-allowed disabled:opacity-50 text-black/[.4] h-[30px] w-[30px] rounded-full shadow-md group border-2 border-solid border-white/[.4] bg-black text-white group-hover:text-white group-hover:bg-[#015a62] dark:group-hover:bg-[#258d9d] group-hover:border-none grid place-items-center`}
       ><Icon icon="material-symbols:fullscreen" class="h-[22px] w-[22px]" />
     </button>
-    <p class="text-xs text-black/[.4] dark:text-white">Fullscreen</p>
+    <p class="text-xs text-white">Fullscreen</p>
   </span>
   <span class="group flex-col flex items-center justify-center gap-0.5">
     <button
       class={cn(
-        "text-black/[.4] h-[30px] w-[30px] rounded-full shadow-md border-2 border-solid dark:text-white group-hover:text-white group-hover:bg-[#015a62] dark:group-hover:bg-[#258d9d] group-hover:border-none grid place-items-center",
+        "h-[30px] w-[30px] rounded-full shadow-md border-2 border-solid text-white group-hover:text-white group-hover:bg-[#015a62] dark:group-hover:bg-[#258d9d] group-hover:border-none grid place-items-center",
         {
           "font-bold bg-[#015a62]": $isAlertPanelOpen,
-          "border-black/[.4] dark:border-white/[.4] bg-white dark:bg-black":
+          "border-white/[.4] bg-black":
             !$isAlertPanelOpen,
         }
       )}
@@ -219,32 +217,11 @@
       /></button
     >
     <p
-      class={`text-xs ${!$isAlertPanelOpen && "text-black/[.4] dark:text-white"}`}
+      class={`text-xs ${!$isAlertPanelOpen && "text-white"}`}
     >
       Alerts
     </p>
   </span>
-  <RegisterFaceDialog>
-    <span class="group flex-col flex items-center justify-center gap-0.5">
-      <button
-        on:click={async () => {
-          await addUserLogs(
-            "User clicked on register face",
-            $user?.email || "",
-            $user?.id || ""
-          );
-        }}
-        class={`disabled:cursor-not-allowed text-black/[.4] h-[30px] w-[30px] disabled:opacity-50 rounded-full shadow-md group border-2 border-solid border-black/[.4] dark:border-white/[.4] bg-white dark:bg-black dark:text-white group-hover:text-white group-hover:bg-[#015a62] dark:group-hover:bg-[#258d9d] group-hover:border-none grid place-items-center`}
-      >
-        <Icon
-          icon="material-symbols:familiar-face-and-zone"
-          class="h-[22px] w-[22px]"
-        />
-      </button>
-      <p class="text-xs text-black/[.4] dark:text-white">Register</p>
-    </span>
-  </RegisterFaceDialog>
-  <!-- svelte-ignore a11y_missing_attribute -->
   <a
     href={window.location.href}
     target="_blank"
@@ -260,13 +237,13 @@
             $user?.id || ""
           );
         }}
-        class={`disabled:cursor-not-allowed disabled:opacity-50 text-black/[.4] h-[30px] w-[30px] rounded-full shadow-md group border-2 border-solid border-black/[.4] dark:border-white/[.4] bg-white dark:bg-black dark:text-white group-hover:text-white group-hover:bg-[#015a62] dark:group-hover:bg-[#258d9d] group-hover:border-none grid place-items-center`}
+        class={`disabled:cursor-not-allowed disabled:opacity-50  h-[30px] w-[30px] rounded-full shadow-md group border-2 border-solid border-white/[.4] bg-black text-white group-hover:text-white group-hover:bg-[#015a62] dark:group-hover:bg-[#258d9d] group-hover:border-none grid place-items-center`}
         ><Icon
           icon="material-symbols:screenshot-monitor-outline"
           class="h-[22px] w-[22px]"
         /></button
       >
-      <p class="text-xs text-black/[.4] dark:text-white">Extend</p>
+      <p class="text-xs text-white">Extend</p>
     </span>
   </a>
 
@@ -275,32 +252,22 @@
         disabled={!features.includes("Toggle Alerts")} -->
     <button
       class={cn(
-        "text-black/[.4] h-[30px] w-[30px] rounded-full shadow-md border-2 border-solid dark:text-white group-hover:text-white group-hover:bg-[#015a62] dark:group-hover:bg-[#258d9d] group-hover:border-none grid place-items-center",
+        "text-black/[.4] h-[30px] w-[30px] rounded-full shadow-md border-2 border-solid text-white group-hover:text-white group-hover:bg-[#015a62] dark:group-hover:bg-[#258d9d] group-hover:border-none grid place-items-center",
         {
           "font-bold bg-[#015a62]": $isRoiPanelOpen,
-          "border-black/[.4] dark:border-white/[.4] bg-white dark:bg-black":
+          "border-white/[.4] bg-black":
             !$isRoiPanelOpen,
         }
       )}
       on:click={handleOpenMarkRoi}><ScanSearch class="h-[22px] w-[22px]" /></button
     >
     <p
-      class={`text-xs ${!$isRoiPanelOpen && "text-black/[.4] dark:text-white"}`}
+      class={`text-xs ${!$isRoiPanelOpen && "text-white"}`}
     >
       Mark ROI
     </p>
   </span>
-  <span class="group flex-col flex items-center justify-center gap-0.5">
-    <button
-      disabled
-      class={`disabled:cursor-not-allowed disabled:opacity-50 text-black/[.4] h-[30px] w-[30px] rounded-full shadow-md group border-2 border-solid border-black/[.4] dark:border-white/[.4] bg-white dark:bg-black dark:text-white group-hover:text-white group-hover:bg-[#015a62] dark:group-hover:bg-[#258d9d] group-hover:border-none grid place-items-center`}
-      ><Icon
-        icon="material-symbols:fiber-manual-record-outline"
-        class="h-[22px] w-[22px]"
-      />
-    </button>
-    <p class="text-xs text-black/[.4] dark:text-white">Record</p>
-  </span>
+
   <span class="group flex-col flex items-center justify-center gap-0.5">
     <button
       on:click={async () => {
@@ -313,13 +280,13 @@
         recordDropdownOpen = false;
       }}
       class={!snipDropDownOpen
-        ? `disabled:cursor-not-allowed text-black/[.23] h-[40px] w-[40px] rounded-full shadow-md  border-2 border-solid border-black/[.23] dark:border-white/[.23] bg-white dark:bg-black dark:text-white group-hover:text-white group-hover:bg-[#015a62] dark:group-hover:bg-[#258d9d] group-hover:border-none grid place-items-center `
+        ? `disabled:cursor-not-allowed text-black/[.23] h-[40px] w-[40px] rounded-full shadow-md  border-2 border-solid border-black/[.23] dark:border-white/[.23] bg-black text-white group-hover:text-white group-hover:bg-[#015a62] dark:group-hover:bg-[#258d9d] group-hover:border-none grid place-items-center `
         : `disabled:cursor-not-allowed relative border-none rounded-full shadow-md h-[40px] w-[40px] text-white bg-[#015a62] grid place-items-center dark:bg-[#015a62]`}
       ><ImageDown class="h-[22px] w-[22px]" />
       {#if snipDropDownOpen}
         <div
           id="dropdown"
-          class="z-50 dark:text-white text-black flex items-center border justify-center bg-background divide-y divide-gray-100 shadow-dropdown rounded-lg shadow w-40 absolute right-12 p-2"
+          class="z-50 text-white text-black flex items-center border justify-center bg-background divide-y divide-gray-100 shadow-dropdown rounded-lg shadow w-40 absolute right-12 p-2"
         >
           <ul
             class="py-2 text-sm flex flex-col items-center justify-center gap-2"
@@ -375,7 +342,7 @@
         </div>
       {/if}
     </button>
-    <p class="text-xs text-black/[.23] dark:text-white">Snip</p>
+    <p class="text-xs text-black/[.23] text-white">Snip</p>
   </span>
   <span class="group flex-col flex items-center justify-center gap-0.5">
     <Popover.Root>
@@ -388,7 +355,7 @@
               $user?.id || ""
             );
           }}
-          class={`disabled:cursor-not-allowed disabled:opacity-50 text-black/[.4] h-[30px] w-[30px] rounded-full shadow-md group border-2 border-solid border-black/[.4] dark:border-white/[.4] bg-white dark:bg-black dark:text-white group-hover:text-white group-hover:bg-[#015a62] dark:group-hover:bg-[#258d9d] group-hover:border-none grid place-items-center`}
+          class={`disabled:cursor-not-allowed disabled:opacity-50 text-black/[.4] h-[30px] w-[30px] rounded-full shadow-md group border-2 border-solid border-white/[.4] bg-black text-white group-hover:text-white group-hover:bg-[#015a62] dark:group-hover:bg-[#258d9d] group-hover:border-none grid place-items-center`}
           ><Icon
             icon="material-symbols:grid-view-outline-rounded"
             class="h-[22px] w-[22px]"
@@ -1024,6 +991,6 @@
       </Popover.Content>
     </Popover.Root>
     <!-- </LayoutDialog> -->
-    <p class="text-xs text-black/[.4] dark:text-white">Layouts</p>
+    <p class="text-xs text-white">Layouts</p>
   </span>
 </div>

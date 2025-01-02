@@ -1,7 +1,7 @@
 <script lang="ts">
   import Switch from "@/components/ui/switch/switch.svelte";
   import { addUserLogs } from "@/lib/logs/userLogs";
-  import { selectedNode,user } from "@/stores";
+  import { selectedNode, user } from "@/stores";
   import { onMount } from "svelte";
 
   let selected = 1;
@@ -51,15 +51,31 @@
     }
   });
 
-  $:{
-    if(recordingType === 4){
-        addUserLogs("User selected custom delay for recording",$user?.email,$user?.id);
-    }else if(recordingType === 1){
-        addUserLogs("User selected no delay for recording",$user?.email,$user?.id);
-    }else if(recordingType === 2){ 
-        addUserLogs("User selected shortest delay for recording",$user?.email,$user?.id); 
-    }else if(recordingType === 3){
-        addUserLogs("User selected best quality for recording",$user?.email,$user?.id);
+  $: {
+    if (recordingType === 4) {
+      addUserLogs(
+        "User selected custom delay for recording",
+        $user?.email,
+        $user?.id
+      );
+    } else if (recordingType === 1) {
+      addUserLogs(
+        "User selected no delay for recording",
+        $user?.email,
+        $user?.id
+      );
+    } else if (recordingType === 2) {
+      addUserLogs(
+        "User selected shortest delay for recording",
+        $user?.email,
+        $user?.id
+      );
+    } else if (recordingType === 3) {
+      addUserLogs(
+        "User selected best quality for recording",
+        $user?.email,
+        $user?.id
+      );
     }
   }
 </script>

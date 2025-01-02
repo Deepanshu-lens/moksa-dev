@@ -61,9 +61,9 @@
       });
       for (let i = 0; i < NvrData.length; i++) {
         const nvr = NvrData[i];
-        const status = await pb.collection("nvr_ping_status").getFirstListItem(
-          `nvr="${nvr.id}"`,
-        );
+        const status = await pb
+          .collection("nvr_ping_status")
+          .getFirstListItem(`nvr="${nvr.id}"`);
         NvrData[i].status = status;
 
         if (nvr.status && nvr.status.status === true) {
@@ -157,7 +157,7 @@
   //   pb.collection("camera_ping_status").unsubscribe("*");
   // });
 
-  // $: $selectedNode, fetchNvrData(), getNvrStorageData();
+  // $:selectedNode, fetchNvrData(), getNvrStorageData();
 
   $: if ($selectedNode) {
     fetchData();
@@ -166,16 +166,12 @@
   async function fetchData() {
     activeNvr = 0;
     inactiveNvr = 0;
-    totalCapacity = 0
-    totalFreeSpace = 0
+    totalCapacity = 0;
+    totalFreeSpace = 0;
     // await fetchNvrData();
     // await getNvrStorageData();
     // await getCameraList();
-    await Promise.all([
-    fetchNvrData(),
-    getNvrStorageData(),
-    getCameraList()
-  ]);
+    await Promise.all([fetchNvrData(), getNvrStorageData(), getCameraList()]);
   }
 
   function parseDetail(detailString, key) {
@@ -186,7 +182,6 @@
     }
     return "Not available";
   }
-
 </script>
 
 <div class="w-full h-[calc(100vh-75px)]">
@@ -236,7 +231,9 @@
           <!-- <Button>Export</Button> -->
         </div>
       </div>
-      <div class="grid grid-cols-8 grid-rows-2 h-[320px] 2xl:h-[500px] gap-4 px-4">
+      <div
+        class="grid grid-cols-8 grid-rows-2 h-[320px] 2xl:h-[500px] gap-4 px-4"
+      >
         <div
           class="gap-4 col-span-2 row-span-2 grid grid-rows-2 grid-cols-1 rounded-md"
         >
@@ -255,14 +252,19 @@
               </span>
               <span class="flex items-center gap-3">
                 <span class="flex items-center gap-1 text-sm">
-                  <span class="h-2 w-2 rounded-full bg-[#5B93FF]" /> <strong>{activeCams}</strong> Active</span
+                  <span class="h-2 w-2 rounded-full bg-[#5B93FF]" />
+                  <strong>{activeCams}</strong> Active</span
                 >
                 <span class="flex items-center gap-1 text-sm"
-                  ><span class="h-2 w-2 rounded-full bg-[#FFD66B]" /><strong>{inactiveCams}</strong> Inactive</span
+                  ><span class="h-2 w-2 rounded-full bg-[#FFD66B]" /><strong
+                    >{inactiveCams}</strong
+                  > Inactive</span
                 >
               </span>
             </span>
-            <span class="col-span-3 row-span-1 relative  grid place-items-center">
+            <span
+              class="col-span-3 row-span-1 relative grid place-items-center"
+            >
               {#if delayedFlag}<Doughnut
                   activeCameras={activeCams}
                   inactiveCameras={inactiveCams}
@@ -273,7 +275,7 @@
                 >
                   <WebcamIcon size={24} class="text-[#5B93FF]" />
                 </span>
-                {:else}
+              {:else}
                 <div class="w-full h-full grid place-items-center">
                   <Spinner />
                 </div>
@@ -341,10 +343,11 @@
                   <Select.Value placeholder="Sort By: Area" />
                 </Select.Trigger>
                 <Select.Content>
-                  <Select.Item value="population">Sort By: Population</Select.Item
-                >
-                <Select.Item value="density">Sort By: Density</Select.Item>
-                <Select.Item value="growth">Sort By:Growth Rate</Select.Item>
+                  <Select.Item value="population"
+                    >Sort By: Population</Select.Item
+                  >
+                  <Select.Item value="density">Sort By: Density</Select.Item>
+                  <Select.Item value="growth">Sort By:Growth Rate</Select.Item>
                 </Select.Content>
               </Select.Root>
               <MoreVertical size={18} />
@@ -352,7 +355,7 @@
           </div>
           {#if NvrData && uniqueCams && delayedFlag}
             <AreaAnalysis {NvrData} {uniqueCams} />
-            {:else}
+          {:else}
             <div class="w-full h-full grid place-items-center">
               <Spinner />
             </div>
@@ -399,14 +402,14 @@
             </Table.Row>
           </Table.Header>
           {#if cameraList && delayedFlag}
-          <Table.Body>
-            {#each cameraList as item, index}
-              <Row {item} {index} />
-            {/each}
-          </Table.Body>
+            <Table.Body>
+              {#each cameraList as item, index}
+                <Row {item} {index} />
+              {/each}
+            </Table.Body>
           {:else}
-          <div class="h-full w-full grid place-items-center mt-10">
-            <Spinner/>
+            <div class="h-full w-full grid place-items-center mt-10">
+              <Spinner />
             </div>
           {/if}
         </Table.Root>
@@ -435,7 +438,9 @@
           <!-- <Button>Export</Button> -->
         </div>
       </div>
-      <div class="grid grid-cols-8 grid-rows-2 h-[320px]  2xl:h-[500px] gap-4 px-4">
+      <div
+        class="grid grid-cols-8 grid-rows-2 h-[320px] 2xl:h-[500px] gap-4 px-4"
+      >
         <div class="gap-4 col-span-2 row-span-2 grid grid-rows-2 grid-cols-1">
           <div
             class="border col-span-1 row-span-2 grid grid-cols-3 p-2 rounded-md"
@@ -454,15 +459,17 @@
               </span>
               <span class="flex items-center gap-3">
                 <span class="flex items-center gap-1">
-                  <span class="h-2 w-2 rounded-full bg-[#5B93FF]" /><strong>{activeNvr}</strong> Active</span
+                  <span class="h-2 w-2 rounded-full bg-[#5B93FF]" /><strong
+                    >{activeNvr}</strong
+                  > Active</span
                 >
                 <span class="flex items-center gap-1"
                   ><span class="h-2 w-2 rounded-full bg-[#FFD66B]" />
-                <strong>{inactiveNvr}</strong> Inactive</span
+                  <strong>{inactiveNvr}</strong> Inactive</span
                 >
               </span>
             </span>
-            <span class="col-span-3 row-span-1 relative  grid place-items-center"
+            <span class="col-span-3 row-span-1 relative grid place-items-center"
               >{#if delayedFlag}<Doughnut
                   activeCameras={activeNvr}
                   inactiveCameras={inactiveNvr}
@@ -504,8 +511,9 @@
                   <Select.Value placeholder="Sort By: Area" />
                 </Select.Trigger>
                 <Select.Content>
-                  <Select.Item value="population">Sort By: Population</Select.Item
-                >
+                  <Select.Item value="population"
+                    >Sort By: Population</Select.Item
+                  >
                   <Select.Item value="density">Sort By: Density</Select.Item>
                   <Select.Item value="growth">Sort By:Growth Rate</Select.Item>
                 </Select.Content>
@@ -673,7 +681,8 @@
               class="absolute bottom-2 scale-90 left-1/2 -translate-x-1/2"
             />
           </div>
-        </div> </div>
+        </div>
+      </div>
       <div class="flex items-center justify-between p-4">
         <div class="left flex flex-col gap-1">
           <h2 class="font-medium text-xl text-[#323232]">Storage per NVR</h2>
@@ -771,7 +780,7 @@
             </span>
           </span>
         </div>
-       <div class="col-span-2 row-span-2 rounded-md border p-2">
+        <div class="col-span-2 row-span-2 rounded-md border p-2">
           <div class="flex items-center justify-between pt-2">
             <p class="text-lg font-medium leading-5">Location</p>
             <span class="flex items-center gap-3">
@@ -789,7 +798,6 @@
             {/if}
           </div>
         </div>
-      
       </div>
     </div>
   {/if}

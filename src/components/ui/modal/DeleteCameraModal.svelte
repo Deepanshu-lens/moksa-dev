@@ -7,7 +7,11 @@
 
   const deleteCamera = async () => {
     const record = await pb.collection("camera").delete(camera.id);
-    addUserLogs("Camera deleted successfully", $user?.email || "", $user?.id || "");
+    addUserLogs(
+      "Camera deleted successfully",
+      $user?.email || "",
+      $user?.id || ""
+    );
   };
 </script>
 

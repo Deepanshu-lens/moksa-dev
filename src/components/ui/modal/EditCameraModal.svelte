@@ -27,7 +27,7 @@
         url: mainUrl,
         subUrl,
         motionSensitivity: 33, // Example value
-        node: $selectedNode,
+        node: selectedNode,
       };
 
       // Push the data to Pocketbase (to the 'cameras' collection, for example)

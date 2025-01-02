@@ -107,7 +107,7 @@
           url: urlLink,
           subUrl: urlLink,
           motionSensitivity: 33, // Example value
-          node: $selectedNode,
+          node: selectedNode,
           save: true,
         };
         pb.autoCancellation(false);
@@ -132,7 +132,7 @@
           name: cameraName,
           url: mainUrl,
           subUrl,
-          node: $selectedNode,
+          node: selectedNode,
           save: true,
           session: $user?.session[0],
           isLocalNetwork: $isLocalNetwork,
@@ -149,7 +149,11 @@
         }
         doneSubmit = true;
         modalOpen.set(false);
-        addUserLogs("Camera added successfully via rtsp", $user?.email || "", $user?.id || "");
+        addUserLogs(
+          "Camera added successfully via rtsp",
+          $user?.email || "",
+          $user?.id || ""
+        );
         toast.success("Camera added successfully");
       } catch (error) {
         console.error("Failed to add camera:", error);
@@ -182,7 +186,7 @@
             port: Number(httpPort),
             url: rtspUrl,
             subUrl: rtspSubUrl,
-            node: $selectedNode,
+            node: selectedNode,
             save: true,
             session: $user?.session[0],
             fps: 1,
@@ -203,7 +207,11 @@
       }
       doneSubmit = true;
       modalOpen.set(false);
-      addUserLogs("Camera added successfully via spectra", $user?.email || "", $user?.id || "");
+      addUserLogs(
+        "Camera added successfully via spectra",
+        $user?.email || "",
+        $user?.id || ""
+      );
       toast.success("Camera added successfully");
     } else {
       setRtspToDb();
@@ -371,7 +379,11 @@
         }
 
         const data = await response.json();
-        addUserLogs("Camera added successfully via rtsp to db method", $user?.email || "", $user?.id || "");
+        addUserLogs(
+          "Camera added successfully via rtsp to db method",
+          $user?.email || "",
+          $user?.id || ""
+        );
         return { camera: camera.cameraName, data };
       } catch (error) {
         console.error(
@@ -393,7 +405,7 @@
             url: streams[0]?.streamUri || "",
             subUrl: streams[1]?.streamUri || "",
             motionSensitivity: 33,
-            node: $selectedNode,
+            node: selectedNode,
             save: true,
             fps: 1,
           };
@@ -403,7 +415,7 @@
             url: streams[0]?.streamUri || "",
             subUrl: streams[1]?.streamUri || "",
             motionSensitivity: 33,
-            node: $selectedNode,
+            node: selectedNode,
             save: true,
             isLocalNetwork: isLocalNetwork,
             streamToCloud: $streamToCloud,

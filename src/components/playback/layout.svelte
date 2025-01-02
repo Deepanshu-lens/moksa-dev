@@ -13,7 +13,7 @@
     FastForward,
     Star,
   } from "lucide-svelte";
-  import { selectedNode, nodes } from "@/stores";
+    import { selectedNode, nodes } from "@/stores";
   import { writable } from "svelte/store";
   import Hls from "hls.js";
   import { toast } from "svelte-sonner";
@@ -76,7 +76,7 @@
 
   const PLAYBACK_API_URL = getPlaybackURL();
 
-  selectedNode.subscribe(() => {
+  $selectedNode.subscribe(() => {
     selectedChannels.set([]);
   });
 
@@ -897,7 +897,7 @@
           const result = await pb.collection("criticalEvents").create({
             camera: $selectedChannels[index].id,
             chunkUrl: currentFragment,
-            node: $selectedNode,
+            node:selectedNode,
             session: $user?.session[0],
             title,
           });

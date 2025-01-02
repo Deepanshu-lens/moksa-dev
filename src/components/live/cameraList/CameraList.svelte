@@ -306,6 +306,7 @@
           >
             <CameraActionButton {camera} action="edit" icon={true} />
             <CameraActionButton {camera} action="settings" icon={true} />
+            <CameraActionButton {camera} action="ptz" icon={true} />
             <CameraActionButton {camera} action="delete" icon={true} />
           </div>
           {#if $selectedNode === "all" && $nodes?.find((node) => node.id === camera?.node[0])?.name}

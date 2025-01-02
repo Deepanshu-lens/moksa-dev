@@ -69,9 +69,9 @@
 
 {#if $user}
   <Popover.Root>
-    <Popover.Trigger let:builder class="border rounded-md">
+    <Popover.Trigger let:builder class="border rounded-md hover:text-black border-gray-600">
       <div
-        class="flex items-center space-x-3 hover:bg-accent py-1.5 px-2 rounded-md"
+        class="flex items-center space-x-3 hover:bg-accent py-1.5 px-2 rounded-md bg-transparent "
       >
         <img
           src={$user.avatar ||
@@ -82,7 +82,7 @@
           width={isVertical ? 64 : 25}
         />
         {#if !isVertical}
-          <div class="space-y-0 flex-col items-start hidden md:flex">
+          <div class="space-y-0 flex-col items-start hidden md:flex text-white hover:text-black">
             <span class="text-xs">{displayName}</span>
             <span class="text-xs">{displayEmail}</span>
           </div>

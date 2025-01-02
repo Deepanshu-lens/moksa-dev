@@ -6,16 +6,14 @@
   import { Button } from "@/components/ui/button";
   import AddCameraForm from "@/components/forms/CameraForm.svelte";
 
-  import { Input } from "@/components/ui/input";
   import * as AlertDialog from "@/components/ui/alert-dialog";
-  import { Label } from "@/components/ui/label";
   import { cameraSchema } from "@/types";
   import * as Select from "@/components/ui/select";
 
   import { createForm } from "felte";
 
   // start
-  import { onDestroy, onMount } from "svelte";
+  import { onDestroy } from "svelte";
   import { writable } from "svelte/store";
   import { toast } from "svelte-sonner";
   import { Dot, Minus, Plus, X } from "lucide-svelte";
@@ -27,8 +25,50 @@
   let index = writable(null);
   let status = writable(null);
   let presets = writable([]);
-  let zoomSpeed = writable("");
   let isPtzOpen = writable(false);
+
+  export let isAllFullScreen: boolean;
+  export let cameraId: string;
+  export let name: string;
+  export let url: string;
+  export let save: boolean;
+  export let face: boolean;
+  export let vehicle: boolean;
+  export let faceDetectionThreshold: number;
+  export let faceSearchThreshold: number;
+  export let vehicleDetectionThreshold: number;
+  export let vehiclePlateThreshold: number;
+  export let vehicleOCRThreshold: number;
+  export let saveDuration: number;
+  export let saveFolder: string;
+  export let motion: number;
+  export let priority: boolean;
+  export let running: boolean;
+  export let runningThresh: number;
+  export let intrusionDetection: boolean;
+  export let intrusionPerson: boolean;
+  export let intrusionVehicle: boolean;
+  export let intrusionPersonThresh: number;
+  export let intrusionVehicleThresh: number;
+  export let lineCrossing: boolean;
+  export let linePerson: boolean;
+  export let lineVehicle: boolean;
+  export let linePersonThresh: number;
+  export let lineVehicleThresh: number;
+  export let personCount: boolean;
+  export let showOptions;
+  export let token;
+  export let role: string;
+  export let ptz;
+  export let preset;
+  export let theft;
+  export let theftDetectionThresh;
+  export let safety;
+  export let person;
+  export let employeEE;
+  export let heatmap;
+  export let cameraNo;
+  export let moksaId;
 
   async function getStatus() {
     await fetch(`${import.meta.env.PUBLIC_ONVIF_URL}/status/${$index}`, {
@@ -178,6 +218,8 @@
   let subUrl = camera ? camera.subUrl : "";
   let doneSubmit = false;
 
+  const isSettingsDialogOpen = writable(false);
+
   let username = $ptzControl.url?.split("rtsp://")?.[1]?.split(":")?.[0];
   let pass = $ptzControl.url?.split(":")?.[2]?.split("@")?.[0];
   let ip = $ptzControl.url?.split("@")?.[1]?.split("/")?.[0]?.split(":")?.[0];
@@ -195,13 +237,17 @@
         url: mainUrl,
         subUrl,
         motionSensitivity: 33, // Example value
-        node: $selectedNode,
+        node: selectedNode,
       };
 
       // Push the data to Pocketbase (to the 'cameras' collection, for example)
       const record = await pb.collection("camera").update(camera.id, data);
       modalOpen.set(false);
-      addUserLogs("Camera updated successfully", $user?.email || "", $user?.id || "");
+      addUserLogs(
+        "Camera updated successfully",
+        $user?.email || "",
+        $user?.id || ""
+      );
       const streamElement = document.getElementById(`stream-${camera.id}`);
       if (streamElement) {
         streamElement.setAttribute(
@@ -218,7 +264,11 @@ wss://view.lenscorp.cloud/api/ws?src=${camera.id}`
 
   const deleteCamera = async () => {
     const record = await pb.collection("camera").delete(camera.id);
-    addUserLogs("Camera deleted successfully", $user?.email || "", $user?.id || "");
+    addUserLogs(
+      "Camera deleted successfully",
+      $user?.email || "",
+      $user?.id || ""
+    );
   };
 
   $: {
@@ -247,7 +297,7 @@ wss://view.lenscorp.cloud/api/ws?src=${camera.id}`
         bind:mainUrl
         bind:subUrl
         bind:doneSubmit
-        modalOpen={modalOpen}
+        {modalOpen}
       />
     </Dialog.Content>
   </Dialog.Root>
@@ -258,7 +308,7 @@ wss://view.lenscorp.cloud/api/ws?src=${camera.id}`
       <Dialog.Header>
         <Dialog.Title class="border-b pb-4">Edit Camera</Dialog.Title>
       </Dialog.Header>
-      <EditCameraForm {camera}  modalOpen={modalOpen}/>
+      <EditCameraForm {camera} {modalOpen} />
     </Dialog.Content>
   </Dialog.Root>
 {:else if action === "ptz"}
@@ -404,7 +454,50 @@ wss://view.lenscorp.cloud/api/ws?src=${camera.id}`
     </Popover.Content>
   </Popover.Root>
 {:else if action === "settings"}
-  <CameraSettingModal {camera}>
+  <CameraSettingModal
+    {camera}
+    {token}
+    {user}
+    {isSettingsDialogOpen}
+    {showOptions}
+    cameraName={name}
+    {save}
+    {face}
+    {vehicle}
+    {running}
+    runningDetectionThreshold={runningThresh}
+    {cameraId}
+    {faceDetectionThreshold}
+    {faceSearchThreshold}
+    {vehicleDetectionThreshold}
+    {vehiclePlateThreshold}
+    {vehicleOCRThreshold}
+    {saveFolder}
+    {saveDuration}
+    {motion}
+    {priority}
+    {intrusionDetection}
+    {intrusionPerson}
+    {intrusionVehicle}
+    {intrusionPersonThresh}
+    {intrusionVehicleThresh}
+    {lineCrossing}
+    {linePerson}
+    {lineVehicle}
+    {linePersonThresh}
+    {lineVehicleThresh}
+    {personCount}
+    cameraURL={url}
+    {subUrl}
+    {theft}
+    {person}
+    {safety}
+    {employeEE}
+    {theftDetectionThresh}
+    {heatmap}
+    {cameraNo}
+    {moksaId}
+  >
     <slot />
   </CameraSettingModal>
 {:else}

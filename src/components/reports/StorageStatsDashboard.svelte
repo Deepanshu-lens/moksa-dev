@@ -146,7 +146,7 @@
   });
 
   $: {
-    if (selectedNode) {
+    if ($selectedNode) {
       selectedCameras = $cameras?.map((cam) => cam?.id);
       // Add logic to filter chart data or fetch filtered data
       fetchData();

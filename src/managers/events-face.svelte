@@ -2,8 +2,7 @@
   import pb from "@/lib/pb";
   import { faceEvents, selectedNode } from "@/stores";
 
-
-$: if ($selectedNode) {
+  $: if ($selectedNode) {
     try {
       pb.collection("faceGallery").subscribe(
         "*",

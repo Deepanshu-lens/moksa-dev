@@ -7,11 +7,11 @@
 
   $: selectedValue = $nodes
     ? {
-        value: $selectedNode,
+        value:selectedNode,
         label: $nodes.find((n) => n.id === $selectedNode)?.name,
       }
     : undefined;
-  $: selectedValue && localStorage.setItem("selectedNode", selectedValue.value);
+  $: selectedValue && localStorage.setItem("$selectedNode", selectedValue.value);
 </script>
 
 {#if $nodes}
@@ -19,7 +19,7 @@
     items={$nodes.map((node) => ({ value: node.id, label: node.name }))}
     onSelectedChange={(e: any) => {
       addUserLogs(`User selected node ${e.label}`, $user?.email || "", $user?.id || "");
-      selectedNode.set(e.value);
+      $selectedNode.set(e.value);
     }}
     bind:selected={selectedValue}
   >
