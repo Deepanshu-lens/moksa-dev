@@ -19,7 +19,7 @@
   import { MoreVertical } from "lucide-svelte";
   import * as Table from "@/components/ui/table/index";
   import * as Select from "@/components/ui/select/index";
-  import HealthNvrcard from "../cards/HealthNvrcard.svelte";
+  // import HealthNvrcard from "../cards/HealthNvrcard.svelte";
   import { onMount } from "svelte";
   import NodeSelection from "../node/NodeSelection.svelte";
   import MapNvr from "../map/MapNvr.svelte";
@@ -539,9 +539,9 @@
         </span>
       </span>
       <div class="flex flex-wrap items-center gap-4 p-4">
-        {#each NvrData as nvr, i}
+        <!-- {#each NvrData as nvr, i}
           <HealthNvrcard {selectedNvr} {nvr} />
-        {/each}
+        {/each} -->
       </div>
     </section>
   {/if}
