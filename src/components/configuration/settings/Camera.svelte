@@ -106,7 +106,7 @@
       }
       const result = await data.json();
       nodeData.set(
-        result?.nodeData.map((node) => ({ ..?.node, session: user.session }))
+        result?.nodeData.map((node) => ({ ...node, session: user.session }))
       );
     } else {
       console.log("no selected node");
