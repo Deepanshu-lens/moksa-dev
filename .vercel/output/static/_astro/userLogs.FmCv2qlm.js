@@ -1,0 +1,1 @@
+import{p as s}from"./pb.BjVtZEqq.js";import{g as a}from"./userDetails.C512u9q6.js";const c=async(t,r,o)=>{try{const e=await a();await s.collection("userLogs").create({event:t,email:r,userId:o,userDetails:e,timestamp:new Date().toISOString()})}catch(e){console.log("Error logging user event:",e)}};export{c as a};

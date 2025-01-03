@@ -1,0 +1,1 @@
+import{w as o}from"./index.BUf4ql09.js";const c=()=>{const{subscribe:s,set:r,update:a}=o([]);return{subscribe:s,set:e=>{r(e)},update:e=>{a(n=>{let t=e(n);return t.length>100&&(t=t.slice(0,100)),t})}}},l=c();export{l};

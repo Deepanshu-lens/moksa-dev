@@ -1,0 +1,1 @@
+import{i as n,c as r}from"./create.BfRhC9QK.js";import{C as c}from"./effects.cxkQmux7.js";import{s as f}from"./updater.B0mDEZrk.js";async function m(i){const{prop:e,defaultEl:s}=i;if(await Promise.all([f(1),c]),e===void 0){s?.focus();return}const o=n(e)?e(s):e;if(typeof o=="string"){const t=document.querySelector(o);if(!r(t))return;t.focus()}else r(o)&&o.focus()}export{m as h};

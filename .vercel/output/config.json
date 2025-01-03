@@ -1,0 +1,118 @@
+{
+	"version": 3,
+	"routes": [
+		{
+			"src": "/analytics/",
+			"headers": {
+				"Location": "/analytics"
+			},
+			"status": 308
+		},
+		{
+			"src": "/atlas/",
+			"headers": {
+				"Location": "/atlas"
+			},
+			"status": 308
+		},
+		{
+			"src": "/configuration/",
+			"headers": {
+				"Location": "/configuration"
+			},
+			"status": 308
+		},
+		{
+			"src": "/events/",
+			"headers": {
+				"Location": "/events"
+			},
+			"status": 308
+		},
+		{
+			"src": "/gallery/",
+			"headers": {
+				"Location": "/gallery"
+			},
+			"status": 308
+		},
+		{
+			"src": "/login/",
+			"headers": {
+				"Location": "/login"
+			},
+			"status": 308
+		},
+		{
+			"src": "/playback/",
+			"headers": {
+				"Location": "/playback"
+			},
+			"status": 308
+		},
+		{
+			"src": "/register/",
+			"headers": {
+				"Location": "/register"
+			},
+			"status": 308
+		},
+		{
+			"src": "/reports/",
+			"headers": {
+				"Location": "/reports"
+			},
+			"status": 308
+		},
+		{
+			"src": "^/_astro/(.*)$",
+			"headers": {
+				"cache-control": "public, max-age=31536000, immutable"
+			},
+			"continue": true
+		},
+		{
+			"handle": "filesystem"
+		},
+		{
+			"src": "^\\/_image$",
+			"dest": "_render"
+		},
+		{
+			"src": "^\\/analytics$",
+			"dest": "_render"
+		},
+		{
+			"src": "^\\/atlas$",
+			"dest": "_render"
+		},
+		{
+			"src": "^\\/configuration$",
+			"dest": "_render"
+		},
+		{
+			"src": "^\\/events$",
+			"dest": "_render"
+		},
+		{
+			"src": "^\\/gallery$",
+			"dest": "_render"
+		},
+		{
+			"src": "^\\/playback$",
+			"dest": "_render"
+		},
+		{
+			"src": "^\\/register$",
+			"dest": "_render"
+		},
+		{
+			"src": "^\\/reports$",
+			"dest": "_render"
+		},
+		{
+			"src": "^\\/$",
+			"dest": "_render"
+		}
+	]
+}

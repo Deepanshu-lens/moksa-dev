@@ -1,0 +1,16 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import ReportsManager from "@/managers/reports.svelte";
+import AllEventsManager from "@/managers/all-events.svelte";
+import CameraManager from "@/managers/camera.svelte";
+import GalleryManager from "@/managers/gallery.svelte";
+---
+
+<Layout title={import.meta.env.PUBLIC_BRAND_NAME + " | Reports"}>
+  <div class="flex flex-row">
+    <CameraManager client:only="svelte"/>
+    <AllEventsManager client:only="svelte"/>
+    <GalleryManager client:only="svelte"/>
+    <ReportsManager client:only="svelte"/>
+  </div>
+</Layout>
