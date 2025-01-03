@@ -9,15 +9,15 @@ import svelte from "@astrojs/svelte";
 
 import icon from "astro-icon";
 
-import node from "@astrojs/node";
+// import node from "@astrojs/node";
 
-import vercel from "@astrojs/vercel/serverless";
+// import vercel from "@astrojs/vercel/serverless";
 
 dotenv.config();
 
 // https://astro.build/config
 export default defineConfig({
-  output: "hybrid",
+  // output: "hybrid",
   // outDir: !process.env.VERCEL ? "../output" : "dist",
   trailingSlash: "never",
   base: "/",
@@ -37,5 +37,5 @@ export default defineConfig({
 
   devToolbar: { enabled: false },
 
-  adapter: vercel(),
+  // adapter: vercel(),
 });
