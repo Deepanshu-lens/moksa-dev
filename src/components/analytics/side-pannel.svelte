@@ -64,7 +64,7 @@
 {#if !$allStores}
   <div>loading ...</div>
 {:else}
-  <main class="flex flex-row-reverse h-[calc(100vh-75px)] w-full">
+  <main class="flex flex-row-reverse h-[100vh] w-[100vw]">
     <div
       class=" flex flex-col gap-5 items-center justify-center px-2 bg-gradient-to-b from-[#000610] via-[#050E41] to-[#000307] h-[calc(100vh-75px)]"
     >
