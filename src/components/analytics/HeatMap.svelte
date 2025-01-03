@@ -4,7 +4,7 @@
   import HeatMapDataTable from "./table/HeatMapDataTable.svelte";
   import { Chart, PieController, ArcElement, Tooltip, Legend } from "chart.js";
   import { onDestroy, onMount } from "svelte";
-  import FusionChart from "./FusionChart.svelte";
+  // import FusionChart from "./FusionChart.svelte";
   import * as Select from "../ui/select";
   import { toast } from "svelte-sonner";
   import * as Popover from "../ui/popover";
@@ -869,10 +869,10 @@
         </p>
       </span>
       <span class="h-full w-full relative">
-        <FusionChart
+        <!-- <FusionChart
           data={transformedFusionData?.data}
           categoriesdata={transformedFusionData?.categories}
-        />
+        /> -->
         <span
           class="absolute bottom-0 left-0 w-[150px] h-[30px] bg-white z-[200]"
         ></span>

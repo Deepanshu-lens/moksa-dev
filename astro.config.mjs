@@ -15,8 +15,8 @@ dotenv.config();
 
 // https://astro.build/config
 export default defineConfig({
-  output: "server",
-  outDir: !process.env.VERCEL ? "../dist" : "dist",
+  output: "hybrid",
+  // outDir: !process.env.VERCEL ? "../dist" : "dist",
   trailingSlash: "never",
   base: "/",
   build: {

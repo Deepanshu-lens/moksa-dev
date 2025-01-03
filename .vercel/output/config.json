@@ -77,42 +77,6 @@
 		{
 			"src": "^\\/_image$",
 			"dest": "_render"
-		},
-		{
-			"src": "^\\/analytics$",
-			"dest": "_render"
-		},
-		{
-			"src": "^\\/atlas$",
-			"dest": "_render"
-		},
-		{
-			"src": "^\\/configuration$",
-			"dest": "_render"
-		},
-		{
-			"src": "^\\/events$",
-			"dest": "_render"
-		},
-		{
-			"src": "^\\/gallery$",
-			"dest": "_render"
-		},
-		{
-			"src": "^\\/playback$",
-			"dest": "_render"
-		},
-		{
-			"src": "^\\/register$",
-			"dest": "_render"
-		},
-		{
-			"src": "^\\/reports$",
-			"dest": "_render"
-		},
-		{
-			"src": "^\\/$",
-			"dest": "_render"
 		}
 	]
 }

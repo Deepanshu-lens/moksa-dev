@@ -1,8 +1,0 @@
----
-import AuthShell from "@/layouts/AuthShell.astro";
-import RegistrationForm from "@/components/forms/RegisterForm.svelte";
----
-
-<AuthShell title={import.meta.env.PUBLIC_BRAND_NAME + " | Register"} mode="register">
-  <RegistrationForm client:only="svelte" />
-</AuthShell>

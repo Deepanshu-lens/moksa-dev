@@ -1,8 +1,0 @@
----
-import Layout from "@/layouts/Layout.astro";
-import ConfigurationPage from "@/managers/configuration-page.svelte";
----
-
-<Layout title={import.meta.env.PUBLIC_BRAND_NAME + " | Configuration"} topbar>
-  <ConfigurationPage client:only="svelte" />
-</Layout>

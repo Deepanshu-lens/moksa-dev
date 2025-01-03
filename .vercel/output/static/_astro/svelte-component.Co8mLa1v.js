@@ -1,0 +1,1 @@
+import{k as r,n as c,o as s,E as i,q as h,u as p,v as u}from"./effects.D69rIdB6.js";function m(o,t,f){r&&c();var e=o,a,n;s(()=>{a!==(a=t())&&(n&&(u(n),n=null),a&&(n=h(()=>f(e,a))))},i),r&&(e=p)}export{m as c};
