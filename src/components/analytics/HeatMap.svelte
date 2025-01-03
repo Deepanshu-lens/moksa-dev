@@ -159,7 +159,7 @@
       socket.disconnect();
     }
 
-    socket = io("https://dev.api.moksa.ai/", {
+    socket = io(`${import.meta.env.PUBLIC_MOKSA_BASE_URL}`, {
       withCredentials: true,
       extraHeaders: {
         Authorization: `Bearer ${token}`,

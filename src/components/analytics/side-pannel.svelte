@@ -1,5 +1,11 @@
 <script lang="ts">
-  import { Store, LayoutDashboard, Users } from "lucide-svelte";
+  import {
+    Store,
+    LayoutDashboard,
+    Users,
+    AreaChart,
+    ShieldCheck,
+  } from "lucide-svelte";
   import Stores from "@/components/analytics/Stores.svelte";
   import Dashboard from "@/components/analytics/Dashboard.svelte";
   import { analyticsData } from "@/stores/analytics-data";
@@ -8,6 +14,8 @@
   import Theft from "./Theft.svelte";
   import EE from "./EE.svelte";
   import PeopleCounter from "./PeopleCounter.svelte";
+  import HeatMap from "./HeatMap.svelte";
+  import Safety from "./Safety.svelte";
   let view = 1;
   export let moksa: any = {};
   let data = {
@@ -27,6 +35,15 @@
   let efficiency = writable([]);
   let safetyDetails = writable([]);
   let storePeopleCount = writable([]);
+  let allStoresLackKitchen = writable(false);
+
+  $: {
+    allStoresLackKitchen.set(
+      $allStores.length > 0
+        ? $allStores.every((store) => !store?.hasKitchen)
+        : true
+    );
+  }
 
   $: {
     if ($analyticsData) {
@@ -170,11 +187,11 @@
         >
           Heat Map
         </p>
-      </span>
+      </span> -->
       <span class="group flex-col flex items-center justify-center gap-0.5">
         <button
           on:click={() => (view = 7)}
-          disabled={allStoresLackKitchen}
+          disabled={$allStoresLackKitchen}
           class={view !== 7
             ? ` disabled:cursor-not-allowed text-white h-[40px] w-[40px] rounded-full shadow-md  border-2 border-solid  dark:border-white bg-transparent group-hover:text-black group-hover:bg-gradient-to-r group-hover:from-[#EBE60B] group-hover:to-[#07E1A4] group-hover:border-none grid place-items-center `
             : `disabled:cursor-not-allowed relative border-none rounded-full shadow-md h-[40px] w-[40px] text-black bg-gradient-to-r from-[#EBE60B] to-[#07E1A4] grid place-items-center `}
@@ -185,7 +202,7 @@
         >
           Kitchen Safety
         </p>
-      </span> -->
+      </span>
     </div>
 
     <!-- Dashboard -->
@@ -246,12 +263,12 @@
       />
 
       <!-- heat map -->
-      <!-- {:else if view === 6}
+    <!-- {:else if view === 6}
       <HeatMap allStores={$allStores} token={data?.moksaToken} /> -->
 
       <!-- safety -->
-      <!-- {:else if view === 7}
-      <Safety allStores={$allStores} token={data?.moksaToken} {user} /> -->
+      {:else if view === 7}
+      <Safety allStores={$allStores} token={data?.moksaToken} {user} />
     {/if}
   </main>
 {/if}

@@ -1050,7 +1050,7 @@
       sockets[storeId].disconnect();
     }
 
-    sockets[storeId] = io("https://dev.api.moksa.ai/", {
+    sockets[storeId] = io(`${import.meta.env.PUBLIC_MOKSA_BASE_URL}`, {
       withCredentials: true,
       extraHeaders: {
         Authorization: `Bearer ${token}`,
