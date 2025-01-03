@@ -28,13 +28,16 @@
       password = "";
       return;
     } else {
-      const login = await fetch(`https://dev.api.moksa.ai/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email: email, password: password }),
-      });
+      const login = await fetch(
+        `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/auth/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email: email, password: password }),
+        }
+      );
       const data = await login.json();
 
       if (data.data && data.data.token) {

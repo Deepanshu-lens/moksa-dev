@@ -31,7 +31,7 @@
     selectedImage = null; // Reset selectedImage before fetching
     try {
       const response = await fetch(
-        `https://dev.api.moksa.ai/stream?key=${imageUri}`,
+        `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/stream?key=${imageUri}`,
         {
           method: "GET",
           headers: {

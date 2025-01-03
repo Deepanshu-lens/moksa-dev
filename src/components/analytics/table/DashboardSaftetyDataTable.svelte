@@ -62,7 +62,7 @@
     // console.log(currentpage);
 
     const safetyDetails = await fetch(
-      `https://dev.api.moksa.ai/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${$selectedStore.value}/${currentpage}/100/${$dateRange === "custom" ? start : formatDate(startDate)}/${$dateRange === "custom" ? end : formatDate(today)}`,
+      `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${$selectedStore.value}/${currentpage}/100/${$dateRange === "custom" ? start : formatDate(startDate)}/${$dateRange === "custom" ? end : formatDate(today)}`,
       {
         method: "GET",
         headers: {
@@ -73,7 +73,7 @@
     return safetyDetails.json();
   };
 
-  $: dbData = safetyData?.data.map((item: any) => ({
+  $: dbData = safetyData?.data?.map((item: any) => ({
     employee: `${item.first_name} ${item.last_name}`,
     masks: item.wearing_mask,
     gloves: item.wearing_gloves,
@@ -96,7 +96,7 @@
     console.log(imageUri);
     try {
       const response = await fetch(
-        `https://dev.api.moksa.ai/stream?key=${imageUri}`,
+        `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/stream?key=${imageUri}`,
         {
           method: "GET",
           headers: {
@@ -177,8 +177,8 @@
       loading = true;
       const newData = await fetchMoreData();
       console.log("new data", newData);
-      safetyData.data = [...safetyData.data, ...newData?.data?.data];
-      currentDataCount = safetyData.data.length;
+      safetyData.data = [...safetyData?.data, ...newData?.data?.data];
+      currentDataCount = safetyData?.data?.length;
       data.set(dbData);
       loading = false;
     }

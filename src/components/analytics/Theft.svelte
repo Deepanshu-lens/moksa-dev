@@ -429,7 +429,7 @@
     startDate.setDate(today.getDate() - 7);
     const formatDate = (date: Date) => date.toISOString().split("T")[0];
     const theftList = await fetch(
-      `https://dev.api.moksa.ai/theft/theftListBasedOnStoreId/${$selectedStore.value}/${formatDate(startDate)}/${formatDate(today)}/1/100`,
+      `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/theft/theftListBasedOnStoreId/${$selectedStore.value}/${formatDate(startDate)}/${formatDate(today)}/1/100`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -447,20 +447,36 @@
   }
 
   async function getTheftTrends(storeId: number) {
-    const theftList = await fetch("/api/theft/trends", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ storeId }),
-    });
-    const data = await theftList.json();
-    console.log(data);
-    if (data.status === 200) {
-      theftTrend.set(data.data);
-      createChart();
-    } else {
-      console.log("no trend data");
+    const today = new Date();
+    const monthago = new Date(today);
+    monthago.setDate(monthago.getMonth() - 1);
+
+    const formatDate = (date: Date) => {
+      return date.toISOString().split("T")[0];
+    };
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/theft/theftTrendsOfAllTime/${storeId}/${formatDate(monthago)}/${formatDate(today)}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch theft trends");
+      }
+
+      const trends = await response.json();
+      console.log(trends, "trends");
+      theftTrend.set(trends?.data);
+      return trends;
+    } catch (error) {
+      console.error("Error fetching theft trends:", error);
     }
   }
 
@@ -524,7 +540,7 @@
     try {
       const [theftD, theftT, theftL, storeTotals] = await Promise.all([
         fetch(
-          `https://dev.api.moksa.ai/theft/theftDetectionDetailsByStoreid/${$selectedStore.value}`,
+          `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/theft/theftDetectionDetailsByStoreid/${$selectedStore.value}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -545,7 +561,7 @@
           }
         ).then((res) => res.json()),
         fetch(
-          `https://dev.api.moksa.ai/theft/theftTrendsOfAllTime/${$selectedStore.value}/${formatDate(startDate)}/${formatDate(today)}`,
+          `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/theft/theftTrendsOfAllTime/${$selectedStore.value}/${formatDate(startDate)}/${formatDate(today)}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -554,7 +570,7 @@
           }
         ).then((res) => res.json()),
         fetch(
-          `https://dev.api.moksa.ai/theft/theftListBasedOnStoreId/${$selectedStore.value}/${formatDate(startDate)}/${formatDate(today)}/1/100`,
+          `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/theft/theftListBasedOnStoreId/${$selectedStore.value}/${formatDate(startDate)}/${formatDate(today)}/1/100`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -563,7 +579,7 @@
           }
         ).then((res) => res.json()),
         fetch(
-          `https://dev.api.moksa.ai/store/getAllStoresTotals/${$selectedStore.value}/${formatDate(startDate)}/${formatDate(today)}`,
+          `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/getAllStoresTotals/${$selectedStore.value}/${formatDate(startDate)}/${formatDate(today)}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -694,7 +710,7 @@
       // Call the three APIs
       const [theftD, theftT, theftL, storesTotal] = await Promise.all([
         fetch(
-          `https://dev.api.moksa.ai/theft/theftDetectionDetailsByStoreid/${$selectedStore.value}`,
+          `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/theft/theftDetectionDetailsByStoreid/${$selectedStore.value}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -715,7 +731,7 @@
           }
         ).then((res) => res.json()),
         fetch(
-          `https://dev.api.moksa.ai/theft/theftTrendsOfAllTime/${$selectedStore.value}/${formatDate(startDate)}/${formatDate(today)}`,
+          `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/theft/theftTrendsOfAllTime/${$selectedStore.value}/${formatDate(startDate)}/${formatDate(today)}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -724,7 +740,7 @@
           }
         ).then((res) => res.json()),
         fetch(
-          `https://dev.api.moksa.ai/theft/theftListBasedOnStoreId/${$selectedStore.value}/${formatDate(startDate)}/${formatDate(today)}/1/100`,
+          `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/theft/theftListBasedOnStoreId/${$selectedStore.value}/${formatDate(startDate)}/${formatDate(today)}/1/100`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -733,7 +749,7 @@
           }
         ).then((res) => res.json()),
         fetch(
-          `https://dev.api.moksa.ai/store/getAllStoresTotals/${$selectedStore.value}/${formatDate(startDate)}/${formatDate(today)}`,
+          `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/getAllStoresTotals/${$selectedStore.value}/${formatDate(startDate)}/${formatDate(today)}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -780,7 +796,7 @@
       // Call the three APIs
       const [theftD, theftT, theftL, storesTotal] = await Promise.all([
         fetch(
-          `https://dev.api.moksa.ai/theft/theftDetectionDetailsByStoreid/${$selectedStore.value}`,
+          `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/theft/theftDetectionDetailsByStoreid/${$selectedStore.value}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -803,7 +819,7 @@
           }
         ).then((res) => res.json()),
         fetch(
-          `https://dev.api.moksa.ai/theft/theftTrendsOfAllTime/${$selectedStore.value}/${start}/${end}`,
+          `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/theft/theftTrendsOfAllTime/${$selectedStore.value}/${start}/${end}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -812,7 +828,7 @@
           }
         ).then((res) => res.json()),
         fetch(
-          `https://dev.api.moksa.ai/theft/theftListBasedOnStoreId/${$selectedStore.value}/${start}/${end}/1/100`,
+          `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/theft/theftListBasedOnStoreId/${$selectedStore.value}/${start}/${end}/1/100`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -821,7 +837,7 @@
           }
         ).then((res) => res.json()),
         fetch(
-          `https://dev.api.moksa.ai/store/getAllStoresTotals/${$selectedStore.value}/${start}/${end}`,
+          `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/getAllStoresTotals/${$selectedStore.value}/${start}/${end}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -1034,7 +1050,7 @@
       sockets[storeId].disconnect();
     }
 
-    sockets[storeId] = io("${import.meta.env.PUBLIC_MOKSA_BASE_URL}/", {
+    sockets[storeId] = io("https://dev.api.moksa.ai/", {
       withCredentials: true,
       extraHeaders: {
         Authorization: `Bearer ${token}`,

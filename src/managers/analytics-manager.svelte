@@ -1,7 +1,8 @@
-<script>
+<script lang="ts">
   import { analyticsData } from "@/stores/analytics-data";
-  import { moksaToken } from "@/stores/moksa-token";
   import { onMount } from "svelte";
+  export let moksa: any = {};
+  const mToken = moksa?.token;
 
   const safeExecute = async (fn, fallbackValue) => {
     try {
@@ -20,7 +21,7 @@
   const today = new Date();
   const oneYearAgo = new Date(today);
   const oneWeekAgo = new Date(today);
-  const mToken = moksaToken;
+
   oneYearAgo.setFullYear(today.getFullYear() - 1);
   oneWeekAgo.setDate(today.getDate() - 7);
 
@@ -42,7 +43,7 @@
 
   const allStoreData = async () => {
     const allstoreData = await fetch(
-      `https://dev.api.moksa.ai/store/getAllStoresTotals/-1/${formatDate(oneWeekAgo)}/${formatDate(today)}`,
+      `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/getAllStoresTotals/-1/${formatDate(oneWeekAgo)}/${formatDate(today)}`,
       {
         method: "GET",
         headers: {
@@ -55,7 +56,7 @@
 
   const aisleData = async () => {
     const aisleData = await fetch(
-      `https://dev.api.moksa.ai/store/getAllStoresWithAisleDetails/1/100/${formatDate(oneYearAgo)}/${formatDate(today)}`,
+      `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/getAllStoresWithAisleDetails/1/100/${formatDate(oneYearAgo)}/${formatDate(today)}`,
       {
         method: "GET",
         headers: {
@@ -68,7 +69,7 @@
 
   const alltheftandcamera = async () => {
     const theftandcamera = await fetch(
-      `https://dev.api.moksa.ai/store/getAllStoresWithTheftAndCameraDetails/1/100/${formatDate(oneYearAgo)}/${formatDate(today)}`,
+      `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/getAllStoresWithTheftAndCameraDetails/1/100/${formatDate(oneYearAgo)}/${formatDate(today)}`,
       {
         method: "GET",
         headers: {
@@ -81,7 +82,7 @@
 
   const theftDetectionDetails = async () => {
     const theftDetectionDetails = await fetch(
-      `https://dev.api.moksa.ai/theft/theftDetectionDetailsByStoreid/-1`,
+      `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/theft/theftDetectionDetailsByStoreid/-1`,
       {
         method: "GET",
         headers: {
@@ -100,7 +101,7 @@
 
   const busyness = async () => {
     const busyness = await fetch(
-      `https://dev.api.moksa.ai/store/storeBusyHour/getStoreBusyHourDataForThisWeek/-1`,
+      `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/storeBusyHour/getStoreBusyHourDataForThisWeek/-1`,
       {
         method: "GET",
         headers: {
@@ -113,7 +114,7 @@
 
   const efficiency = async () => {
     const efficiency = await fetch(
-      `https://dev.api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/-1/${formatDate(oneWeekAgo)}/1/100/${formatDate(today)}`,
+      `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/-1/${formatDate(oneWeekAgo)}/1/100/${formatDate(today)}`,
       {
         method: "GET",
         headers: {
@@ -126,7 +127,7 @@
 
   const safetyDetails = async () => {
     const safetyDetails = await fetch(
-      `https://dev.api.moksa.ai/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/-1/1/100/${formatDate(oneWeekAgo)}/${formatDate(today)}`,
+      `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/-1/1/100/${formatDate(oneWeekAgo)}/${formatDate(today)}`,
       {
         method: "GET",
         headers: {
@@ -139,7 +140,7 @@
 
   const storePeopleCount = async () => {
     const spc = await fetch(
-      `https://dev.api.moksa.ai/people/getPeopleCount/-1`,
+      `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/people/getPeopleCount/-1`,
       {
         method: "GET",
         headers: {
@@ -156,7 +157,7 @@
 
   const allUsers = async () => {
     const allUsers = await fetch(
-      `https://dev.api.moksa.ai/auth/getAllUsers/1/100`,
+      `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/auth/getAllUsers/1/100`,
       {
         method: "GET",
         headers: {
@@ -180,7 +181,7 @@
     storePeopleCount: () => storePeopleCount(),
     // userStoreDetails: async () => {
     //   const res = await fetch(
-    //     `https://dev.api.moksa.ai/store/getUserStoreDetailsByUserId/${locals.user.record.moksaId}`,
+    //     `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/getUserStoreDetailsByUserId/${locals.user.record.moksaId}`,
     //     {
     //       headers: {
     //         "Content-Type": "application/json",
@@ -199,11 +200,10 @@
         return [key, value];
       })
     );
-
     const data = Object.fromEntries(results);
-    if(!!data){
+    if (!!data) {
       analyticsData.set(data);
-    }else{
+    } else {
       analyticsData.set({});
     }
   });

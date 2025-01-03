@@ -159,7 +159,7 @@
       : "";
     try {
       const response = await fetch(
-        `https://dev.api.moksa.ai/people/getPeopleCount/${storeId}`,
+        `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/people/getPeopleCount/${storeId}`,
         {
           headers: {
             "Content-Type": "application/json",

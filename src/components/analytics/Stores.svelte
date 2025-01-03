@@ -17,27 +17,58 @@
   import Spinner from "../ui/spinner/Spinner.svelte";
   import AddStoreDialog from "../dialogs/AddStoreDialog.svelte";
   import * as DropdownMenu from "@/components/ui/dropdown-menu";
-  // import { page } from "@/stores";
-  import PocketBase from "pocketbase";
-
   let cardData = writable([]);
   export let allStores: any[] = [];
   export let theftandcamera: any[] = [];
   export let nodes;
   export let user;
-  export let token= "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOjgsImZpcnN0X25hbWUiOiJhbnVzaGl5YSIsImxhc3RfbmFtZSI6InAiLCJlbWFpbCI6ImFudXNoaXlhQGdtYWlsLmNvbSIsImlhdCI6MTczNTgwMzc0NywiZXhwIjoxNzM1ODkwMTQ3fQ.tnLqFGfz2iRw8UTbL79YaCnQ-CxPpjMzz42qVQbzUTc";
-  const PB = new PocketBase(`https://server.moksa.ai`);
+  export let token;
+
+  const getStoreDetails = async () => {
+    let storeId = allStores.filter((store) => store.id !== -1);
+    const today = new Date();
+    const yearAgo = new Date(today);
+    yearAgo.setFullYear(yearAgo.getFullYear() - 1);
+
+    const formatDate = (date: Date) => {
+      return date.toISOString().split("T")[0];
+    };
+
+    try {
+      const responses = await Promise.all(
+        storeId.map(async (store) => {
+          const response = await fetch(
+            `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/getStoreByStoreIdWithAllDetails/${store.id}/${formatDate(yearAgo)}/${formatDate(today)}`,
+            {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
+          if (!response.ok) {
+            throw new Error(
+              `Failed to fetch store details for store ${store.id}`
+            );
+          }
+          return response.json();
+        })
+      );
+
+      if(responses?.length > 0) {
+        cardData.set(responses);
+      }
+      const combinedResponse = responses.flat();
+      return combinedResponse;
+    } catch (error) {
+      console.error("Error fetching store details:", error);
+    }
+ 
+  };
 
   onMount(async () => {
-    const res = await fetch("/api/store/getStoreDetails", {
-      method: "POST",
-      body: JSON.stringify({
-        storeId: allStores.filter((store) => store.id !== -1),
-      }),
-    });
-    const data = await res.json();
-    // console.log(data);
-    cardData.set(data);
+    getStoreDetails();
   });
 
   // $: console.log("nodes", nodes);
@@ -50,7 +81,7 @@
     oneWeekAgo.setDate(today.getDate() - 7);
     const formatDate = (date: Date) => date.toISOString().split("T")[0];
     const theftCamera = await fetch(
-      `https://dev.api.moksa.ai/store/getAllStoresWithTheftAndCameraDetails/1/100/${formatDate(oneYearAgo)}/${formatDate(today)}`,
+      `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/getAllStoresWithTheftAndCameraDetails/1/100/${formatDate(oneYearAgo)}/${formatDate(today)}`,
       {
         method: "GET",
         headers: {
@@ -70,7 +101,7 @@
       }
     );
 
-    const updatedNodes = await PB.collection("node").getFullList({
+    const updatedNodes = await pb.collection("node").getFullList({
       // filter: `session~"${$page.params.slug}"`,
     });
     const data = await theftCamera.json();
@@ -186,6 +217,7 @@
   let searchStore = "";
 
   import { createEventDispatcher } from "svelte";
+  import pb from "@/lib/pb";
 
   let filterText = "";
   $: filteredFruits = fruits.filter((fruit) =>

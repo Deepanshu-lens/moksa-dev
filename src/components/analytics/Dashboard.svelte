@@ -24,8 +24,7 @@
   import * as Popover from "../ui/popover";
   import Spinner from "../ui/spinner/Spinner.svelte";
 
-  export let token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOjgsImZpcnN0X25hbWUiOiJhbnVzaGl5YSIsImxhc3RfbmFtZSI6InAiLCJlbWFpbCI6ImFudXNoaXlhQGdtYWlsLmNvbSIsImlhdCI6MTczNTgwMzc0NywiZXhwIjoxNzM1ODkwMTQ3fQ.tnLqFGfz2iRw8UTbL79YaCnQ-CxPpjMzz42qVQbzUTc";
-  console.log(token,'token');
+  export let token;
   export let allStores;
   export let allStoresData;
   export let aisleData;
@@ -57,6 +56,8 @@
   let loadingFloor = true;
   let heatMapData = writable(null);
   let floorMaps = writable([]);
+
+  console.log(safetyDetails,'safetyDetails');
 
   const fruits = allStores?.map((store: any) => ({
     value: store.id,
@@ -361,7 +362,7 @@
       const [theftD, busy, employeeEff, safetyD, storeData] = await Promise.all(
         [
           fetch(
-            `https://dev.api.moksa.ai/theft/theftDetectionDetailsByStoreid/${$selectedStore.value}`,
+            `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/theft/theftDetectionDetailsByStoreid/${$selectedStore.value}`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -382,7 +383,7 @@
             }
           ).then((res) => res.json()),
           fetch(
-            `https://dev.api.moksa.ai/customerPrediction/storeBusyHourBystoreId/${$selectedStore.value}`,
+            `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/customerPrediction/storeBusyHourBystoreId/${$selectedStore.value}`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -391,7 +392,7 @@
             }
           ).then((res) => res.json()),
           fetch(
-            `https://dev.api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/${$selectedStore.value}/${formatDate(startDate)}/1/100/${formatDate(today)}`,
+            `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/${$selectedStore.value}/${formatDate(startDate)}/1/100/${formatDate(today)}`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -400,7 +401,7 @@
             }
           ).then((res) => res.json()),
           fetch(
-            `https://dev.api.moksa.ai/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${$selectedStore.value}/1/100/${formatDate(startDate)}/${formatDate(today)}`,
+            `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${$selectedStore.value}/1/100/${formatDate(startDate)}/${formatDate(today)}`,
             {
               method: "GET",
               headers: {
@@ -410,7 +411,7 @@
             }
           ).then((res) => res.json()),
           fetch(
-            `https://dev.api.moksa.ai/store/getAllStoresTotals/${$selectedStore.value}/${formatDate(startDate)}/${formatDate(today)}`,
+            `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/getAllStoresTotals/${$selectedStore.value}/${formatDate(startDate)}/${formatDate(today)}`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -423,7 +424,7 @@
       console.log(employeeEff);
       console.log(safetyD);
 
-      efficiency = employeeEff.data;
+      efficiency = employeeEff?.data;
       theftDataa.set(theftD);
       allStoresData = storeData.data;
       busynessStoresData.set(busy.data);
@@ -529,7 +530,7 @@
         safetyData,
       ] = await Promise.all([
         fetch(
-          `https://dev.api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/${$selectedStore.value}/${formatDate(startDate)}/1/100/${formatDate(today)}`,
+          `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/${$selectedStore.value}/${formatDate(startDate)}/1/100/${formatDate(today)}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -538,7 +539,7 @@
           }
         ).then((res) => res.json()),
         fetch(
-          `https://dev.api.moksa.ai/store/getAllStoresTotals/${$selectedStore.value}/${formatDate(startDate)}/${formatDate(today)}`,
+          `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/getAllStoresTotals/${$selectedStore.value}/${formatDate(startDate)}/${formatDate(today)}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -547,7 +548,7 @@
           }
         ).then((res) => res.json()),
         fetch(
-          `https://dev.api.moksa.ai/store/getAllStoresWithAisleDetails/1/20/${formatDate(startDate)}/${formatDate(today)}`,
+          `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/getAllStoresWithAisleDetails/1/20/${formatDate(startDate)}/${formatDate(today)}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -556,7 +557,7 @@
           }
         ).then((res) => res.json()),
         fetch(
-          `https://dev.api.moksa.ai/theft/theftDetectionDetailsByStoreid/-1`,
+          `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/theft/theftDetectionDetailsByStoreid/-1`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -577,7 +578,7 @@
           }
         ).then((res) => res.json()),
         fetch(
-          `https://dev.api.moksa.ai/people/getPeopleCount/${$selectedStore.value}`,
+          `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/people/getPeopleCount/${$selectedStore.value}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -598,7 +599,7 @@
           }
         ).then((res) => res.json()),
         fetch(
-          `https://dev.api.moksa.ai/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${$selectedStore.value}/1/100/${formatDate(startDate)}/${formatDate(today)}`,
+          `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${$selectedStore.value}/1/100/${formatDate(startDate)}/${formatDate(today)}`,
           {
             method: "GET",
             headers: {
@@ -619,7 +620,7 @@
       // storesAisle.set(storesAisle)
       storePeopleCount = storePeople?.data?.data;
       allStoresData = storesTotal.data;
-      efficiency = eeScore.data;
+      efficiency = eeScore?.data;
       safetyDetails = safetyData?.data === undefined ? [] : safetyData?.data;
 
       theftDataa.set(theftD);
@@ -652,7 +653,7 @@
         safetyData,
       ] = await Promise.all([
         fetch(
-          `https://dev.api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/${$selectedStore.value}/${start}/1/100/${end}`,
+          `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/${$selectedStore.value}/${start}/1/100/${end}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -661,7 +662,7 @@
           }
         ).then((res) => res.json()),
         fetch(
-          `https://dev.api.moksa.ai/store/getAllStoresTotals/${$selectedStore.value}/${start}/${end}`,
+          `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/getAllStoresTotals/${$selectedStore.value}/${start}/${end}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -670,7 +671,7 @@
           }
         ).then((res) => res.json()),
         fetch(
-          `https://dev.api.moksa.ai/store/getAllStoresWithAisleDetails/1/20/${start}/${end}`,
+          `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/getAllStoresWithAisleDetails/1/20/${start}/${end}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -679,7 +680,7 @@
           }
         ).then((res) => res.json()),
         fetch(
-          `https://dev.api.moksa.ai/theft/theftDetectionDetailsByStoreid/${$selectedStore.value}`,
+          `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/theft/theftDetectionDetailsByStoreid/${$selectedStore.value}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -701,19 +702,22 @@
             },
           }
         ).then((res) => res.json()),
-        fetch(`https://dev.api.moksa.ai/people/getPeopleCount/-1`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-            Pagepersize: "100",
-            Pagenumber: "1",
-            startdate: start,
-            enddate: end,
-            datetype: "custom",
-          },
-        }).then((res) => res.json()),
         fetch(
-          `https://dev.api.moksa.ai/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${$selectedStore.value}/1/100/${start}/${end}`,
+          `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/people/getPeopleCount/-1`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+              Pagepersize: "100",
+              Pagenumber: "1",
+              startdate: start,
+              enddate: end,
+              datetype: "custom",
+            },
+          }
+        ).then((res) => res.json()),
+        fetch(
+          `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${$selectedStore.value}/1/100/${start}/${end}`,
           {
             method: "GET",
             headers: {
@@ -733,7 +737,7 @@
       // storesAisle.set(storesAisle)
       storePeopleCount = storePeople?.data?.data;
       allStoresData = storesTotal.data;
-      efficiency = eeScore.data;
+      efficiency = eeScore?.data;
       safetyDetails = safetyData?.data === undefined ? [] : safetyData?.data;
       theftDataa.set(theftD);
       updateBarChart(theftD);
@@ -823,7 +827,7 @@
     }
     if (efficiency?.data?.length > 0) {
       convertArrToCSV(
-        efficiency.data,
+        efficiency?.data,
         `dashboard_employee_efficiency_data_${date}.csv`
       );
     } else {
@@ -916,7 +920,7 @@
   const getFloorMap = async (storeId) => {
     try {
       const res = await fetch(
-        `https://dev.api.moksa.ai/store/getFloorMapByStoreid/${storeId}`,
+        `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/getFloorMapByStoreid/${storeId}`,
         {
           method: "GET",
           headers: {
@@ -967,7 +971,7 @@
     if (selectedFloorMap !== "" && selectedFloorMap !== null) {
       // console.log('selectedFloorMap',selectedFloorMap)
       const mapData = await fetch(
-        `https://dev.api.moksa.ai/heatmap/getHeatMapByTimeAndStoreId/${$heatMapDateRange}/${$selectedStore.value}`,
+        `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/heatmap/getHeatMapByTimeAndStoreId/${$heatMapDateRange}/${$selectedStore.value}`,
         {
           method: "GET",
           headers: {
@@ -980,7 +984,7 @@
       console.log("mapData", data);
       heatMapData.set(data);
       const res = await fetch(
-        `https://dev.api.moksa.ai/stream?key=${selectedFloorMap}`,
+        `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/stream?key=${selectedFloorMap}`,
         {
           method: "GET",
           headers: {
@@ -1024,7 +1028,7 @@
     if (selectedFloorMap !== "" && selectedFloorMap !== null) {
       // console.log('selectedFloorMap',selectedFloorMap)
       const mapData = await fetch(
-        `https://dev.api.moksa.ai/heatmap/getHeatMapByTimeAndStoreId/custom/${$selectedStore.value}`,
+        `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/heatmap/getHeatMapByTimeAndStoreId/custom/${$selectedStore.value}`,
         {
           method: "GET",
           headers: {
@@ -1039,7 +1043,7 @@
       console.log("mapData", data);
       heatMapData.set(data);
       const res = await fetch(
-        `https://dev.api.moksa.ai/stream?key=${selectedFloorMap}`,
+        `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/stream?key=${selectedFloorMap}`,
         {
           method: "GET",
           headers: {
@@ -1145,7 +1149,7 @@
             />
           </div>
           <Select.Group>
-            {#if filteredFruits.length > 0}
+            {#if filteredFruits?.length > 0}
               {#each filteredFruits as fruit}
                 <Select.Item
                   on:click={() => updateAllSelects(fruit)}
@@ -1255,7 +1259,7 @@
         </AddStoreDialog>
       </span>
       <div class="flex flex-col max-h-[300px] overflow-y-auto hide-scrollbar">
-        {#if theftandcamera.length === 0}
+        {#if theftandcamera?.length === 0}
           <p class="text-center text-gray-500 mt-8">No data available</p>
         {:else}
           {#each theftandcamera as data, index}
@@ -1334,9 +1338,9 @@
       <div
         class="w-full h-full max-h-[300px] overflow-y-auto hide-scrollbar relative"
       >
-        {#if storePeopleCount.length === 0}
+        {#if storePeopleCount?.length === 0}
           <p class="text-center text-gray-500 mt-8">No data available</p>
-        {:else}
+        {:else if !!storePeopleCount}
           <DashboardStoresOverviewtable aisleData={storePeopleCount} />
         {/if}
       </div>
@@ -1407,9 +1411,9 @@
         </Select.Root> -->
       </span>
       <span class="w-full h-full">
-        {#if efficiency.length === 0 || efficiency.data.length === 0}
+        {#if efficiency?.length === 0 || efficiency?.data?.length === 0}
           <p class="text-center text-gray-500 mt-8">No data available</p>
-        {:else}
+        {:else if efficiency?.data?.length > 0}
           <DashboardEfficiencyDataTable
             {efficiency}
             {token}
@@ -1438,7 +1442,7 @@
               Store does not have a kitchen
             </p>
           {/if}
-        {:else}
+        {:else if safetyDetails?.data?.length > 0}
           <DashboardSaftetyDataTable
             safetyData={safetyDetails}
             {token}

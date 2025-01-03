@@ -54,7 +54,7 @@
   const getFloorMap = async (storeId) => {
     try {
       const res = await fetch(
-        `https://dev.api.moksa.ai/store/getFloorMapByStoreid/${storeId}`,
+        `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/getFloorMapByStoreid/${storeId}`,
         {
           method: "GET",
           headers: {
@@ -159,7 +159,7 @@
       socket.disconnect();
     }
 
-    socket = io("${import.meta.env.PUBLIC_MOKSA_BASE_URL}", {
+    socket = io("https://dev.api.moksa.ai/", {
       withCredentials: true,
       extraHeaders: {
         Authorization: `Bearer ${token}`,
@@ -213,7 +213,7 @@
       if (data?.heatmapValues) {
         heatMapData.set(data?.heatmapValues); // Update heatMapData with the received data
         const res = await fetch(
-          `https://dev.api.moksa.ai/stream?key=${selectedFloorMap}`,
+          `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/stream?key=${selectedFloorMap}`,
           {
             method: "GET",
             headers: {
@@ -275,7 +275,7 @@
       console.log("selectedFloorMap", selectedFloorMap);
 
       const aData = await fetch(
-        `https://dev.api.moksa.ai/people/aisleCount/getAisleCountbyStoreid/${$selectedStore.value}`,
+        `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/people/aisleCount/getAisleCountbyStoreid/${$selectedStore.value}`,
         {
           method: "GET",
           headers: {
@@ -309,7 +309,7 @@
       }
 
       const mapData = await fetch(
-        `https://dev.api.moksa.ai/heatmap/getHeatMapByTimeAndStoreId/${$dateRange}/${$selectedStore.value}`,
+        `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/heatmap/getHeatMapByTimeAndStoreId/${$dateRange}/${$selectedStore.value}`,
         {
           method: "GET",
           headers: {
@@ -323,7 +323,7 @@
       console.log("mapData", data);
       heatMapData.set(data?.data);
       const res = await fetch(
-        `https://dev.api.moksa.ai/stream?key=${selectedFloorMap}`,
+        `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/stream?key=${selectedFloorMap}`,
         {
           method: "GET",
           headers: {
@@ -368,7 +368,7 @@
       // console.log('selectedFloorMap',selectedFloorMap)
 
       const aData = await fetch(
-        `https://dev.api.moksa.ai/people/aisleCount/getAisleCountbyStoreid/${$selectedStore.value}`,
+        `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/people/aisleCount/getAisleCountbyStoreid/${$selectedStore.value}`,
         {
           method: "GET",
           headers: {
@@ -410,7 +410,7 @@
       }
 
       const mapData = await fetch(
-        `https://dev.api.moksa.ai/heatmap/getHeatMapByTimeAndStoreId/custom/${$selectedStore.value}`,
+        `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/heatmap/getHeatMapByTimeAndStoreId/custom/${$selectedStore.value}`,
         {
           method: "GET",
           headers: {
@@ -425,7 +425,7 @@
       console.log("mapData", data);
       heatMapData.set(data?.data);
       const res = await fetch(
-        `https://dev.api.moksa.ai/stream?key=${selectedFloorMap}`,
+        `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/stream?key=${selectedFloorMap}`,
         {
           method: "GET",
           headers: {

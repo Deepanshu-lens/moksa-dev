@@ -38,7 +38,7 @@
     selectedImage = null; // Reset selectedImage before fetching
     try {
       const response = await fetch(
-        `https://dev.api.moksa.ai/stream?key=${imageUri}`,
+        `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/stream?key=${imageUri}`,
         {
           method: "GET",
           headers: {
@@ -181,7 +181,7 @@
     // console.log(currentpage);
 
     const safetyDetails = await fetch(
-      `https://dev.api.moksa.ai/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${$selectedStore.value}/${currentpage}/100/${$dateRange === "custom" ? start : formatDate(startDate)}/${$dateRange === "custom" ? end : formatDate(today)}`,
+      `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${$selectedStore.value}/${currentpage}/100/${$dateRange === "custom" ? start : formatDate(startDate)}/${$dateRange === "custom" ? end : formatDate(today)}`,
       {
         method: "GET",
         headers: {

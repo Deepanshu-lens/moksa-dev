@@ -52,7 +52,7 @@
 
     const formatDate = (date: Date) => date.toISOString().split("T")[0];
     const efficiency = await fetch(
-      `https://dev.api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/${$selectedStore.value}/${$dateRange === "custom" ? start : formatDate(startDate)}/${currentpage}/100/${$dateRange === "custom" ? end : formatDate(today)}`,
+      `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/${$selectedStore.value}/${$dateRange === "custom" ? start : formatDate(startDate)}/${currentpage}/100/${$dateRange === "custom" ? end : formatDate(today)}`,
       {
         method: "GET",
         headers: {
@@ -67,7 +67,7 @@
     currentPageIndex = 0;
   }
 
-  $: dbData = efficiency.data.map((item) => {
+  $: dbData = efficiency?.data?.map((item) => {
     return {
       employee: `${item?.employee}`,
       storeName: item?.store_name,
@@ -105,8 +105,8 @@
     if ($pageIndex === $pageCount - 1 && currentDataCount < efficiency.total) {
       loading = true;
       const newData = await fetchMoreData();
-      efficiency.data = [...efficiency.data, ...newData?.data?.data];
-      currentDataCount = efficiency.data.length;
+      efficiency.data = [...efficiency?.data, ...newData?.data?.data];
+      currentDataCount = efficiency?.data?.length;
       data.set(dbData); // Update the data store
       // console.log(currentPageIndex);
       loading = false;
@@ -114,7 +114,7 @@
   }
 
   $: columns = table.createColumns(
-    efficiency.column
+    efficiency?.column
       .filter(
         (col) =>
           ![
@@ -123,7 +123,7 @@
             "last_name",
             "role",
             "efficiency_score",
-          ].includes(col.key)
+          ]?.includes(col.key)
       )
       .map((col) =>
         table.column({

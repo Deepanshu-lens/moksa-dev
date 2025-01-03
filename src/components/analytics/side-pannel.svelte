@@ -1,32 +1,20 @@
-<script>
-  import {
-    Users,
-    ShieldCheck,
-    AreaChart,
-    Store,
-    LayoutDashboard,
-  } from "lucide-svelte";
+<script lang="ts">
+  import { Store, LayoutDashboard, Users } from "lucide-svelte";
   import Stores from "@/components/analytics/Stores.svelte";
   import Dashboard from "@/components/analytics/Dashboard.svelte";
-  import Theft from "@/components/analytics/Theft.svelte";
-  import PeopleCounter from "@/components/analytics/PeopleCounter.svelte";
-  import Safety from "@/components/analytics/Safety.svelte";
-  import HeatMap from "@/components/analytics/HeatMap.svelte";
-  import pb from "@/lib/pb";
-  import EE from "@/components/analytics/EE.svelte";
   import { analyticsData } from "@/stores/analytics-data";
   import { writable } from "svelte/store";
   import { nodes } from "@/stores";
+  import Theft from "./Theft.svelte";
+  import EE from "./EE.svelte";
+  import PeopleCounter from "./PeopleCounter.svelte";
   let view = 1;
+  export let moksa: any = {};
   let data = {
-    moksaToken:
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOjgsImZpcnN0X25hbWUiOiJhbnVzaGl5YSIsImxhc3RfbmFtZSI6InAiLCJlbWFpbCI6ImFudXNoaXlhQGdtYWlsLmNvbSIsImlhdCI6MTczNTgwMzc0NywiZXhwIjoxNzM1ODkwMTQ3fQ.tnLqFGfz2iRw8UTbL79YaCnQ-CxPpjMzz42qVQbzUTc",
+    moksaToken: moksa?.token,
   };
-  $: {
-    if ($analyticsData) {
-      data = $analyticsData;
-    }
-  }
+  let user = moksa;
+  let moksaUserId = moksa?.user?.moksaId;
 
   let allStores = writable([]);
   let allStoresData = writable([]);
@@ -39,20 +27,6 @@
   let efficiency = writable([]);
   let safetyDetails = writable([]);
   let storePeopleCount = writable([]);
-
-  const user = {
-    avatar: "download_9N9VYdIRK0.png",
-    collectionId: "_pb_users_auth_",
-    email: "main.user@moksa.ai",
-    features: [],
-    firstName: "main",
-    id: "vtlzgvuiepk1mul",
-    lastName: "user",
-    moksaId: 68,
-    name: "",
-    role: "superAdmin",
-    session: "85et6t89vibycns",
-  };
 
   $: {
     if ($analyticsData) {
@@ -67,58 +41,6 @@
       safetyDetails.set($analyticsData?.safetyDetails?.data);
       storePeopleCount.set($analyticsData?.storePeopleCount?.data?.data);
     }
-  }
-
-  // let aisleData  = data?.aisleData?.data?.data ?? [];
-  // let busyness  = data?.busyness?.data ?? [];
-  // let efficiency  = data?.efficiency?.data ?? [];
-  // let safetyDetails  = data?.safetyDetails?.data ?? [];
-  // let storePeopleCount  = data?.storePeopleCount?.data?.data ?? [];
-
-  $: allStoresLackKitchen =
-    $allStores?.length > 0
-      ? $allStores?.every((store) => !store.hasKitchen)
-      : true;
-
-  // let theftandcamera = data?.theftandcamera?.data?.data ?? [];
-  // let theftData = data?.theftData ?? [];
-  // let usersData = data?.usersData ?? [];
-  const moksaUserId = user?.moksaId;
-  const session = data?.session;
-  let nodesLocal = $nodes;
-
-  //   onMount(async () => {
-  //     pb.autoCancellation(false);
-  //     nodes = await getNodes();
-  //     const s = nodes.find((n) => n.id === session.activeNode);
-  //     if (s) {
-  //       selectedNode.set(s);
-  //     } else {
-  //       selectedNode.set(nodes[0]);
-  //     }
-  //   });
-
-  async function getNodes() {
-    if (session?.node.length > 0) {
-      const nodes = await pb.collection("node").getFullList(200, {
-        sort: "created",
-        expand: "camera",
-        filter: `session~"${session.id}"`,
-      });
-      return nodes.map((node) => ({
-        node,
-        session: session.id,
-        camera:
-          node?.camera?.length > 0
-            ? node?.expand?.camera?.reverse().map((cam) => ({
-                name: cam.name,
-                id: cam.id,
-                url: cam.url,
-              }))
-            : [],
-      }));
-    }
-    return [];
   }
 </script>
 
@@ -157,10 +79,9 @@
           Stores
         </p>
       </span>
-      <!-- <span class="group flex-col flex items-center justify-center gap-0.5">
-        
+      <span class="group flex-col flex items-center justify-center gap-0.5">
+        <!-- svelte-ignore a11y_consider_explicit_label -->
         <button
-        disabled
           on:click={() => (view = 3)}
           class={view !== 3
             ? ` disabled:cursor-not-allowed text-white h-[40px] w-[40px] rounded-full shadow-md  border-2 border-solid  dark:border-white bg-transparent group-hover:text-black group-hover:bg-gradient-to-r group-hover:from-[#EBE60B] group-hover:to-[#07E1A4] group-hover:border-none grid place-items-center `
@@ -188,7 +109,7 @@
         </p>
       </span>
       <span class="group flex-col flex items-center justify-center gap-0.5">
-        
+        <!-- svelte-ignore a11y_consider_explicit_label -->
         <button
           on:click={() => (view = 4)}
           class={view !== 4
@@ -236,7 +157,7 @@
           People <br /> Counter
         </p>
       </span>
-      <span class="group flex-col flex items-center justify-center gap-0.5">
+      <!-- <span class="group flex-col flex items-center justify-center gap-0.5">
         <button
           on:click={() => (view = 6)}
           class={view !== 6
@@ -296,7 +217,7 @@
       />
 
       <!-- theft -->
-    <!-- {:else if view === 3}
+    {:else if view === 3}
       <Theft
         theftandcamera={$theftandcamera}
         allStores={$allStores}
@@ -321,16 +242,15 @@
       <PeopleCounter
         allStores={$allStores}
         token={data?.moksaToken}
-        userData={$usersData}
         curruser={user}
       />
 
       <!-- heat map -->
-    {:else if view === 6}
-      <HeatMap allStores={$allStores} token={data?.moksaToken} />
+      <!-- {:else if view === 6}
+      <HeatMap allStores={$allStores} token={data?.moksaToken} /> -->
 
       <!-- safety -->
-    {:else if view === 7}
+      <!-- {:else if view === 7}
       <Safety allStores={$allStores} token={data?.moksaToken} {user} /> -->
     {/if}
   </main>

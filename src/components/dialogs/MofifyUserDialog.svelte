@@ -46,7 +46,7 @@
       }
     );
     const currentStores = await fetch(
-      `https://dev.api.moksa.ai/store/getUserStoreDetailsByUserId/${moksaId}`,
+      `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/getUserStoreDetailsByUserId/${moksaId}`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -119,7 +119,7 @@
       // });
 
       const updateMoksaUser = await fetch(
-        `https://dev.api.moksa.ai/auth/updateUser`,
+        `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/auth/updateUser`,
         {
           method: "POST",
           headers: {
@@ -149,7 +149,7 @@
 
       const filteredCurStores = curStores.filter((id) => id !== 0);
       const updateMoksaUserStores = await fetch(
-        `https://dev.api.moksa.ai/store/userStore/updateUserByUserId`,
+        `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/userStore/updateUserByUserId`,
         {
           method: "POST",
           headers: {

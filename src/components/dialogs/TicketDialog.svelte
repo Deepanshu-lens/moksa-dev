@@ -21,7 +21,7 @@
   const fetchComplaints = async () => {
     try {
       const response = await fetch(
-        `https://dev.api.moksa.ai/customerComplaints/getAllComplaints/1/10`,
+        `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/customerComplaints/getAllComplaints/1/10`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -38,18 +38,21 @@
   };
 
   const onSubmit = async () => {
-    await fetch(`https://dev.api.moksa.ai/customerComplaints/create`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        cameraId,
-        storeId,
-        issue,
-      }),
-    })
+    await fetch(
+      `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/customerComplaints/create`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          cameraId,
+          storeId,
+          issue,
+        }),
+      }
+    )
       .then((response) => {
         if (response.ok) {
           dialogOpen = false;
@@ -71,7 +74,7 @@
   async function getCams(id) {
     cameraId = "";
     const allCams = await fetch(
-      `https://dev.api.moksa.ai/camera/getAllCamerasByStoreId/${id}/1/100`,
+      `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/camera/getAllCamerasByStoreId/${id}/1/100`,
       {
         method: "GET",
         headers: {

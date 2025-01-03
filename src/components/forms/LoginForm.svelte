@@ -9,16 +9,11 @@
   import { user } from "@/stores";
   import Button from "../ui/button/button.svelte";
   import { addAuthLogs } from "@/lib/logs/authLogs";
+  import { moksaToken } from "@/stores/moksa-token";
 
   if (pb.authStore.token) {
     pb.authStore.clear();
   }
-
-  // if (window.api) {
-  //   window.api.invoke("clear-auth-token");
-  // } else {
-  //   localStorage.removeItem("pb_auth_token");
-  // }
 
   const loginSchema = userSchema.pick({ email: true });
 
@@ -45,6 +40,8 @@
   });
 
   async function login(email: string, password: string) {
+
+    // logging in via pb
     let authData;
     try {
       authData = await pb.collection("users").authWithPassword(email, password);
@@ -54,6 +51,44 @@
         return;
       }
       toast.error("Authentication failed. Please try again.");
+    }
+
+
+    // logging in via moksa apis
+    try {
+      await fetch(`${import.meta.env.PUBLIC_MOKSA_BASE_URL}/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: email, password: password }),
+      })
+        .then(async (res) => {
+          const data = await res.json();
+          if (data.data && data.data.token) {
+            const token = data.data.token;
+            localStorage.setItem('moksa-token', token);
+          } else {
+            console.log("Token not found in response");
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+
+      // const user = await pb
+      //   ?.collection("users")
+      //   .authWithPassword(email, password);
+
+      // const eventData = { email: email };
+
+      // const event = await pb?.collection("loginEvents").create(eventData);
+    } catch (err: any) {
+      console.log(err, "error here");
+      console.log(
+        "login error",
+        err.message === undefined ? "User not found" : err.message
+      );
     }
 
     if (authData) {

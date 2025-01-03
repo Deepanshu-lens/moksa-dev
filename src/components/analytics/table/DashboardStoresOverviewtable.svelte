@@ -25,9 +25,9 @@
   const dispatch = createEventDispatcher();
 
   function parseTimeString(timeString: string): string {
-    const timeRanges = timeString.split(/[-to]/).map((time) => time.trim());
+    const timeRanges = timeString.split(/[-to]/)?.map((time) => time.trim());
     return timeRanges
-      .map((time) => {
+      ?.map((time) => {
         const [hour, modifier] = time?.match(/(\d+)([APM]+)/)?.slice(1);
         const hourFormatted = hour?.padStart(2, "0"); // Ensure two digits
         return `${hourFormatted}:00${modifier?.toLowerCase()}`; // Append minutes and format modifier
@@ -35,7 +35,7 @@
       .join("-");
   }
 
-  $: dbdata = aisleData.map((item: any) => {
+  $: dbdata = aisleData?.map((item: any) => {
     return {
       storeName: item.store,
       customers: item.noofcustomers,

@@ -58,7 +58,7 @@
       socket.disconnect();
     }
 
-    socket = io("${import.meta.env.PUBLIC_MOKSA_BASE_URL}", {
+    socket = io("https://dev.api.moksa.ai/", {
       withCredentials: true,
       extraHeaders: {
         Authorization: `Bearer ${token}`,
@@ -180,7 +180,7 @@
   async function getLiveData(storeId: number) {
     loadingLive.set(true);
     const response = await fetch(
-      `https://dev.api.moksa.ai/people/getPeopleCountLive/${storeId}/1/30`,
+      `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/people/getPeopleCountLive/${storeId}/1/30`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -200,7 +200,7 @@
       .toISOString()
       .split("T")[0];
     const weekData = await fetch(
-      `https://dev.api.moksa.ai/people/getPeopleCount/${storeId}/${weekAgo}/${today}`,
+      `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/people/getPeopleCount/${storeId}/${weekAgo}/${today}`,
       {
         headers:
           $selectedStore.value !== -1
@@ -261,7 +261,7 @@
     try {
       // Call the three APIs
       const d = await fetch(
-        `https://dev.api.moksa.ai/people/getPeopleCount/${storeId}`,
+        `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/people/getPeopleCount/${storeId}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -300,7 +300,7 @@
       // console.log(token);
       // Call the three APIs
       const d = await fetch(
-        `https://dev.api.moksa.ai/people/getPeopleCount/${storeId}`,
+        `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/people/getPeopleCount/${storeId}`,
         {
           method: "GET",
           headers: {

@@ -58,8 +58,8 @@
     dispatch("select", fruit);
   }
 
-  let selectedStore = writable(stores.length > 0 ? stores?.[0].label : null);
-  let selectedStoreId = writable(stores.length > 0 ? stores?.[0].value : null);
+  let selectedStore = writable(stores?.length > 0 ? stores?.[0].label : null);
+  let selectedStoreId = writable(stores?.length > 0 ? stores?.[0].value : null);
 
   function calculateFilledSegments(hours, totalSegments = 36) {
     if (!hours) return 0; // Handle null or undefined time as 0
@@ -249,7 +249,7 @@
       socket.disconnect();
     }
 
-    socket = io("${import.meta.env.PUBLIC_MOKSA_BASE_URL}", {
+    socket = io("https://dev.api.moksa.ai/", {
       withCredentials: true,
       extraHeaders: {
         Authorization: `Bearer ${token}`,
@@ -354,25 +354,50 @@
     setTimeout(() => {
       createChart();
     }, 100);
+
+    const today = new Date();
+    const weekAgo = new Date(today);
+    weekAgo.setDate(weekAgo.getDate() - 15);
+
+    const formatDate = (date: Date) => {
+      return date.toISOString().split("T")[0];
+    };
+
     try {
       loading = true;
       const [employeeResponse, efficiencyResponse] = await Promise.all([
-        fetch("/api/employee/getByStoreId", {
-          method: "POST",
-          body: JSON.stringify({ storeId: stores[0].value }),
-          headers: { "Content-Type": "application/json" },
-        }),
-        fetch("/api/employee/getEfficiencyByStoreId", {
-          method: "POST",
-          body: JSON.stringify({ storeId: stores[0].value }),
-          headers: { "Content-Type": "application/json" },
-        }),
+        fetch(
+          `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/storeEmployee/getAllEmployeeByStoreId/${stores[0].value}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        ),
+        fetch(
+          `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/${stores[0].value}/${formatDate(weekAgo)}/1/100/${formatDate(today)}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        ),
       ]);
 
-      employeeData.set(await employeeResponse.json());
-      efficiencyData.set(await efficiencyResponse.json());
+      const empData = await employeeResponse.json();
+      const effData = await efficiencyResponse.json();
 
-      if ($employeeData.data.length > 0) {
+      console.log(empData, "empData");
+      console.log(effData, "effData");
+
+      employeeData.set(empData);
+      efficiencyData.set(effData);
+
+      if ($employeeData?.data?.length > 0) {
         await getEmployeeDetails($employeeData.data[0].id);
       } else {
         employeeDetails.set(null);
@@ -405,7 +430,7 @@
     try {
       loading = true;
       const response = await fetch(
-        `https://dev.api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/${$selectedStoreId}/${start}/1/100/${end}`,
+        `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/${$selectedStoreId}/${start}/1/100/${end}`,
         {
           method: "GET",
           headers: {
@@ -467,7 +492,7 @@
     try {
       loading = true;
       const response = await fetch(
-        `https://dev.api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/${$selectedStoreId}/${formatDate(startDate)}/1/100/${formatDate(today)}`,
+        `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/${$selectedStoreId}/${formatDate(startDate)}/1/100/${formatDate(today)}`,
         {
           method: "GET",
           headers: {
@@ -507,11 +532,16 @@
 
   async function getbystoreID() {
     employeeData.set([]);
-    const response = await fetch("/api/employee/getByStoreId", {
-      method: "POST",
-      body: JSON.stringify({ storeId: $selectedStoreId }),
-      headers: { "Content-Type": "application/json" },
-    });
+    const response = await fetch(
+      `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/storeEmployee/getAllEmployeeByStoreId/${$selectedStoreId}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
     const data = await response.json();
     // console.log(data);
     employeeData.set(data);
@@ -548,7 +578,7 @@
       detailsLoading = true;
       try {
         const response = await fetch(
-          `https://dev.api.moksa.ai/employeeEfficiency/getEmployeeEfficiencyByEmpid/${id}/${formatDate(startDate)}/${formatDate(today)}`,
+          `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/employeeEfficiency/getEmployeeEfficiencyByEmpid/${id}/${formatDate(startDate)}/${formatDate(today)}`,
           {
             method: "GET",
             headers: {
@@ -586,7 +616,7 @@
     if (!!id) {
       try {
         const response = await fetch(
-          `https://dev.api.moksa.ai/employeeEfficiency/getEmployeeEfficiencyByEmpid/${id}/${start}/${end}`,
+          `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/employeeEfficiency/getEmployeeEfficiencyByEmpid/${id}/${start}/${end}`,
           {
             method: "GET",
             headers: {
@@ -693,12 +723,14 @@
             class="w-auto min-w-[150px] bg-[#3D81FC] text-white border-none text-xs px-1 rounded-lg"
           >
             <Select.Value
-              placeholder={stores.length > 0 ? stores?.[0]?.label : "No Stores"}
+              placeholder={stores?.length > 0
+                ? stores?.[0]?.label
+                : "No Stores"}
             />
           </Select.Trigger>
           <Select.Content class="max-h-[200px] overflow-y-auto">
             <Select.Group>
-              <!-- {#if stores.length > 0}
+              <!-- {#if stores?.length > 0}
                 {#each stores as store}
                   <Select.Item
                     class="px-1"
@@ -728,7 +760,7 @@
                   class="mb-2"
                 />
               </div>
-              {#if filteredFruits.length > 0}
+              {#if filteredFruits?.length > 0}
                 {#each filteredFruits as store}
                   <Select.Item
                     on:click={async () => {
@@ -760,7 +792,7 @@
           <span class="flex items-center justify-center h-full w-full">
             <Spinner />
           </span>
-        {:else if $efficiencyData && $efficiencyData?.data && $efficiencyData?.data?.data.length > 0}
+        {:else if $efficiencyData && $efficiencyData?.data && $efficiencyData?.data?.data?.length > 0}
           <EmployeeTrackingDataTable {efficiencyData} {selectedStore} />
         {:else}
           <span class="flex items-center justify-center h-full w-full">

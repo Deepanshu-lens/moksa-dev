@@ -97,7 +97,7 @@
     try {
       const [response, liveResponse] = await Promise.all([
         fetch(
-          `https://dev.api.moksa.ai/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${$selectedStore.value}/1/100/${formatDate(startDate)}/${formatDate(today)}`,
+          `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${$selectedStore.value}/1/100/${formatDate(startDate)}/${formatDate(today)}`,
           {
             method: "GET",
             headers: {
@@ -107,7 +107,7 @@
           }
         ),
         fetch(
-          `https://dev.api.moksa.ai/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${$selectedStore.value}/1/100/${formatDate(startDate)}/${formatDate(today)}`,
+          `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${$selectedStore.value}/1/100/${formatDate(startDate)}/${formatDate(today)}`,
           {
             method: "GET",
             headers: {
@@ -148,7 +148,7 @@
 
     try {
       const response = await fetch(
-        `https://dev.api.moksa.ai/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${$selectedStore.value}/1/100/${start}/${end}`,
+        `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${$selectedStore.value}/1/100/${start}/${end}`,
         {
           method: "GET",
           headers: {
@@ -198,7 +198,7 @@
   //     sockets[storeId].disconnect();
   //   }
 
-  //   sockets[storeId] = io("${import.meta.env.PUBLIC_MOKSA_BASE_URL}", {
+  //   sockets[storeId] = io("https://dev.api.moksa.ai/", {
   //     withCredentials: true,
   //     extraHeaders: {
   //       Authorization: `Bearer ${token}`,
@@ -282,7 +282,7 @@
       sockets[storeId].disconnect();
     }
 
-    sockets[storeId] = io("${import.meta.env.PUBLIC_MOKSA_BASE_URL}", {
+    sockets[storeId] = io("https://dev.api.moksa.ai/", {
       withCredentials: true,
       extraHeaders: {
         Authorization: `Bearer ${token}`,

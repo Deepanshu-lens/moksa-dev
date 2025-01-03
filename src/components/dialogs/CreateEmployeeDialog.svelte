@@ -41,7 +41,7 @@
     }
 
     const res = await fetch(
-      `https://dev.api.moksa.ai/store/storeEmployee/create`,
+      `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/storeEmployee/create`,
       {
         method: "POST",
         headers: {

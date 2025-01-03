@@ -219,7 +219,7 @@
 
     await axios
       .post(
-        `https://dev.api.moksa.ai/store/updateCustomerVars/${$selectedNode?.moksaId}`,
+        `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/updateCustomerVars/${$selectedNode?.moksaId}`,
         customerVarsPayload,
         {
           headers: {

@@ -45,7 +45,7 @@
       expandedRowData.set([]);
     } else {
       await fetch(
-        `https://dev.api.moksa.ai/store/getStoreByStoreIdWithAllDetails/${moksaId}/${oneYearAgo}/${today}`,
+        `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/getStoreByStoreIdWithAllDetails/${moksaId}/${oneYearAgo}/${today}`,
         {
           headers: {
             "Content-Type": "application/json",
