@@ -174,7 +174,7 @@
           People <br /> Counter
         </p>
       </span>
-      <!-- <span class="group flex-col flex items-center justify-center gap-0.5">
+      <span class="group flex-col flex items-center justify-center gap-0.5">
         <button
           on:click={() => (view = 6)}
           class={view !== 6
@@ -187,7 +187,7 @@
         >
           Heat Map
         </p>
-      </span> -->
+      </span>
       <span class="group flex-col flex items-center justify-center gap-0.5">
         <button
           on:click={() => (view = 7)}
@@ -263,11 +263,11 @@
       />
 
       <!-- heat map -->
-    <!-- {:else if view === 6}
-      <HeatMap allStores={$allStores} token={data?.moksaToken} /> -->
+    {:else if view === 6}
+      <HeatMap allStores={$allStores} token={data?.moksaToken} />
 
       <!-- safety -->
-      {:else if view === 7}
+    {:else if view === 7}
       <Safety allStores={$allStores} token={data?.moksaToken} {user} />
     {/if}
   </main>

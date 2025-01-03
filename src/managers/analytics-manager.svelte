@@ -29,7 +29,7 @@
 
   const dropwdown = async () => {
     const response = await fetch(
-      "https://dev.api.moksa.ai/store/getAllStoresForDropdown",
+      `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/getAllStoresForDropdown`,
       {
         method: "GET",
         headers: {

@@ -40,6 +40,7 @@
     "socket.io-client": "^4.8.1",
     "sortablejs": "^1.15.3",
     "svelte": "^5.1.9",
+    "svelte-fusioncharts": "^1.1.0",
     "svelte-headless-table": "^0.18.3",
     "tailwindcss": "^3.4.14",
     "tailwindcss-animate": "^1.0.7",
