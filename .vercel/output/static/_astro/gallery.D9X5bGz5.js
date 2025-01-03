@@ -1,1 +1,0 @@
-import{w as e}from"./index.PDEF5wc2.js";const c=()=>{const{subscribe:a,set:s,update:r}=e([]);return{subscribe:a,set:t=>{s(t)},update:t=>{r(o=>t(o))}}},d=c(),i=e(0),u=e(!1);export{d as g,u as i,i as t};
