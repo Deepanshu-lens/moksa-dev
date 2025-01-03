@@ -1,0 +1,1 @@
+import{w as e}from"./index.Syity6yz.js";const r=()=>{const{subscribe:a,set:s,update:n}=e([]);return{subscribe:a,set:t=>{s(t)},update:t=>{n(o=>t(o))}}},d=r(),u=e(0);let i=e(!1);export{d as a,i,u as t};

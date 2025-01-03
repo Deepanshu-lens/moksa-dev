@@ -1,0 +1,1 @@
+import{w as e}from"./index.Syity6yz.js";const o=e(!1),s=e(!1),a=e(typeof window<"u"&&Number(localStorage.getItem("selectedLayout"))||3),l=e(typeof window<"u"?JSON.parse(localStorage.getItem("customLayout")||"null"):null),n=e(!1);export{o as a,n as b,l as c,s as i,a as s};

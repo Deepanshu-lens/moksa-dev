@@ -1,0 +1,1 @@
+import{w as o}from"./index.Syity6yz.js";import{c as s}from"./pb.BjVtZEqq.js";const n=()=>{const{subscribe:a,set:d,update:r}=o(void 0);return{subscribe:a,set:e=>{const t=s(e);d(t)},update:e=>{r(t=>{const c=e(t);return s(c)})}}},u=o(),l=n();export{l as n,u as s};
