@@ -47,7 +47,7 @@
           nodes.update((current) =>
             current.filter((cam) => cam.id !== e.record.id)
           );
-          $nodes.length > 0 && $selectedNode.set($nodes[0].id);
+          $nodes.length > 0 && selectedNode.set($nodes[0].id);
         }
       },
       {

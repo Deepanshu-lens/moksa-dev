@@ -92,9 +92,9 @@
   //     nodes = await getNodes();
   //     const s = nodes.find((n) => n.id === session.activeNode);
   //     if (s) {
-  //       $selectedNode.set(s);
+  //       selectedNode.set(s);
   //     } else {
-  //       $selectedNode.set(nodes[0]);
+  //       selectedNode.set(nodes[0]);
   //     }
   //   });
 

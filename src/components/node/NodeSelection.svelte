@@ -19,7 +19,7 @@
     items={$nodes.map((node) => ({ value: node.id, label: node.name }))}
     onSelectedChange={(e: any) => {
       addUserLogs(`User selected node ${e.label}`, $user?.email || "", $user?.id || "");
-      $selectedNode.set(e.value);
+      selectedNode.set(e.value);
     }}
     bind:selected={selectedValue}
   >

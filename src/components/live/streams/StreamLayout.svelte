@@ -132,11 +132,11 @@
       if (record) record_offline = pb.collection("node").create(record);
       else record_offline = await pb.collection("node").create(data);
 
-      if (record) $selectedNode.set(record.id);
-      else if (record_offline) $selectedNode.set(record_offline.id);
+      if (record) selectedNode.set(record.id);
+      else if (record_offline) selectedNode.set(record_offline.id);
     } else {
       record = await pb.collection("node").create(data);
-      $selectedNode.set(record.id);
+      selectedNode.set(record.id);
     }
   };
 

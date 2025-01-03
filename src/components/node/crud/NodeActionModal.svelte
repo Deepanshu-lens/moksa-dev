@@ -130,8 +130,8 @@
       }
     }
 
-    if (record) $selectedNode.set(record.id);
-    else if (record_offline) $selectedNode.set(record_offline.id);
+    if (record) selectedNode.set(record.id);
+    else if (record_offline) selectedNode.set(record_offline.id);
     modalOpen.set(false);
   };
 
@@ -143,7 +143,7 @@
     const record = await pb
       .collection("node")
       .update($nodes.find((n) => n.id === $selectedNode)?.id, data);
-    $selectedNode.set(record.id);
+    selectedNode.set(record.id);
     modalOpen.set(false);
     addUserLogs(
       "Node updated successfully",

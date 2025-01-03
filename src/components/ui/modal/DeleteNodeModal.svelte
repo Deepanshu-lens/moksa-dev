@@ -14,7 +14,7 @@
     );
   };
 
-  $: $nodes.length > 0 && $selectedNode.set($nodes[0].id);
+  $: $nodes.length > 0 && selectedNode.set($nodes[0].id);
 </script>
 
 <AlertDialog.Root>

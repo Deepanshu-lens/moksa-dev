@@ -15,7 +15,7 @@
     const { value, checked } = event.target;
 
     if (checked) {
-      $selectedNode.set({
+      selectedNode.set({
         ...$selectedNode,
         mobileLayout: value,
       });

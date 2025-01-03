@@ -23,7 +23,7 @@
 
   const storedNode = localStorage.getItem("$selectedNode");
 
-  $: storedNode && $selectedNode.set(storedNode);
+  $: storedNode && selectedNode.set(storedNode);
 
   const addCameras = async () => {
     let label = $selectedCamerasIds.length <= 1 ? "Camera" : "Cameras";

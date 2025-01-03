@@ -17,7 +17,7 @@
     const record = await pb
       .collection("node")
       .update($nodes.find((n) => n.id === $selectedNode)?.id, data);
-    $selectedNode.set(record.id);
+    selectedNode.set(record.id);
     modalOpen = false;
     addUserLogs(
       "Node updated successfully",

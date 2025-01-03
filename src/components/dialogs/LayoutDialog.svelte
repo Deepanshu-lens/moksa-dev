@@ -20,7 +20,7 @@
 
   const onSubmit = async () => {
     markRoi.set(false);
-    $selectedNode.set({
+    selectedNode.set({
       ...$selectedNode,
       maxStreamsPerPage:
         selected === 7
