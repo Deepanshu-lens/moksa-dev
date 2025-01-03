@@ -9,20 +9,24 @@ import svelte from "@astrojs/svelte";
 
 import icon from "astro-icon";
 
-import vercel from '@astrojs/vercel/serverless';
+import node from "@astrojs/node";
+
+import vercel from "@astrojs/vercel/serverless";
 
 dotenv.config();
 
 // https://astro.build/config
 export default defineConfig({
   output: "hybrid",
-  // outDir: !process.env.VERCEL ? "../dist" : "dist",
+  // outDir: !process.env.VERCEL ? "../output" : "dist",
   trailingSlash: "never",
   base: "/",
+
   build: {
     format: !process.env.VERCEL ? "file" : "directory",
     assetsPrefix: "./", // Ensures that asset paths are relative
   },
+
   integrations: [
     tailwind({
       applyBaseStyles: false,
@@ -30,6 +34,8 @@ export default defineConfig({
     svelte(),
     icon(),
   ],
+
   devToolbar: { enabled: false },
+
   adapter: vercel(),
 });
