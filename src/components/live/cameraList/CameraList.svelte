@@ -21,7 +21,8 @@
   import { writable } from "svelte/store";
   import { getCameras } from "@/managers/get-heathmap";
   import { addUserLogs } from "@/lib/logs/userLogs";
-
+  export let moksa;
+  console.log(moksa,'mkk');
   let cameraItems: HTMLDivElement;
   let sortCriteria: string | null = null; // No sort criteria by default
   let sortDirection = "asc"; // Default sort direction
@@ -127,7 +128,7 @@
     <div class={`flex justify-between items-center gap-4 w-full`}>
       <NodeSelection />
       <div class={cn("flex items-center", "space-x-2")}>
-        <NodeActionButton action="add" />
+        <NodeActionButton action="add" {moksa}/>
         <NodeActionButton action="edit" />
         <NodeActionButton action="delete" />
       </div>
@@ -159,7 +160,11 @@
                 class="flex items-center justify-between"
                 on:click={() => {
                   handleSortChange("name"); // Update sort criteria
-                  addUserLogs("User sorted cameras by name", $user?.email || "", $user?.id || "");
+                  addUserLogs(
+                    "User sorted cameras by name",
+                    $user?.email || "",
+                    $user?.id || ""
+                  );
                   searchCriteria = "name"; // Set search criteria to "name"
                 }}
               >
@@ -176,7 +181,11 @@
                 class="flex items-center justify-between"
                 on:click={() => {
                   handleSortChange("url"); // Update sort criteria
-                  addUserLogs("User sorted cameras by url", $user?.email || "", $user?.id || "");
+                  addUserLogs(
+                    "User sorted cameras by url",
+                    $user?.email || "",
+                    $user?.id || ""
+                  );
                   searchCriteria = "url"; // Set search criteria to "RTSP URL"
                 }}
               >
@@ -222,9 +231,13 @@
             <DropdownMenu.Group>
               <DropdownMenu.Item
                 class="flex items-center justify-between"
-                on:click={() =>{
-                   handleSortChange("created")
-                   addUserLogs("User sorted cameras by date", $user?.email || "", $user?.id || "");
+                on:click={() => {
+                  handleSortChange("created");
+                  addUserLogs(
+                    "User sorted cameras by date",
+                    $user?.email || "",
+                    $user?.id || ""
+                  );
                 }}
               >
                 <span>Date (created on)</span>
@@ -239,8 +252,12 @@
               <DropdownMenu.Item
                 class="flex items-center justify-between"
                 on:click={() => {
-                  handleSortChange("name")
-                  addUserLogs("User sorted cameras by name", $user?.email || "", $user?.id || "");
+                  handleSortChange("name");
+                  addUserLogs(
+                    "User sorted cameras by name",
+                    $user?.email || "",
+                    $user?.id || ""
+                  );
                 }}
               >
                 <span> Camera Name </span>

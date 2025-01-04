@@ -17,6 +17,7 @@
   } from "@/stores";
   import SidePannel from "./side-pannel.svelte";
   import EventAlertModal from "../events/EventAlertModal.svelte";
+  export let moksa: any = {};
   import { toast } from "svelte-sonner";
   import * as Tabs from "@/components/ui/tabs";
   import * as Accordion from "@/components/ui/accordion/index.ts";
@@ -576,7 +577,7 @@
                 {#if $isAlertPanelOpen || $isRoiPanelOpen}
                   <div class="flex">
                     {#if currentPanel == 0}
-                      <CameraList />
+                      <CameraList moksa={moksa}/>
                     {:else if currentPanel == 1}
                       <div
                         class="border-l flex flex-col p-2 overflow-visible w-full min-w-[360px]"
@@ -781,7 +782,7 @@
                   </div>
                 {:else}
                   <div class="flex">
-                    <CameraList />
+                    <CameraList {moksa}/>
                   </div>
                 {/if}
 

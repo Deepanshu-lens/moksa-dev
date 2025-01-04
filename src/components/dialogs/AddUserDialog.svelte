@@ -3,16 +3,13 @@
   import { Input } from "@/components/ui/input";
   import { Label } from "@/components/ui/label";
   import { Button } from "@/components/ui/button";
-  import { selectedNode } from "@/stores";
   import * as Select from "@/components/ui/select";
   import { X } from "lucide-svelte";
   import PocketBase from "pocketbase";
-  import { page } from "@/stores";
   import { onMount } from "svelte";
-  import { enhance } from "$app/forms";
 
   // dialogOpen = false;
-
+  export let moksa;
   let dialogOpen = false;
   let userType = "";
   let userID = "";
@@ -22,9 +19,7 @@
   let mailId = "";
   let password = "";
   let cPassword = "";
-  export let user;
   export let handleSubmit;
-  const token = user.moksaToken;
   let nodes: any[] = [];
   let moksaNodes: any[] = [];
   let roles: any[] = [];

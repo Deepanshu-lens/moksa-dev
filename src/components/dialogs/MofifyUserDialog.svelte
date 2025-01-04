@@ -4,11 +4,9 @@
   import { Input } from "@/components/ui/input";
   import { Label } from "@/components/ui/label";
   import { Button } from "@/components/ui/button";
-  import { selectedNode } from "@/stores";
   import * as Select from "@/components/ui/select";
   import { X } from "lucide-svelte";
   import PocketBase from "pocketbase";
-  import { page } from "@/stores";
 
   let dialogOpen = false;
   export let data;

@@ -3,10 +3,10 @@
   import NodeActionModal from "./NodeActionModal.svelte";
 
   export let action: "add" | "edit" | "delete";
-
+  export let moksa;
 </script>
 
-<NodeActionModal {action}>
+<NodeActionModal {action} {moksa}>
   <Button variant="outline" size="sm" class={`text-xs`}
     >{action.charAt(0).toUpperCase() + action.slice(1)}</Button
   >

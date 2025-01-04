@@ -1,10 +1,8 @@
 <script lang="ts">
   import PocketBase from "pocketbase";
-  import { page } from "@/stores";
   import * as Dialog from "@/components/ui/dialog";
   import { toast } from "svelte-sonner";
   import { Button } from "@/components/ui/button";
-  import { addUserLog } from "@/lib/addUserLog";
 
   export let data;
   export let token;
@@ -36,7 +34,7 @@
       console.log(pbdel);
 
       toast.success("User deleted successfully");
-      addUserLog(`User deleted: ${data.username} (Moksa ID: ${data.moksaId})`);
+      // addUserLogs(`User deleted: ${data.username} (Moksa ID: ${data.moksaId})`);
       dialogOpen = false;
     } catch (error) {
       console.error("Error deleting user:", error);

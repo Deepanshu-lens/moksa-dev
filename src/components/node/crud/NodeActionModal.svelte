@@ -1,13 +1,12 @@
 <script lang="ts">
   import * as Dialog from "@/components/ui/dialog";
-  import AddCameraForm from "@/components/forms/CameraForm.svelte";
 
   import pb from "@/lib/pb";
   import * as AlertDialog from "@/components/ui/alert-dialog";
   import * as Tabs from "@/components/ui/tabs/index.js";
   import * as Card from "@/components/ui/card/index.js";
   import { selectedNode, nodes, user } from "@/stores";
-
+  export let moksa;
   import { Input } from "@/components/ui/input";
   import { Label } from "@/components/ui/label";
   import { Button } from "@/components/ui/button";
@@ -18,9 +17,7 @@
 
   import { toast } from "svelte-sonner";
   import { Slider } from "@/components/ui/slider";
-  import { ChevronDown, PlusCircle } from "lucide-svelte";
   import * as Select from "@/components/ui/select/index";
-  import { onMount } from "svelte";
 
   export let action: "add" | "edit" | "delete";
 
@@ -86,8 +83,8 @@
     let cam;
     let cam_offline;
     const data = {
-      name: nodeName,
-      session: $user.session[0],
+      name: nodeName[0],
+      session: $user.session,
     };
     const pb_online = new PocketBase(import.meta.env.PUBLIC_POCKETBASE_URL);
     if (window.api) {
@@ -163,15 +160,8 @@
     );
   };
 
-  const onSubmit = () => {
-    console.log($selectedNode?.allCameraNumbers);
-    console.log(cameraNumber);
-    console.log(typeof cameraNumber);
-    if (
-      cameraNumber === null ||
-      cameraNumber === "" ||
-      cameraNumber === undefined
-    ) {
+  const onSubmit = async () => {
+    if (cameraNumber === null || cameraNumber === undefined) {
       toast.error("Camera number is required");
       return;
     }
@@ -199,41 +189,116 @@
       console.log(modifiedCameraURL);
       console.log(modifiedSubURL);
 
-      fetch("/api/camera/addCamera", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: cameraName,
-          url: modifiedCameraURL,
-          subUrl: modifiedSubURL,
-          nodeId: sNode ? sNode.id : $selectedNode.id,
+      try {
+        const inference = await pb?.collection("ai_inference").create({
+          // camera: camera.id,
+          node: sNode ? sNode.id : $selectedNode,
+          session: $user?.session[0],
           face: face,
-          save: saving,
-          saveFolder: "./PlayBack/",
-          saveDuration: 30 * 60 * 24,
           vehicle: vehicle,
           faceDetThresh: 0.93,
           faceMatchThresh: 0.3,
           vehicleDetThresh: 0.4,
           vehiclePlateThresh: 0.5,
           vehicleOCRThresh: 0.6,
-          priority: priority === true ? 1 : 0,
           motionThresh:
             motionThresh === 0 ? 1000 : motionThresh === 50 ? 2500 : 5000,
           personCount: personCount,
+          // running: data.running,
+          // runningThresh: data.runningThresh,
+        });
+
+        const camera = await pb?.collection("camera").create({
+          name: cameraName,
+          url: modifiedCameraURL,
+          subUrl: modifiedSubURL,
+          nodeId: sNode ? sNode.id : $selectedNode,
+          save: saving,
+          saveDuration: 30 * 60 * 24,
+          saveFolder: "./PlayBack/",
+          personCount: personCount,
+          inference: inference?.id,
           cameraNumber: parseInt(cameraNumber),
-          moksaId: $selectedNode.moksaId,
-        }),
-      }).then((response) => {
-        if (response.ok) {
-          dialogOpen = false;
-          toast("Camera added!");
-        } else {
-          toast.error(`error adding camera`);
-        }
-      });
+        });
+
+        await Promise.all([
+          fetch(`${import.meta.env.PUBLIC_POCKETBASE_URL}/api/addStream`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${moksa?.token}`,
+            },
+            body: JSON.stringify({
+              name: cameraName,
+              url: modifiedCameraURL,
+              subUrl: modifiedSubURL,
+              nodeId: sNode ? sNode.id : $selectedNode,
+              face: face,
+              save: saving,
+              saveFolder: "./PlayBack/",
+              saveDuration: 30 * 60 * 24,
+              vehicle: vehicle,
+              faceDetThresh: 0.93,
+              faceMatchThresh: 0.3,
+              vehicleDetThresh: 0.4,
+              vehiclePlateThresh: 0.5,
+              vehicleOCRThresh: 0.6,
+              priority: priority === true ? 1 : 0,
+              motionThresh:
+                motionThresh === 0 ? 1000 : motionThresh === 50 ? 2500 : 5000,
+              personCount: personCount,
+              cameraNumber: parseInt(cameraNumber),
+              moksaId: moksa?.user?.moksaId,
+            }),
+          }),
+          fetch(`${import.meta.env.PUBLIC_MOKSA_BASE_URL}/camera/addCamera`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${moksa?.token}`,
+            },
+            body: JSON.stringify({
+              port: 554,
+              vendor: "company",
+              streaming_url: modifiedCameraURL,
+              ip: modifiedCameraURL.split("@")[1].split(":")[0],
+              store_id: moksa?.user?.moksaId,
+              cameraNo: Number(cameraNumber),
+              lensCameraId: camera.id,
+            }),
+          })
+            .then(async (res) => {
+              if (!res.ok) {
+                throw new Error(
+                  `Moksa API error: ${res.status} ${res.statusText}`
+                );
+              }
+              const moksaData = await res.json();
+              console.log("Moksa API response:", moksaData);
+
+              // Update PocketBase camera with Moksa ID
+              if (moksaData.data.id) {
+                await pb?.collection("camera").update(camera.id, {
+                  cameraId: moksaData.data.id,
+                });
+                console.log(
+                  "Updated PocketBase camera with Moksa ID:",
+                  moksaData.data.id
+                );
+              } else {
+                console.warn("Moksa API response doesn't contain an ID");
+              }
+            })
+            .catch((err) => {
+              console.log(err);
+            }),
+        ]);
+
+        modalOpen.set(false);
+      } catch (error) {
+        console.log(error);
+        console.error("Error adding camera:", error);
+      }
     } else {
       const onvifUrl = `onvif://${cameraUsername}:${cameraPass}@${cameraIp}${httpPort ? `:${httpPort}` : ""}`;
       console.log(onvifUrl);
