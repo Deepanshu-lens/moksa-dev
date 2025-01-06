@@ -6,7 +6,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
     let token = cookies.get('moksa-token');
     console.log(token, 'tokenmn');
 
-    const response = await fetch(`http://dev.api.moksa.ai/store/updateCustomerVars/${payload.storeId}`, {
+    const response = await fetch(`https://api.moksa.ai/store/updateCustomerVars/${payload.storeId}`, {
         method: 'POST',
         headers: {
             'Authorization': `Bearer ${cookies.get('moksa-token')}`,
