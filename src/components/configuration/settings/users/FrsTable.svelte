@@ -45,3 +45,12 @@
       </Table.Row>
     </Table.Body>
   </Table.Root>
+
+
+<style>
+  input[type="checkbox"] {
+    accent-color: #0070FF !important;
+    transform: scale(1.25);
+
+  }
+</style>

@@ -8,7 +8,6 @@
   import Switch from "../ui/switch/switch.svelte";
   import * as Select from "@/components/ui/select/index";
   import { selectedNode } from "@/stores";
-  import { onMount } from "svelte";
   export let user;
   let cameraName = "";
   let cameraNumber: number | null = null;
@@ -231,14 +230,14 @@
         user_id: nvrUserId,
         http_port: nvrPort,
         ip: nvrIp,
-        node: $selectedNode.id,
+        node: $selectedNode,
         nodeName: $selectedNode.name,
         camCount: camCount,
         nvrSaving: nvrSaving,
         nvrFace: nvrFace,
-        host: $page.url.host,
+        host: window.URL.hostname,
         nvrPersonCount: personCount,
-        moksaId: $selectedNode.moksaId,
+        moksaId: $selectedNode,
       }),
     })
       .then((response) => {

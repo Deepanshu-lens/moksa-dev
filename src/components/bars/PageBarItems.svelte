@@ -24,6 +24,7 @@
     { name: "Live", link: "/", icon: "live-icon" },
     { name: "Analytics", link: "/analytics", icon: "playback-icon" },
     { name: "Users", link: "/users", icon: "playback-icon" },
+    { name: "Settings", link: "/settings?section=Camera", icon: "playback-icon" },
   ];
 
   // if (import.meta.env.PUBLIC_ENV === "production") {

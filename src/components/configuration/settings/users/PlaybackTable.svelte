@@ -1,28 +1,30 @@
 <script>
-  import { Button } from "@/components/ui/button";
-  import Checkbox from "@/components/ui/checkbox/checkbox.svelte";
+  import PocketBase from "pocketbase";
   import * as Table from "@/components/ui/table/index";
-  export let allUsers;
-  import { onMount } from "svelte";
-  import { toast } from "svelte-sonner";
   import { writable, get } from "svelte/store";
-  let reportsFeatures = [];
+  export let allUsers;
+  import { page } from "$app/stores";
+  import { onMount } from "svelte";
+  import { Button } from "@/components/ui/button";
+  import { toast } from "svelte-sonner";
+  const PB = new PocketBase(`https://server.moksa.ai`);
+  let playbackFeatures = [];
   let userFeatures = writable([]);
 
   onMount(async () => {
-    const reports = await fetch("/api/features/navbar");
-    if (!reports.ok) {
+    const playback = await fetch("/api/features/playback");
+    if (!playback.ok) {
       throw new Error(
-        `failed to fetch playback features, HTTP error! status: ${reports.status}`,
+        `failed to fetch playback features, HTTP error! status: ${playback.status}`,
       );
     }
-    const p = await reports.json();
-    console.log(p);
-    reportsFeatures = p?.features?.items;
+    const p = await playback.json();
+    playbackFeatures = p?.features?.items;
     initializeUserFeatures();
   });
+
   function initializeUserFeatures() {
-    const features = allUsers?.map((user) => ({
+    const features = allUsers.map((user) => ({
       id: user.id,
       features: user.features ? [...user.features] : [],
     }));
@@ -52,6 +54,8 @@
   }
 
   function handleFeaturesUpdate() {
+    console.log("first", $userFeatures);
+
     fetch("/api/features/addFeature", {
       method: "POST",
       headers: {
@@ -62,7 +66,7 @@
       .then((response) => response.json())
       .then((data) => {
         console.log("Success:", data);
-        toast("Permissions Updated for Navbar!");
+        toast("Permissions Updated for Playback page!");
       })
       .catch((error) => {
         console.error("Error:", error);
@@ -72,20 +76,18 @@
 </script>
 
 <Table.Root
-  class="mx-auto h-full w-full flex flex-col max-w-[calc(100vw-8.3rem)] max-h-[calc(100vh-310px)] hide-scrollbar overflow-x-auto"
+  class="mx-auto h-full w-full mt-1 flex flex-col max-w-[calc(100vw-8.3rem)] max-h-[calc(100vh-310px)] hide-scrollbar overflow-x-auto"
 >
   <Table.Header
-    class="border-2 border-[#e4e4e4] border-solid rounded-lg bg-[#f9f9f9]"
+    class="border border-[#e4e4e4] border-solid bg-[#f9f9f9] w-max min-w-full"
   >
-    <Table.Row class="bg-transparent flex items-center gap-4 p-3">
+    <Table.Row class="bg-transparent flex items-center justify-between p-2">
       <Table.Head class="text-[#727272] h-full w-[50px]"
-        ><Checkbox
-          class="data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
-        />
-      </Table.Head>
-      <Table.Head class="text-[#727272] h-full w-[300px]">User Name</Table.Head>
-      {#if reportsFeatures}
-        {#each reportsFeatures as feature}
+        ><input type="checkbox" name="" id="" /></Table.Head
+      >
+      <Table.Head class="text-[#727272] h-full w-[200px]">User Name</Table.Head>
+      {#if playbackFeatures}
+        {#each playbackFeatures as feature}
           <Table.Head class="text-[#727272] h-full w-[200px]"
             >{feature.feature}</Table.Head
           >
@@ -93,30 +95,26 @@
       {/if}
     </Table.Row>
   </Table.Header>
-  <Table.Body class="pb-10">
+  <Table.Body class=" pb-10">
     {#each allUsers as user}
       <Table.Row
-        class="bg-transparent cursor-pointer flex items-center gap-4 mt-4 px-3 rounded-lg  border-2 border-solid border-[#e4e4e4]"
+        class="bg-transparent cursor-pointer flex items-center justify-between gap-4 px-2 bordeb border-x border-solid border-[#e4e4e4] w-max min-w-full"
       >
-        <Table.Cell class="text-black h-full w-[50px]">
-          <Checkbox
-            class="data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
-          />
-        </Table.Cell>
-        <Table.Cell class="text-black h-full">
-          <span class="flex flex-col font-semibold text-primary">
-            <span>
-              Name: {user?.name.length > 0 ? user.name : "-"}
-            </span>
-            <span class="text-xs">
-              Id: {user.id}
-            </span>
+        <Table.Cell class="text-black h-full w-[50px]"
+          ><input type="checkbox" /></Table.Cell
+        >
+        <Table.Cell class="text-black h-full w-[200px]">
+          <span class="flex flex-col font-semibold text-[#3D81FC] capitalize">
+            <span>Name: {user?.firstName} {user?.lastName}</span>
+            <!-- <span class="text-xs">Id: {user.id}</span> -->
           </span>
         </Table.Cell>
-        {#each reportsFeatures as feature}
-          <Table.Cell class="text-[#727272] h-full  w-[180px]">
-            <Checkbox
-              class="data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
+        {#each playbackFeatures as feature, index}
+          <Table.Cell
+            class={`text-[#727272] h-full w-[180px] ${index !== playbackFeatures.length - 1 ? "border-r" : ""}`}
+          >
+            <input
+              type="checkbox"
               checked={user?.features
                 ? user?.features.includes(feature.id)
                 : false}
@@ -128,5 +126,17 @@
       </Table.Row>
     {/each}
   </Table.Body>
-  <Button on:click={handleFeaturesUpdate} class="mr-auto">Save</Button>
+  <Button
+    class="mr-auto bg-[#3D81FC] text-white"
+    on:click={handleFeaturesUpdate}
+  >
+    save
+  </Button>
 </Table.Root>
+
+<style>
+  input[type="checkbox"] {
+    accent-color: #0070ff !important;
+    transform: scale(1.25);
+  }
+</style>

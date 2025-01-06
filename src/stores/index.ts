@@ -22,9 +22,11 @@ import { faceEvents } from "./face-events";
 import { allEvents, totalAllEvent, isEventsLoading } from "./all-events";
 import { gallery, totalFaceRegistered, isGalleryLoading } from "./gallery";
 import { eventsManager, loadingEvents } from "./events-manager";
+import { settings } from "./settings";
 
 export {
   user,
+  settings,
   loadingEvents,
   eventsManager,
   cameras,

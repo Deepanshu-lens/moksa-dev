@@ -10,7 +10,6 @@
   import { Input } from "@/components/ui/input";
   import { Label } from "@/components/ui/label";
   import { Button } from "@/components/ui/button";
-  import { addUserLog } from "@/lib/addUserLog";
 
   const deleteCamera = () => {
     console.log("deleted", name, cameraId, nodeId, url);
@@ -26,7 +25,6 @@
       }),
     }).then(() => {
       toast("Selected camera Deleted!");
-      addUserLog(`user deleted camera with name ${name} & url ${url}`);
     });
   };
 </script>
