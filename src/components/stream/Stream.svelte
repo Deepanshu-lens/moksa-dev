@@ -52,7 +52,7 @@
         ? `animate-gradient-border border-4`
         : $hoveredCamera === camera.id
           ? `w-full h-full relative border-[#3D81FC] border-4 border-solid`
-            : `hover:border-[#3D81FC] hover:border-4`),
+          : `hover:border-[#3D81FC] hover:border-4`),
   )}
   id={camera.id}
   bind:this={parentDiv}

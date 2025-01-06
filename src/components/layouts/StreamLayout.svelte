@@ -10,6 +10,7 @@
     view,
     cameraCounts,
   } from "@/lib/stores";
+  import LocalStream from "@/components/stream/LocalStream.svelte";
   import Stream from "@/components/stream/Stream.svelte";
   import type { Camera } from "@/types.d.ts";
   import * as Carousel from "@/components/ui/carousel/index.js";
@@ -104,20 +105,31 @@
       console.log("video c.id exists", camera.name);
       return;
     }
-    let video = document.createElement("video-stream") as VideoStreamType;
+    let video;
+    if (camera.streamToCloud) {
+      video = document.createElement("video");
+      video.autoplay = true;
+      video.playsInline = true;
+      video.muted = true;
+    } else {
+      video = document.createElement("video-stream") as VideoStreamType;
+      video.mode = "mse";
+      video.url = camera.url;
+      video.src = new URL(
+        `wss://server.moksa.ai/api/ws?src=${camera.id}&nodeID=${1}&cn=${camera.name}`,
+      );
+      video.background = true;
+      video.visibilityCheck = false;
+    }
     video.id = `stream-${camera.id}`;
-    video.mode = "mse";
+
     // video.mode = camera.mse ? 'mse' : "webrtc";
-    video.url = camera.url;
-    video.src = new URL(
-      `wss://server.moksa.ai/api/ws?src=${camera.id}&nodeID=${1}&cn=${camera.name}`,
-    );
+
     video.style.position = "relative";
     video.style.width = "100%";
     video.style.height = "100%";
     video.style.zIndex = "10";
-    video.background = true;
-    video.visibilityCheck = false;
+
     videos[camera.id] = video;
   };
 
@@ -348,11 +360,13 @@
           // console.log("c", c);
           initVideo(c);
         } else {
-          if (videos[c.id].url !== c.url) {
-            videos[c.id].url = c.url;
-            videos[c.id].src = new URL(
-              `wss://server.moksa.ai/api/ws?src=${c.id}&nodeID=${1}&cn=${c.name}`,
-            );
+          if (!c.streamToCloud) {
+            if (videos[c.id].url !== c.url) {
+              videos[c.id].url = c.url;
+              videos[c.id].src = new URL(
+                `wss://server.moksa.ai/api/ws?src=${c.id}&nodeID=${1}&cn=${c.name}`,
+              );
+            }
           }
         }
       });
@@ -367,15 +381,17 @@
       //   endIndex,
       // );
       camerasOnSlide.map((c) => {
-        if (!videos[c.id]) {
-          initVideo(c);
-        } else {
-          if (videos[c.id].url !== c.url) {
-            console.log("first");
-            videos[c.id].url = c.url;
-            videos[c.id].src = new URL(
-              `wss://server.moksa.ai/api/ws?src=${c.id}&nodeID=${1}&cn=${c.name}`,
-            );
+        if (!c.streamToCloud) {
+          if (!videos[c.id]) {
+            initVideo(c);
+          } else {
+            if (videos[c.id].url !== c.url && !c.streamToCloud) {
+              console.log("first");
+              videos[c.id].url = c.url;
+              videos[c.id].src = new URL(
+                `wss://server.moksa.ai/api/ws?src=${c.id}&nodeID=${1}&cn=${c.name}`,
+              );
+            }
           }
         }
       });
@@ -799,6 +815,8 @@
     updateCanvasCoordinates();
   }
 
+  // console.log("CAMERA: ", $filteredNodeCameras[0].streamToCloud);
+
   function updateListWithNewOrder(newOrder, draggedItem) {
     const cell = document.getElementById("grid-cell-0");
     const stream = cell?.querySelector("video-stream");
@@ -888,7 +906,7 @@
     }
 
     const camera = $selectedNode.camera[currentIndex];
-    if (camera) {
+    if (camera && !camera.streamToCloud) {
       console.log(
         `Refreshing camera: ${camera.name} (${currentIndex + 1}/${totalCameras})`,
       );
@@ -896,7 +914,7 @@
     }
 
     currentIndex = (currentIndex + 1) % totalCameras;
-    scheduleNextRefresh();
+    if (!camera.StreamToCloud) scheduleNextRefresh();
   }
 
   function scheduleNextRefresh() {
@@ -949,6 +967,7 @@
   });
 
   // $: console.log('cells',cells)
+  // console.log("CAMERA: ", $filteredNodeCameras[0].streamToCloud);
 </script>
 
 {#if streamCount > 0 && Object.keys(videos).length > 0}
@@ -963,12 +982,20 @@
       {#each Array($filteredNodeCameras.length) as _, newIndex}
         {#key newIndex}
           <div id={`grid-cell-${newIndex}`} class="relative">
-            <Stream
-              videoElement={videos[$filteredNodeCameras[newIndex].id]}
-              camera={$filteredNodeCameras[newIndex]}
-              on:h265Error={handleH265Error}
-              on:refErr={handleRefreshError}
-            />
+            {#if $filteredNodeCameras[newIndex].streamToCloud}
+              <LocalStream
+                videoElement={videos[$filteredNodeCameras[newIndex].id]}
+                camera={$filteredNodeCameras[newIndex]}
+                on:h265Error={handleH265Error}
+                on:refErr={handleRefreshError}
+              />{:else}
+              <Stream
+                videoElement={videos[$filteredNodeCameras[newIndex].id]}
+                camera={$filteredNodeCameras[newIndex]}
+                on:h265Error={handleH265Error}
+                on:refErr={handleRefreshError}
+              />
+            {/if}
             <span
               class="flex gap-2 bg-[rgba(0,0,0,.5)] text-white py-1 px-3 absolute top-4 left-4 items-center rounded-xl scale-90 z-20"
             >
@@ -1093,28 +1120,52 @@
                           <AArrowUp size={18} />
                         </button>
                       {/if}
-                      <Stream
-                        videoElement={videos[
-                          $selectedNode.camera[
+                      {#if $selectedNode.camera[pageIndex * ($selectedNode.maxStreamsPerPage === 5 || $selectedNode.maxStreamsPerPage === 7 ? $selectedNode.maxStreamsPerPage + 1 : $selectedNode.maxStreamsPerPage) + slotIndex].streamToCloud}
+                        <LocalStream
+                          videoElement={videos[
+                            $selectedNode.camera[
+                              pageIndex *
+                                ($selectedNode.maxStreamsPerPage === 5 ||
+                                $selectedNode.maxStreamsPerPage === 7
+                                  ? $selectedNode.maxStreamsPerPage + 1
+                                  : $selectedNode.maxStreamsPerPage) +
+                                slotIndex
+                            ].id
+                          ]}
+                          camera={$selectedNode.camera[
                             pageIndex *
                               ($selectedNode.maxStreamsPerPage === 5 ||
                               $selectedNode.maxStreamsPerPage === 7
                                 ? $selectedNode.maxStreamsPerPage + 1
                                 : $selectedNode.maxStreamsPerPage) +
                               slotIndex
-                          ].id
-                        ]}
-                        camera={$selectedNode.camera[
-                          pageIndex *
-                            ($selectedNode.maxStreamsPerPage === 5 ||
-                            $selectedNode.maxStreamsPerPage === 7
-                              ? $selectedNode.maxStreamsPerPage + 1
-                              : $selectedNode.maxStreamsPerPage) +
-                            slotIndex
-                        ]}
-                        on:h265Error={handleH265Error}
-                        on:refErr={handleRefreshError}
-                      />
+                          ]}
+                          on:h265Error={handleH265Error}
+                          on:refErr={handleRefreshError}
+                        />{:else}
+                        <Stream
+                          videoElement={videos[
+                            $selectedNode.camera[
+                              pageIndex *
+                                ($selectedNode.maxStreamsPerPage === 5 ||
+                                $selectedNode.maxStreamsPerPage === 7
+                                  ? $selectedNode.maxStreamsPerPage + 1
+                                  : $selectedNode.maxStreamsPerPage) +
+                                slotIndex
+                            ].id
+                          ]}
+                          camera={$selectedNode.camera[
+                            pageIndex *
+                              ($selectedNode.maxStreamsPerPage === 5 ||
+                              $selectedNode.maxStreamsPerPage === 7
+                                ? $selectedNode.maxStreamsPerPage + 1
+                                : $selectedNode.maxStreamsPerPage) +
+                              slotIndex
+                          ]}
+                          on:h265Error={handleH265Error}
+                          on:refErr={handleRefreshError}
+                        />
+                      {/if}
 
                       {#if $selectedNode.camera[pageIndex * ($selectedNode.maxStreamsPerPage === 5 || $selectedNode.maxStreamsPerPage === 7 ? $selectedNode.maxStreamsPerPage + 1 : $selectedNode.maxStreamsPerPage) + slotIndex]?.expand?.inference?.lineCrossing === true && $selectedNode.camera[pageIndex * ($selectedNode.maxStreamsPerPage === 5 || $selectedNode.maxStreamsPerPage === 7 ? $selectedNode.maxStreamsPerPage + 1 : $selectedNode.maxStreamsPerPage) + slotIndex]?.expand?.inference?.lineData?.length > 0}
                         <canvas
