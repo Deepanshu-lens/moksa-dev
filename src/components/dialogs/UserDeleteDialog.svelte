@@ -3,6 +3,7 @@
   import * as Dialog from "@/components/ui/dialog";
   import { toast } from "svelte-sonner";
   import { Button } from "@/components/ui/button";
+  import pb from "@/lib/pb";
 
   export let data;
   export let token;
@@ -11,8 +12,6 @@
   // $: if (dialogOpen) {
   //   console.log(data);
   // }
-
-  const pocketBase = new PocketBase(`https://server.moksa.ai`);
 
   const deleteUser = async () => {
     try {
@@ -30,7 +29,7 @@
       const res = await del.json();
       console.log(res);
 
-      const pbdel = await pocketBase.collection("users").delete(data.lensId);
+      const pbdel = await pb.collection("users").delete(data.lensId);
       console.log(pbdel);
 
       toast.success("User deleted successfully");

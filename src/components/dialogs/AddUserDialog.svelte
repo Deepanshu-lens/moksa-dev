@@ -7,6 +7,7 @@
   import { X } from "lucide-svelte";
   import PocketBase from "pocketbase";
   import { onMount } from "svelte";
+  import pb from "@/lib/pb";
 
   // dialogOpen = false;
   export let moksa;
@@ -27,11 +28,10 @@
 
   console.log(roles, "roles");
 
-  const PB = new PocketBase(`https://server.moksa.ai`);
   onMount(async () => {
-    PB.autoCancellation(false);
-    const res = await PB.collection("roles").getFullList();
-    const stores = await PB.collection("node").getFullList();
+    pb.autoCancellation(false);
+    const res = await pb.collection("roles").getFullList();
+    const stores = await pb.collection("node").getFullList();
     roles = res;
 
     if (userRole === "admin") {
@@ -55,12 +55,12 @@
   //     return false;
   //   }
 
-  //   const session = await PB.collection("session").create({
+  //   const session = await pb.collection("session").create({
   //     owned: true,
   //     node: userType === "superAdmin" ? nodes : null,
   //   });
   //   console.log(session);
-  //   const user = await PB.collection("users").create({
+  //   const user = await pb.collection("users").create({
   //     firstName,
   //     lastName,
   //     email: mailId,
@@ -87,14 +87,14 @@
   //   });
   //   const d = await moksa.json();
 
-  //   await PB.collection("users").update(user.id, {
+  //   await pb.collection("users").update(user.id, {
   //     moksaToken: d.id,
   //   });
   //   dialogOpen = false;
 
   //   if (userType === "superAdmin") {
   //     for (const node of nodes) {
-  //       await PB.collection("node").update(node, {
+  //       await pb.collection("node").update(node, {
   //         "session+": [session.id],
   //       });
   //     }
@@ -274,9 +274,8 @@
               mailId,
               password,
               cPassword
-            ).then((res) => {
-              if (res.message === "success") dialogOpen = false;
-            });
+            );
+            dialogOpen = false;
           }}
           type="submit"
           class="px-4 py-2 bg-blue-500 hover:text-blue-500 hover:bg-white text-white rounded-md"

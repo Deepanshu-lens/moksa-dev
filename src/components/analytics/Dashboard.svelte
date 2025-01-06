@@ -57,7 +57,7 @@
   let heatMapData = writable(null);
   let floorMaps = writable([]);
 
-  console.log(safetyDetails,'safetyDetails');
+  console.log(safetyDetails, "safetyDetails");
 
   const fruits = allStores?.map((store: any) => ({
     value: store.id,
@@ -1252,7 +1252,7 @@
         <p class="text-[#323232] dark:text-white text-lg font-semibold">
           All Stores
         </p>
-        <AddStoreDialog>
+        <AddStoreDialog {token} {user}>
           <Button variant="outline" class="flex items-center gap-1 text-xs"
             ><Plus size={14} />Add Store</Button
           >

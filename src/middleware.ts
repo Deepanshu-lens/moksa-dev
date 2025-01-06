@@ -1,6 +1,6 @@
 import { defineMiddleware } from "astro:middleware";
 
-let mToken = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOjI0LCJmaXJzdF9uYW1lIjoibWFpbiIsImxhc3RfbmFtZSI6InVzZXIiLCJlbWFpbCI6Im1haW4udXNlckBtb2tzYS5haSIsImlhdCI6MTczNTk3NjY3NCwiZXhwIjoxNzM2MDYzMDc0fQ.guMhmKooIE9TBvMa2AuPUxBYxsRczeNKs5fU2j73O6s`;
+let mToken = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOjI0LCJmaXJzdF9uYW1lIjoibWFpbiIsImxhc3RfbmFtZSI6InVzZXIiLCJlbWFpbCI6Im1haW4udXNlckBtb2tzYS5haSIsImlhdCI6MTczNjE1Njk2MiwiZXhwIjoxNzM2MjQzMzYyfQ.z1X_Win-cpxX649pKmgDkJJHUzFjoaVPni6p0UEWcT4`;
 
 export const onRequest = defineMiddleware(async (context, next) => {
   context.locals.moksa = {

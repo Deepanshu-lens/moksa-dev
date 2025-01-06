@@ -7,6 +7,7 @@
   import * as Select from "@/components/ui/select";
   import { X } from "lucide-svelte";
   import PocketBase from "pocketbase";
+  import pb from "@/lib/pb";
 
   let dialogOpen = false;
   export let data;
@@ -29,13 +30,11 @@
 
   let roles: any[] = [];
 
-  const PB = new PocketBase(`https://server.moksa.ai`);
-
   async function initiate() {
-    PB.autoCancellation(false);
-    const res = await PB.collection("roles").getFullList();
+    pb.autoCancellation(false);
+    const res = await pb.collection("roles").getFullList();
     const allStoress = await fetch(
-      "${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/getAllStoresForDropdown",
+      `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/getAllStoresForDropdown`,
       {
         method: "GET",
         headers: {
@@ -52,8 +51,8 @@
         },
       }
     );
-    const allStoresData = await allStoress.json();
-    const currentStoresData = await currentStores.json();
+    const allStoresData = await allStoress?.json();
+    const currentStoresData = await currentStores?.json();
     // console.log(allStoresData.data)
     // console.log(currentStoresData)
     allStores = allStoresData.data.data;
@@ -76,8 +75,8 @@
 
   const handleSubmit = async () => {
     try {
-      PB.autoCancellation(false);
-      const U = await PB.collection("users").getFullList({
+      pb.autoCancellation(false);
+      const U = await pb.collection("users").getFullList({
         filter: `id="${data.lensId}"`,
       });
 
@@ -87,7 +86,7 @@
 
       const nodes = [];
       for (const store of curStores) {
-        const storeNodes = await PB.collection("node").getFullList({
+        const storeNodes = await pb.collection("node").getFullList({
           filter: `moksaId="${store}"`,
         });
         console.log(storeNodes, "storeNodes");
@@ -99,16 +98,15 @@
       console.log("nodes", nodes);
       console.log("user session", U[0].session);
       console.log("user session", U[0].session[0]);
-      const sessupdate = await PB.collection("session").update(
-        U[0].session[0],
-        {
+      const sessupdate = await pb
+        .collection("session")
+        .update(U[0].session[0], {
           node: nodes,
-        }
-      );
+        });
 
       console.log(sessupdate);
 
-      // await PB.collection("users").update(data.lensId, {
+      // await pb.collection("users").update(data.lensId, {
       //   first_name: firstName,
       //   last_name: lastName,
       //   email: mailId,
@@ -140,7 +138,7 @@
       }
 
       for (const node of nodes) {
-        await PB.collection("node").update(node, {
+        await pb.collection("node").update(node, {
           "session+": U[0].session,
         });
       }

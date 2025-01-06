@@ -1,15 +1,15 @@
 <script lang="ts">
-  import { toast } from "svelte-sonner";
   import * as Dialog from "@/components/ui/dialog";
   import { Input } from "@/components/ui/input";
   import { Label } from "@/components/ui/label";
   import { Button } from "@/components/ui/button";
-  import { selectedNode } from "@/stores";
   import { ChevronDown, X } from "lucide-svelte";
   import Switch from "../ui/switch/switch.svelte";
+  import { addStore } from "@/lib/add-store";
 
   export let refreshStoreData: () => void;
-
+  export let token;
+  export let user;
   let dialogOpen = false;
   let nodeName = "";
   let address = "";
@@ -25,15 +25,11 @@
   const timezones = ["EST", "PST", "MST", "UTC", "CST"];
 
   const handleSubmit = async () => {
-    console.log(nodeName, address, pincode, country, manager);
-    await fetch("/api/node/create", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    const { success } = await addStore(
+      token,
+      {
         name: nodeName,
-        sessionId: $selectedNode?.session,
+        sessionId: user?.user?.session,
         address: address,
         pin: pincode,
         country: country,
@@ -43,15 +39,14 @@
         storeCloseTime: storeCloseTime,
         isStore24hr: isStore24hr,
         hasKitchen: hasKitchen,
-      }),
-    })
-      .then(async () => {
-        toast("Store added");
-        dialogOpen = false;
-        await refreshStoreData();
-      })
-      .catch((err) => console.log(err));
-    return true;
+      },
+      user?.user
+    );
+
+    if (success) {
+      dialogOpen = false;
+      await refreshStoreData();
+    }
   };
 </script>
 

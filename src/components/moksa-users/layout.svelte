@@ -62,6 +62,7 @@
   let searchVal: string = "";
   let roles = [];
   let { user } = moksa;
+  let { token } = moksa;
 
   let nodes: any[] = [];
   let moksaNodes: any[] = [];
@@ -183,33 +184,71 @@
       if (userMessage && userMessage.message === "error") {
         return;
       }
-      console.log("user,user", user);
+      let response;
 
-      const moksa = await fetch("/api/user/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          firstName,
-          lastName,
-          mailId,
-          password,
-          userType,
-          lensId: user?.id,
-        }),
-      });
-
-      const d = await moksa.json();
-      if (d.error) {
-        toast.error(
-          "Oops, moksa API failed with status code 500. Please contact our support team."
+      try {
+        const moksa = await fetch(
+          `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/auth/createUserWithPocketbase`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              first_name: firstName,
+              last_name: lastName,
+              email: mailId,
+              password,
+              lensId: user?.id,
+              role: userType.toLowerCase(),
+              mobile_number: phoneNumber,
+            }),
+          }
         );
-        return;
+
+        console.log(moksa, "moksa");
+        if (!moksa.ok) {
+          console.log({ error: "moksa_failed" });
+          toast.error(
+            "Oops, moksa API failed with status code 500. Please contact our support team."
+          );
+          return;
+        }
+        response = await moksa.json();
+      } catch (error) {
+        console.error("Error creating user:", error);
       }
+
       await pb.collection("users").update(user?.id, {
-        moksaId: d.data?.id,
+        moksaId: response?.data?.id,
       });
+
+      // const moksa = await fetch("/api/user/create", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify({
+      //     firstName,
+      //     lastName,
+      //     mailId,
+      //     password,
+      //     userType,
+      //     lensId: user?.id,
+      //   }),
+      // });
+
+      // const d = await moksa.json();
+      // if (d.error) {
+      // toast.error(
+      //   "Oops, moksa API failed with status code 500. Please contact our support team."
+      // );
+      // return;
+      // }
+      // await pb.collection("users").update(user?.id, {
+      //   moksaId: d.data?.id,
+      // });
 
       if (userType === "superAdmin") {
         for (const node of nodes) {
