@@ -1,7 +1,7 @@
 import { toast } from "svelte-sonner";
 import pb from "./pb";
 
-export const addStore = async (token, data, user) => {
+export const addStore = async (token:string, data:any, user:any) => {
   try {
     const mobileLay = 1;
 
@@ -63,7 +63,7 @@ export const addStore = async (token, data, user) => {
           storeIds.push(newS.data.id);
         }
 
-        toast.success("Store created successfully");
+        
         await fetch(
           `${
             import.meta.env.PUBLIC_MOKSA_BASE_URL
@@ -80,8 +80,7 @@ export const addStore = async (token, data, user) => {
             }),
           }
         ).then(async (res) => {
-          const data = await res.json();
-          // console.log(data)
+          toast.success("Store created successfully");
         });
         await pb?.collection("node").update(result?.id, {
           moksaId: newS?.data.id,

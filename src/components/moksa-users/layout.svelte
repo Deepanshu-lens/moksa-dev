@@ -207,7 +207,6 @@
           }
         );
 
-        console.log(moksa, "moksa");
         if (!moksa.ok) {
           console.log({ error: "moksa_failed" });
           toast.error(
