@@ -15,7 +15,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
     try {
         const { storeId } = await request.json();
         const responses = await Promise.all(storeId.map(async (store: any) => {
-            const response = await fetch(`https://dev.api.moksa.ai/people/getPeopleCount/${store.id}/${formatDate(weekAgo)}/${formatDate(today)}`, {
+            const response = await fetch(`https://api.moksa.ai/people/getPeopleCount/${store.id}/${formatDate(weekAgo)}/${formatDate(today)}`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,

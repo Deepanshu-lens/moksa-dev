@@ -26,6 +26,7 @@
   export let data: PageServerData;
   // let allStores: any[] = data?.stores?.data?.data;
   let allStores: any[] = data?.stores?.data?.data ?? [];
+  console.log(data?.user, "data user");
 
   console.log(allStores, "all stores here");
   let allStoresData: any[] = data?.allstoreData?.data ?? [];
@@ -39,6 +40,7 @@
   let storePeopleCount: any[] = data?.storePeopleCount?.data?.data ?? [];
 
   const { user } = data;
+  console.log(user, "userrr");
   // console.log(user);
   // console.log("pagedata", data);
 
@@ -284,7 +286,7 @@
 
     <!-- Empoloyees Effeciency -->
   {:else if view === 4}
-    <EE {allStores} token={data.moksaToken} {moksaUserId} user={data?.user}/>
+    <EE {allStores} token={data.moksaToken} {moksaUserId} user={data?.user} />
 
     <!-- people counter -->
   {:else if view === 5}

@@ -60,7 +60,7 @@
   // $: console.log(users)
   // $: console.log(filter)
 
-  console.log(role);
+  console.log(users,'users');
   $: users = users
     .filter(
       (u) =>

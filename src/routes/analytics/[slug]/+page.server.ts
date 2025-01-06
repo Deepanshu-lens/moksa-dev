@@ -18,11 +18,11 @@ export const load: PageServerLoad = async ({ fetch, cookies, locals }) => {
         }
     };
 
-
     const today = new Date();
     const oneYearAgo = new Date(today);
     const oneWeekAgo = new Date(today);
     const mToken = cookies.get('moksa-token');
+    console.log(mToken, 'mtoken');
     oneYearAgo.setFullYear(today.getFullYear() - 1);
     oneWeekAgo.setDate(today.getDate() - 7);
 
@@ -32,7 +32,7 @@ export const load: PageServerLoad = async ({ fetch, cookies, locals }) => {
     // console.log(formatDate(oneYearAgo))
     // console.log(formatDate(today))
     const dropwdown = async () => {
-        const response = await fetch('https://dev.api.moksa.ai/store/getAllStoresForDropdown', {
+        const response = await fetch('https://api.moksa.ai/store/getAllStoresForDropdown', {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${mToken}`,
@@ -43,7 +43,7 @@ export const load: PageServerLoad = async ({ fetch, cookies, locals }) => {
     }
 
     const allStoreData = async () => {
-        const allstoreData = await fetch(`https://dev.api.moksa.ai/store/getAllStoresTotals/-1/${formatDate(oneWeekAgo)}/${formatDate(today)}`, {
+        const allstoreData = await fetch(`https://api.moksa.ai/store/getAllStoresTotals/-1/${formatDate(oneWeekAgo)}/${formatDate(today)}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${mToken}`,
@@ -54,7 +54,7 @@ export const load: PageServerLoad = async ({ fetch, cookies, locals }) => {
     }
 
     const aisleData = async () => {
-        const aisleData = await fetch(`https://dev.api.moksa.ai/store/getAllStoresWithAisleDetails/1/100/${formatDate(oneYearAgo)}/${formatDate(today)}`, {
+        const aisleData = await fetch(`https://api.moksa.ai/store/getAllStoresWithAisleDetails/1/100/${formatDate(oneYearAgo)}/${formatDate(today)}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${mToken}`
@@ -64,7 +64,7 @@ export const load: PageServerLoad = async ({ fetch, cookies, locals }) => {
     }
 
     const alltheftandcamera = async () => {
-        const theftandcamera = await fetch(`https://dev.api.moksa.ai/store/getAllStoresWithTheftAndCameraDetails/1/100/${formatDate(oneYearAgo)}/${formatDate(today)}`, {
+        const theftandcamera = await fetch(`https://api.moksa.ai/store/getAllStoresWithTheftAndCameraDetails/1/100/${formatDate(oneYearAgo)}/${formatDate(today)}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${mToken}`
@@ -74,7 +74,7 @@ export const load: PageServerLoad = async ({ fetch, cookies, locals }) => {
     }
 
     const theftDetectionDetails = async () => {
-        const theftDetectionDetails = await fetch(`https://dev.api.moksa.ai/theft/theftDetectionDetailsByStoreid/-1`, {
+        const theftDetectionDetails = await fetch(`https://api.moksa.ai/theft/theftDetectionDetailsByStoreid/-1`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${mToken}`,
@@ -90,7 +90,7 @@ export const load: PageServerLoad = async ({ fetch, cookies, locals }) => {
     }
 
     const busyness = async () => {
-        const busyness = await fetch(`https://dev.api.moksa.ai/store/storeBusyHour/getStoreBusyHourDataForThisWeek/-1`, {
+        const busyness = await fetch(`https://api.moksa.ai/store/storeBusyHour/getStoreBusyHourDataForThisWeek/-1`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${mToken}`
@@ -100,17 +100,19 @@ export const load: PageServerLoad = async ({ fetch, cookies, locals }) => {
     }
 
     const efficiency = async () => {
-        const efficiency = await fetch(`https://dev.api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/-1/${formatDate(oneWeekAgo)}/1/100/${formatDate(today)}`, {
+        const efficiency = await fetch(`https://api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/-1/${formatDate(oneWeekAgo)}/1/100/${formatDate(today)}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${mToken}`
             }
         });
-        return efficiency.json();
+        const data = await efficiency.json();
+        console.log(data, 'data');
+        return data;
     }
 
     const safetyDetails = async () => {
-        const safetyDetails = await fetch(`https://dev.api.moksa.ai/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/-1/1/100/${formatDate(oneWeekAgo)}/${formatDate(today)}`, {
+        const safetyDetails = await fetch(`https://api.moksa.ai/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/-1/1/100/${formatDate(oneWeekAgo)}/${formatDate(today)}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${mToken}`
@@ -120,7 +122,7 @@ export const load: PageServerLoad = async ({ fetch, cookies, locals }) => {
     }
 
     const storePeopleCount = async () => {
-        const spc = await fetch(`https://dev.api.moksa.ai/people/getPeopleCount/-1`, {
+        const spc = await fetch(`https://api.moksa.ai/people/getPeopleCount/-1`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${mToken}`,
@@ -133,10 +135,8 @@ export const load: PageServerLoad = async ({ fetch, cookies, locals }) => {
         return spc.json();
     }
 
-
-
     const allUsers = async () => {
-        const allUsers = await fetch(`https://dev.api.moksa.ai/auth/getAllUsers/1/100`, {
+        const allUsers = await fetch(`https://api.moksa.ai/auth/getAllUsers/1/100`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${mToken}`
@@ -157,7 +157,7 @@ export const load: PageServerLoad = async ({ fetch, cookies, locals }) => {
         usersData: () => allUsers(),
         storePeopleCount: () => storePeopleCount(),
         userStoreDetails: async () => {
-            const res = await fetch(`https://dev.api.moksa.ai/store/getUserStoreDetailsByUserId/${locals.user.record.moksaId}`, {
+            const res = await fetch(`https://api.moksa.ai/store/getUserStoreDetailsByUserId/${locals.user.record.moksaId}`, {
                 headers: {
                     "Content-Type": "application/json",
                     'Authorization': `Bearer ${mToken}`

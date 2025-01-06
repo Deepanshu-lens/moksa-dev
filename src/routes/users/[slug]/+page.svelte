@@ -32,7 +32,6 @@
   export let data;
   let userData = data.usersData.status === 200 ? data.usersData.data.data : [];
   const moksaToken = data.moksaToken;
-  // console.log(userData)
   const fruits = [
     { value: "apple", label: "Apple" },
     { value: "banana", label: "Banana" },
@@ -232,7 +231,7 @@
           });
         }
         const updateMoksaUserStores = await fetch(
-          `https://dev.api.moksa.ai/store/userStore/updateUserByUserId`,
+          `https://api.moksa.ai/store/userStore/updateUserByUserId`,
           {
             method: "POST",
             headers: {
@@ -250,7 +249,7 @@
       }
 
       const allUsers = await fetch(
-        `https://dev.api.moksa.ai/auth/getAllUsers/1/100`,
+        `https://api.moksa.ai/auth/getAllUsers/1/100`,
         {
           method: "GET",
           headers: {

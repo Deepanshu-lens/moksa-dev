@@ -7,7 +7,7 @@ export const actions = {
     const email = data.get("email")?.toString() || "";
 
     try {
-      await fetch(`https://dev.api.moksa.ai/auth/sendOtp`, {
+      await fetch(`https://api.moksa.ai/auth/sendOtp`, {
         method: "POST", headers: {
           'Content-Type': 'application/json'
         },

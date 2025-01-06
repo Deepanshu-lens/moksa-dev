@@ -87,13 +87,14 @@ export const POST: RequestHandler = async ({
     // console.log(data.moksaId)
     // console.log(data.cameraNumber)
     // console.log(camera.id)
+    console.log(`${VITE_POCKETBASE_URL}/api/addStream`, 'url here')
     await Promise.all([
       fetch(`${VITE_POCKETBASE_URL}/api/addStream`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       }),
-      fetch(`https://dev.api.moksa.ai/camera/addCamera`, {
+      fetch(`https://api.moksa.ai/camera/addCamera`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

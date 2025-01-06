@@ -26,7 +26,7 @@
 
   async function sendOtp() {
     // Send OTP to the provided email
-    const response = await fetch(`https://dev.api.moksa.ai/auth/sendOtp`, {
+    const response = await fetch(`https://api.moksa.ai/auth/sendOtp`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -48,7 +48,7 @@
 
     // Verify the OTP and get the token
     const response = await fetch(
-      `https://dev.api.moksa.ai/auth/getTokenForOtp?otp=${otp}&email=${email}
+      `https://api.moksa.ai/auth/getTokenForOtp?otp=${otp}&email=${email}
 `,
       {
         method: "GET",
@@ -70,7 +70,7 @@
   async function resetPassword() {
     // Send the token to reset the password
     const response = await fetch(
-      `https://dev.api.moksa.ai/auth/resetPasswordWithOtp`,
+      `https://api.moksa.ai/auth/resetPasswordWithOtp`,
       {
         method: "POST",
         headers: {

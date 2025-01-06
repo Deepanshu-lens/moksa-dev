@@ -361,7 +361,7 @@
       const [theftD, busy, employeeEff, safetyD, storeData] = await Promise.all(
         [
           fetch(
-            `https://dev.api.moksa.ai/theft/theftDetectionDetailsByStoreid/${$selectedStore.value}`,
+            `https://api.moksa.ai/theft/theftDetectionDetailsByStoreid/${$selectedStore.value}`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -382,7 +382,7 @@
             },
           ).then((res) => res.json()),
           fetch(
-            `https://dev.api.moksa.ai/customerPrediction/storeBusyHourBystoreId/${$selectedStore.value}`,
+            `https://api.moksa.ai/customerPrediction/storeBusyHourBystoreId/${$selectedStore.value}`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -391,7 +391,7 @@
             },
           ).then((res) => res.json()),
           fetch(
-            `https://dev.api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/${$selectedStore.value}/${formatDate(startDate)}/1/100/${formatDate(today)}`,
+            `https://api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/${$selectedStore.value}/${formatDate(startDate)}/1/100/${formatDate(today)}`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -400,7 +400,7 @@
             },
           ).then((res) => res.json()),
           fetch(
-            `https://dev.api.moksa.ai/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${$selectedStore.value}/1/100/${formatDate(startDate)}/${formatDate(today)}`,
+            `https://api.moksa.ai/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${$selectedStore.value}/1/100/${formatDate(startDate)}/${formatDate(today)}`,
             {
               method: "GET",
               headers: {
@@ -410,7 +410,7 @@
             },
           ).then((res) => res.json()),
           fetch(
-            `https://dev.api.moksa.ai/store/getAllStoresTotals/${$selectedStore.value}/${formatDate(startDate)}/${formatDate(today)}`,
+            `https://api.moksa.ai/store/getAllStoresTotals/${$selectedStore.value}/${formatDate(startDate)}/${formatDate(today)}`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -529,7 +529,7 @@
         safetyData,
       ] = await Promise.all([
         fetch(
-          `https://dev.api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/${$selectedStore.value}/${formatDate(startDate)}/1/100/${formatDate(today)}`,
+          `https://api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/${$selectedStore.value}/${formatDate(startDate)}/1/100/${formatDate(today)}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -538,7 +538,7 @@
           },
         ).then((res) => res.json()),
         fetch(
-          `https://dev.api.moksa.ai/store/getAllStoresTotals/${$selectedStore.value}/${formatDate(startDate)}/${formatDate(today)}`,
+          `https://api.moksa.ai/store/getAllStoresTotals/${$selectedStore.value}/${formatDate(startDate)}/${formatDate(today)}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -547,7 +547,7 @@
           },
         ).then((res) => res.json()),
         fetch(
-          `https://dev.api.moksa.ai/store/getAllStoresWithAisleDetails/1/20/${formatDate(startDate)}/${formatDate(today)}`,
+          `https://api.moksa.ai/store/getAllStoresWithAisleDetails/1/20/${formatDate(startDate)}/${formatDate(today)}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -556,7 +556,7 @@
           },
         ).then((res) => res.json()),
         fetch(
-          `https://dev.api.moksa.ai/theft/theftDetectionDetailsByStoreid/-1`,
+          `https://api.moksa.ai/theft/theftDetectionDetailsByStoreid/-1`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -577,7 +577,7 @@
           },
         ).then((res) => res.json()),
         fetch(
-          `https://dev.api.moksa.ai/people/getPeopleCount/${$selectedStore.value}`,
+          `https://api.moksa.ai/people/getPeopleCount/${$selectedStore.value}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -598,7 +598,7 @@
           },
         ).then((res) => res.json()),
         fetch(
-          `https://dev.api.moksa.ai/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${$selectedStore.value}/1/100/${formatDate(startDate)}/${formatDate(today)}`,
+          `https://api.moksa.ai/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${$selectedStore.value}/1/100/${formatDate(startDate)}/${formatDate(today)}`,
           {
             method: "GET",
             headers: {
@@ -652,7 +652,7 @@
         safetyData,
       ] = await Promise.all([
         fetch(
-          `https://dev.api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/${$selectedStore.value}/${start}/1/100/${end}`,
+          `https://api.moksa.ai/store/storeEmployee/getEmployeeEfficiencyByStoreidDynamic/${$selectedStore.value}/${start}/1/100/${end}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -661,7 +661,7 @@
           },
         ).then((res) => res.json()),
         fetch(
-          `https://dev.api.moksa.ai/store/getAllStoresTotals/${$selectedStore.value}/${start}/${end}`,
+          `https://api.moksa.ai/store/getAllStoresTotals/${$selectedStore.value}/${start}/${end}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -670,7 +670,7 @@
           },
         ).then((res) => res.json()),
         fetch(
-          `https://dev.api.moksa.ai/store/getAllStoresWithAisleDetails/1/20/${start}/${end}`,
+          `https://api.moksa.ai/store/getAllStoresWithAisleDetails/1/20/${start}/${end}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -679,7 +679,7 @@
           },
         ).then((res) => res.json()),
         fetch(
-          `https://dev.api.moksa.ai/theft/theftDetectionDetailsByStoreid/${$selectedStore.value}`,
+          `https://api.moksa.ai/theft/theftDetectionDetailsByStoreid/${$selectedStore.value}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -701,7 +701,7 @@
             },
           },
         ).then((res) => res.json()),
-        fetch(`https://dev.api.moksa.ai/people/getPeopleCount/-1`, {
+        fetch(`https://api.moksa.ai/people/getPeopleCount/-1`, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
@@ -713,7 +713,7 @@
           },
         }).then((res) => res.json()),
         fetch(
-          `https://dev.api.moksa.ai/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${$selectedStore.value}/1/100/${start}/${end}`,
+          `https://api.moksa.ai/store/storeEmployee/getSafetyDetailsOfAllEmployeesByStore/${$selectedStore.value}/1/100/${start}/${end}`,
           {
             method: "GET",
             headers: {
@@ -916,7 +916,7 @@
   const getFloorMap = async (storeId) => {
     try {
       const res = await fetch(
-        `https://dev.api.moksa.ai/store/getFloorMapByStoreid/${storeId}`,
+        `https://api.moksa.ai/store/getFloorMapByStoreid/${storeId}`,
         {
           method: "GET",
           headers: {
@@ -965,7 +965,7 @@
     if (selectedFloorMap !== "" && selectedFloorMap !== null) {
       // console.log('selectedFloorMap',selectedFloorMap)
       const mapData = await fetch(
-        `https://dev.api.moksa.ai/heatmap/getHeatMapByTimeAndStoreId/${$heatMapDateRange}/${$selectedStore.value}`,
+        `https://api.moksa.ai/heatmap/getHeatMapByTimeAndStoreId/${$heatMapDateRange}/${$selectedStore.value}`,
         {
           method: "GET",
           headers: {
@@ -978,7 +978,7 @@
       console.log("mapData", data);
       heatMapData.set(data);
       const res = await fetch(
-        `https://dev.api.moksa.ai/stream?key=${selectedFloorMap}`,
+        `https://api.moksa.ai/stream?key=${selectedFloorMap}`,
         {
           method: "GET",
           headers: {
@@ -1022,7 +1022,7 @@
     if (selectedFloorMap !== "" && selectedFloorMap !== null) {
       // console.log('selectedFloorMap',selectedFloorMap)
       const mapData = await fetch(
-        `https://dev.api.moksa.ai/heatmap/getHeatMapByTimeAndStoreId/custom/${$selectedStore.value}`,
+        `https://api.moksa.ai/heatmap/getHeatMapByTimeAndStoreId/custom/${$selectedStore.value}`,
         {
           method: "GET",
           headers: {
@@ -1037,7 +1037,7 @@
       console.log("mapData", data);
       heatMapData.set(data);
       const res = await fetch(
-        `https://dev.api.moksa.ai/stream?key=${selectedFloorMap}`,
+        `https://api.moksa.ai/stream?key=${selectedFloorMap}`,
         {
           method: "GET",
           headers: {
