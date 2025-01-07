@@ -131,6 +131,10 @@
           class="opacity-50 block py-1.5 px-3.5 hover:bg-accent cursor-not-allowed"
           >Account Settings</span
         >
+        <span
+          class="block py-1.5 px-3.5 hover:bg-accent"
+          ><a href="/account">Manage Account</a></span
+        >
         <DropdownMenu.Root>
           <DropdownMenu.Trigger asChild let:builder>
             <Button
