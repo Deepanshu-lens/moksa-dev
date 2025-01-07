@@ -3,7 +3,15 @@
   import { cn } from "@/lib/utils";
   import { user } from "@/stores";
   import Icon from "@iconify/svelte";
-
+  import { BellDot } from "lucide-svelte";
+  import * as Popover from "@/components/ui/popover/index.js";
+  import Button from "../ui/button/button.svelte";
+  import { onDestroy, onMount } from "svelte";
+  import { io } from "socket.io-client";
+  import { toast } from "svelte-sonner";
+  import { writable } from "svelte/store";
+  import NotificationCard from "../cards/NotificationCard.svelte";
+  export let moksa;
   let currentPath = window.location.pathname;
   if (window.api) {
     const pathSegments = currentPath.split("/");
@@ -24,22 +32,142 @@
     { name: "Live", link: "/", icon: "live-icon" },
     { name: "Analytics", link: "/analytics", icon: "playback-icon" },
     { name: "Users", link: "/users", icon: "playback-icon" },
-    { name: "Settings", link: "/settings?section=Camera", icon: "playback-icon" },
+    {
+      name: "Settings",
+      link: "/settings?section=Camera",
+      icon: "playback-icon",
+    },
   ];
 
-  // if (import.meta.env.PUBLIC_ENV === "production") {
-  //   data = data.filter((item) => item.name !== "Reports");
-  // }
-
   const disabledPaths: string[] = [];
-
   export let isVertical = false;
+  let sockets: { [key: number]: any } = {};
+  let liveData = writable([]);
+  let allStores = [];
+  const moksaUserId = moksa?.user?.moksaId;
+
+  const getTheftNotifications = async () => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/notification/getAllUnreadNotificationsByUserId/${moksaUserId}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${moksa?.token}`,
+          },
+        }
+      );
+      const data = await response.json();
+      if (!!data?.data) {
+        liveData.set(data?.data);
+      } else {
+        liveData.set([]);
+      }
+    } catch (error) {
+      console.log(error, "error");
+      toast.error("Error fetching theft notifications");
+    }
+  };
+
+  onMount(async () => {
+    // console.log("moksa?.token", moksa?.token);
+    const response = await fetch(
+      `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/getAllStoresForDropdown`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${moksa?.token}`,
+          enableallstores: "true",
+        },
+      }
+    );
+    const res = await response.json();
+    console.log("res", res);
+    allStores = res?.data?.data;
+    if (res?.data?.data?.length > 0) {
+      setupSocketForAllStores();
+    }
+
+    getTheftNotifications();
+  });
+
+  function setupSocketForAllStores() {
+    allStores.forEach((store: any) => {
+      setupSocket(store.id);
+    });
+  }
+
+  function setupSocket(storeId: number) {
+    let userID = moksaUserId;
+    if (user?.role === "superAdmin") {
+      userID = -1;
+    }
+
+    if (sockets[storeId]) {
+      sockets[storeId].disconnect();
+    }
+
+    sockets[storeId] = io(`${import.meta.env.PUBLIC_MOKSA_BASE_URL}/`, {
+      withCredentials: true,
+      extraHeaders: {
+        Authorization: `Bearer ${moksa?.token}`,
+      },
+      transports: ["websocket", "polling"],
+    });
+
+    const socket = sockets[storeId];
+
+    socket.on("error", (err) => {
+      console.log(`error for store ${storeId}:`, err);
+    });
+
+    socket.on("connect", () => {
+      console.log(`connected for notification in pagebar (navbar) ${userID}`);
+      socket.emit("joinUser", userID);
+      socket.emit("joinStore", storeId);
+    });
+
+    socket.on(`notification_${userID}`, (data) => {
+      console.log(`Received notification data for store ${userID}:`, data);
+
+      if ($liveData?.length > 0) {
+        liveData.update((currentData) => {
+          let istheftId = currentData.some(
+            (item: any) => item.theft_id === data?.theft_id
+          );
+          if (!istheftId) {
+            toast.warning("theft detected!");
+            let newData = [...currentData];
+            newData.unshift(data);
+            return newData;
+          } else {
+            return currentData;
+          }
+        });
+      } else {
+        liveData.set([data]);
+      }
+    });
+
+    socket.on("disconnect", () => {
+      console.log(`disconnected for store ${storeId}`);
+    });
+  }
+
+  onDestroy(() => {
+    Object.values(sockets).forEach((socket) => {
+      console.log("disconnecting socket");
+      socket.disconnect();
+    });
+  });
+
+  $: console.log($liveData, "live data");
 </script>
 
 <div
   class={isVertical
     ? "flex flex-col items-center space-y-12 "
-    : "flex justify-center space-x-6 w-full"}
+    : "flex justify-center space-x-6 w-full relative"}
 >
   <nav class="hidden md:flex space-x-4">
     <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -81,5 +209,28 @@
         <span>{link.name}</span>
       </a>
     {/each}
+    <Popover.Root>
+      <Popover.Trigger asChild let:builder>
+        <Button
+          builders={[builder]}
+          variant="outline"
+          class="bg-[#061149] size-[40px] grid place-items-center rounded-md p-1 border border-white/[.08] text-white hover:bg-white hover:text-black hover:dark:text-white hover:dark:bg-[#272727] absolute right-5"
+          ><BellDot size={22} /></Button
+        >
+      </Popover.Trigger>
+      <Popover.Content class="w-auto px-2 py-3">
+        <article
+          class="gap-2 bg-white rounded-lg dropdown-shadow w-[340px] flex flex-col max-h-[450px] overflow-y-auto overflow-h-auto"
+        >
+          {#if $liveData.length === 0}
+            <p class="text-center text-gray-500">No notifications yet</p>
+          {:else}
+            {#each $liveData as notification}
+              <NotificationCard {notification} />
+            {/each}
+          {/if}
+        </article>
+      </Popover.Content>
+    </Popover.Root>
   </nav>
 </div>

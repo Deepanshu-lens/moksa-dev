@@ -1,6 +1,5 @@
 <script lang="ts">
   import * as Card from "@/components/ui/card";
-  import { Button } from "../ui/button";
   export let seen = true;
   // export let title;
   // export let time;
