@@ -1,11 +1,10 @@
 ---
 import "@/styles/globals.css";
 import Layout from "./Layout.astro";
-import Logo from "@/components/logo/index.astro";
 
 interface Props {
   title: string;
-  mode?: "login" | "register";
+  mode?: "login" | "register" | "forgot-password";
 }
 const { title, mode = "login" } = Astro.props;
 export const prerender = true;
@@ -29,31 +28,15 @@ export const prerender = true;
         class="form-cont flex flex-col h-full items-center justify-center gap-4 w-[350px] mx-auto scale-[.85] sm:scale-100 xl:scale-100 2xl:scale-125 lg:scale-90 md:scale-75"
       >
         <h2 class="font-medium text-2xl sm:self-start ]">
-          {mode === "login" ? "Login" : "Register"}
+          {mode === "login" ? "Login" : mode === "register" ? "Register" : ""}
         </h2>
         <p class="text-[#919EAB] text-sm sm:self-start pb-4">
-          Login with registered email ID
+          {
+            (mode === "login" || mode === "register") &&
+              "Login with registered email ID"
+          }
         </p>
-
         <slot />
-
-        <!-- {
-          mode === "login" ? (
-            <button class="inline-block cursor-pointer align-baseline font-bold text-sm text-[#797c80] /[.7] mt-4">
-              Don't have an account yet?
-              <a class="ml-1 text-primary font-semibold" href="/register">
-                Sign up
-              </a>
-            </button>
-          ) : (
-            <button class="inline-block cursor-pointer align-baseline font-bold text-sm text-[#797c80] /[.7] mt-4">
-              Already have an account?
-              <a class="ml-1 text-primary font-semibold" href="/login">
-                Log In
-              </a>
-            </button>
-          )
-        } -->
       </div>
     </div>
   </div>

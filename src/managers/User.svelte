@@ -49,7 +49,8 @@
         } else {
           const isLoginPage =
             window.location.pathname === "/login" ||
-            window.location.pathname === "/register";
+            window.location.pathname === "/register" ||
+            window.location.pathname === "/forgot-password";
           if (!isLoginPage) window.location.href = "/login";
         }
       }

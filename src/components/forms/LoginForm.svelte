@@ -9,7 +9,6 @@
   import { user } from "@/stores";
   import Button from "../ui/button/button.svelte";
   import { addAuthLogs } from "@/lib/logs/authLogs";
-  import { moksaToken } from "@/stores/moksa-token";
 
   if (pb.authStore.token) {
     pb.authStore.clear();
@@ -40,7 +39,6 @@
   });
 
   async function login(email: string, password: string) {
-
     // logging in via pb
     let authData;
     try {
@@ -52,7 +50,6 @@
       }
       toast.error("Authentication failed. Please try again.");
     }
-
 
     // logging in via moksa apis
     try {
@@ -67,7 +64,7 @@
           const data = await res.json();
           if (data.data && data.data.token) {
             const token = data.data.token;
-            localStorage.setItem('moksa-token', token);
+            localStorage.setItem("moksa-token", token);
           } else {
             console.log("Token not found in response");
           }
@@ -148,6 +145,22 @@
         {$errors.password}
       {/if}
     </div>
+  </div>
+
+  <!-- Forgot Password link -->
+  <div class="w-[350px] flex justify-end">
+    <button
+      class="inline-block cursor-pointer align-baseline font-bold text-sm text-[#797c80] /[.7]"
+      on:click={() => {
+        if (window.api) {
+          window.api.navigate("/forgot-password");
+        } else {
+          window.location.href = "/forgot-password";
+        }
+      }}
+    >
+      <span class="ml-1 text-primary font-semibold"> Forgot Password</span>
+    </button>
   </div>
 
   <div class="flex flex-col items-center justify-between mb-10 sm:mb-0">
