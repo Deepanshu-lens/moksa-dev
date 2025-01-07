@@ -4,9 +4,8 @@
   import { Label } from "@/components/ui/label";
   import { Button } from "@/components/ui/button";
   import * as Select from "@/components/ui/select";
-  import { CloudFog } from "lucide-svelte";
-  import Camera from "../configuration/settings/Camera.svelte";
-  import { tickets } from "@/lib/stores";
+  import { writable } from "svelte/store";
+  let tickets = writable([]);
 
   export let token: string;
   export let nodes: any;
@@ -146,6 +145,7 @@
       </div>
       <div class="grid grid-cols-4 items-center gap-4">
         <Label for="pincode">Issue</Label>
+        <!-- svelte-ignore element_invalid_self_closing_tag -->
         <textarea
           id="issue"
           placeholder="Describe the issue..."

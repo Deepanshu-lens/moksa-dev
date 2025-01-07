@@ -3,7 +3,7 @@
   import { cn } from "@/lib/utils";
   import { user } from "@/stores";
   import Icon from "@iconify/svelte";
-  import { BellDot } from "lucide-svelte";
+  import { BellDot, MessageCircleQuestion } from "lucide-svelte";
   import * as Popover from "@/components/ui/popover/index.js";
   import Button from "../ui/button/button.svelte";
   import { onDestroy, onMount } from "svelte";
@@ -161,7 +161,6 @@
     });
   });
 
-  $: console.log($liveData, "live data");
 </script>
 
 <div
@@ -209,28 +208,40 @@
         <span>{link.name}</span>
       </a>
     {/each}
-    <Popover.Root>
-      <Popover.Trigger asChild let:builder>
-        <Button
-          builders={[builder]}
-          variant="outline"
-          class="bg-[#061149] size-[40px] grid place-items-center rounded-md p-1 border border-white/[.08] text-white hover:bg-white hover:text-black hover:dark:text-white hover:dark:bg-[#272727] absolute right-5"
-          ><BellDot size={22} /></Button
+
+    <div class="absolute right-5 flex items-center gap-x-4">
+      <!-- Raise Question -->
+      <span>
+        <a
+          href={`/tickets`}
+          class="bg-[#061149] size-[40px] grid place-items-center rounded-md p-1 border border-white/[.08] text-white hover:bg-white hover:text-black hover:dark:text-white hover:dark:bg-[#272727]"
+          ><MessageCircleQuestion size={22} /></a
         >
-      </Popover.Trigger>
-      <Popover.Content class="w-auto px-2 py-3">
-        <article
-          class="gap-2 bg-white rounded-lg dropdown-shadow w-[340px] flex flex-col max-h-[450px] overflow-y-auto overflow-h-auto"
-        >
-          {#if $liveData.length === 0}
-            <p class="text-center text-gray-500">No notifications yet</p>
-          {:else}
-            {#each $liveData as notification}
-              <NotificationCard {notification} />
-            {/each}
-          {/if}
-        </article>
-      </Popover.Content>
-    </Popover.Root>
+      </span>
+      <!-- notification dropdown -->
+      <Popover.Root>
+        <Popover.Trigger asChild let:builder>
+          <Button
+            builders={[builder]}
+            variant="outline"
+            class="bg-[#061149] size-[40px] grid place-items-center rounded-md p-1 border border-white/[.08] text-white hover:bg-white hover:text-black hover:dark:text-white hover:dark:bg-[#272727]"
+            ><BellDot size={22} /></Button
+          >
+        </Popover.Trigger>
+        <Popover.Content class="w-auto px-2 py-3">
+          <article
+            class="gap-2 bg-white rounded-lg dropdown-shadow w-[340px] flex flex-col max-h-[450px] overflow-y-auto overflow-h-auto"
+          >
+            {#if $liveData.length === 0}
+              <p class="text-center text-gray-500">No notifications yet</p>
+            {:else}
+              {#each $liveData as notification}
+                <NotificationCard {notification} />
+              {/each}
+            {/if}
+          </article>
+        </Popover.Content>
+      </Popover.Root>
+    </div>
   </nav>
 </div>
