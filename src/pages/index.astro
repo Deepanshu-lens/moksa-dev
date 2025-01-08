@@ -8,14 +8,14 @@ import GalleryPage from "@/managers/gallery.svelte";
 import LiveLayout from "@/components/live/layout.svelte";
 import MoksaTokenManager from "@/managers/moksa-token.svelte";
 
-export async function get(context) {
-  console.log('called')
+export async function get(context: any) {
+  console.log("called");
   const cookies = context.request.headers.get("cookie") || "";
   console.log(cookies, "cookies");
   const authCookies = Object.fromEntries(
     cookies
       .split("; ")
-      .map((cookie) => cookie.split("=").map(decodeURIComponent))
+      .map((cookie: any) => cookie.split("=").map(decodeURIComponent))
   );
 
   return {

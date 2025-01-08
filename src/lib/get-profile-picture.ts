@@ -1,7 +1,7 @@
 export function getProfilePicture(
-  collectionId,
-  recordId,
-  fileName,
+  collectionId: string,
+  recordId: string,
+  fileName: string,
   size = "0x0"
 ) {
   return `${

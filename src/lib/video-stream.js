@@ -21,7 +21,7 @@ export class VideoStream extends VideoRTC {
     }
   }
 
-  set divError(value) {}
+  // set divError(value) {}
 
   startStreamCheck() {
     if (this.checkInterval) {

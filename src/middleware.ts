@@ -1,6 +1,6 @@
 import { parse } from "cookie";
 
-export async function onRequest(context, next) {
+export async function onRequest(context: any, next: any) {
   const { request } = context;
 
   // Parse cookies from the request header

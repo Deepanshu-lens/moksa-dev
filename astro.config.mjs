@@ -9,7 +9,7 @@ import svelte from "@astrojs/svelte";
 
 import icon from "astro-icon";
 
-// import node from "@astrojs/node";
+import node from "@astrojs/node";
 
 // import vercel from "@astrojs/vercel/serverless";
 
@@ -37,5 +37,7 @@ export default defineConfig({
 
   devToolbar: { enabled: false },
 
-  // adapter: vercel(),
+  adapter: node({
+    mode: "standalone", // Optional, depending on your deployment
+  }),
 });

@@ -32,7 +32,7 @@ export const addAuthLogs = async (eventString: string, email: string) => {
   try {
     const userDetails = await getUserSystemDetails();
 
-    const res = await pb.collection("loginEvents").create({
+    await pb.collection("loginEvents").create({
       events: event,
       email: email,
       userDetails: userDetails,

@@ -79,7 +79,7 @@ export const addStore = async (token:string, data:any, user:any) => {
               storeIds: storeIds,
             }),
           }
-        ).then(async (res) => {
+        ).then(async () => {
           toast.success("Store created successfully");
         });
         await pb?.collection("node").update(result?.id, {
