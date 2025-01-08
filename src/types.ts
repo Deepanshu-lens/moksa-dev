@@ -13,6 +13,7 @@ export const userSchema = z.object({
   lastName: z.string(),
   collectionId: z.string(),
   features: z.any(),
+  avatar: z.string(),
 });
 
 // export const cameraSchema = z.lazy(() =>

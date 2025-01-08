@@ -1,12 +1,8 @@
 <script lang="ts">
   import {
     BarChartBig,
-    KeyRound,
-    CarFront,
     LineChart,
     HeartPulse,
-    ParkingMeter,
-    Lock,
     CalendarRange,
   } from "lucide-svelte";
   import Topbar from "@/components/reports/Topbar.svelte";

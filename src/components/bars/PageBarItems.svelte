@@ -13,8 +13,8 @@
   import NotificationCard from "../cards/NotificationCard.svelte";
   export let moksa;
   moksa = {
-    ...moksa,
     user: $user,
+    ...moksa,
   };
   let currentPath = window.location.pathname;
   if (window.api) {
@@ -74,7 +74,7 @@
   };
 
   onMount(async () => {
-    // console.log("moksa?.token", moksa?.token);
+    console.log("moksa?.token", moksa);
     const response = await fetch(
       `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/getAllStoresForDropdown`,
       {

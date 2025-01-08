@@ -5,21 +5,25 @@
   export let data;
   import pb from "@/lib/pb";
   import Button from "../ui/button/button.svelte";
+  import { getProfilePicture } from "@/lib/get-profile-picture";
+  import { user } from "@/stores";
   export let moksa;
-  const { user } = moksa;
-
-  console.log(user, "user");
+  moksa = {
+    ...moksa,
+    user: $user,
+  };
+  const userObj = moksa?.user;
 
   let profile = {
-    name: user?.firstName + " " + user?.lastName,
-    email: user?.email || "",
-    role: user?.role || "",
-    phone: data?.user?.phoneNumber || "",
-    userId: data?.user?.moksaId | "",
-    avatar: data?.user?.avatar || "",
+    name: userObj?.firstName + " " + userObj?.lastName,
+    email: userObj?.email || "",
+    role: userObj?.role || "",
+    phone: data?.userObj?.phoneNumber || "",
+    userId: data?.userObj?.moksaId | "",
+    avatar: data?.userObj?.avatar || "",
   };
 
-  let accountEmail = user?.email;
+  let accountEmail = userObj?.email;
   let password = "";
   let confirmPassword = "";
   let oldPassword = "";
@@ -30,7 +34,7 @@
     profilePictureUrl = URL.createObjectURL(profilePicture[0]);
   }
 
-  let phoneNumber = user?.phoneNumber;
+  let phoneNumber = userObj?.phoneNumber;
 
   async function updatePassword() {
     try {
@@ -63,7 +67,7 @@
       }
 
       //   update user password in pb
-      await pb?.collection("users").update(user?.id, {
+      await pb?.collection("users").update(userObj?.id, {
         oldPassword,
         password,
         passwordConfirm: confirmPassword,
@@ -86,16 +90,12 @@
       updateData.append("avatar", file);
       const picUpdate = await pb
         .collection("users")
-        .update(user?.id, updateData);
+        .update(userObj?.id, updateData);
       console.log(picUpdate);
       profilePicture = null;
       profilePictureUrl = null;
       window.location.reload();
     }
-  }
-
-  function getProfilePicture(collectionId, recordId, fileName, size = "0x0") {
-    return `${import.meta.env.PUBLIC_POCKETBASE_URL}/api/files/${collectionId}/${recordId}/${fileName}?thumb=${size}`;
   }
 </script>
 
@@ -114,8 +114,8 @@
         <!-- svelte-ignore a11y-img-redundant-alt -->
         <img
           src={profilePictureUrl ||
-            (user?.avatar &&
-              getProfilePicture("users", user?.id, user?.avatar)) ||
+            (userObj?.avatar &&
+              getProfilePicture("users", userObj?.id, userObj?.avatar)) ||
             "https://via.placeholder.com/150"}
           alt="Profile Picture"
           class="rounded-full size-[215px] object-contain ring-2 ring-gray-300"

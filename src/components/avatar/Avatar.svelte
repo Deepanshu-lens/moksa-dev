@@ -9,12 +9,14 @@
   import { onMount } from "svelte";
   import { writable } from "svelte/store";
   import { cn } from "@/lib/utils";
+  import { getProfilePicture } from "@/lib/get-profile-picture";
   let pendingDays = writable(5);
   const MAX_NAME_LENGTH = 20;
   const MAX_EMAIL_LENGTH = 30;
 
   let displayName = "";
   let displayEmail = "";
+  let imgSrc;
 
   async function logout() {
     await addAuthLogs("logout", $user?.email || "");
@@ -69,12 +71,15 @@
 
 {#if $user}
   <Popover.Root>
-    <Popover.Trigger let:builder class="border rounded-md hover:text-black border-gray-600">
+    <Popover.Trigger
+      let:builder
+      class="border rounded-md hover:text-black border-gray-600"
+    >
       <div
-        class="flex items-center space-x-3 hover:bg-accent py-1.5 px-2 rounded-md bg-transparent "
+        class="flex items-center space-x-3 hover:bg-accent py-1.5 px-2 rounded-md bg-transparent"
       >
         <img
-          src={$user.avatar ||
+          src={getProfilePicture("users", $user?.id, $user?.avatar) ||
             `https://ui-avatars.com/api/name=${$user.name}?background=random` ||
             ""}
           alt="User Avatar"
@@ -82,7 +87,9 @@
           width={isVertical ? 64 : 25}
         />
         {#if !isVertical}
-          <div class="space-y-0 flex-col items-start hidden md:flex text-white hover:text-black">
+          <div
+            class="space-y-0 flex-col items-start hidden md:flex text-white hover:text-black"
+          >
             <span class="text-xs">{displayName}</span>
             <span class="text-xs">{displayEmail}</span>
           </div>
@@ -131,8 +138,7 @@
           class="opacity-50 block py-1.5 px-3.5 hover:bg-accent cursor-not-allowed"
           >Account Settings</span
         >
-        <span
-          class="block py-1.5 px-3.5 hover:bg-accent"
+        <span class="block py-1.5 px-3.5 hover:bg-accent"
           ><a href="/account">Manage Account</a></span
         >
         <DropdownMenu.Root>
