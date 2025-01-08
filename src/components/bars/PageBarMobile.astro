@@ -11,6 +11,7 @@ interface Props {
 const { location = "top" } = Astro.props;
 
 const isVertical = location === "left" || location === "right";
+console.log(import.meta.env.PUBLIC_DARK_LOGO, "logo here");
 ---
 
 <header
@@ -29,33 +30,33 @@ const isVertical = location === "left" || location === "right";
 >
   <!-- Mobile Actions add/edit/delete -->
   <div class="flex items-start justify-between w-full">
-    <div class="w-[50%]">
-      <div class="flex items-center">
-        <div class={`flex flex-col justify-between items-center gap-4 w-full`}>
+    <div class="w-full">
+      <div class="flex items-center justify-between">
+        <div class="mx-3">
           <img
-            src={import.meta.env.PUBLIC_LIGHT_LOGO}
+            src={import.meta.env.PUBLIC_MOBILE_LIGHT_LOGO}
             alt="Logo"
-            class="h-8 w-auto dark:hidden block"
+            class="h-[3rem] dark:hidden block"
           />
           <img
-            src={import.meta.env.PUBLIC_DARK_LOGO}
+            src={import.meta.env.PUBLIC_MOBILE_DARK_LOGO}
             alt="Logo"
-            class="h-8 w-auto hidden dark:block"
+            class="h-[3rem] hidden dark:block"
           />
-          <div class={cn("flex justify-end ml-20", "gap-1")}>
-            <NodeActionButton action="add" client:only="svelte" />
-            <NodeActionButton action="edit" client:only="svelte" />
-            <NodeActionButton action="delete" client:only="svelte" />
-          </div>
+        </div>
+        <div class="flex items-center gap-1">
+          <Avatar client:only="svelte" />
+          <ThemeSwitch client:only="svelte" />
         </div>
       </div>
-      <div class="mt-4 w-full">
+      <div class="mt-4 w-full px-1 flex items-center justify-between gap-x-2">
         <NodeSelection client:only="svelte" />
+        <div class="flex items-center gap-x-2">
+          <NodeActionButton action="add" client:only="svelte" icon={true} />
+          <NodeActionButton action="edit" client:only="svelte" icon={true} />
+          <NodeActionButton action="delete" client:only="svelte" icon={true} />
+        </div>
       </div>
-    </div>
-    <div class="flex items-center gap-1">
-      <Avatar client:only="svelte" />
-      <ThemeSwitch client:only="svelte" />
     </div>
   </div>
 </header>
