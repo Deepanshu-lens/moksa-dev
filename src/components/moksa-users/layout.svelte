@@ -29,8 +29,8 @@
   import { moksaUsers } from "@/stores/moksa-user";
   import { writable } from "svelte/store";
   import { user } from "@/stores";
+  import { moksaToken } from "@/stores/moksa-token";
   let view: number = 1;
-  export let moksa;
   let userData = writable([]);
   const userRole = writable("");
   $: {
@@ -40,14 +40,19 @@
     }
   }
 
-  moksa = {
-    ...moksa,
+  let moksa = {
     user: $user,
+    token: $moksaToken,
   };
 
   let userObj = moksa?.user;
 
-  const moksaToken = moksa?.token;
+  const mToken = writable(null);
+  $: {
+    if ($moksaToken) {
+      mToken.set($moksaToken);
+    }
+  }
   const fruits = [
     { value: "apple", label: "Apple" },
     { value: "banana", label: "Banana" },
@@ -260,20 +265,23 @@
             "session+": [session.id],
           });
         }
-        const updateMoksaUserStores = await fetch(
-          `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/userStore/updateUserByUserId`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${moksaToken}`,
-            },
-            body: JSON.stringify({
-              userId: d.data?.id,
-              storeIds: moksaNodes,
-            }),
-          }
-        );
+
+        if ($mToken) {
+          const updateMoksaUserStores = await fetch(
+            `${import.meta.env.PUBLIC_MOKSA_BASE_URL}/store/userStore/updateUserByUserId`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${$mToken}`,
+              },
+              body: JSON.stringify({
+                userId: d.data?.id,
+                storeIds: moksaNodes,
+              }),
+            }
+          );
+        }
 
         console.log(updateMoksaUserStores);
       }
@@ -283,7 +291,7 @@
         {
           method: "GET",
           headers: {
-            Authorization: `Bearer ${moksaToken}`,
+            Authorization: `Bearer ${$mToken}`,
           },
         }
       );
@@ -725,6 +733,8 @@
   function handleRoleSelect(role: string) {
     selectedRole = selectedRole === role ? "" : role;
   }
+
+  $: console.log($mToken, "mToken");
 </script>
 
 {#if !$userData}
@@ -838,7 +848,7 @@
             Users
           </div>
           <UsersDataTable
-            token={moksaToken}
+            token={$mToken}
             users={$userData}
             {searchVal}
             filter={selectedRole}

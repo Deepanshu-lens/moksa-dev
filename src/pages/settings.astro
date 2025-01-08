@@ -2,13 +2,12 @@
 import Layout from "@/layouts/Layout.astro";
 import SettingsLayout from "@/components/settings/layout.svelte";
 import SettingsManager from "@/managers/settings-manager.svelte"
-const moksa = Astro.locals.moksa;
 ---
 
 <!-- Changed -->
 <Layout title={import.meta.env.PUBLIC_BRAND_NAME}>
   <div class="flex flex-row">
-    <SettingsManager client:only="svelte" {moksa}/>
-    <SettingsLayout client:only="svelte" {moksa}/>
+    <SettingsManager client:only="svelte"/>
+    <SettingsLayout client:only="svelte"/>
   </div>
 </Layout>

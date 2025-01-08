@@ -2,13 +2,12 @@
 import Layout from "@/layouts/Layout.astro";
 import UsersLayout from "@/components/moksa-users/layout.svelte";
 import UsersManager from "@/managers/users-manager.svelte";
-const moksa = Astro.locals.moksa;
 ---
 
 <!-- Changed -->
 <Layout title={import.meta.env.PUBLIC_BRAND_NAME}>
   <div class="flex flex-row">
-    <UsersManager client:only="svelte" {moksa}/>
-    <UsersLayout client:only="svelte" {moksa}/>
+    <UsersManager client:only="svelte" />
+    <UsersLayout client:only="svelte"/>
   </div>
 </Layout>

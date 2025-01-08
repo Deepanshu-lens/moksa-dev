@@ -2,9 +2,9 @@
   import ConfigPanel from "../configuration/ConfigPanel.svelte";
   import type { Node } from "@/types";
   import { user } from "@/stores";
-  export let moksa;
-  moksa = {
-    ...moksa,
+  import { moksaToken } from "@/stores/moksa-token";
+  let moksa = {
+    token: $moksaToken,
     user: $user,
   };
   export let data;

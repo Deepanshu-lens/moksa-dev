@@ -1,8 +1,8 @@
 <script lang="ts">
   import { analyticsData } from "@/stores/analytics-data";
+  import { moksaToken } from "@/stores/moksa-token";
   import { onMount } from "svelte";
-  export let moksa: any = {};
-  const mToken = moksa?.token;
+  const mToken = $moksaToken;
 
   const safeExecute = async (fn, fallbackValue) => {
     try {

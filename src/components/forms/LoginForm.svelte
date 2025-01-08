@@ -71,8 +71,8 @@
           const data = await res.json();
           if (data.data && data.data.token) {
             const token = data?.data?.token;
-            console.log(token, "token");
             setCookie("moksa-token", token, 1);
+            window.localStorage.setItem("moksa-token", token);
           } else {
             console.log("Token not found in response");
           }

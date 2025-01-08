@@ -1,12 +1,14 @@
 <script lang="ts">
   import SidePannel from "@/components/analytics/side-pannel.svelte";
-  export let moksa: any = {};
   import { user } from "@/stores";
+  import { moksaToken } from "@/stores/moksa-token";
 
   let moksaObj = {
-    ...moksa,
+    token: $moksaToken,
     user: $user,
   };
+
+  console.log(moksaObj, "moksaObj");
 </script>
 
 <div class="hidden lg:block">

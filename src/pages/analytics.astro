@@ -2,13 +2,12 @@
 import Layout from "@/layouts/Layout.astro";
 import AnalyticsLayout from "@/components/analytics/layout.svelte";
 import AnalyticsManager from "@/managers/analytics-manager.svelte";
-const moksa = Astro.locals.moksa;
 ---
 
 <!-- Changed -->
 <Layout title={import.meta.env.PUBLIC_BRAND_NAME}>
   <div class="flex flex-row">
-    <AnalyticsManager client:only="svelte" {moksa} />
-    <AnalyticsLayout client:only="svelte" {moksa} />
+    <AnalyticsManager client:only="svelte"  />
+    <AnalyticsLayout client:only="svelte"  />
   </div>
 </Layout>

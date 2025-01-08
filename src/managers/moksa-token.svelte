@@ -4,7 +4,7 @@
 
   onMount(() => {
     if (typeof window !== "undefined") {
-      let mToken = window.localStorage.getItem("moksaToken");
+      let mToken = window.localStorage.getItem("moksa-token");
       if (mToken) {
         moksaToken.set(mToken);
       }

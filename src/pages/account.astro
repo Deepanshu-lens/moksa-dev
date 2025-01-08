@@ -1,12 +1,11 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import AccountsLayout from "@/components/accounts/layout.svelte";
-const moksa = Astro.locals.moksa;
 ---
 
 <!-- Changed -->
 <Layout title={import.meta.env.PUBLIC_BRAND_NAME}>
   <div class="flex flex-row">
-    <AccountsLayout client:only="svelte" {moksa}/>
+    <AccountsLayout client:only="svelte"/>
   </div>
 </Layout>

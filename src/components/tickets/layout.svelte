@@ -14,11 +14,13 @@
   import { user } from "@/stores";
   let showRightPanel: boolean = true;
   let requestDialogOpen = false;
-  export let moksa;
-  moksa = {
-    ...moksa,
+  import { moksaToken } from "@/stores/moksa-token";
+
+  let moksa = {
+    token: $moksaToken,
     user: $user,
   };
+  
   let tickets = writable([]);
   export let data;
   let nodes;

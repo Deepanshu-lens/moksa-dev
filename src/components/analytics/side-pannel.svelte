@@ -61,7 +61,7 @@
   }
 </script>
 
-{#if !$allStores}
+{#if !$allStores && data?.moksaToken}
   <div>loading ...</div>
 {:else}
   <main class="flex flex-row-reverse h-[100vh] w-[100vw]">

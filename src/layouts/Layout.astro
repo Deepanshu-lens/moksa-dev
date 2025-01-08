@@ -6,6 +6,7 @@ import User from "@/managers/User.svelte";
 import PageBar from "@/components/bars/PageBar.astro";
 import MobileNavbar from "@/components/bars/MobileNavbar.svelte";
 import Node from "@/managers/node.svelte";
+import MoksaTokenManager from "@/managers/moksa-token.svelte";
 interface Props {
   title: string;
   topbar?: boolean;
@@ -44,13 +45,18 @@ const { title, topbar = true } = Astro.props;
     <meta charset="UTF-8" />
     <meta name="description" content="Astro description" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/svg+xml" href={import.meta.env.PUBLIC_LIGHT_LOGO} />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href={import.meta.env.PUBLIC_LIGHT_LOGO}
+    />
     <title>{title}</title>
   </head>
   <body class="antialiased">
     <Node client:only="svelte" />
     <ModeWatcher client:load />
     <User client:only="svelte" />
+    <MoksaTokenManager client:only="svelte" />
     <div class="hidden lg:block">
       {topbar && <PageBar location="top" />}
     </div>

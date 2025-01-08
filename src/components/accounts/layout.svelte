@@ -7,9 +7,9 @@
   import Button from "../ui/button/button.svelte";
   import { getProfilePicture } from "@/lib/get-profile-picture";
   import { user } from "@/stores";
-  export let moksa;
-  moksa = {
-    ...moksa,
+  import { moksaToken } from "@/stores/moksa-token";
+  let moksa = {
+    token: $moksaToken,
     user: $user,
   };
   const userObj = moksa?.user;

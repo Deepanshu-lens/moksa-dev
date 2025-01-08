@@ -11,10 +11,10 @@
   import { toast } from "svelte-sonner";
   import { writable } from "svelte/store";
   import NotificationCard from "../cards/NotificationCard.svelte";
-  export let moksa;
-  moksa = {
+  import { moksaToken } from "@/stores/moksa-token";
+  let moksa = {
+    token: $moksaToken,
     user: $user,
-    ...moksa,
   };
   let currentPath = window.location.pathname;
   if (window.api) {

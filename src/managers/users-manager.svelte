@@ -1,8 +1,13 @@
 <script lang="ts">
   import pb from "@/lib/pb";
+  import { user } from "@/stores";
+  import { moksaToken } from "@/stores/moksa-token";
   import { moksaUsers } from "@/stores/moksa-user";
   import { onMount } from "svelte";
-  export let moksa;
+  let moksa = {
+    token: $moksaToken,
+    user: $user,
+  };
 
   const today = new Date();
   const oneYearAgo = new Date(today);
@@ -45,7 +50,7 @@
     // const userRole = await getUserRole();
     moksaUsers.set({
       users: userData?.data?.data,
-    //   userRole,
+      //   userRole,
     });
   });
 </script>
