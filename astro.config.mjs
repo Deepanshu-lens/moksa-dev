@@ -9,9 +9,9 @@ import svelte from "@astrojs/svelte";
 
 import icon from "astro-icon";
 
-import node from "@astrojs/node";
+// import node from "@astrojs/node";
 
-// import vercel from "@astrojs/vercel/serverless";
+import vercel from "@astrojs/vercel/serverless";
 
 dotenv.config();
 
@@ -37,7 +37,5 @@ export default defineConfig({
 
   devToolbar: { enabled: false },
 
-  adapter: node({
-    mode: "standalone", // Optional, depending on your deployment
-  }),
+  adapter: vercel(),
 });
