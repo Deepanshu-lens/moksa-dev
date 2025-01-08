@@ -18,8 +18,6 @@
     ArrowDownWideNarrow,
     Check,
   } from "lucide-svelte";
-  import { writable } from "svelte/store";
-  import { getCameras } from "@/managers/get-heathmap";
   import { addUserLogs } from "@/lib/logs/userLogs";
   export let moksa;
   console.log(moksa,'mkk');

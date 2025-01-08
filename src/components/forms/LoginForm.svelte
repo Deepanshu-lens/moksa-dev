@@ -16,6 +16,13 @@
 
   const loginSchema = userSchema.pick({ email: true });
 
+  function setCookie(name: string, value: string, days: number) {
+    const date = new Date();
+    date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
+    const expires = `expires=${date.toUTCString()}`;
+    window.document.cookie = `${name}=${value}; ${expires}; path=/; Secure; SameSite=Strict`;
+  }
+
   const { form, errors, reset, isSubmitting } = createForm({
     initialValues: { email: "", password: "" },
     extend: validator({ schema: loginSchema }),
@@ -63,8 +70,9 @@
         .then(async (res) => {
           const data = await res.json();
           if (data.data && data.data.token) {
-            const token = data.data.token;
-            localStorage.setItem("moksa-token", token);
+            const token = data?.data?.token;
+            console.log(token, "token");
+            setCookie("moksa-token", token, 1);
           } else {
             console.log("Token not found in response");
           }
@@ -89,7 +97,18 @@
     }
 
     if (authData) {
-      user.set(authData.record);
+      let userRole = await pb?.collection("users").getFullList({
+        filter: `id="${authData?.record?.id}"`,
+        expand: "role",
+        fields: "expand",
+      });
+
+      let userObj = {
+        role: userRole[0]?.expand?.role?.roleName,
+        ...authData?.record,
+      };
+
+      user.set(userObj);
       if (window.api) {
         await window.api.invoke("save-auth-token", pb.authStore.token);
       } else {
@@ -100,10 +119,6 @@
     toast.error("Authentication failed. Please try again.");
     return;
   }
-
-  // $: $user && window && window.api
-  //   ? window.api.navigate("/index")
-  //   : (window.location.href = "/");
 </script>
 
 <form use:form class="space-y-4 w-full">
@@ -149,18 +164,12 @@
 
   <!-- Forgot Password link -->
   <div class="w-[350px] flex justify-end">
-    <button
+    <a
+      href="/forgot-password"
       class="inline-block cursor-pointer align-baseline font-bold text-sm text-[#797c80] /[.7]"
-      on:click={() => {
-        if (window.api) {
-          window.api.navigate("/forgot-password");
-        } else {
-          window.location.href = "/forgot-password";
-        }
-      }}
     >
-      <span class="ml-1 text-primary font-semibold"> Forgot Password</span>
-    </button>
+      Forgot Password
+    </a>
   </div>
 
   <div class="flex flex-col items-center justify-between mb-10 sm:mb-0">

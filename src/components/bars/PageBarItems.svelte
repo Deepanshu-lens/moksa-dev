@@ -12,6 +12,10 @@
   import { writable } from "svelte/store";
   import NotificationCard from "../cards/NotificationCard.svelte";
   export let moksa;
+  moksa = {
+    ...moksa,
+    user: $user,
+  };
   let currentPath = window.location.pathname;
   if (window.api) {
     const pathSegments = currentPath.split("/");
@@ -82,7 +86,6 @@
       }
     );
     const res = await response.json();
-    console.log("res", res);
     allStores = res?.data?.data;
     if (res?.data?.data?.length > 0) {
       setupSocketForAllStores();
@@ -99,7 +102,7 @@
 
   function setupSocket(storeId: number) {
     let userID = moksaUserId;
-    if (user?.role === "superAdmin") {
+    if ($user?.role === "superAdmin") {
       userID = -1;
     }
 
@@ -160,7 +163,6 @@
       socket.disconnect();
     });
   });
-
 </script>
 
 <div

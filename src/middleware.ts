@@ -1,23 +1,16 @@
-import { defineMiddleware } from "astro:middleware";
+import { parse } from "cookie";
 
-let mToken = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOjI0LCJmaXJzdF9uYW1lIjoibWFpbiIsImxhc3RfbmFtZSI6InVzZXIiLCJlbWFpbCI6Im1haW4udXNlckBtb2tzYS5haSIsImlhdCI6MTczNjE1Njk2MiwiZXhwIjoxNzM2MjQzMzYyfQ.z1X_Win-cpxX649pKmgDkJJHUzFjoaVPni6p0UEWcT4`;
+export async function onRequest(context, next) {
+  const { request } = context;
 
-export const onRequest = defineMiddleware(async (context, next) => {
+  // Parse cookies from the request header
+  const cookieHeader = request.headers.get("cookie") || "";
+  const cookies = parse(cookieHeader)["moksa-token"];
+
   context.locals.moksa = {
-    token: mToken,
-    user : {
-      avatar: "download_9N9VYdIRK0.png",
-      collectionId: "_pb_users_auth_",
-      email: "main.user@moksa.ai",
-      features: [],
-      firstName: "main",
-      id: "vtlzgvuiepk1mul",
-      lastName: "user",
-      moksaId: 68,
-      name: "",
-      role: "superAdmin",
-      session: "85et6t89vibycns",
-    },
+    token: cookies,
   };
-  return await next();
-});
+
+  // return a Response directly, or the result of calling `next()`
+  return next();
+}

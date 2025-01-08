@@ -11,51 +11,14 @@
   import { onMount } from "svelte";
   import { writable } from "svelte/store";
   import pb from "@/lib/pb";
+  import { user } from "@/stores";
   let showRightPanel: boolean = true;
   let requestDialogOpen = false;
   export let moksa;
-  let dummyTickets = [
-    {
-      id: "1",
-      name: "Ticket 01",
-      severity: "Critical",
-      createdAt: "5 Apr, 2024: 12:00 PM IST",
-      createdBy: "John Doe",
-      location: "Gurugram",
-      assignedTo: "Jane Doe",
-      status: "Resolved",
-      resolvedAt: "6 Apr, 2024: 12:00 PM IST",
-      resolvedBy: "Self",
-      comments: "Temporary spike in usage due to updates",
-    },
-    {
-      id: "2",
-      name: "Ticket 02",
-      severity: "Critical",
-      createdAt: "5 Apr, 2024: 12:00 PM IST",
-      createdBy: "John Doe",
-      location: "Gurugram",
-      assignedTo: "Jane Doe",
-      status: "Resolved",
-      resolvedAt: "6 Apr, 2024: 12:00 PM IST",
-      resolvedBy: "Self",
-      comments: "Temporary spike in usage due to updates",
-    },
-    {
-      id: "3",
-      name: "Ticket 03",
-      severity: "Critical",
-      createdAt: "5 Apr, 2024: 12:00 PM IST",
-      createdBy: "John Doe",
-      location: "Gurugram",
-      assignedTo: "Jane Doe",
-      status: "Resolved",
-      resolvedAt: "6 Apr, 2024: 12:00 PM IST",
-      resolvedBy: "Self",
-      comments: "Temporary spike in usage due to updates",
-    },
-  ];
-
+  moksa = {
+    ...moksa,
+    user: $user,
+  };
   let tickets = writable([]);
   export let data;
   let nodes;

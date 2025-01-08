@@ -8,6 +8,8 @@
   export let moksa;
   const { user } = moksa;
 
+  console.log(user, "user");
+
   let profile = {
     name: user?.firstName + " " + user?.lastName,
     email: user?.email || "",
@@ -17,7 +19,7 @@
     avatar: data?.user?.avatar || "",
   };
 
-  let accountEmail = user.email;
+  let accountEmail = user?.email;
   let password = "";
   let confirmPassword = "";
   let oldPassword = "";
@@ -28,7 +30,7 @@
     profilePictureUrl = URL.createObjectURL(profilePicture[0]);
   }
 
-  let phoneNumber = user.phoneNumber;
+  let phoneNumber = user?.phoneNumber;
 
   async function updatePassword() {
     try {
@@ -60,7 +62,7 @@
         toast.error("Error in moksa Api: ", error?.message);
       }
 
-    //   update user password in pb
+      //   update user password in pb
       await pb?.collection("users").update(user?.id, {
         oldPassword,
         password,
@@ -74,46 +76,6 @@
       console.error("Password reset error:", error);
       toast.error("Failed to update password");
     }
-
-    // try {
-    //   const update = await fetch("/api/user/passwordReset", {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //     body: JSON.stringify({
-    //       oldPassword: oldPassword,
-    //       password: password,
-    //       passwordConfirm: confirmPassword,
-    //     }),
-    //   });
-    //   console.log(update);
-    //   if (update.ok) {
-    //     toast.success("Password updated successfully");
-    //   } else {
-    //     toast.error("Failed to update password");
-    //     toast.error(update.message);
-    //   }
-    //   pb.authStore.clear();
-    //   window.location.reload();
-    //   window.location.href = "/login?message=Password updated successfully";
-    // } catch (error) {
-    //   console.error("Error updating password:", error);
-    //   if (error) {
-    //     // Handle specific PocketBase errors
-    //     if (error.data.code === 400) {
-    //       toast.error(
-    //         "Invalid old password or password confirmation does not match."
-    //       );
-    //     } else {
-    //       toast.error(
-    //         "An error occurred while updating the password. Please try again."
-    //       );
-    //     }
-    //   } else {
-    //     toast.error("An unexpected error occurred. Please try again later.");
-    //   }
-    // }
   }
 
   async function saveProfilePicture() {
@@ -124,7 +86,7 @@
       updateData.append("avatar", file);
       const picUpdate = await pb
         .collection("users")
-        .update(user.id, updateData);
+        .update(user?.id, updateData);
       console.log(picUpdate);
       profilePicture = null;
       profilePictureUrl = null;
@@ -133,7 +95,7 @@
   }
 
   function getProfilePicture(collectionId, recordId, fileName, size = "0x0") {
-    return `https://server.moksa.ai/api/files/${collectionId}/${recordId}/${fileName}?thumb=${size}`;
+    return `${import.meta.env.PUBLIC_POCKETBASE_URL}/api/files/${collectionId}/${recordId}/${fileName}?thumb=${size}`;
   }
 </script>
 
@@ -152,7 +114,8 @@
         <!-- svelte-ignore a11y-img-redundant-alt -->
         <img
           src={profilePictureUrl ||
-            (user.avatar && getProfilePicture("users", user.id, user.avatar)) ||
+            (user?.avatar &&
+              getProfilePicture("users", user?.id, user?.avatar)) ||
             "https://via.placeholder.com/150"}
           alt="Profile Picture"
           class="rounded-full size-[215px] object-contain ring-2 ring-gray-300"
@@ -289,27 +252,6 @@
                 class="border border-gray-300 min-w-[350px] p-2 rounded-md"
                 bind:value={confirmPassword}
               />
-              <!-- {#if password === confirmPassword && password.length > 8}
-              <span class="text-sm flex items-center gap-2">
-                <svg
-                  width="16"
-                  height="12"
-                  viewBox="0 0 16 12"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M1.25098 6.36861L5.68703 10.8047L14.5592 1.29883"
-                    stroke="#248303"
-                    stroke-width="1.90117"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </svg>
-  
-                Confirm password
-              </span>
-              {/if} -->
             </div>
           </div>
 

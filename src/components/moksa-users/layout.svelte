@@ -28,6 +28,7 @@
   import pb from "@/lib/pb";
   import { moksaUsers } from "@/stores/moksa-user";
   import { writable } from "svelte/store";
+  import { user } from "@/stores";
   let view: number = 1;
   export let moksa;
   let userData = writable([]);
@@ -39,7 +40,12 @@
     }
   }
 
-  $: console.log($userData, "userData");
+  moksa = {
+    ...moksa,
+    user: $user,
+  };
+
+  let userObj = moksa?.user;
 
   const moksaToken = moksa?.token;
   const fruits = [
@@ -61,7 +67,6 @@
   let chartLoading = true;
   let searchVal: string = "";
   let roles = [];
-  let { user } = moksa;
   let { token } = moksa;
 
   let nodes: any[] = [];
@@ -200,7 +205,7 @@
               last_name: lastName,
               email: mailId,
               password,
-              lensId: user?.id,
+              lensId: userObj?.id,
               role: userType.toLowerCase(),
               mobile_number: phoneNumber,
             }),
@@ -219,7 +224,7 @@
         console.error("Error creating user:", error);
       }
 
-      await pb.collection("users").update(user?.id, {
+      await pb.collection("users").update(userObj?.id, {
         moksaId: response?.data?.id,
       });
 
@@ -837,7 +842,7 @@
             users={$userData}
             {searchVal}
             filter={selectedRole}
-            role={user?.role}
+            role={userObj?.role}
           />
         </div>
       </section>

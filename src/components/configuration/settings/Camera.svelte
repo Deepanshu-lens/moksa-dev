@@ -1,7 +1,6 @@
 <script lang="ts">
   import { Button } from "../../ui/button";
   import AddCameraDialog from "@/components/dialogs/AddCameraDialog.svelte";
-  import type { User } from "@/types";
   import { Edit, Search, Trash2, X } from "lucide-svelte";
   export let user;
   import { onMount, onDestroy } from "svelte";
@@ -28,13 +27,11 @@
   let enable = false;
   let newData = writable([]);
 
-  // const nodeData = writable([]);
-
   async function getNodeData() {
     try {
       pb.autoCancellation(false);
       const nodeData = await pb?.collection("node").getFullList({
-        filter: `session~"${user?.session}"`,
+        filter: `session~"${user?.session[0]}"`,
       });
 
       if (nodeData?.length > 0) {
@@ -63,7 +60,6 @@
 
   onMount(() => {
     pb.collection("camera").subscribe("*", async (e) => {
-      console.log("change", e.action, e.record);
       getNodeData();
     });
   });
@@ -97,8 +93,7 @@
   $: {
     if ($settings) {
       let temp = $settings.filter((item: any) => {
-        console.log(user?.session, "session");
-        return item.session?.includes(user?.session);
+        return item.session?.includes(user?.session[0]);
       });
       newData.set(temp);
     }
@@ -113,8 +108,6 @@
       detailIndex = null;
     }
   }
-
-  $: console.log($settings, "settings");
 </script>
 
 {#if !$settings}
@@ -128,6 +121,7 @@
       class=" w-[94.5%] my-4 py-4 mx-6 shadow-md rounded-md border border-[#00000014]"
     >
       <h2 class="px-6 font-medium mb-4" id="details">Camera & Store Details</h2>
+      <!-- svelte-ignore element_invalid_self_closing_tag -->
       <div
         class="h-[1px] dark:bg-[#292929] ml-2 mb-4 bg-[#e0e0e0] mt-8 w-[95%]"
       />
@@ -178,7 +172,7 @@
             <Select.Trigger class="text-sm pl-6">
               <Select.Value placeholder={"Select a Store"} />
             </Select.Trigger>
-            <Select.Content>
+            <Select.Content class="max-h-72 overflow-auto">
               <Select.Group>
                 {#if $newData?.length > 0}
                   {#each $newData as item, index}
@@ -202,164 +196,6 @@
             variant="ghost"><Trash2 size={16} /> Delete</Button
           >
         </div>
-        <!-- 
-        <table class="w-full bg-white rounded-md flex flex-col gap-4">
-          <thead class="bg-[#f9f9f9] border-[#e4e4e4] rounded-md">
-            <tr class="border-[#e4e4e4] rounded-md">
-              <th class="text-start py-2 px-4 text-[#5F6064] w-[80px]">Store</th>
-              <th class="text-start py-2 px-4 text-[#5F6064] w-2/3"></th>
-              <th class="text-start py-2 px-4 text-[#5F6064] w-1/3">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {#if filteredNodeNames.length > 0}
-              {#each filteredNodeNames as item, index}
-                <tr
-                  class={`dark:bg-[#1b1b1b] bg-[white] cursor-pointer border-[#e4e4e4] border rounded-md`}
-                  on:click={() => {
-                    if (nodeIndex === index) {
-                      if (!nodeModify) {
-                        nodeIndex = null;
-                      }
-                    } else {
-                      nodeIndex = index;
-                      addUserLog(
-                        `user clicked on table row with node name ${item.name}`,
-                      );
-                    }
-                  }}
-                >
-                  <td class="text-start py-3 px-4 h-full max-w-[80px]">
-                    <div class="flex justify-start items-start h-full">
-                      <input
-                        class="w-auto cursor-pointer"
-                        type="checkbox"
-                        checked={nodeIndex === index}
-                      />
-                    </div>
-                  </td>
-                  <td class=" text-start py-2 px-4 w-full">
-                    {#if nodeModify && index === nodeIndex}
-                      <input
-                        type="text"
-                        autoComplete="off"
-                        name="node-name"
-                        placeholder={item.name}
-                        bind:value={newNodeName}
-                        on:input={(e) => {
-                          newNodeName = e.target.value;
-                        }}
-                        class="block border-0 px-1 py-1 text-gray-900
-                      placeholder:text-gray-400
-                        bg-transparent w-full
-                        focus:border-b-2
-                      focus:border-indigo-600
-                      dark:text-[#979797] sm:text-sm sm:leading-6"
-                      />
-                    {:else}
-                      {item.name}
-                    {/if}
-                  </td>
-                  <td
-                    class="w-full flex items-center justify-start gap-3 py-3 px-4"
-                  >
-                    <Button
-                      class="text-[#4976F4] text-sm text-start flex items-center gap-1"
-                      variant="ghost"
-                    >
-                      <Edit size={16} /> Modify</Button
-                    >
-                    <Button
-                      class="text-[#F44336] text-sm text-start flex items-center gap-1"
-                      variant="ghost"><Trash2 size={16} /> Delete</Button
-                    >
-                  </td>
-                </tr>
-              {/each}
-            {:else}
-              {#each $settings as data, index}
-                <tr
-                  class={`dark:bg-[#1b1b1b] bg-[white] cursor-pointer border-[#e4e4e4] border rounded-md`}
-                  on:click={async () => {
-                    if (nodeIndex === index) {
-                      if (!nodeModify) {
-                        nodeIndex = null;
-                      }
-                    } else {
-                      nodeIndex = index;
-                      console.log($settings[index].id);
-                      const status = await pb.collection(
-                        "camera_ping_status",
-                      ).getList(1, 100, {
-                        filter: `node~"${$settings[index].id}"`,
-                        sort: "-created",
-                      });
-                      console.log("status", status);
-                      const uniqueUrls = new Set();
-                      const uniqueStatus = status.items.filter((item) => {
-                        if (!uniqueUrls.has(item.url)) {
-                          uniqueUrls.add(item.url);
-                          return true;
-                        }
-                        return false;
-                      });
-                      addUserLog(
-                        `user clicked on table row with node name ${data.name}`,
-                      );
-                    }
-                  }}
-                >
-                  <td class="text-start py-3 px-4 h-full max-w-[80px]">
-                    <div class="flex justify-start items-start h-full">
-                      <input
-                        class="w-auto cursor-pointer"
-                        type="checkbox"
-                        checked={nodeIndex === index}
-                      />
-                    </div>
-                  </td>
-                  <td class=" text-start py-2 px-4 w-full">
-                    {#if nodeModify && index === nodeIndex}
-                      <input
-                        type="text"
-                        autoComplete="off"
-                        name="node-name"
-                        placeholder={data.name}
-                        bind:value={newNodeName}
-                        on:input={(e) => {
-                          console.log(e.target.value);
-                          newNodeName = e.target.value;
-                        }}
-                        class="block border-0 px-1 py-1 text-gray-900
-                          placeholder:text-gray-400
-                            bg-transparent w-full
-                            focus:border-b-2
-                          focus:border-indigo-600
-                          dark:text-[#979797] sm:text-sm sm:leading-6"
-                      />
-                    {:else}
-                      {data.name}
-                    {/if}
-                  </td>
-                  <td
-                    class="w-full flex items-center justify-start gap-3 py-3 px-4"
-                  >
-                    <Button
-                      class="text-[#4976F4] text-sm text-start flex items-center gap-1"
-                      variant="ghost"
-                    >
-                      <Edit size={16} /> Modify</Button
-                    >
-                    <Button
-                      class="text-[#F44336] text-sm text-start flex items-center gap-1"
-                      variant="ghost"><Trash2 size={16} /> Delete</Button
-                    >
-                  </td>
-                </tr>
-              {/each}
-            {/if}
-          </tbody>
-        </table> -->
       </div>
 
       {#if nodeIndex !== undefined && nodeIndex !== null}

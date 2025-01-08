@@ -20,7 +20,6 @@
     // Get a specific parameter
     search = searchParams.get("section");
 
-    console.log(search); // Logs the value of the "section" parameter
     if (search === null) {
       searchParams.set("section", "Remote");
       history.replaceState(null, "", `${location.pathname}?${searchParams}`);

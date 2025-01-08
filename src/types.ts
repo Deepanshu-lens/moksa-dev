@@ -7,6 +7,12 @@ export const userSchema = z.object({
     .min(2, { message: "Name must be at least 2 characters long." }),
   email: z.string().email({ message: "Invalid email address." }),
   session: z.array(z.string()),
+  role: z.string(),
+  moksaId: z.number(),
+  firstName: z.string(),
+  lastName: z.string(),
+  collectionId: z.string(),
+  features: z.any(),
 });
 
 // export const cameraSchema = z.lazy(() =>
@@ -95,7 +101,7 @@ export const cameraSchema = z.lazy(() =>
     timeZone: z.string().optional(),
     isRoiEnabled: z.boolean(),
     roiCanvasCoordinates: z.any(),
-    roiRectangleCoordinates:z.any(),
+    roiRectangleCoordinates: z.any(),
     streamType: z
       .enum(["", "Default", "Mainstream", "Substream"])
       .transform((val) => (val === "" ? "Default" : val)),

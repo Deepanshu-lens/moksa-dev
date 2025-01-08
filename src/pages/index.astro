@@ -7,8 +7,27 @@ import PageBarMobile from "@/components/bars/PageBarMobile.astro";
 import GalleryPage from "@/managers/gallery.svelte";
 import LiveLayout from "@/components/live/layout.svelte";
 import MoksaTokenManager from "@/managers/moksa-token.svelte";
-const moksa = Astro.locals.moksa;
 
+export async function get(context) {
+  console.log('called')
+  const cookies = context.request.headers.get("cookie") || "";
+  console.log(cookies, "cookies");
+  const authCookies = Object.fromEntries(
+    cookies
+      .split("; ")
+      .map((cookie) => cookie.split("=").map(decodeURIComponent))
+  );
+
+  return {
+    props: {
+      moksaToken: authCookies["moksa-token"] || null,
+    },
+  };
+}
+
+const { moksaToken } = Astro.props;
+console.log(moksaToken, "moksaToken");
+const moksa = Astro.locals.moksa;
 ---
 
 <!-- Changed -->
@@ -22,6 +41,6 @@ const moksa = Astro.locals.moksa;
     <EventsManager client:only="svelte" />
     <PersonCountManager client:only="svelte" />
     <GalleryPage client:only="svelte" />
-    <LiveLayout client:only="svelte" {moksa}/>
+    <LiveLayout client:only="svelte" {moksa} />
   </div>
 </Layout>

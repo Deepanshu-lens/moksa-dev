@@ -7,7 +7,6 @@
   import Switch from "../ui/switch/switch.svelte";
   import { addStore } from "@/lib/add-store";
 
-  export let refreshStoreData: () => void;
   export let token;
   export let user;
   let dialogOpen = false;
@@ -45,7 +44,6 @@
 
     if (success) {
       dialogOpen = false;
-      await refreshStoreData();
     }
   };
 </script>

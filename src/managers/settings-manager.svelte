@@ -1,14 +1,13 @@
 <script>
   import pb from "@/lib/pb";
-  import { settings } from "@/stores";
+  import { settings, user } from "@/stores";
   import { onMount } from "svelte";
-  export let moksa;
 
   export const getSettingsData = async () => {
     try {
       pb.autoCancellation(false);
       const nodeData = await pb?.collection("node").getFullList({
-        filter: `session~"${moksa?.user?.session}"`,
+        filter: `session~"${$user?.session[0]}"`,
       });
 
       if (nodeData?.length > 0) {

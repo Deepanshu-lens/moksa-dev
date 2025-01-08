@@ -9,6 +9,6 @@ const moksa = Astro.locals.moksa;
 <Layout title={import.meta.env.PUBLIC_BRAND_NAME}>
   <div class="flex flex-row">
     <AnalyticsManager client:only="svelte" {moksa} />
-    <AnalyticsLayout client:only="svelte" {moksa}/>
+    <AnalyticsLayout client:only="svelte" {moksa} />
   </div>
 </Layout>
