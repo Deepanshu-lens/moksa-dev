@@ -18,14 +18,14 @@ dotenv.config();
 // https://astro.build/config
 export default defineConfig({
   output: "server",
-  outDir: !process.env.VERCEL ? "../output" : "dist",
-  trailingSlash: "never",
-  base: "/",
+  // outDir: !process.env.VERCEL ? "../output" : "dist",
+  // trailingSlash: "never",
+  // base: "/",
 
-  build: {
-    format: !process.env.VERCEL ? "file" : "directory",
-    assetsPrefix: "./", // Ensures that asset paths are relative
-  },
+  // build: {
+  //   format: !process.env.VERCEL ? "file" : "directory",
+  //   assetsPrefix: "./", // Ensures that asset paths are relative
+  // },
 
   integrations: [
     tailwind({
