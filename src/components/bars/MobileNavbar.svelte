@@ -5,7 +5,7 @@
   const currentPath = window?.location?.pathname;
 </script>
 
-{#if isLoggedIn}
+{#if isLoggedIn && import.meta.env.PUBLIC_BRAND_NAME !=="Moksa AI"}
   {#if currentPath === "/"}
     <MobileMenu />
   {/if}

@@ -62,9 +62,9 @@ const { title, topbar = true } = Astro.props;
     </div>
 
     <Toaster client:only="svelte" />
-    <div class="lg:hidden block">
+    <!-- <div class="lg:hidden block">
       <MobileNavbar client:only="svelte" />
-    </div>
+    </div> -->
     <slot />
   </body>
 </html>
