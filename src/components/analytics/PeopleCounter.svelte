@@ -15,6 +15,7 @@
   export let allStores;
   export let token;
   let storeData: any = writable([]);
+  let storeColumns: any = writable([]);
   let liveData = writable([]);
   let dateRange = writable("7");
   let value: DateRange | undefined = undefined;
@@ -161,7 +162,6 @@
         console.log("called week data");
         getWeekData($selectedStore.value);
       } else if (value === undefined && $dateRange.toLowerCase() !== "custom") {
-        console.log("called date range function");
         fetchDataForDateRange();
       } else if ($dateRange.toLowerCase() === "custom" && value) {
         console.log("called custom date data");
@@ -228,7 +228,6 @@
   }
 
   async function fetchDataForDateRange() {
-    console.log("called it instead");
     customDateLabel = "Custom";
     const today = new Date();
     let startDate = new Date(today);
@@ -275,9 +274,20 @@
       console.log(d);
       const peopleCount = await d.json();
 
-      console.log("poeplecount", peopleCount);
       if (peopleCount.status === 200) {
         storeData.set(peopleCount?.data?.data);
+        if ($selectedStore?.value === -1) {
+          let cols = [
+            ...peopleCount?.data?.column,
+            {
+              key: "chevron",
+              header: "Chevron",
+            },
+          ];
+          storeColumns.set(cols);
+        } else {
+          storeColumns.set(peopleCount?.data?.column);
+        }
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -317,9 +327,10 @@
       console.log(d);
       const peopleCount = await d.json();
 
-      console.log("poeplecount", peopleCount);
       if (peopleCount.status === 200) {
         storeData.set(peopleCount?.data?.data);
+        console.log($selectedStore?.value, "selected store");
+        storeColumns.set(peopleCount?.data?.column);
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -381,8 +392,6 @@
 
     return stringValue;
   }
-
-  $: console.log(startValue, "start value");
 </script>
 
 <section
@@ -558,6 +567,7 @@
           {token}
           {dateRange}
           {value}
+          {storeColumns}
         />
         <!-- {:else}
           <span

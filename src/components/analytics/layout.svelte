@@ -7,10 +7,10 @@
     token: $moksaToken,
     user: $user,
   };
-
-  console.log(moksaObj, "moksaObj");
 </script>
 
 <div class="hidden lg:block">
-  <SidePannel moksa={moksaObj} />
+  {#if !!$moksaToken}
+    <SidePannel moksa={moksaObj} />
+  {/if}
 </div>

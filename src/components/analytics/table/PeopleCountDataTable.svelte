@@ -18,36 +18,38 @@
 
   export let selectedStore: { value: number; label: string };
   export let storeData: any[];
+  export let storeColumns: any[];
   export let token: string;
   export let dateRange: string;
   export let value: any;
   let selectedStoreId = writable(-1);
 
-  $: dbData =
-    $selectedStore.value !== -1
-      ? $storeData.map((item: any) => {
-          return {
-            storeName: item.store,
-            customerCount: item.noofcustomers,
-            date:
-              item.date && item.hour
-                ? `${item.date}, ${item.hour}`
-                : item.date
-                  ? item.date
-                  : "N/A",
-            busyHourProjections: "Coming Soon",
-          };
-        })
-      : $storeData.map((item: any) => {
-          return {
-            storeName: item.store,
-            customerCount: item.noofcustomers,
-            busyHourProjections: item.busyhour,
-            customerProjection: item.predicted_percentage,
-            predictedMean: item.predictedmean,
-            store_id: item.store_id,
-          };
-        });
+  $: dbData = $storeData;
+  // $: dbData =
+  //   $selectedStore.value !== -1
+  //     ? $storeData.map((item: any) => {
+  //         return {
+  //           store: item?.store,
+  //           noofcustomers: item.noofcustomers,
+  //           date:
+  //             item.date && item.hour
+  //               ? `${item.date}, ${item.hour}`
+  //               : item.date
+  //                 ? item.date
+  //                 : "N/A",
+  //           busyHourProjections: "Coming Soon",
+  //         };
+  //       })
+  //     : $storeData.map((item: any) => {
+  //         return {
+  //           store: item?.store,
+  //           noofcustomers: item.noofcustomers,
+  //           busyHourProjections: item.busyhour,
+  //           customerProjection: item.predicted_percentage,
+  //           predictedMean: item.predictedmean,
+  //           store_id: item.store_id,
+  //         };
+  //       });
 
   $: data = writable(dbData);
 
@@ -84,48 +86,47 @@
     }
   }
 
-  $: columns =
-    $selectedStore.value !== -1
-      ? table.createColumns([
-          table.column({
-            accessor: "storeName",
-            header: "Store Name",
-          }),
-          table.column({
-            accessor: "date",
-            header: "Date, Hours",
-          }),
-          table.column({
-            accessor: "customerCount",
-            header: "Customer Count",
-          }),
-          table.column({
-            accessor: "busyHourProjections",
-            header: "Busy Hour Projections",
-          }),
-        ])
-      : table.createColumns([
-          table.column({
-            accessor: "storeName",
-            header: "Store Name",
-          }),
-          table.column({
-            accessor: "customerCount",
-            header: "Customer Count",
-          }),
-          table.column({
-            accessor: "busyHourProjections",
-            header: "Busy Hour Projections",
-          }),
-          table.column({
-            accessor: "customerProjection",
-            header: "Customer Projections",
-          }),
-          table.column({
-            accessor: "chevron",
-            header: "Chevron",
-          }),
-        ]);
+  $: columns = table.createColumns(
+    $storeColumns?.map((col) =>
+      table.column({
+        accessor: col?.key,
+        header: col?.header,
+      })
+    )
+  );
+
+  // $: columns =
+  //   $selectedStore.value !== -1
+  //     ? table.createColumns(
+  //         $storeColumns?.map((col) =>
+  // table.column({
+  //   accessor: col?.key,
+  //   header: col?.header,
+  // })
+  //         )
+  //       )
+  //     : table.createColumns([
+  //         table.column({
+  //           accessor: "storeName",
+  //           header: "Store Name",
+  //         }),
+  //         table.column({
+  //           accessor: "customerCount",
+  //           header: "Customer Count",
+  //         }),
+  //         table.column({
+  //           accessor: "busyHourProjections",
+  //           header: "Busy Hour Projections",
+  //         }),
+  //         table.column({
+  //           accessor: "customerProjection",
+  //           header: "Customer Projections",
+  //         }),
+  //         table.column({
+  //           accessor: "chevron",
+  //           header: "Chevron",
+  //         }),
+  //       ]);
 
   const pageSizeOptions = [5, 10, 20, 50];
 
@@ -165,6 +166,7 @@
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
             datetype: $dateRange,
+            dropdown: "true",
             pagenumber: "1",
             pagepersize: "100",
             startdate: start,
@@ -173,6 +175,7 @@
         }
       );
       const data = await response.json();
+      console.log(data, "data here");
       return data;
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -340,18 +343,48 @@
                       {...attrs}
                       class="flex items-center justify-center whitespace-nowrap flex-1 py-2 w-full"
                     >
-                      {#if cell.id === "storeName"}
-                        <div
-                          class="flex items-center gap-2 min-w-[200px] justify-start"
-                        >
+                      {#if cell?.id !== "chevron"}
+                        {#if cell?.id === "predictedmean"}
                           <div
-                            class="w-8 h-8 rounded text-start bg-blue-900 flex items-center justify-center flex-shrink-0"
+                            class="flex items-center gap-2 min-w-[200px] justify-start"
                           >
-                            <Store class="w-4 h-4 text-white" />
+                            <div>{row?.original[cell?.id]}</div>
+                            <div
+                              class={`px-2 py-1 rounded ${row.original.predictedmean > row.original.noofcustomers ? "bg-red-100 text-red-600" : "bg-green-100 text-green-600"}`}
+                            >
+                              {row?.original?.predicted_percentage}%
+                            </div>
                           </div>
-                          <span>{row.original.storeName}</span>
-                        </div>
-                      {:else if cell.id === "customerProjection"}
+                        {:else}
+                          <div
+                            class="flex items-center gap-2 min-w-[200px] justify-start"
+                          >
+                            {#if cell?.id === "store"}
+                              <div
+                                class="w-8 h-8 rounded text-start bg-blue-900 flex items-center justify-center flex-shrink-0"
+                              >
+                                <Store class="w-4 h-4 text-white" />
+                              </div>
+                            {/if}
+                            <span>{row?.original[cell?.id]}</span>
+                          </div>
+                        {/if}
+                      {:else}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          on:click={() => toggleRow(row?.original?.store_id)}
+                        >
+                          <ChevronRight
+                            class={`w-5 h-5 text-gray-400 ${
+                              expandedRows.has(row?.original?.store_id)
+                                ? "rotate-90"
+                                : ""
+                            }`}
+                          />
+                        </Button>
+                      {/if}
+                      <!-- {:else if cell.id === "customerProjection"}
                         <div class="flex items-center gap-2">
                           <span class="text-gray-600"
                             >{row.original.predictedMean}</span
@@ -359,16 +392,10 @@
                           <div
                             class={`px-2 py-1 rounded ${row.original.predictedMean > row.original.customerCount ? "bg-red-100 text-red-600" : "bg-green-100 text-green-600"}`}
                           >
-                            <!-- {#if row.original.customerProjection > 0}
-                              <TrendingUp class="w-4 h-4 inline mr-1" />
-                            {:else}
-                              <TrendingDown class="w-4 h-4 inline mr-1" />
-                            {/if} -->
                             {row.original.customerProjection}%
                           </div>
                         </div>
                       {:else if cell.id === "chevron"}
-                        <!-- <ChevronRight class="w-5 h-5 text-gray-400" /> -->
                         <Button
                           variant="ghost"
                           size="icon"
@@ -383,8 +410,8 @@
                           />
                         </Button>
                       {:else}
-                        <Render of={cell.render()} />
-                      {/if}
+                        <Render of={cell.render()} /> -->
+                      <!-- {/if} -->
                     </Table.Cell>
                   </Subscribe>
                 {/each}

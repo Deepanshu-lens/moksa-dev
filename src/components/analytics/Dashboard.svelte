@@ -583,6 +583,7 @@
             headers: {
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
+              dropdown: "true",
               datetype:
                 $dateRange === "7 Days"
                   ? "7"
@@ -707,6 +708,7 @@
           {
             headers: {
               Authorization: `Bearer ${token}`,
+              dropdown: "true",
               "Content-Type": "application/json",
               Pagepersize: "100",
               Pagenumber: "1",

@@ -177,8 +177,8 @@
             Authorization: `Bearer ${token}`,
             datetype: $dateRange,
             pagenumber: 1,
+            dropdown: "true",
             pagepersize: 100,
-            dropdown: true,
           },
         }
       );

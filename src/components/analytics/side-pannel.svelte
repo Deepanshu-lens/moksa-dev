@@ -16,7 +16,7 @@
   import PeopleCounter from "./PeopleCounter.svelte";
   import HeatMap from "./HeatMap.svelte";
   import Safety from "./Safety.svelte";
-  let view = 1;
+  let view = 5;
   export let moksa: any = {};
   let data = {
     moksaToken: moksa?.token,
